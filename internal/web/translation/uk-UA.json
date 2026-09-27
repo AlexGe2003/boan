@@ -98,14 +98,14 @@
     "ofTotal": "з {total}",
     "tabLinks": "Підписка",
     "tabApps": "Застосунки",
-    "tabConfigs": "Конфіги",
     "scanTitle": "Скануйте телефоном",
     "scanHint": "Відскануйте цей код у VPN-застосунку, щоб додати підписку без копіювання посилання.",
     "updateInterval": "Автооновлення кожні {hours} год",
     "support": "Підтримка",
     "qrTitle": "Скануйте. Імпортуйте. Підключайтеся.",
     "qrHint": "Відскануйте в клієнтському застосунку. Нікому не показуйте цей код.",
-    "saveQr": "Зберегти QR"
+    "saveQr": "Зберегти QR",
+    "tabConfigs": "Конфіги"
   },
   "menu": {
     "theme": "Тема",
@@ -119,18 +119,15 @@
     "routing": "Маршрутизація",
     "outbounds": "Вихідні",
     "apiDocs": "Документація API",
-    "donate": "Підтримати",
     "hosts": "Хости",
-    "docs": "Документація",
     "openMenu": "Відкрити меню",
     "pinSidebar": "Закріпити бічну панель",
     "unpinSidebar": "Відкріпити бічну панель",
-    "subFormats": "Формати підписки"
+    "subFormats": "Формати підписки",
+    "mySubscriptions": "My subscriptions"
   },
   "pages": {
     "login": {
-      "hello": "Привіт",
-      "title": "Привітання!",
       "loginAgain": "Ваш сеанс закінчився, увійдіть знову",
       "toasts": {
         "invalidFormData": "Формат вхідних даних недійсний.",
@@ -711,7 +708,10 @@
         "peerNumberConfig": "Конфіг Peer {n}"
       },
       "sniffingDestOverride": "Перевизначення призначення",
-      "advancedTitle": "Додаткові налаштування"
+      "advancedTitle": "Додаткові налаштування",
+      "streamSettings": {
+        "reality": {}
+      }
     },
     "clients": {
       "tabBasics": "Основні",
@@ -946,7 +946,8 @@
       "renewOnDayDesc": "Подовжувати цього числа кожного місяця, опівночі за часовим поясом панелі, замість інтервалу в днях. Якщо в місяці такого числа немає, подовження припаде на останній день. 0 — залишити режим інтервалу.",
       "renewsUsed": "Подовжень витрачено",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Введіть 32-значний hex-тег для встановлення або 'none' для очищення спонсорського каналу на MTProto."
+      "bulkAdTagHint": "Введіть 32-значний hex-тег для встановлення або 'none' для очищення спонсорського каналу на MTProto.",
+      "managementIntro": "Set each user's connection credentials, traffic quota, expiry, device limits, and assigned inbounds. Open Details or Edit on a user to manage their configuration."
     },
     "groups": {
       "name": "Назва",
@@ -1343,6 +1344,13 @@
       "telegramBotLanguage": "Мова Telegram-бота",
       "security": {
         "admin": "Облікові дані адміністратора",
+        "panelUsers": "Облікові записи панелі",
+        "roleAdmin": "Адміністратор",
+        "roleUser": "Користувач",
+        "userCreate": "Створити обліковий запис",
+        "userDelete": "Видалити",
+        "userResetPassword": "Скинути пароль",
+        "forbidden": "Недостатньо прав",
         "twoFactor": "Двофакторна аутентифікація",
         "twoFactorEnable": "Увімкнути 2FA",
         "twoFactorEnableDesc": "Додає додатковий рівень аутентифікації для підвищення безпеки.",
@@ -1366,7 +1374,39 @@
         "apiTokenEmpty": "Поки немає токенів — створіть один для автентифікації ботів або віддалених панелей.",
         "apiTokenDeleteWarning": "Будь-який клієнт, що використовує цей токен, негайно втратить автентифікацію.",
         "apiTokenCreatedTitle": "Токен створено",
-        "apiTokenCreatedNotice": "Скопіюйте цей токен зараз. З міркувань безпеки він не зберігається у читабельному вигляді й більше не відображатиметься."
+        "apiTokenCreatedNotice": "Скопіюйте цей токен зараз. З міркувань безпеки він не зберігається у читабельному вигляді й більше не відображатиметься.",
+        "userManagement": "Panel accounts & permissions",
+        "userManagementDesc": "Manage accounts that sign in to the panel and their page access. Proxy clients are managed on the Clients page.",
+        "rolesTab": "Roles and page access",
+        "usersTab": "Panel accounts",
+        "roleCreate": "Create role",
+        "roleEdit": "Edit role",
+        "roleName": "Role name",
+        "rolePageHelp": "Create a role, select its accessible pages, then assign it to users.",
+        "roleSaved": "Role saved",
+        "roleDeleted": "Role deleted",
+        "deleteRoleConfirm": "Delete role {{name}}?",
+        "pages": "Accessible pages",
+        "allPages": "All pages",
+        "builtInRole": "Built-in role",
+        "createUserHelp": "This creates a user who can sign in. Choose an existing role to set their access.",
+        "setRoleTo": "Set as {{role}}",
+        "roleHelp": "Admins manage the panel; users access only their assigned resources.",
+        "actions": "Actions",
+        "changeRole": "Change role",
+        "roleUpdated": "Role updated",
+        "userCreated": "User created",
+        "userDeleted": "User deleted",
+        "passwordReset": "Password reset",
+        "deleteConfirm": "Delete account {{username}}?",
+        "deleteHelp": "Assigned inbounds will be transferred to another administrator.",
+        "deleteAccountWarning": "This account will immediately lose access. This action cannot be undone.",
+        "transferCount": "This account owns {{count}} inbounds. Select an account to receive them.",
+        "transferTarget": "Select receiving account",
+        "transferRequired": "Select an account to receive the inbounds",
+        "roleLabel": "User role",
+        "userUpdated": "账号已更新",
+        "userEdit": "编辑账号"
       },
       "toasts": {
         "modifySettings": "Параметри було змінено.",
@@ -2541,5 +2581,46 @@
     "restartXray": "Перезапустити службу Xray",
     "restartXraySuccess": "Службу Xray успішно перезапущено",
     "settings": "Налаштування"
-  }
+  },
+  "nodeMonitor": {
+    "title": "Node monitor",
+    "panelLatencyHint": "Latency measures the panel's connection to each node. Carrier latency and packet loss require probes on those networks.",
+    "loadFailed": "Could not update monitoring data",
+    "coreIssues": "Core issues",
+    "updatedAt": "Updated at",
+    "local": "Local",
+    "panelLatency": "Panel latency",
+    "config": "Node configuration and traffic",
+    "noConfig": "No visible configuration",
+    "name": "Name",
+    "protocol": "Protocol",
+    "port": "Port",
+    "used": "Used",
+    "remaining": "Remaining",
+    "status": "Status",
+    "unlimited": "Unlimited",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "memory": "Memory",
+    "disk": "Disk",
+    "traffic": "Traffic",
+    "latency": "Latency",
+    "packetLoss": "Packet loss",
+    "uptimeDays": "Online {count} days",
+    "statusOverview": "Node status overview",
+    "onlineNodes": "Nodes online",
+    "carrier0": "Telecom",
+    "carrier1": "Mobile",
+    "carrier2": "Unicom",
+    "manageNodes": "Manage nodes",
+    "setupSummary": "How do I add or configure a node?",
+    "setupGuide": "An administrator adds the remote panel under Nodes, enters its address and connection credentials, tests the connection, and saves it. The node then appears here. Users can view node health and their own inbound configurations. Carrier latency and packet loss need separate probes.",
+    "noNodes": "No nodes to monitor yet",
+    "panelLatencyDetail": "Panel to node",
+    "carrierMonitoring": "Carrier monitoring",
+    "probeNotConfigured": "Probe not configured",
+    "offlineMetrics": "Live metrics are unavailable while this node is offline",
+    "lastHeartbeatShort": "Heartbeat {time}"
+  },
+  "subscriptions": {}
 }

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/entity"
@@ -72,6 +74,18 @@ func (a *SettingController) initRouter(g *gin.RouterGroup) {
 	g.POST("/update", a.updateSetting)
 	g.POST("/validateRegex", a.validateRegex)
 	g.POST("/updateUser", a.updateUser)
+	g.GET("/session", a.sessionUser)
+	g.GET("/users", a.listPanelUsers)
+	g.POST("/users/migrate/:id", a.migrateLegacyAccount)
+	g.GET("/users/migrationTargets", a.migrationTargets)
+	g.POST("/users", a.createPanelUser)
+	g.POST("/users/name/:id", a.updatePanelUsername)
+	g.POST("/users/role/:id", a.setPanelUserRole)
+	g.POST("/users/delete/:id", a.deletePanelUser)
+	g.GET("/roles", a.listPanelRoles)
+	g.POST("/roles", a.createPanelRole)
+	g.POST("/roles/:key", a.updatePanelRole)
+	g.POST("/roles/delete/:key", a.deletePanelRole)
 	g.POST("/restartPanel", a.restartPanel)
 	g.GET("/getDefaultJsonConfig", a.getDefaultXrayConfig)
 	g.GET("/apiTokens", a.listApiTokens)
@@ -189,6 +203,130 @@ func (a *SettingController) updateSetting(c *gin.Context) {
 		}
 	}
 	jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifySettings"), err)
+}
+
+func (a *SettingController) sessionUser(c *gin.Context) {
+	user := session.GetLoginUser(c)
+	if user == nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	role := model.RoleUser
+	if user.IsAdmin() {
+		role = model.RoleAdmin
+	}
+	pages, err := a.userService.RolePages(user.Role)
+	jsonObj(c, gin.H{"id": user.Id, "username": user.Username, "role": role, "roleKey": user.Role, "pages": pages}, err)
+}
+
+func (a *SettingController) listPanelRoles(c *gin.Context) {
+	roles, err := a.userService.ListPanelRoles()
+	jsonObj(c, roles, err)
+}
+
+func (a *SettingController) createPanelRole(c *gin.Context) {
+	var form struct {
+		Name  string   `json:"name"`
+		Pages []string `json:"pages"`
+	}
+	if err := c.ShouldBindJSON(&form); err != nil {
+		jsonObj(c, nil, err)
+		return
+	}
+	role, err := a.userService.CreatePanelRole(form.Name, form.Pages)
+	jsonObj(c, role, err)
+}
+
+func (a *SettingController) updatePanelRole(c *gin.Context) {
+	var form struct {
+		Name  string   `json:"name"`
+		Pages []string `json:"pages"`
+	}
+	if err := c.ShouldBindJSON(&form); err != nil {
+		jsonMsg(c, "", err)
+		return
+	}
+	jsonMsg(c, "", a.userService.UpdatePanelRole(c.Param("key"), form.Name, form.Pages))
+}
+
+func (a *SettingController) deletePanelRole(c *gin.Context) {
+	jsonMsg(c, "", a.userService.DeletePanelRole(c.Param("key")))
+}
+
+func (a *SettingController) listPanelUsers(c *gin.Context) {
+	rows, err := a.userService.ListPanelUsers()
+	jsonObj(c, rows, err)
+}
+
+func (a *SettingController) createPanelUser(c *gin.Context) {
+	var form struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+		Role     string `json:"role"`
+	}
+	if err := c.ShouldBindJSON(&form); err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUserError"), err)
+		return
+	}
+	user, err := a.userService.CreatePanelUser(form.Username, form.Password, form.Role)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUserError"), err)
+		return
+	}
+	jsonObj(c, user, nil)
+}
+
+func (a *SettingController) updatePanelUsername(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUserError"), err)
+		return
+	}
+	var form struct {
+		Username string `json:"username"`
+	}
+	if err := c.ShouldBindJSON(&form); err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUserError"), err)
+		return
+	}
+	jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUser"), a.userService.UpdatePanelUsername(id, form.Username))
+}
+
+func (a *SettingController) setPanelUserRole(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUserError"), err)
+		return
+	}
+	var form struct {
+		Role string `json:"role"`
+	}
+	if err := c.ShouldBindJSON(&form); err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUserError"), err)
+		return
+	}
+	err = a.userService.SetPanelUserRole(id, form.Role)
+	jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUser"), err)
+}
+
+func (a *SettingController) deletePanelUser(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id <= 0 {
+		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUserError"), errors.New("invalid account id"))
+		return
+	}
+	if current := session.GetLoginUser(c); current != nil && current.Id == id {
+		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUserError"), errors.New("cannot delete the current account"))
+		return
+	}
+	var form struct {
+		ReassignTo int `json:"reassignTo"`
+	}
+	if err := c.ShouldBindJSON(&form); err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUserError"), err)
+		return
+	}
+	jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUser"), a.userService.DeletePanelUser(id, form.ReassignTo))
 }
 
 // updateUser updates the current user's username and password.
@@ -391,4 +529,39 @@ func (a *SettingController) testDiscord(c *gin.Context) {
 		return
 	}
 	jsonMsg(c, I18nWeb(c, "pages.settings.discordTestSuccess"), nil)
+}
+
+func (a *SettingController) migrationTargets(c *gin.Context) {
+	current := session.GetLoginUser(c)
+	if current == nil || !current.IsAdmin() {
+		c.AbortWithStatus(403)
+		return
+	}
+	var rows []struct {
+		ID    int    `json:"id"`
+		Email string `json:"email"`
+	}
+	err := database.GetDB().Model(&model.ClientRecord{}).Select("id,email").Where("id NOT IN (?)", database.GetDB().Model(&model.User{}).Select("client_id").Where("client_id IS NOT NULL AND role IN ?", []string{model.RoleAdmin, model.RoleCustomer})).Order("email").Scan(&rows).Error
+	jsonObj(c, rows, err)
+}
+func (a *SettingController) migrateLegacyAccount(c *gin.Context) {
+	current := session.GetLoginUser(c)
+	if current == nil || !current.IsAdmin() {
+		c.AbortWithStatus(403)
+		return
+	}
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		jsonObj(c, nil, err)
+		return
+	}
+	var body struct {
+		ClientID int `json:"clientId"`
+		OwnerID  int `json:"ownerId"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		jsonObj(c, nil, err)
+		return
+	}
+	jsonObj(c, nil, a.userService.MigrateLegacyAccount(id, body.ClientID, body.OwnerID))
 }

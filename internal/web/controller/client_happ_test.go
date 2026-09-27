@@ -12,8 +12,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/locale"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
 )
 
 type fakeHappLinkGenerator struct {
@@ -36,6 +38,7 @@ func newHappClientTestRouter(generator service.HappLinkGenerator) *gin.Engine {
 	router := gin.New()
 	router.Use(func(c *gin.Context) {
 		c.Set("I18n", func(_ locale.I18nType, key string, _ ...string) string { return key })
+		session.SetAPIAuthUser(c, &model.User{Role: model.RoleAdmin})
 		c.Next()
 	})
 	(&ClientController{happGenerator: generator}).initRouter(router.Group("/clients"))

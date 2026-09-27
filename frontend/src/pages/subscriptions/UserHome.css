@@ -1,0 +1,552 @@
+.customer-app {
+  min-height: 100vh;
+  display: flex;
+  background: #1b1f2a;
+  color: #dce0eb;
+  font:
+    14px Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'PingFang SC',
+    sans-serif;
+}
+.customer-sidebar {
+  width: 240px;
+  flex: none;
+  background: #1e2432;
+  border-right: 1px solid #2b303d;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.customer-brand {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 25px;
+  color: #f3f5fa;
+  border-bottom: 1px solid #2b303d;
+  text-decoration: none;
+}
+.customer-brand > .anticon {
+  color: #477aff;
+  font-size: 25px;
+}
+.customer-brand strong {
+  font-size: 20px;
+}
+.customer-brand > span:last-child {
+  font-size: 13px;
+  color: #bec6d6;
+}
+.customer-sidebar nav {
+  padding: 8px 12px;
+}
+.customer-sidebar nav p {
+  font-size: 12px;
+  color: #73849e;
+  margin: 21px 10px 10px;
+}
+.customer-sidebar nav button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 11px 14px;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: #a9b4c8;
+  text-align: left;
+  cursor: pointer;
+}
+.customer-sidebar nav button.active {
+  background: #2b3245;
+  color: #edf2ff;
+}
+.customer-sidebar nav button:hover {
+  background: #282f40;
+}
+.customer-sidebar nav .anticon {
+  font-size: 17px;
+  color: #778eb2;
+}
+.customer-sidebar-bottom {
+  margin-top: auto;
+  padding: 28px;
+  color: #97a5bd;
+  font-size: 12px;
+}
+.customer-sidebar-bottom small {
+  display: block;
+  margin: 9px 0 0 13px;
+  color: #65748b;
+}
+.connection-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #3bd48e;
+  margin-right: 8px;
+}
+.customer-main {
+  min-width: 0;
+  flex: 1;
+}
+.customer-topbar {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #2b303d;
+  background: #1e2432;
+  padding: 0 25px;
+}
+.customer-topbar h1 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.customer-topbar > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.customer-avatar {
+  border: 1px solid #b8a374;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  color: #dce4f8;
+  background: #29324b;
+  cursor: pointer;
+}
+.customer-menu {
+  display: none;
+}
+.customer-content {
+  padding: 20px 26px;
+  max-width: 1800px;
+  margin: auto;
+}
+.customer-announcement {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1d305d;
+  padding: 12px 16px;
+  color: #c5d5f7;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.customer-announcement > .anticon {
+  color: #3675ff;
+}
+.customer-announcement small {
+  margin-left: auto;
+  color: #91a2c2;
+  white-space: nowrap;
+}
+.customer-banner {
+  min-height: 240px;
+  border-radius: 6px;
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  align-items: flex-end;
+  padding: 28px;
+  margin-bottom: 18px;
+  border: 1px solid #76513a55;
+}
+.customer-banner > div {
+  padding: 8px 0;
+  text-shadow: 0 2px 15px #230b02;
+}
+.customer-banner span {
+  font-size: 10px;
+  letter-spacing: 2.6px;
+  color: #e6c8a3;
+}
+.customer-banner h2 {
+  font-size: 30px;
+  color: #ffefd9;
+  letter-spacing: 1px;
+  margin: 14px 0 10px;
+  font-weight: 550;
+}
+.customer-banner p {
+  color: #d5b69f;
+  margin: 0;
+  font-size: 13px;
+}
+.mobile-break {
+  display: none;
+}
+.customer-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 2.05fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.customer-card {
+  background: #222633;
+  border: 1px solid #303542;
+  border-radius: 6px;
+  padding: 18px;
+  min-width: 0;
+  margin-bottom: 18px;
+}
+.customer-stats .customer-card {
+  margin-bottom: 0;
+}
+.customer-card h2 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 23px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.quota-card h2 {
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.quota-card h3 {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+.quota-expiry {
+  font-size: 12px;
+  color: #a4aec1;
+  margin: 0;
+}
+.quota-summary {
+  font-size: 12px;
+  font-weight: 600;
+  display: block;
+  margin-top: 3px;
+}
+.quota-summary span {
+  font-weight: 400;
+  color: #b3bcce;
+}
+.traffic-list {
+  margin: 0;
+  display: grid;
+  gap: 17px;
+}
+.traffic-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+.traffic-list dt {
+  color: #a3adbf;
+  white-space: nowrap;
+}
+.traffic-list dd {
+  margin: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.up {
+  color: #2bca76;
+}
+.down {
+  color: #f37373;
+}
+.total-mark {
+  width: 3px;
+  height: 11px;
+  background: #4079ff;
+  display: inline-block;
+  margin-left: 6px;
+  margin-right: 5px;
+}
+.subscription-name {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  margin: 0 0 10px;
+}
+.muted {
+  color: #8f9bb0;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.customer-text-button {
+  border: 0;
+  background: transparent;
+  color: #6794ff;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-top: 5px;
+  font-size: 12px;
+}
+.customer-text-button > .anticon {
+  font-size: 10px;
+  margin-left: 8px;
+}
+.clients-card h2 span {
+  font-size: 12px;
+  color: #75839b;
+  font-weight: 400;
+  margin-left: auto;
+}
+.platform-grid {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.platform-grid button {
+  color: #8696af;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-size: 12px;
+  text-align: center;
+}
+.platform-grid button > span {
+  background: #2d3242;
+  border: 1px solid transparent;
+  display: flex;
+  width: 76px;
+  height: 72px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border-radius: 7px;
+  font-size: 29px;
+  color: #9fb5e1;
+}
+.platform-grid button:hover > span {
+  background: #353e54;
+  border-color: #4d6899;
+}
+.platform-grid button:nth-child(2) > span {
+  color: #27a4ee;
+}
+.platform-grid button:nth-child(3) > span {
+  color: #38d78d;
+}
+.customer-shortcuts {
+  display: grid;
+  gap: 12px;
+}
+.customer-shortcuts button {
+  padding: 18px;
+  background: #222633;
+  border: 1px solid #303542;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  color: #dce0eb;
+}
+.customer-shortcuts button:hover {
+  background: #282e3e;
+}
+.customer-shortcuts h3 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+.customer-shortcuts p {
+  color: #8893a7;
+  font-size: 12px;
+  margin: 0;
+}
+.customer-shortcuts button > .anticon {
+  font-size: 24px;
+  color: #3877ff;
+  margin-right: 5px;
+}
+.customer-footer {
+  display: flex;
+  justify-content: space-between;
+  color: #66748e;
+  font-size: 11px;
+  padding: 25px 0 8px;
+}
+.detail-card {
+  padding: 26px;
+}
+.subscription-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+.subscription-actions p {
+  width: 100%;
+  color: #8d9ab0;
+  font-size: 12px;
+}
+.profile-list {
+  margin: 25px 0;
+}
+.profile-list > div {
+  display: flex;
+  padding: 16px 0;
+  border-bottom: 1px solid #343a49;
+  gap: 30px;
+}
+.profile-list dt {
+  width: 110px;
+  color: #8e9bb1;
+}
+.profile-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.customer-guide {
+  padding-left: 24px;
+}
+.customer-guide li {
+  padding: 4px 0 20px 10px;
+}
+.customer-guide h3 {
+  font-size: 15px;
+}
+.customer-guide p {
+  color: #9ca9bd;
+  line-height: 1.8;
+}
+.customer-app button:focus-visible,
+.customer-app a:focus-visible {
+  outline: 2px solid #729fff;
+  outline-offset: 3px;
+}
+.customer-scrim {
+  display: none;
+}
+@media (max-width: 1150px) {
+  .customer-sidebar {
+    width: 205px;
+  }
+  .customer-brand {
+    padding: 0 16px;
+  }
+  .customer-stats {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+  .customer-content {
+    padding: 18px;
+  }
+  .customer-banner h2 {
+    font-size: 26px;
+  }
+}
+@media (max-width: 700px) {
+  .customer-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 101;
+    width: 240px;
+    transform: translateX(-100%);
+  }
+  .customer-sidebar.is-open {
+    transform: translateX(0);
+  }
+  .customer-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: #0009;
+    border: 0;
+    z-index: 100;
+  }
+  .customer-menu {
+    display: inline-flex;
+  }
+  .customer-topbar {
+    padding: 0 14px;
+    gap: 12px;
+  }
+  .customer-topbar h1 {
+    margin-right: auto;
+  }
+  .customer-topbar > div {
+    gap: 5px;
+  }
+  .customer-content {
+    padding: 14px;
+  }
+  .customer-announcement {
+    font-size: 11px;
+    line-height: 1.7;
+  }
+  .customer-announcement small {
+    display: none;
+  }
+  .customer-banner {
+    min-height: 210px;
+    padding: 20px;
+    background-position: 58% center;
+  }
+  .customer-banner h2 {
+    font-size: 23px;
+    line-height: 1.4;
+  }
+  .mobile-break {
+    display: block;
+  }
+  .customer-banner p {
+    font-size: 11px;
+  }
+  .customer-stats {
+    gap: 12px;
+  }
+  .customer-card {
+    padding: 15px;
+  }
+  .traffic-list > div {
+    font-size: 11px;
+    gap: 5px;
+  }
+  .customer-card h2 {
+    font-size: 14px;
+  }
+  .platform-grid {
+    gap: 20px;
+  }
+  .platform-grid button > span {
+    width: 60px;
+    height: 60px;
+  }
+  .clients-card h2 span {
+    font-size: 10px;
+  }
+  .customer-footer {
+    font-size: 10px;
+  }
+  .customer-footer > span:last-child {
+    display: none;
+  }
+  .subscription-actions {
+    flex-direction: column;
+  }
+  .profile-list > div {
+    gap: 12px;
+  }
+  .profile-list dt {
+    flex: none;
+    width: 90px;
+  }
+}
+@media (max-width: 700px) {
+  .customer-sidebar {
+    visibility: hidden;
+  }
+  .customer-sidebar.is-open {
+    visibility: visible;
+  }
+}

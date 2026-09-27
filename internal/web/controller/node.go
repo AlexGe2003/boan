@@ -8,9 +8,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +31,7 @@ func NewNodeController(g *gin.RouterGroup) *NodeController {
 
 func (a *NodeController) initRouter(g *gin.RouterGroup) {
 	g.GET("/list", a.list)
+	g.GET("/monitor", a.monitor)
 	g.GET("/get/:id", a.get)
 	g.GET("/webCert/:id", a.webCert)
 
@@ -45,6 +49,101 @@ func (a *NodeController) initRouter(g *gin.RouterGroup) {
 	g.POST("/mtls/ca", a.mtlsCa)
 	g.POST("/mtls/trustCA", a.setMtlsTrustCA)
 	g.POST("/mtls/reloadClient", a.reloadMtlsClient)
+}
+
+type monitoredInbound struct {
+	ID        int            `json:"id"`
+	Remark    string         `json:"remark"`
+	Protocol  model.Protocol `json:"protocol"`
+	Port      int            `json:"port"`
+	Enabled   bool           `json:"enabled"`
+	Up        int64          `json:"up"`
+	Down      int64          `json:"down"`
+	Used      int64          `json:"used"`
+	Total     int64          `json:"total"`
+	Remaining *int64         `json:"remaining"`
+}
+
+type monitoredNode struct {
+	ID            int                `json:"id"`
+	Local         bool               `json:"local"`
+	Name          string             `json:"name"`
+	Address       string             `json:"address"`
+	Status        string             `json:"status"`
+	XrayState     string             `json:"xrayState"`
+	LastHeartbeat int64              `json:"lastHeartbeat"`
+	LatencyMs     int                `json:"panelLatencyMs"`
+	CpuPct        float64            `json:"cpuPct"`
+	MemPct        float64            `json:"memPct"`
+	UptimeSecs    uint64             `json:"uptimeSecs"`
+	NetUp         uint64             `json:"netUp"`
+	NetDown       uint64             `json:"netDown"`
+	Inbounds      []monitoredInbound `json:"inbounds"`
+}
+
+// monitor is a read-only projection. It omits node API credentials and inbound
+// client settings. Ordinary users see only the inbounds assigned to them.
+func (a *NodeController) monitor(c *gin.Context) {
+	nodes, err := a.nodeService.GetNodeTree()
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.list"), err)
+		return
+	}
+	user := session.GetLoginUser(c)
+	if user == nil {
+		c.AbortWithStatus(401)
+		return
+	}
+	var inbounds []model.Inbound
+	query := database.GetDB().Model(&model.Inbound{}).Select("id", "user_id", "node_id", "remark", "protocol", "port", "enable", "up", "down", "total")
+	if !user.IsAdmin() {
+		query = query.Where("user_id = ?", user.Id)
+	}
+	if err := query.Find(&inbounds).Error; err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.nodes.toasts.list"), err)
+		return
+	}
+	byNode := make(map[int][]monitoredInbound)
+	for _, inbound := range inbounds {
+		used := inbound.Up + inbound.Down
+		var remaining *int64
+		if inbound.Total > 0 {
+			left := max(0, inbound.Total-used)
+			remaining = &left
+		}
+		id := 0
+		if inbound.NodeID != nil {
+			id = *inbound.NodeID
+		}
+		byNode[id] = append(byNode[id], monitoredInbound{
+			ID:     inbound.Id,
+			Remark: inbound.Remark, Protocol: inbound.Protocol, Port: inbound.Port,
+			Enabled: inbound.Enable, Up: inbound.Up, Down: inbound.Down,
+			Used: used, Total: inbound.Total, Remaining: remaining,
+		})
+	}
+	result := make([]monitoredNode, 0, len(nodes)+1)
+	localStatus := "offline"
+	if a.xrayService.IsXrayRunning() {
+		localStatus = "online"
+	}
+	if user.IsAdmin() || len(byNode[0]) > 0 {
+		result = append(result, monitoredNode{ID: 0, Local: true, Name: "Local", Status: localStatus, XrayState: localStatus, Inbounds: byNode[0]})
+	}
+	for _, node := range nodes {
+		var nodeInbounds []monitoredInbound
+		if node.Id != 0 && !node.Transitive {
+			nodeInbounds = byNode[node.Id]
+		}
+		result = append(result, monitoredNode{
+			ID: node.Id, Name: node.Name, Address: node.Address, Status: node.Status,
+			XrayState: node.XrayState, LastHeartbeat: node.LastHeartbeat,
+			LatencyMs: node.LatencyMs, CpuPct: node.CpuPct, MemPct: node.MemPct,
+			UptimeSecs: node.UptimeSecs, NetUp: node.NetUp, NetDown: node.NetDown,
+			Inbounds: nodeInbounds,
+		})
+	}
+	jsonObj(c, result, nil)
 }
 
 // reloadMtlsClient validates the credential currently stored by the master and

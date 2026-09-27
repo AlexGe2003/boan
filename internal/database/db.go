@@ -65,6 +65,11 @@ const (
 func allModels() []any {
 	return []any{
 		&model.User{},
+		&model.PanelRoleDefinition{},
+		&model.SubscriptionPlan{},
+		&model.SupportTicket{},
+		&model.SupportMessage{},
+		&model.SubscriptionAssignment{},
 		&model.Inbound{},
 		&model.OutboundTraffics{},
 		&model.Setting{},
@@ -135,6 +140,9 @@ func initModels() error {
 		return err
 	}
 	if err := migrateApiTokenScopeAndExpiry(); err != nil {
+		return err
+	}
+	if err := migrateUserRole(); err != nil {
 		return err
 	}
 	if err := dropLegacyForeignKeys(); err != nil {
@@ -1224,6 +1232,7 @@ func initUser() error {
 		user := &model.User{
 			Username: defaultUsername,
 			Password: hashedPassword,
+			Role:     model.RoleAdmin,
 		}
 		return db.Create(user).Error
 	}
@@ -2765,6 +2774,19 @@ func normalizeApiTokenCreatedAtSeconds() error {
 	return db.Model(&model.ApiToken{}).
 		Where("created_at >= ?", model.ApiTokenUnixMillisecondsThreshold).
 		UpdateColumn("created_at", gorm.Expr("created_at / ?", 1000)).Error
+}
+
+func migrateUserRole() error {
+	m := db.Migrator()
+	if !m.HasTable(&model.User{}) {
+		return nil
+	}
+	if !m.HasColumn(&model.User{}, "Role") {
+		if err := m.AddColumn(&model.User{}, "Role"); err != nil {
+			return err
+		}
+	}
+	return db.Model(&model.User{}).Where("role IS NULL OR TRIM(role) = ''").Update("role", model.RoleAdmin).Error
 }
 
 func migrateApiTokenScopeAndExpiry() error {

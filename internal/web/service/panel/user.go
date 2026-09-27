@@ -2,6 +2,7 @@ package panel
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -30,6 +31,16 @@ func (s *UserService) GetFirstUser() (*model.User, error) {
 	err := db.Model(model.User{}).
 		First(user).
 		Error
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+// GetFirstAdmin is the account API tokens and node mTLS act as.
+func (s *UserService) GetFirstAdmin() (*model.User, error) {
+	user := &model.User{}
+	err := database.GetDB().Where("role = ?", model.RoleAdmin).Order("id ASC").First(user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +102,7 @@ func (s *UserService) CheckUser(username string, password string, twoFactorCode 
 		return nil, err
 	}
 
-	if twoFactorEnable {
+	if twoFactorEnable && user.Role != model.RoleCustomer {
 		twoFactorToken, err := s.settingService.GetTwoFactorToken()
 		if err != nil {
 			logger.Warning("check two factor token err:", err)
@@ -115,23 +126,11 @@ func (s *UserService) BumpLoginEpoch() error {
 }
 
 func (s *UserService) UpdateUser(id int, username string, password string) error {
-	db := database.GetDB()
 	hashedPassword, err := crypto.HashPasswordAsBcrypt(password)
 	if err != nil {
 		return err
 	}
-
-	twoFactorEnable, err := s.settingService.GetTwoFactorEnable()
-	if err != nil {
-		return err
-	}
-
-	if twoFactorEnable {
-		_ = s.settingService.SetTwoFactorEnable(false)
-		_ = s.settingService.SetTwoFactorToken("")
-	}
-
-	return db.Model(model.User{}).
+	return database.GetDB().Model(model.User{}).
 		Where("id = ?", id).
 		Updates(map[string]any{
 			"username":    username,
@@ -159,6 +158,7 @@ func (s *UserService) UpdateFirstUser(username string, password string) error {
 	if database.IsNotFound(err) {
 		user.Username = username
 		user.Password = hashedPassword
+		user.Role = model.RoleAdmin
 		return db.Model(model.User{}).Create(user).Error
 	} else if err != nil {
 		return err
@@ -167,4 +167,136 @@ func (s *UserService) UpdateFirstUser(username string, password string) error {
 	user.Password = hashedPassword
 	user.LoginEpoch++
 	return db.Save(user).Error
+}
+
+var ErrLastAdmin = errors.New("cannot remove the last admin")
+
+type PanelUser struct {
+	Id           int    `json:"id"`
+	Username     string `json:"username"`
+	Role         string `json:"role"`
+	InboundCount int64  `json:"inboundCount"`
+	ClientID     *int   `json:"clientId,omitempty"`
+}
+
+func (s *UserService) ListPanelUsers() ([]PanelUser, error) {
+	var rows []model.User
+	if err := database.GetDB().Order("id ASC").Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	var counts []struct {
+		UserId int   `gorm:"column:user_id"`
+		Total  int64 `gorm:"column:total"`
+	}
+	if err := database.GetDB().Model(&model.Inbound{}).
+		Select("user_id, COUNT(*) AS total").Group("user_id").Scan(&counts).Error; err != nil {
+		return nil, err
+	}
+	countByUser := make(map[int]int64, len(counts))
+	for _, count := range counts {
+		countByUser[count.UserId] = count.Total
+	}
+	out := make([]PanelUser, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, PanelUser{Id: row.Id, Username: row.Username, Role: row.Role, InboundCount: countByUser[row.Id], ClientID: row.ClientID})
+	}
+	return out, nil
+}
+
+func (s *UserService) CreatePanelUser(username, password, role string) (*PanelUser, error) {
+	username = strings.TrimSpace(username)
+	if username == "" || strings.ContainsAny(username, " \t\r\n") {
+		return nil, errors.New("a username without spaces is required")
+	}
+	if len(password) < 8 {
+		return nil, errors.New("password must be at least 8 characters")
+	}
+	if role == "" {
+		role = model.RoleUser
+	}
+	if _, err := s.RolePages(role); err != nil {
+		return nil, errors.New("invalid role")
+	}
+	hashed, err := crypto.HashPasswordAsBcrypt(password)
+	if err != nil {
+		return nil, err
+	}
+	user := &model.User{Username: username, Password: hashed, Role: role}
+	if err := database.GetDB().Create(user).Error; err != nil {
+		return nil, err
+	}
+	return &PanelUser{Id: user.Id, Username: user.Username, Role: user.Role}, nil
+}
+
+func (s *UserService) UpdatePanelUsername(id int, username string) error {
+	username = strings.TrimSpace(username)
+	if username == "" || strings.ContainsAny(username, " \t\r\n") {
+		return errors.New("a username without spaces is required")
+	}
+	result := database.GetDB().Model(&model.User{}).Where("id = ?", id).Update("username", username)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}
+
+func (s *UserService) SetPanelUserRole(id int, role string) error {
+	if _, err := s.RolePages(role); err != nil {
+		return errors.New("invalid role")
+	}
+	return database.GetDB().Transaction(func(tx *gorm.DB) error {
+		var user model.User
+		if err := tx.First(&user, id).Error; err != nil {
+			return err
+		}
+		if user.IsAdmin() && role != model.RoleAdmin {
+			var n int64
+			if err := tx.Model(&model.User{}).Where("role = ?", model.RoleAdmin).Count(&n).Error; err != nil {
+				return err
+			}
+			if n <= 1 {
+				return ErrLastAdmin
+			}
+		}
+		return tx.Model(&model.User{}).Where("id = ?", id).Update("role", role).Error
+	})
+}
+
+func (s *UserService) DeletePanelUser(id, reassignTo int) error {
+	return database.GetDB().Transaction(func(tx *gorm.DB) error {
+		var user model.User
+		if err := tx.First(&user, id).Error; err != nil {
+			return err
+		}
+		if user.IsAdmin() {
+			var admins int64
+			if err := tx.Model(&model.User{}).Where("role = ?", model.RoleAdmin).Count(&admins).Error; err != nil {
+				return err
+			}
+			if admins <= 1 {
+				return ErrLastAdmin
+			}
+		}
+		var inboundCount int64
+		if err := tx.Model(&model.Inbound{}).Where("user_id = ?", id).Count(&inboundCount).Error; err != nil {
+			return err
+		}
+		if inboundCount > 0 {
+			if reassignTo <= 0 || reassignTo == id {
+				return errors.New("select another account to receive assigned inbounds")
+			}
+			var target model.User
+			if err := tx.First(&target, reassignTo).Error; err != nil {
+				return err
+			}
+			if err := tx.Model(&model.Inbound{}).Where("user_id = ?", id).
+				Update("user_id", reassignTo).Error; err != nil {
+				return err
+			}
+		}
+		return tx.Delete(&model.User{}, id).Error
+	})
 }

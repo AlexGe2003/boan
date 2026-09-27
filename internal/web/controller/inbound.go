@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"net"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -31,12 +32,7 @@ func NewInboundController(g *gin.RouterGroup) *InboundController {
 	return a
 }
 
-// broadcastInboundsUpdateClientLimit is the threshold past which we skip the
-// full-list push over WebSocket and signal the frontend to re-fetch via REST.
-// Mirrors the same heuristic used by the periodic traffic job.
-const broadcastInboundsUpdateClientLimit = 5000
-
-// broadcastInboundsUpdate fetches and broadcasts the inbound list for userId.
+// broadcastInboundsUpdate tells open sessions to re-fetch the inbound list.
 // At scale (10k+ clients) the marshaled JSON exceeds the WS payload ceiling,
 // so we send an invalidate signal instead — frontend re-fetches via REST.
 // Skipped entirely when no WebSocket clients are connected.
@@ -44,19 +40,10 @@ func (a *InboundController) broadcastInboundsUpdate(userId int) {
 	if !websocket.HasClients() {
 		return
 	}
-	inbounds, err := a.inboundService.GetInbounds(userId)
-	if err != nil {
-		return
-	}
-	totalClients := 0
-	for _, ib := range inbounds {
-		totalClients += len(ib.ClientStats)
-	}
-	if totalClients > broadcastInboundsUpdateClientLimit {
-		websocket.BroadcastInvalidate(websocket.MessageTypeInbounds)
-		return
-	}
-	websocket.BroadcastInbounds(inbounds)
+	// A full list pushed to every socket would show one user's inbounds to the
+	// others. Each session refetches the list it is allowed to see.
+	_ = userId
+	websocket.BroadcastInvalidate(websocket.MessageTypeInbounds)
 }
 
 // inboundServiceFor tells the service whether this request is a master's
@@ -92,9 +79,19 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 }
 
 // getInbounds retrieves the list of inbounds for the logged-in user.
+func (a *InboundController) inboundOwned(c *gin.Context, id int) bool {
+	user := session.GetLoginUser(c)
+	ib, err := a.inboundService.GetInbound(id)
+	if err != nil || ib == nil || ib.Id == 0 || (user != nil && !user.IsAdmin() && ib.UserId != user.Id) {
+		c.AbortWithStatus(http.StatusNotFound)
+		return false
+	}
+	return true
+}
+
 func (a *InboundController) getInbounds(c *gin.Context) {
 	user := session.GetLoginUser(c)
-	inbounds, err := a.inboundService.GetInbounds(user.Id)
+	inbounds, err := a.inboundService.GetInbounds(scopeUserID(user))
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
 		return
@@ -106,7 +103,7 @@ func (a *InboundController) getInbounds(c *gin.Context) {
 // payloads from settings.clients[]. Detail-view flows still use /get/:id.
 func (a *InboundController) getInboundsSlim(c *gin.Context) {
 	user := session.GetLoginUser(c)
-	inbounds, err := a.inboundService.GetInboundsSlim(user.Id)
+	inbounds, err := a.inboundService.GetInboundsSlim(scopeUserID(user))
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
 		return
@@ -119,7 +116,7 @@ func (a *InboundController) getInboundsSlim(c *gin.Context) {
 // remark template (name-only display part) is applied consistently.
 func (a *InboundController) getAllInboundLinks(c *gin.Context) {
 	user := session.GetLoginUser(c)
-	links, err := a.inboundService.GetAllInboundLinks(resolveHost(c), user.Id)
+	links, err := a.inboundService.GetAllInboundLinks(resolveHost(c), scopeUserID(user))
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
 		return
@@ -132,7 +129,7 @@ func (a *InboundController) getAllInboundLinks(c *gin.Context) {
 // Avoids shipping per-client settings and traffic stats just to fill a dropdown.
 func (a *InboundController) getInboundOptions(c *gin.Context) {
 	user := session.GetLoginUser(c)
-	options, err := a.inboundService.GetInboundOptions(user.Id)
+	options, err := a.inboundService.GetInboundOptions(scopeUserID(user))
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
 		return
@@ -145,6 +142,9 @@ func (a *InboundController) getInbound(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "get"), err)
+		return
+	}
+	if !a.inboundOwned(c, id) {
 		return
 	}
 	inbound, err := a.inboundService.GetInboundDetail(id)
@@ -191,6 +191,9 @@ func (a *InboundController) delInbound(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundDeleteSuccess"), err)
 		return
 	}
+	if !a.inboundOwned(c, id) {
+		return
+	}
 	needRestart, err := a.inboundService.DelInbound(id)
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
@@ -217,6 +220,11 @@ func (a *InboundController) bulkDelInbounds(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
+	for _, id := range req.Ids {
+		if !a.inboundOwned(c, id) {
+			return
+		}
+	}
 	result, needRestart, err := a.inboundService.DelInbounds(req.Ids)
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
@@ -236,6 +244,9 @@ func (a *InboundController) updateInbound(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundUpdateSuccess"), err)
+		return
+	}
+	if !a.inboundOwned(c, id) {
 		return
 	}
 	inbound := &model.Inbound{
@@ -273,6 +284,9 @@ func (a *InboundController) setInboundSubSortIndex(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundUpdateSuccess"), err)
 		return
 	}
+	if !a.inboundOwned(c, id) {
+		return
+	}
 	type form struct {
 		SubSortIndex int `json:"subSortIndex" form:"subSortIndex" binding:"required"`
 	}
@@ -293,6 +307,9 @@ func (a *InboundController) setInboundEnable(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundUpdateSuccess"), err)
+		return
+	}
+	if !a.inboundOwned(c, id) {
 		return
 	}
 	type form struct {
@@ -326,6 +343,9 @@ func (a *InboundController) resetInboundTraffic(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.inboundUpdateSuccess"), err)
 		return
 	}
+	if !a.inboundOwned(c, id) {
+		return
+	}
 
 	err = a.inboundService.ResetInboundTraffic(id)
 	if err != nil {
@@ -346,6 +366,9 @@ func (a *InboundController) delAllInboundClients(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if !a.inboundOwned(c, id) {
 		return
 	}
 	emails, err := a.inboundService.EmailsByInbound(id)
@@ -475,6 +498,9 @@ func (a *InboundController) getFallbacks(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "get"), err)
 		return
 	}
+	if !a.inboundOwned(c, id) {
+		return
+	}
 	rows, err := a.fallbackService.GetByMaster(id)
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "get"), err)
@@ -489,6 +515,9 @@ func (a *InboundController) setFallbacks(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if !a.inboundOwned(c, id) {
 		return
 	}
 	type body struct {

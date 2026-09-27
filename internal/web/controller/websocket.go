@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
@@ -69,11 +70,16 @@ func (w *WebSocketController) HandleWebSocket(c *gin.Context) {
 		return
 	}
 
+	if user := session.GetLoginUser(c); user != nil && user.Role == model.RoleCustomer {
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		logger.Error("Failed to upgrade WebSocket connection:", err)
 		return
 	}
 
-	w.service.HandleConnection(conn, getRemoteIp(c))
+	user := session.GetLoginUser(c)
+	w.service.HandleConnection(conn, getRemoteIp(c), user != nil && user.IsAdmin())
 }

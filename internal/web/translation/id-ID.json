@@ -98,14 +98,14 @@
     "ofTotal": "dari {total}",
     "tabLinks": "Langganan",
     "tabApps": "Aplikasi",
-    "tabConfigs": "Konfigurasi",
     "scanTitle": "Pindai dengan ponsel",
     "scanHint": "Pindai kode ini di aplikasi VPN untuk menambahkan langganan tanpa menyalin tautan.",
     "updateInterval": "Diperbarui otomatis setiap {hours} jam",
     "support": "Dukungan",
     "qrTitle": "Pindai. Impor. Terhubung.",
     "qrHint": "Pindai dengan aplikasi klien Anda. Jaga kerahasiaan kode ini.",
-    "saveQr": "Simpan QR"
+    "saveQr": "Simpan QR",
+    "tabConfigs": "Konfigurasi"
   },
   "menu": {
     "theme": "Tema",
@@ -119,18 +119,15 @@
     "routing": "Pengalihan",
     "outbounds": "Outbound",
     "apiDocs": "Dokumentasi API",
-    "donate": "Donasi",
     "hosts": "Host",
-    "docs": "Dokumentasi",
     "openMenu": "Buka menu",
     "pinSidebar": "Sematkan bilah sisi",
     "unpinSidebar": "Lepas sematan bilah sisi",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "mySubscriptions": "My subscriptions"
   },
   "pages": {
     "login": {
-      "hello": "Halo",
-      "title": "Selamat Datang",
       "loginAgain": "Sesi Anda telah berakhir, harap masuk kembali",
       "toasts": {
         "invalidFormData": "Format data input tidak valid.",
@@ -711,7 +708,10 @@
         "peerNumberConfig": "Konfig Peer {n}"
       },
       "sniffingDestOverride": "Penggantian tujuan",
-      "advancedTitle": "Pengaturan Lanjutan"
+      "advancedTitle": "Pengaturan Lanjutan",
+      "streamSettings": {
+        "reality": {}
+      }
     },
     "clients": {
       "tabBasics": "Dasar",
@@ -946,7 +946,8 @@
       "renewOnDayDesc": "Perpanjang pada tanggal ini setiap bulan kalender, pada tengah malam menurut zona waktu panel, alih-alih setiap N hari. Bulan yang terlalu pendek untuk tanggal yang dipilih diperpanjang pada hari terakhirnya. 0 mempertahankan mode interval hari.",
       "renewsUsed": "Perpanjangan terpakai",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Masukkan tag heksadesimal 32 karakter untuk mengatur, atau 'none' untuk menghapus pada MTProto."
+      "bulkAdTagHint": "Masukkan tag heksadesimal 32 karakter untuk mengatur, atau 'none' untuk menghapus pada MTProto.",
+      "managementIntro": "Set each user's connection credentials, traffic quota, expiry, device limits, and assigned inbounds. Open Details or Edit on a user to manage their configuration."
     },
     "groups": {
       "name": "Nama",
@@ -1343,6 +1344,13 @@
       "telegramBotLanguage": "Bahasa Bot Telegram",
       "security": {
         "admin": "Kredensial admin",
+        "panelUsers": "Akun panel",
+        "roleAdmin": "Admin",
+        "roleUser": "Pengguna",
+        "userCreate": "Buat akun",
+        "userDelete": "Hapus",
+        "userResetPassword": "Setel ulang kata sandi",
+        "forbidden": "Anda tidak punya izin untuk melakukan ini",
         "twoFactor": "Autentikasi dua faktor",
         "twoFactorEnable": "Aktifkan 2FA",
         "twoFactorEnableDesc": "Menambahkan lapisan autentikasi tambahan untuk keamanan lebih.",
@@ -1366,7 +1374,39 @@
         "apiTokenEmpty": "Belum ada token — buat satu untuk mengautentikasi bot atau panel jarak jauh.",
         "apiTokenDeleteWarning": "Setiap pemanggil yang menggunakan token ini akan berhenti terautentikasi segera.",
         "apiTokenCreatedTitle": "Token dibuat",
-        "apiTokenCreatedNotice": "Salin token ini sekarang. Demi keamanan, token tidak disimpan dalam bentuk yang dapat dibaca dan tidak akan ditampilkan lagi."
+        "apiTokenCreatedNotice": "Salin token ini sekarang. Demi keamanan, token tidak disimpan dalam bentuk yang dapat dibaca dan tidak akan ditampilkan lagi.",
+        "userManagement": "Panel accounts & permissions",
+        "userManagementDesc": "Manage accounts that sign in to the panel and their page access. Proxy clients are managed on the Clients page.",
+        "rolesTab": "Roles and page access",
+        "usersTab": "Panel accounts",
+        "roleCreate": "Create role",
+        "roleEdit": "Edit role",
+        "roleName": "Role name",
+        "rolePageHelp": "Create a role, select its accessible pages, then assign it to users.",
+        "roleSaved": "Role saved",
+        "roleDeleted": "Role deleted",
+        "deleteRoleConfirm": "Delete role {{name}}?",
+        "pages": "Accessible pages",
+        "allPages": "All pages",
+        "builtInRole": "Built-in role",
+        "createUserHelp": "This creates a user who can sign in. Choose an existing role to set their access.",
+        "setRoleTo": "Set as {{role}}",
+        "roleHelp": "Admins manage the panel; users access only their assigned resources.",
+        "actions": "Actions",
+        "changeRole": "Change role",
+        "roleUpdated": "Role updated",
+        "userCreated": "User created",
+        "userDeleted": "User deleted",
+        "passwordReset": "Password reset",
+        "deleteConfirm": "Delete account {{username}}?",
+        "deleteHelp": "Assigned inbounds will be transferred to another administrator.",
+        "deleteAccountWarning": "This account will immediately lose access. This action cannot be undone.",
+        "transferCount": "This account owns {{count}} inbounds. Select an account to receive them.",
+        "transferTarget": "Select receiving account",
+        "transferRequired": "Select an account to receive the inbounds",
+        "roleLabel": "User role",
+        "userUpdated": "账号已更新",
+        "userEdit": "编辑账号"
       },
       "toasts": {
         "modifySettings": "Parameter telah diubah.",
@@ -2541,5 +2581,46 @@
     "restartXray": "Mulai Ulang Layanan Xray",
     "restartXraySuccess": "Layanan Xray berhasil dimulai ulang",
     "settings": "Pengaturan"
-  }
+  },
+  "nodeMonitor": {
+    "title": "Node monitor",
+    "panelLatencyHint": "Latency measures the panel's connection to each node. Carrier latency and packet loss require probes on those networks.",
+    "loadFailed": "Could not update monitoring data",
+    "coreIssues": "Core issues",
+    "updatedAt": "Updated at",
+    "local": "Local",
+    "panelLatency": "Panel latency",
+    "config": "Node configuration and traffic",
+    "noConfig": "No visible configuration",
+    "name": "Name",
+    "protocol": "Protocol",
+    "port": "Port",
+    "used": "Used",
+    "remaining": "Remaining",
+    "status": "Status",
+    "unlimited": "Unlimited",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "memory": "Memory",
+    "disk": "Disk",
+    "traffic": "Traffic",
+    "latency": "Latency",
+    "packetLoss": "Packet loss",
+    "uptimeDays": "Online {count} days",
+    "statusOverview": "Node status overview",
+    "onlineNodes": "Nodes online",
+    "carrier0": "Telecom",
+    "carrier1": "Mobile",
+    "carrier2": "Unicom",
+    "manageNodes": "Manage nodes",
+    "setupSummary": "How do I add or configure a node?",
+    "setupGuide": "An administrator adds the remote panel under Nodes, enters its address and connection credentials, tests the connection, and saves it. The node then appears here. Users can view node health and their own inbound configurations. Carrier latency and packet loss need separate probes.",
+    "noNodes": "No nodes to monitor yet",
+    "panelLatencyDetail": "Panel to node",
+    "carrierMonitoring": "Carrier monitoring",
+    "probeNotConfigured": "Probe not configured",
+    "offlineMetrics": "Live metrics are unavailable while this node is offline",
+    "lastHeartbeatShort": "Heartbeat {time}"
+  },
+  "subscriptions": {}
 }

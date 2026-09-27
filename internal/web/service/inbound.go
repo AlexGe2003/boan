@@ -190,7 +190,12 @@ func normalizeInboundShareAddressColumns(tx *gorm.DB) error {
 func (s *InboundService) GetInbounds(userId int) ([]*model.Inbound, error) {
 	db := database.GetDB()
 	var inbounds []*model.Inbound
-	err := db.Model(model.Inbound{}).Preload("ClientStats").Where("user_id = ?", userId).Order("id ASC").Find(&inbounds).Error
+	q := db.Model(model.Inbound{}).Preload("ClientStats")
+	// userId < 0 is the admin view: every inbound, not only user_id = 0.
+	if userId >= 0 {
+		q = q.Where("user_id = ?", userId)
+	}
+	err := q.Order("id ASC").Find(&inbounds).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -233,7 +238,11 @@ func (s *InboundService) annotateLocalOriginGuid(inbounds []*model.Inbound) {
 func (s *InboundService) GetInboundsSlim(userId int) ([]*model.Inbound, error) {
 	db := database.GetDB()
 	var inbounds []*model.Inbound
-	err := db.Model(model.Inbound{}).Preload("ClientStats").Where("user_id = ?", userId).Order("id ASC").Find(&inbounds).Error
+	q := db.Model(model.Inbound{}).Preload("ClientStats")
+	if userId >= 0 {
+		q = q.Where("user_id = ?", userId)
+	}
+	err := q.Order("id ASC").Find(&inbounds).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -380,12 +389,13 @@ func (s *InboundService) GetInboundOptions(userId int) ([]InboundOption, error) 
 		NodeAddress       string `gorm:"column:node_address"`
 		DisableFlow       bool   `gorm:"column:disable_flow"`
 	}
-	err := db.Table("inbounds").
+	q := db.Table("inbounds").
 		Select("inbounds.id, inbounds.remark, inbounds.tag, inbounds.protocol, inbounds.port, inbounds.enable, inbounds.stream_settings, inbounds.settings, inbounds.listen, inbounds.share_addr, inbounds.share_addr_strategy, inbounds.node_id, COALESCE(nodes.address, '') AS node_address, inbounds.disable_flow").
-		Joins("LEFT JOIN nodes ON nodes.id = inbounds.node_id").
-		Where("inbounds.user_id = ?", userId).
-		Order("inbounds.id ASC").
-		Scan(&rows).Error
+		Joins("LEFT JOIN nodes ON nodes.id = inbounds.node_id")
+	if userId >= 0 {
+		q = q.Where("inbounds.user_id = ?", userId)
+	}
+	err := q.Order("inbounds.id ASC").Scan(&rows).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
@@ -1520,6 +1530,12 @@ func (s *InboundService) DelInbounds(ids []int) (BulkDelInboundResult, bool, err
 		return struct{}{}
 	})
 	return result, needRestart, nil
+}
+
+func (s *InboundService) InboundIDsForUser(userId int) ([]int, error) {
+	var ids []int
+	err := database.GetDB().Model(&model.Inbound{}).Where("user_id = ?", userId).Pluck("id", &ids).Error
+	return ids, err
 }
 
 func (s *InboundService) GetInbound(id int) (*model.Inbound, error) {

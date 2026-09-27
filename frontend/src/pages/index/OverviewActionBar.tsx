@@ -15,6 +15,7 @@ import {
   ReloadOutlined,
 } from '@ant-design/icons';
 
+import { usePanelRole } from '@/api/queries/usePanelRole';
 import { formatPanelVersion } from '@/lib/panel-version';
 import type { Status } from '@/models/status';
 
@@ -72,11 +73,13 @@ export default function OverviewActionBar({
   onOpenVersionSwitch,
 }: OverviewActionBarProps) {
   const { t } = useTranslation();
+  const role = usePanelRole();
+  const admin = role === 'admin';
   const stateText = t(XRAY_STATE_KEYS[status.xray.state] ?? 'pages.index.xrayStatusUnknown');
   const hasVersion = !!status.xray.version && status.xray.version !== 'Unknown';
   const size = isMobile ? ('small' as const) : ('middle' as const);
 
-  const actionGroups: BarAction[][] = [
+  const machineActions: BarAction[][] = [
     [
       {
         key: 'restart',
@@ -142,17 +145,21 @@ export default function OverviewActionBar({
       },
     ],
   ];
+  const actionGroups = admin ? machineActions : machineActions.slice(2);
 
   const statePill = (
     <span className="ov-state" data-state={status.xray.state}>
       <span className="ov-state-dot" style={{ color: status.xray.color }} />
       <span>{`${t('pages.index.xrayStatus')} · ${stateText}`}</span>
-      {hasVersion && (
+      {hasVersion && admin && (
         <Tooltip title={t('pages.index.xraySwitch')}>
           <button type="button" className="ov-state-version" onClick={onOpenVersionSwitch}>
             {`v${status.xray.version}`}
           </button>
         </Tooltip>
+      )}
+      {hasVersion && !admin && (
+        <span className="ov-state-version">{`v${status.xray.version}`}</span>
       )}
     </span>
   );
@@ -173,7 +180,7 @@ export default function OverviewActionBar({
         </Tooltip>
       ) : null}
 
-      {updateAvailable ? (
+      {admin && updateAvailable ? (
         <Tag
           className="ov-update-tag"
           color="warning"
@@ -182,12 +189,14 @@ export default function OverviewActionBar({
         >
           {`${t('update')} ${formatPanelVersion(latestVersion)}`}
         </Tag>
-      ) : (
+      ) : admin ? (
         <Tooltip title={t('pages.index.updatePanel')}>
           <button type="button" className="ov-panel-version ov-mono" onClick={onOpenPanelUpdate}>
             {formatPanelVersion(panelVersion)}
           </button>
         </Tooltip>
+      ) : (
+        <span className="ov-panel-version ov-mono">{formatPanelVersion(panelVersion)}</span>
       )}
 
       <div className="ov-bar-actions">

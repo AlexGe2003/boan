@@ -98,14 +98,14 @@
     "ofTotal": "/ {total}",
     "tabLinks": "Abonelik",
     "tabApps": "Uygulamalar",
-    "tabConfigs": "Yapılandırmalar",
     "scanTitle": "Telefonunuzla tarayın",
     "scanHint": "Bağlantıyı kopyalamadan aboneliği eklemek için bu kodu VPN uygulamanızda tarayın.",
     "updateInterval": "Her {hours} saatte bir otomatik güncellenir",
     "support": "Destek",
     "qrTitle": "Tara. İçe aktar. Bağlan.",
     "qrHint": "İstemci uygulamanızla tarayın. Bu kodu kimseyle paylaşmayın.",
-    "saveQr": "QR'ı kaydet"
+    "saveQr": "QR'ı kaydet",
+    "tabConfigs": "Yapılandırmalar"
   },
   "menu": {
     "theme": "Tema",
@@ -119,18 +119,15 @@
     "routing": "Yönlendirme",
     "outbounds": "Giden Bağlantılar",
     "apiDocs": "API Belgeleri",
-    "donate": "Bağış Yap",
     "hosts": "Host'lar",
-    "docs": "Belgeler",
     "openMenu": "Menüyü aç",
     "pinSidebar": "Kenar çubuğunu sabitle",
     "unpinSidebar": "Kenar çubuğu sabitlemesini kaldır",
-    "subFormats": "Abonelik Formatları"
+    "subFormats": "Abonelik Formatları",
+    "mySubscriptions": "My subscriptions"
   },
   "pages": {
     "login": {
-      "hello": "Merhaba",
-      "title": "Hoş Geldiniz",
       "loginAgain": "Oturum süreniz doldu, lütfen tekrar giriş yapın.",
       "toasts": {
         "invalidFormData": "Veri formatı geçersiz.",
@@ -711,7 +708,10 @@
         "peerNumberConfig": "Peer {n} Yapılandırması"
       },
       "sniffingDestOverride": "Hedef geçersiz kılma",
-      "advancedTitle": "Gelişmiş Ayarlar"
+      "advancedTitle": "Gelişmiş Ayarlar",
+      "streamSettings": {
+        "reality": {}
+      }
     },
     "clients": {
       "tabBasics": "Temel",
@@ -946,7 +946,8 @@
       "renewOnDayDesc": "Her N günde bir yerine, her takvim ayının bu gününde, panel saat diliminde gece yarısı yeniler. Seçilen gün için kısa olan aylarda ayın son gününde yeniler. 0 gün aralığı modunu korur.",
       "renewsUsed": "Kullanılan yenileme",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "Aramak için 32 karakterlik onaltılık etiket girin veya MTProto üzerinde temizlemek için 'none' yazın."
+      "bulkAdTagHint": "Aramak için 32 karakterlik onaltılık etiket girin veya MTProto üzerinde temizlemek için 'none' yazın.",
+      "managementIntro": "Set each user's connection credentials, traffic quota, expiry, device limits, and assigned inbounds. Open Details or Edit on a user to manage their configuration."
     },
     "groups": {
       "name": "İsim",
@@ -1343,6 +1344,13 @@
       "telegramBotLanguage": "Telegram Bot Dili",
       "security": {
         "admin": "Yönetici Kimlik Bilgileri",
+        "panelUsers": "Panel hesapları",
+        "roleAdmin": "Yönetici",
+        "roleUser": "Kullanıcı",
+        "userCreate": "Hesap oluştur",
+        "userDelete": "Sil",
+        "userResetPassword": "Parolayı sıfırla",
+        "forbidden": "Bunu yapmak için izniniz yok",
         "twoFactor": "İki Adımlı Doğrulama",
         "twoFactorEnable": "2FA'yı Etkinleştir",
         "twoFactorEnableDesc": "Daha fazla güvenlik için ek bir doğrulama katmanı ekler.",
@@ -1366,7 +1374,39 @@
         "apiTokenEmpty": "Henüz token yok — botları veya uzak panelleri doğrulamak için bir tane oluşturun.",
         "apiTokenDeleteWarning": "Bu token'ı kullanan tüm bağlantılar anında kimlik doğrulamasını kaybeder.",
         "apiTokenCreatedTitle": "Token Oluşturuldu",
-        "apiTokenCreatedNotice": "Bu token'ı şimdi kopyalayın. Güvenlik nedeniyle okunabilir biçimde saklanmaz ve tekrar gösterilmez."
+        "apiTokenCreatedNotice": "Bu token'ı şimdi kopyalayın. Güvenlik nedeniyle okunabilir biçimde saklanmaz ve tekrar gösterilmez.",
+        "userManagement": "Panel accounts & permissions",
+        "userManagementDesc": "Manage accounts that sign in to the panel and their page access. Proxy clients are managed on the Clients page.",
+        "rolesTab": "Roles and page access",
+        "usersTab": "Panel accounts",
+        "roleCreate": "Create role",
+        "roleEdit": "Edit role",
+        "roleName": "Role name",
+        "rolePageHelp": "Create a role, select its accessible pages, then assign it to users.",
+        "roleSaved": "Role saved",
+        "roleDeleted": "Role deleted",
+        "deleteRoleConfirm": "Delete role {{name}}?",
+        "pages": "Accessible pages",
+        "allPages": "All pages",
+        "builtInRole": "Built-in role",
+        "createUserHelp": "This creates a user who can sign in. Choose an existing role to set their access.",
+        "setRoleTo": "Set as {{role}}",
+        "roleHelp": "Admins manage the panel; users access only their assigned resources.",
+        "actions": "Actions",
+        "changeRole": "Change role",
+        "roleUpdated": "Role updated",
+        "userCreated": "User created",
+        "userDeleted": "User deleted",
+        "passwordReset": "Password reset",
+        "deleteConfirm": "Delete account {{username}}?",
+        "deleteHelp": "Assigned inbounds will be transferred to another administrator.",
+        "deleteAccountWarning": "This account will immediately lose access. This action cannot be undone.",
+        "transferCount": "This account owns {{count}} inbounds. Select an account to receive them.",
+        "transferTarget": "Select receiving account",
+        "transferRequired": "Select an account to receive the inbounds",
+        "roleLabel": "User role",
+        "userUpdated": "账号已更新",
+        "userEdit": "编辑账号"
       },
       "toasts": {
         "modifySettings": "Parametreler değiştirildi.",
@@ -2541,5 +2581,46 @@
     "restartXray": "Xray Hizmetini Yeniden Başlat",
     "restartXraySuccess": "Xray hizmeti başarıyla yeniden başlatıldı",
     "settings": "Ayarlar"
-  }
+  },
+  "nodeMonitor": {
+    "title": "Node monitor",
+    "panelLatencyHint": "Latency measures the panel's connection to each node. Carrier latency and packet loss require probes on those networks.",
+    "loadFailed": "Could not update monitoring data",
+    "coreIssues": "Core issues",
+    "updatedAt": "Updated at",
+    "local": "Local",
+    "panelLatency": "Panel latency",
+    "config": "Node configuration and traffic",
+    "noConfig": "No visible configuration",
+    "name": "Name",
+    "protocol": "Protocol",
+    "port": "Port",
+    "used": "Used",
+    "remaining": "Remaining",
+    "status": "Status",
+    "unlimited": "Unlimited",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "memory": "Memory",
+    "disk": "Disk",
+    "traffic": "Traffic",
+    "latency": "Latency",
+    "packetLoss": "Packet loss",
+    "uptimeDays": "Online {count} days",
+    "statusOverview": "Node status overview",
+    "onlineNodes": "Nodes online",
+    "carrier0": "Telecom",
+    "carrier1": "Mobile",
+    "carrier2": "Unicom",
+    "manageNodes": "Manage nodes",
+    "setupSummary": "How do I add or configure a node?",
+    "setupGuide": "An administrator adds the remote panel under Nodes, enters its address and connection credentials, tests the connection, and saves it. The node then appears here. Users can view node health and their own inbound configurations. Carrier latency and packet loss need separate probes.",
+    "noNodes": "No nodes to monitor yet",
+    "panelLatencyDetail": "Panel to node",
+    "carrierMonitoring": "Carrier monitoring",
+    "probeNotConfigured": "Probe not configured",
+    "offlineMetrics": "Live metrics are unavailable while this node is offline",
+    "lastHeartbeatShort": "Heartbeat {time}"
+  },
+  "subscriptions": {}
 }

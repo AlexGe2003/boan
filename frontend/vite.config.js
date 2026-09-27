@@ -94,7 +94,7 @@ function bypassMigratedRoute(req) {
   const url = req.url.split('?')[0];
   const basePath = refreshBasePath();
 
-  if (url === basePath) return '/login.html';
+  if (url === basePath || url === basePath + 'login') return '/login.html';
 
   if (url.startsWith(basePath)) {
     const stripped = url.slice(basePath.length);

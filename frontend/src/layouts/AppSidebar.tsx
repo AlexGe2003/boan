@@ -17,7 +17,6 @@ import {
   ExportOutlined,
   GithubOutlined,
   GlobalOutlined,
-  HeartOutlined,
   ImportOutlined,
   LogoutOutlined,
   MailOutlined,
@@ -27,7 +26,6 @@ import {
   MoonOutlined,
   PushpinFilled,
   PushpinOutlined,
-  ReadOutlined,
   SafetyOutlined,
   SearchOutlined,
   SettingOutlined,
@@ -43,13 +41,13 @@ import { formatPanelVersion } from '@/lib/panel-version';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
 import { useAllSettings } from '@/api/queries/useAllSettings';
 import { useCommandPalette } from '@/components/command-palette/useCommandPalette';
+import { usePanelAccess } from '@/api/queries/usePanelRole';
+import { visibleNavKeys } from '@/layouts/nav-role';
 import './AppSidebar.css';
 
-const DONATE_URL = 'https://donate.sanaei.dev/';
 // The palette listens for Ctrl as well as Cmd, so the chip must not show a
 // Mac glyph to the Linux and Windows operators who are most of this panel's.
 const SHORTCUT_MODIFIER = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? '⌘' : 'Ctrl';
-const DOCS_URL = 'https://docs.sanaei.dev/';
 const REPO_URL = 'https://github.com/MHSanaei/3x-ui';
 const LOGOUT_KEY = '__logout__';
 const RAIL_WIDTH = 72;
@@ -86,36 +84,6 @@ const iconByName: Record<IconName, ComponentType> = {
   outbound: ExportOutlined,
   routing: SwapOutlined,
 };
-
-function DonateButton({ ariaLabel }: { ariaLabel: string }) {
-  return (
-    <a
-      href={DONATE_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="sidebar-donate"
-      aria-label={ariaLabel}
-      title={ariaLabel}
-    >
-      <HeartOutlined />
-    </a>
-  );
-}
-
-function DocsButton({ ariaLabel }: { ariaLabel: string }) {
-  return (
-    <a
-      href={DOCS_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="sidebar-docs"
-      aria-label={ariaLabel}
-      title={ariaLabel}
-    >
-      <ReadOutlined />
-    </a>
-  );
-}
 
 function VersionBadge({ version, collapsed }: { version: string; collapsed?: boolean }) {
   if (!version) return null;
@@ -183,6 +151,7 @@ export default function AppSidebar() {
   const { open: openCommandPalette } = useCommandPalette();
   const navigate = useNavigate();
   const { pathname, hash } = useLocation();
+  const access = usePanelAccess();
   const { allSetting } = useAllSettings();
   const showSubFormats = !!(allSetting.subJsonEnable || allSetting.subClashEnable);
   const showSubBalancers = !!allSetting.subJsonEnable;
@@ -190,10 +159,18 @@ export default function AppSidebar() {
   const [hovered, setHovered] = useState(() => hoveredAcrossRemounts);
   const [pinned, setPinned] = useState(readSidebarPinned);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1025px)');
+    const closeMobileDrawer = () => {
+      if (desktop.matches) setDrawerOpen(false);
+    };
+    desktop.addEventListener('change', closeMobileDrawer);
+    return () => desktop.removeEventListener('change', closeMobileDrawer);
+  }, []);
   const railCollapsed = !hovered && !pinned;
   const railStyle = useMemo(
-    () => ({ '--sider-rail': `${pinned ? SIDER_WIDTH : RAIL_WIDTH}px` }) as CSSProperties,
-    [pinned],
+    () => ({ '--sider-rail': `${!railCollapsed ? SIDER_WIDTH : RAIL_WIDTH}px` }) as CSSProperties,
+    [railCollapsed],
   );
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -224,6 +201,10 @@ export default function AppSidebar() {
       { key: '/', icon: 'dashboard', title: t('menu.dashboard') },
       { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
       { key: '/clients', icon: 'team', title: t('menu.clients') },
+      { key: '/my-subscriptions', icon: 'team', title: t('menu.mySubscriptions') },
+      { key: '/node-monitor', icon: 'cluster', title: t('nodeMonitor.title') },
+      { key: '/support', title: '工单服务', icon: 'team' },
+      { key: '/plans', icon: 'groups', title: '订阅套餐' },
       { key: '/groups', icon: 'groups', title: t('menu.groups') },
       { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
       { key: '/hosts', icon: 'hosts', title: t('menu.hosts') },
@@ -237,8 +218,17 @@ export default function AppSidebar() {
     [t],
   );
 
-  const navItems = useMemo(() => tabs.filter((tab) => tab.icon !== 'logout'), [tabs]);
-  const utilItems = useMemo(() => tabs.filter((tab) => tab.icon === 'logout'), [tabs]);
+  const shownTabs = useMemo(
+    () =>
+      tabs.filter(
+        (tab) =>
+          !(access.role === 'admin' && tab.key === '/my-subscriptions') &&
+          visibleNavKeys(access.role, [tab.key], access.pages).includes(tab.key),
+      ),
+    [tabs, access.role, access.pages],
+  );
+  const navItems = useMemo(() => shownTabs.filter((tab) => tab.icon !== 'logout'), [shownTabs]);
+  const utilItems = useMemo(() => shownTabs.filter((tab) => tab.icon === 'logout'), [shownTabs]);
 
   const settingsChildren = useMemo<NonNullable<MenuProps['items']>>(() => {
     const children: NonNullable<MenuProps['items']> = [
@@ -269,6 +259,12 @@ export default function AppSidebar() {
         label: t('pages.settings.subSettings'),
       },
     ];
+    if (access.role === 'admin')
+      children.splice(2, 0, {
+        key: '/settings#administrators',
+        icon: <TeamOutlined />,
+        label: '管理员账号',
+      });
     if (showSubFormats) {
       children.push({
         key: '/settings#subscription-formats',
@@ -284,7 +280,7 @@ export default function AppSidebar() {
       });
     }
     return children;
-  }, [t, showSubFormats, showSubBalancers]);
+  }, [t, showSubFormats, showSubBalancers, access.role]);
 
   const xrayChildren = useMemo<NonNullable<MenuProps['items']>>(
     () => [
@@ -377,9 +373,6 @@ export default function AppSidebar() {
         collapsed={railCollapsed}
       >
         <div className="sider-brand">
-          <div className="brand-block">
-            <span className="brand-text">{railCollapsed ? '3X' : '3X-UI'}</span>
-          </div>
           {!railCollapsed && (
             <div className="brand-actions">
               <button
@@ -392,8 +385,6 @@ export default function AppSidebar() {
               >
                 {pinned ? <PushpinFilled /> : <PushpinOutlined />}
               </button>
-              <DocsButton ariaLabel={t('menu.docs') || 'Documentation'} />
-              <DonateButton ariaLabel={t('menu.donate') || 'Donate'} />
               <ThemeCycleButton
                 id="theme-cycle"
                 isDark={isDark}
@@ -455,22 +446,23 @@ export default function AppSidebar() {
         placement="left"
         closable={false}
         open={drawerOpen}
-        rootClassName={currentTheme}
+        rootClassName={`panel-navigation-drawer ${currentTheme}`}
         size="min(82vw, 320px)"
         styles={{
           wrapper: { padding: 0 },
-          body: { padding: 0, display: 'flex', flexDirection: 'column', height: '100%' },
+          body: {
+            padding: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            overflow: 'hidden',
+          },
           header: { display: 'none' },
         }}
         onClose={() => setDrawerOpen(false)}
       >
         <div className="drawer-header">
-          <div className="brand-block">
-            <span className="drawer-brand">3X-UI</span>
-          </div>
           <div className="drawer-header-actions">
-            <DocsButton ariaLabel={t('menu.docs') || 'Documentation'} />
-            <DonateButton ariaLabel={t('menu.donate') || 'Donate'} />
             <ThemeCycleButton
               id="theme-cycle-drawer"
               isDark={isDark}

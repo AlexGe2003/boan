@@ -5,6 +5,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
@@ -41,6 +42,7 @@ func NewIndexController(g *gin.RouterGroup) *IndexController {
 // initRouter sets up the routes for index, login, logout, and two-factor authentication.
 func (a *IndexController) initRouter(g *gin.RouterGroup) {
 	g.GET("/", a.index)
+	g.GET("/login", a.index)
 	g.GET("/csrf-token", a.csrfToken)
 
 	g.POST("/login", middleware.CSRFMiddleware(), a.login)
@@ -52,7 +54,16 @@ func (a *IndexController) initRouter(g *gin.RouterGroup) {
 func (a *IndexController) index(c *gin.Context) {
 	if session.IsLogin(c) {
 		c.Header("Cache-Control", "no-store")
-		c.Redirect(http.StatusTemporaryRedirect, c.GetString("base_path")+"panel/")
+		path := "panel/"
+		if user := session.GetLoginUser(c); user != nil && !user.IsAdmin() {
+			path = "panel/my-subscriptions"
+			if user.Role != model.RoleUser {
+				if pages, err := a.userService.RolePages(user.Role); err == nil && len(pages) > 0 {
+					path = "panel" + pages[0]
+				}
+			}
+		}
+		c.Redirect(http.StatusTemporaryRedirect, c.GetString("base_path")+path)
 		return
 	}
 	serveDistPage(c, "login.html")
@@ -126,7 +137,12 @@ func (a *IndexController) login(c *gin.Context) {
 		return
 	}
 
-	jsonMsg(c, I18nWeb(c, "pages.login.toasts.successLogin"), nil)
+	role := model.RoleUser
+	if user.IsAdmin() {
+		role = model.RoleAdmin
+	}
+	pages, err := a.userService.RolePages(user.Role)
+	jsonMsgObj(c, I18nWeb(c, "pages.login.toasts.successLogin"), gin.H{"role": role, "roleKey": user.Role, "username": user.Username, "pages": pages}, err)
 }
 
 func loginFailureReason(err error) string {

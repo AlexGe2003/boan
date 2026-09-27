@@ -4,6 +4,7 @@ package websocket
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"sync"
 	"time"
 
@@ -49,8 +50,9 @@ type clientOp struct {
 // NewClient builds a Client ready for hub registration.
 func NewClient(id string) *Client {
 	return &Client{
-		ID:   id,
-		Send: make(chan []byte, clientSendQueue),
+		ID:    id,
+		Send:  make(chan []byte, clientSendQueue),
+		Admin: true,
 	}
 }
 
@@ -64,6 +66,7 @@ type Message struct {
 // Client represents a single WebSocket connection.
 type Client struct {
 	ID        string
+	Admin     bool
 	Send      chan []byte
 	closeOnce sync.Once
 }
@@ -219,8 +222,12 @@ func (h *Hub) fanout(msg []byte) {
 	}
 	h.mu.RUnlock()
 
+	adminOnly := wsAdminOnly(msg)
 	var dead []*Client
 	for _, c := range targets {
+		if adminOnly && !c.Admin {
+			continue
+		}
 		if !trySend(c, msg) {
 			dead = append(dead, c)
 		}
@@ -244,6 +251,25 @@ func (h *Hub) fanout(msg []byte) {
 // Returns false if the client should be evicted (full buffer or closed channel).
 // A defer-recover guards against the rare race where the channel was closed
 // concurrently — sending on a closed channel always panics, even with select+default.
+func wsAdminOnly(msg []byte) bool {
+	n := len(msg)
+	if n > 80 {
+		n = 80
+	}
+	head := string(msg[:n])
+	switch {
+	case strings.Contains(head, `"type":"inbounds"`),
+		strings.Contains(head, `"type":"clients"`),
+		strings.Contains(head, `"type":"client_stats"`),
+		strings.Contains(head, `"type":"nodes"`),
+		strings.Contains(head, `"type":"outbounds"`),
+		strings.Contains(head, `"type":"traffic"`):
+		return true
+	default:
+		return false
+	}
+}
+
 func trySend(c *Client, msg []byte) (ok bool) {
 	defer func() {
 		if r := recover(); r != nil {

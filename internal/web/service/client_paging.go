@@ -61,6 +61,10 @@ type ClientPageParams struct {
 	HasTgID    string `form:"hasTgId"`
 	HasComment string `form:"hasComment"`
 	Group      string `form:"group"`
+
+	// OwnerUserID limits the page to clients attached to that user's inbounds.
+	// It is set by the controller, not the query string.
+	OwnerUserID int `form:"-"`
 }
 
 // ClientPageResponse is the shape returned by ListPaged. `Total` is the
@@ -133,6 +137,7 @@ type clientQuery struct {
 	nowMs            int64
 	expireDiffMs     int64
 	trafficDiffBytes int64
+	ownerUserID      int
 }
 
 type clientQueryJoin struct {
@@ -173,6 +178,9 @@ func (q clientQuery) from() *gorm.DB {
 	tx := q.db.Table("clients AS c")
 	for _, j := range q.joins {
 		tx = tx.Joins(j.sql, j.args...)
+	}
+	if q.ownerUserID > 0 {
+		tx = tx.Where(`EXISTS (SELECT 1 FROM client_inbounds ci JOIN inbounds ib ON ib.id = ci.inbound_id WHERE ci.client_id = c.id AND ib.user_id = ?)`, q.ownerUserID)
 	}
 	return tx
 }
@@ -360,9 +368,14 @@ func (s *ClientService) ListPaged(inboundSvc *InboundService, settingSvc *Settin
 
 	onlines := inboundSvc.GetOnlineClients()
 	q := newClientQuery(db, time.Now().UnixMilli(), expireDiffMs, trafficDiffBytes)
+	q.ownerUserID = params.OwnerUserID
 
 	var total int64
-	if err := db.Model(&model.ClientRecord{}).Count(&total).Error; err != nil {
+	countQ := db.Model(&model.ClientRecord{})
+	if params.OwnerUserID > 0 {
+		countQ = countQ.Where(`EXISTS (SELECT 1 FROM client_inbounds ci JOIN inbounds ib ON ib.id = ci.inbound_id WHERE ci.client_id = clients.id AND ib.user_id = ?)`, params.OwnerUserID)
+	}
+	if err := countQ.Count(&total).Error; err != nil {
 		return nil, err
 	}
 

@@ -95,6 +95,10 @@ import { ClientInboundChips, ClientRowActions } from './RowCells';
 import { emptyFilters, activeFilterCount } from './filters';
 import type { ClientFilters } from './filters';
 import './ClientsPage.css';
+import ClientAccountModal from './ClientAccountModal';
+import SubscriberModal from '@/pages/plans/SubscriberModal';
+import { usePlanAssignments } from '@/pages/plans/api';
+import { usePanelRole } from '@/api/queries/usePanelRole';
 
 const FILTER_STATE_KEY = 'clientsFilterState';
 const DISABLED_PAGE_SIZE = 200;
@@ -317,6 +321,9 @@ function sortValueFor(column: string | null, order: 'ascend' | 'descend' | null)
 }
 
 export default function ClientsPage() {
+  const panelRole = usePanelRole();
+  const planAssignments = usePlanAssignments(panelRole === 'admin');
+  const [accountEmail, setAccountEmail] = useState<string | null>(null);
   const { t } = useTranslation();
   const { isDark, isUltra, antdThemeConfig } = useTheme();
   const { datepicker } = useDatepicker();
@@ -673,7 +680,13 @@ export default function ClientsPage() {
     }
   }
 
+  const [subscriberMode, setSubscriberMode] = useState<'create' | 'assign' | null>(null);
+
   function onAdd() {
+    if (panelRole === 'admin') {
+      setSubscriberMode('create');
+      return;
+    }
     setFormMode('add');
     setEditingClient(null);
     setEditingAttachedIds([]);
@@ -1050,7 +1063,7 @@ export default function ClientsPage() {
       {
         title: t('pages.clients.actions'),
         key: 'actions',
-        width: 200,
+        width: 260,
         render: (_v, record) => (
           <ClientRowActions
             email={record.email}
@@ -1058,6 +1071,7 @@ export default function ClientsPage() {
             onShowInfo={onShowInfo}
             onResetTraffic={onResetTraffic}
             onEdit={onEdit}
+            onAccount={panelRole === 'admin' ? setAccountEmail : undefined}
             onDelete={onDelete}
           />
         ),
@@ -1121,6 +1135,13 @@ export default function ClientsPage() {
             <ClientCardComment comment={record.comment} className="sub" />
           </div>
         ),
+      },
+      {
+        title: '订阅套餐',
+        key: 'subscriptionPlan',
+        width: 160,
+        hidden: panelRole !== 'admin',
+        render: (_v, record) => planAssignments.data?.[record.email] || '未分配套餐',
       },
       {
         title: t('pages.clients.group'),
@@ -1214,6 +1235,8 @@ export default function ClientsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       t,
+      panelRole,
+      planAssignments.data,
       togglingEmail,
       clientBucket,
       isOnline,
@@ -1306,11 +1329,16 @@ export default function ClientsPage() {
               ) : (
                 <Row gutter={[isMobile ? 8 : 16, isMobile ? 8 : 12]}>
                   <Col span={24}>
+                    <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
+                      {t('pages.clients.managementIntro')}
+                    </Typography.Paragraph>
+                  </Col>
+                  <Col span={24}>
                     <Card size="small" hoverable className="summary-card">
                       <Row gutter={[16, 12]}>
                         <Col xs={12} sm={8} md={4}>
                           <SummaryStat
-                            title={t('clients')}
+                            title="用户"
                             value={summary.total}
                             prefix={<TeamOutlined />}
                             onSelect={() => selectBucket(null)}
@@ -1393,6 +1421,9 @@ export default function ClientsPage() {
                             >
                               {t('pages.clients.selectedCount', { count: selectedRowKeys.length })}
                             </Tag>
+                          )}
+                          {panelRole === 'admin' && selectedRowKeys.length > 0 && (
+                            <Button onClick={() => setSubscriberMode('assign')}>分配套餐</Button>
                           )}
                           <Dropdown
                             trigger={['click']}
@@ -1791,6 +1822,15 @@ export default function ClientsPage() {
                                         placement="bottomRight"
                                         menu={{
                                           items: [
+                                            ...(panelRole === 'admin'
+                                              ? [
+                                                  {
+                                                    key: 'account',
+                                                    label: '登录账号',
+                                                    onClick: () => setAccountEmail(row.email),
+                                                  },
+                                                ]
+                                              : []),
                                             {
                                               key: 'qr',
                                               label: (
@@ -1874,6 +1914,21 @@ export default function ClientsPage() {
           </Layout.Content>
         </Layout>
 
+        {subscriberMode && (
+          <SubscriberModal
+            emails={subscriberMode === 'assign' ? selectedRowKeys : undefined}
+            onClose={() => setSubscriberMode(null)}
+            onSaved={() => {
+              void refresh();
+              void planAssignments.refetch();
+            }}
+          />
+        )}
+        <ClientAccountModal
+          key={accountEmail ?? 'closed'}
+          email={accountEmail}
+          onClose={() => setAccountEmail(null)}
+        />
         <LazyMount when={formOpen}>
           <ClientFormModal
             open={formOpen}

@@ -14,6 +14,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/entity"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
 )
 
 // seedPartlyApplyingClient puts one client on two inbounds and corrupts the second
@@ -71,6 +72,7 @@ func postCtx(t *testing.T, email string, body any) (*gin.Context, *httptest.Resp
 	}
 	c.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(payload))
 	c.Request.Header.Set("Content-Type", "application/json")
+	session.SetAPIAuthUser(c, &model.User{Role: model.RoleAdmin})
 	return c, w
 }
 

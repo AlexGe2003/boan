@@ -39,7 +39,7 @@ func (a *APIController) checkAPIAuth(c *gin.Context) {
 	// the caller, equivalent to a valid bearer token. api_authed must be set so
 	// the CSRF middleware lets cert-authed mutations through.
 	if c.Request.TLS != nil && len(c.Request.TLS.VerifiedChains) > 0 {
-		if u, err := a.userService.GetFirstUser(); err == nil {
+		if u, err := a.userService.GetFirstAdmin(); err == nil {
 			session.SetAPIAuthUser(c, u)
 		}
 		c.Set("api_authed", true)
@@ -51,7 +51,7 @@ func (a *APIController) checkAPIAuth(c *gin.Context) {
 	if after, ok := strings.CutPrefix(auth, "Bearer "); ok {
 		tok := after
 		if row, ok := a.apiTokenService.MatchToken(tok); ok {
-			if u, err := a.userService.GetFirstUser(); err == nil {
+			if u, err := a.userService.GetFirstAdmin(); err == nil {
 				session.SetAPIAuthUser(c, u)
 			}
 			c.Set("api_authed", true)
@@ -172,6 +172,7 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	api := g.Group("/panel/api")
 	api.Use(a.checkAPIAuth)
 	api.Use(a.enforceTokenScope)
+	api.Use(a.enforceRole)
 	// Decode + verify the node config envelope (zstd + X-Config-Sha256) and
 	// advertise support, before CSRF/handlers read the body.
 	api.Use(middleware.ConfigEnvelopeMiddleware())
@@ -186,6 +187,8 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	clients := api.Group("/clients")
 	NewClientController(clients)
 	NewGroupController(clients)
+	NewSubscriptionPlanController(api.Group("/subscription-plans"))
+	NewSupportController(api.Group("/support"))
 
 	// Server API
 	server := api.Group("/server")

@@ -98,14 +98,14 @@
     "ofTotal": "من {total}",
     "tabLinks": "الاشتراك",
     "tabApps": "التطبيقات",
-    "tabConfigs": "الكونفيجات",
     "scanTitle": "امسح بهاتفك",
     "scanHint": "امسح هذا الرمز في تطبيق VPN لإضافة الاشتراك دون نسخ الرابط.",
     "updateInterval": "تحديث تلقائي كل {hours} ساعة",
     "support": "الدعم",
     "qrTitle": "امسح. استورد. اتصل.",
     "qrHint": "امسح الرمز بتطبيق العميل. لا تشارك هذا الرمز مع أحد.",
-    "saveQr": "حفظ QR"
+    "saveQr": "حفظ QR",
+    "tabConfigs": "الكونفيجات"
   },
   "menu": {
     "theme": "الثيم",
@@ -119,18 +119,15 @@
     "routing": "التوجيه",
     "outbounds": "الصادرات",
     "apiDocs": "توثيق API",
-    "donate": "تبرع",
     "hosts": "المضيفات",
-    "docs": "التوثيق",
     "openMenu": "فتح القائمة",
     "pinSidebar": "تثبيت الشريط الجانبي",
     "unpinSidebar": "إلغاء تثبيت الشريط الجانبي",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "mySubscriptions": "My subscriptions"
   },
   "pages": {
     "login": {
-      "hello": "أهلا",
-      "title": "أهلاً وسهلاً",
       "loginAgain": "انتهت صلاحية الجلسة، سجل دخول تاني",
       "toasts": {
         "invalidFormData": "تنسيق البيانات المدخلة مش صحيح.",
@@ -711,7 +708,10 @@
         "peerNumberConfig": "تكوين Peer {n}"
       },
       "sniffingDestOverride": "تجاوز الوجهة",
-      "advancedTitle": "الإعدادات المتقدمة"
+      "advancedTitle": "الإعدادات المتقدمة",
+      "streamSettings": {
+        "reality": {}
+      }
     },
     "clients": {
       "tabBasics": "أساسي",
@@ -946,7 +946,8 @@
       "renewOnDayDesc": "يتم التجديد في هذا اليوم من كل شهر ميلادي، عند منتصف الليل بتوقيت اللوحة، بدلاً من كل N يوم. إذا كان الشهر أقصر من اليوم المختار، يتم التجديد في آخر يوم منه. القيمة 0 تُبقي وضع الفاصل اليومي.",
       "renewsUsed": "التجديدات المستخدمة",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "أدخل علامة من 32 حرفًا ست عشريًا للتعيين، أو 'none' للمسح في منافذ MTProto."
+      "bulkAdTagHint": "أدخل علامة من 32 حرفًا ست عشريًا للتعيين، أو 'none' للمسح في منافذ MTProto.",
+      "managementIntro": "Set each user's connection credentials, traffic quota, expiry, device limits, and assigned inbounds. Open Details or Edit on a user to manage their configuration."
     },
     "groups": {
       "name": "الاسم",
@@ -1343,6 +1344,13 @@
       "telegramBotLanguage": "لغة بوت Telegram",
       "security": {
         "admin": "بيانات الأدمن",
+        "panelUsers": "حسابات اللوحة",
+        "roleAdmin": "مدير",
+        "roleUser": "مستخدم",
+        "userCreate": "إنشاء حساب",
+        "userDelete": "حذف",
+        "userResetPassword": "إعادة تعيين كلمة المرور",
+        "forbidden": "ليست لديك صلاحية للقيام بذلك",
         "twoFactor": "المصادقة الثنائية",
         "twoFactorEnable": "تفعيل المصادقة الثنائية",
         "twoFactorEnableDesc": "يضيف طبقة إضافية من المصادقة لتعزيز الأمان.",
@@ -1366,7 +1374,39 @@
         "apiTokenEmpty": "لا توجد رموز بعد — أنشئ واحدًا لمصادقة الروبوتات أو اللوحات البعيدة.",
         "apiTokenDeleteWarning": "أي عميل يستخدم هذا الرمز سيفقد المصادقة فورًا.",
         "apiTokenCreatedTitle": "تم إنشاء الرمز",
-        "apiTokenCreatedNotice": "انسخ هذا الرمز الآن. لأسباب أمنية لا يتم تخزينه بصيغة قابلة للقراءة ولن يتم عرضه مرة أخرى."
+        "apiTokenCreatedNotice": "انسخ هذا الرمز الآن. لأسباب أمنية لا يتم تخزينه بصيغة قابلة للقراءة ولن يتم عرضه مرة أخرى.",
+        "userManagement": "Panel accounts & permissions",
+        "userManagementDesc": "Manage accounts that sign in to the panel and their page access. Proxy clients are managed on the Clients page.",
+        "rolesTab": "Roles and page access",
+        "usersTab": "Panel accounts",
+        "roleCreate": "Create role",
+        "roleEdit": "Edit role",
+        "roleName": "Role name",
+        "rolePageHelp": "Create a role, select its accessible pages, then assign it to users.",
+        "roleSaved": "Role saved",
+        "roleDeleted": "Role deleted",
+        "deleteRoleConfirm": "Delete role {{name}}?",
+        "pages": "Accessible pages",
+        "allPages": "All pages",
+        "builtInRole": "Built-in role",
+        "createUserHelp": "This creates a user who can sign in. Choose an existing role to set their access.",
+        "setRoleTo": "Set as {{role}}",
+        "roleHelp": "Admins manage the panel; users access only their assigned resources.",
+        "actions": "Actions",
+        "changeRole": "Change role",
+        "roleUpdated": "Role updated",
+        "userCreated": "User created",
+        "userDeleted": "User deleted",
+        "passwordReset": "Password reset",
+        "deleteConfirm": "Delete account {{username}}?",
+        "deleteHelp": "Assigned inbounds will be transferred to another administrator.",
+        "deleteAccountWarning": "This account will immediately lose access. This action cannot be undone.",
+        "transferCount": "This account owns {{count}} inbounds. Select an account to receive them.",
+        "transferTarget": "Select receiving account",
+        "transferRequired": "Select an account to receive the inbounds",
+        "roleLabel": "User role",
+        "userUpdated": "账号已更新",
+        "userEdit": "编辑账号"
       },
       "toasts": {
         "modifySettings": "تم تغيير المعلمات.",
@@ -2541,5 +2581,46 @@
     "restartXray": "إعادة تشغيل خدمة Xray",
     "restartXraySuccess": "تمت إعادة تشغيل خدمة Xray بنجاح",
     "settings": "الإعدادات"
-  }
+  },
+  "nodeMonitor": {
+    "title": "Node monitor",
+    "panelLatencyHint": "Latency measures the panel's connection to each node. Carrier latency and packet loss require probes on those networks.",
+    "loadFailed": "Could not update monitoring data",
+    "coreIssues": "Core issues",
+    "updatedAt": "Updated at",
+    "local": "Local",
+    "panelLatency": "Panel latency",
+    "config": "Node configuration and traffic",
+    "noConfig": "No visible configuration",
+    "name": "Name",
+    "protocol": "Protocol",
+    "port": "Port",
+    "used": "Used",
+    "remaining": "Remaining",
+    "status": "Status",
+    "unlimited": "Unlimited",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "memory": "Memory",
+    "disk": "Disk",
+    "traffic": "Traffic",
+    "latency": "Latency",
+    "packetLoss": "Packet loss",
+    "uptimeDays": "Online {count} days",
+    "statusOverview": "Node status overview",
+    "onlineNodes": "Nodes online",
+    "carrier0": "Telecom",
+    "carrier1": "Mobile",
+    "carrier2": "Unicom",
+    "manageNodes": "Manage nodes",
+    "setupSummary": "How do I add or configure a node?",
+    "setupGuide": "An administrator adds the remote panel under Nodes, enters its address and connection credentials, tests the connection, and saves it. The node then appears here. Users can view node health and their own inbound configurations. Carrier latency and packet loss need separate probes.",
+    "noNodes": "No nodes to monitor yet",
+    "panelLatencyDetail": "Panel to node",
+    "carrierMonitoring": "Carrier monitoring",
+    "probeNotConfigured": "Probe not configured",
+    "offlineMetrics": "Live metrics are unavailable while this node is offline",
+    "lastHeartbeatShort": "Heartbeat {time}"
+  },
+  "subscriptions": {}
 }

@@ -20,6 +20,7 @@ interface ClientRowActionsProps {
   onShowInfo: (email: string) => void;
   onResetTraffic: (email: string) => void;
   onEdit: (email: string) => void;
+  onAccount?: (email: string) => void;
   onDelete: (email: string) => void;
 }
 
@@ -34,11 +35,17 @@ export const ClientRowActions = memo(function ClientRowActions({
   onShowInfo,
   onResetTraffic,
   onEdit,
+  onAccount,
   onDelete,
 }: ClientRowActionsProps) {
   const { t } = useTranslation();
   return (
     <Space size={4}>
+      {onAccount && (
+        <Button size="small" type="link" onClick={() => onAccount(email)}>
+          登录账号
+        </Button>
+      )}
       <Tooltip title={t('pages.clients.qrCode')}>
         <Button
           size="small"

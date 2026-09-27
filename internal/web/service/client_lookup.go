@@ -168,10 +168,34 @@ func (s *ClientService) TunnelAllowedIPsByInbound(inboundSvc *InboundService, em
 	return result, nil
 }
 
-func (s *ClientService) List() ([]ClientWithAttachments, error) {
+func (s *ClientService) EmailOnUserInbound(email string, userId int) (bool, error) {
+	var n int64
+	err := database.GetDB().Table("client_inbounds").
+		Joins("JOIN clients ON clients.id = client_inbounds.client_id").
+		Joins("JOIN inbounds ON inbounds.id = client_inbounds.inbound_id").
+		Where("LOWER(clients.email) = LOWER(?) AND inbounds.user_id = ?", email, userId).
+		Count(&n).Error
+	return n > 0, err
+}
+
+func (s *ClientService) SubIDOnUserInbound(subID string, userId int) (bool, error) {
+	var n int64
+	err := database.GetDB().Table("client_inbounds").
+		Joins("JOIN clients ON clients.id = client_inbounds.client_id").
+		Joins("JOIN inbounds ON inbounds.id = client_inbounds.inbound_id").
+		Where("clients.sub_id = ? AND inbounds.user_id = ?", subID, userId).
+		Count(&n).Error
+	return n > 0, err
+}
+
+func (s *ClientService) List(clientIDs ...int) ([]ClientWithAttachments, error) {
 	db := database.GetDB()
 	var rows []model.ClientRecord
-	if err := db.Order("id ASC").Find(&rows).Error; err != nil {
+	query := db.Order("id ASC")
+	if len(clientIDs) > 0 {
+		query = query.Where("id IN ?", clientIDs)
+	}
+	if err := query.Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	if len(rows) == 0 {

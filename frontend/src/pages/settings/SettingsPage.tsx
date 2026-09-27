@@ -25,6 +25,7 @@ import { AllSettingSchema } from '@/schemas/setting';
 import AppSidebar from '@/layouts/AppSidebar';
 import GeneralTab from './GeneralTab';
 import SecurityTab from './SecurityTab';
+import PanelUsers from './PanelUsers';
 import TelegramTab from './TelegramTab';
 import EmailTab from './EmailTab';
 import DiscordTab from './DiscordTab';
@@ -40,6 +41,7 @@ interface ApiMsg {
 const tabSlugs = [
   'general',
   'security',
+  'administrators',
   'telegram',
   'email',
   'discord',
@@ -207,6 +209,8 @@ export default function SettingsPage() {
 
   const categoryBody = useMemo(() => {
     switch (activeSlug) {
+      case 'administrators':
+        return <PanelUsers />;
       case 'security':
         return (
           <SecurityTab
@@ -272,7 +276,7 @@ export default function SettingsPage() {
                   )}
 
                   <Row gutter={[isMobile ? 8 : 16, isMobile ? 0 : 12]}>
-                    <Col span={24}>
+                    <Col span={24} hidden={activeSlug === 'administrators'}>
                       <Card hoverable>
                         <Row className="header-row">
                           <Col xs={24} sm={10} className="header-actions">

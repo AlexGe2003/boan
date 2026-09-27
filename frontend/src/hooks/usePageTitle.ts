@@ -6,6 +6,7 @@ const TITLE_KEYS: Record<string, string> = {
   '/': 'menu.dashboard',
   '/inbounds': 'menu.inbounds',
   '/clients': 'menu.clients',
+  '/my-subscriptions': 'menu.mySubscriptions',
   '/groups': 'menu.groups',
   '/nodes': 'menu.nodes',
   '/hosts': 'menu.hosts',
@@ -17,13 +18,22 @@ const TITLE_KEYS: Record<string, string> = {
 };
 
 export function usePageTitle() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const { t } = useTranslation();
 
   useEffect(() => {
     const key = TITLE_KEYS[pathname];
-    const title = key ? t(key) : '3X-UI';
+    const title =
+      pathname === '/settings' && hash === '#administrators'
+        ? '管理员账号'
+        : pathname === '/support'
+          ? '工单服务'
+          : pathname === '/plans'
+            ? '订阅套餐'
+            : key
+              ? t(key)
+              : '3X-UI';
     const host = window.location.hostname;
     document.title = host ? `${host} - ${title}` : title;
-  }, [pathname, t]);
+  }, [pathname, hash, t]);
 }

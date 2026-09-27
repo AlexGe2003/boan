@@ -17,6 +17,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	xuilogger "github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/entity"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
 )
 
 func newHostTestDB(t *testing.T) {
@@ -63,6 +64,7 @@ func doHostReq(t *testing.T, engine *gin.Engine, method, path string, body any) 
 func TestHostController_AddListGetDelete(t *testing.T) {
 	newHostTestDB(t)
 	engine := gin.New()
+	engine.Use(func(c *gin.Context) { session.SetAPIAuthUser(c, &model.User{Role: model.RoleAdmin}); c.Next() })
 	NewHostController(engine.Group("/panel/api/hosts"))
 
 	ib := &model.Inbound{Tag: "ctl", Enable: true, Port: 5443, Protocol: model.VLESS, Settings: `{"clients":[]}`}

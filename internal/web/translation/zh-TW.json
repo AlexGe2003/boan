@@ -98,14 +98,14 @@
     "ofTotal": "共 {total}",
     "tabLinks": "訂閱",
     "tabApps": "應用程式",
-    "tabConfigs": "設定檔",
     "scanTitle": "用手機掃描",
     "scanHint": "在 VPN 應用程式中掃描此 QR 碼，無需複製連結即可新增訂閱。",
     "updateInterval": "每 {hours} 小時自動更新",
     "support": "支援",
     "qrTitle": "掃描。匯入。連線。",
     "qrHint": "使用用戶端應用程式掃描。請勿外洩此 QR 碼。",
-    "saveQr": "儲存 QR 碼"
+    "saveQr": "儲存 QR 碼",
+    "tabConfigs": "設定檔"
   },
   "menu": {
     "theme": "主題",
@@ -119,18 +119,15 @@
     "routing": "路由",
     "outbounds": "出站",
     "apiDocs": "API 文件",
-    "donate": "捐贈",
     "hosts": "主機",
-    "docs": "文件",
     "openMenu": "開啟選單",
     "pinSidebar": "固定側邊欄",
     "unpinSidebar": "取消固定側邊欄",
-    "subFormats": "Sub Formats"
+    "subFormats": "Sub Formats",
+    "mySubscriptions": "My subscriptions"
   },
   "pages": {
     "login": {
-      "hello": "你好",
-      "title": "歡迎",
       "loginAgain": "登入時效已過，請重新登入",
       "toasts": {
         "invalidFormData": "資料格式錯誤",
@@ -711,7 +708,10 @@
         "peerNumberConfig": "Peer {n} 設定"
       },
       "sniffingDestOverride": "目標覆寫",
-      "advancedTitle": "進階設定"
+      "advancedTitle": "進階設定",
+      "streamSettings": {
+        "reality": {}
+      }
     },
     "clients": {
       "tabBasics": "基本",
@@ -946,7 +946,8 @@
       "renewOnDayDesc": "每個自然月的這一天午夜（依面板時區）續期，而不是每 N 天續期一次。若當月沒有該日期，則在當月最後一天續期。填 0 保持按天間隔模式。",
       "renewsUsed": "已用續期次數",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
-      "bulkAdTagHint": "輸入 32 位十六進位標籤以設定，或輸入 'none' 清除 MTProto 贊助頻道。"
+      "bulkAdTagHint": "輸入 32 位十六進位標籤以設定，或輸入 'none' 清除 MTProto 贊助頻道。",
+      "managementIntro": "Set each user's connection credentials, traffic quota, expiry, device limits, and assigned inbounds. Open Details or Edit on a user to manage their configuration."
     },
     "groups": {
       "name": "名稱",
@@ -1343,6 +1344,13 @@
       "telegramBotLanguage": "Telegram 機器人語言",
       "security": {
         "admin": "管理員憑證",
+        "panelUsers": "面板帳號",
+        "roleAdmin": "管理員",
+        "roleUser": "一般使用者",
+        "userCreate": "新增帳號",
+        "userDelete": "刪除",
+        "userResetPassword": "重設密碼",
+        "forbidden": "沒有權限",
         "twoFactor": "雙重驗證",
         "twoFactorEnable": "啟用 2FA",
         "twoFactorEnableDesc": "增加額外的驗證層以提高安全性。",
@@ -1366,7 +1374,39 @@
         "apiTokenEmpty": "尚無令牌 — 建立一個以認證機器人或遠端面板。",
         "apiTokenDeleteWarning": "使用此令牌的任何呼叫方將立即無法認證。",
         "apiTokenCreatedTitle": "權杖已建立",
-        "apiTokenCreatedNotice": "請立即複製此權杖。基於安全考量，它不會以可讀形式儲存，也不會再次顯示。"
+        "apiTokenCreatedNotice": "請立即複製此權杖。基於安全考量，它不會以可讀形式儲存，也不會再次顯示。",
+        "userManagement": "Panel accounts & permissions",
+        "userManagementDesc": "Manage accounts that sign in to the panel and their page access. Proxy clients are managed on the Clients page.",
+        "rolesTab": "Roles and page access",
+        "usersTab": "Panel accounts",
+        "roleCreate": "Create role",
+        "roleEdit": "Edit role",
+        "roleName": "Role name",
+        "rolePageHelp": "Create a role, select its accessible pages, then assign it to users.",
+        "roleSaved": "Role saved",
+        "roleDeleted": "Role deleted",
+        "deleteRoleConfirm": "Delete role {{name}}?",
+        "pages": "Accessible pages",
+        "allPages": "All pages",
+        "builtInRole": "Built-in role",
+        "createUserHelp": "This creates a user who can sign in. Choose an existing role to set their access.",
+        "setRoleTo": "Set as {{role}}",
+        "roleHelp": "Admins manage the panel; users access only their assigned resources.",
+        "actions": "Actions",
+        "changeRole": "Change role",
+        "roleUpdated": "Role updated",
+        "userCreated": "User created",
+        "userDeleted": "User deleted",
+        "passwordReset": "Password reset",
+        "deleteConfirm": "Delete account {{username}}?",
+        "deleteHelp": "Assigned inbounds will be transferred to another administrator.",
+        "deleteAccountWarning": "This account will immediately lose access. This action cannot be undone.",
+        "transferCount": "This account owns {{count}} inbounds. Select an account to receive them.",
+        "transferTarget": "Select receiving account",
+        "transferRequired": "Select an account to receive the inbounds",
+        "roleLabel": "User role",
+        "userUpdated": "账号已更新",
+        "userEdit": "编辑账号"
       },
       "toasts": {
         "modifySettings": "參數已更改。",
@@ -2541,5 +2581,46 @@
     "restartXray": "重啟 Xray 服務",
     "restartXraySuccess": "Xray 服務已成功重啟",
     "settings": "設定"
-  }
+  },
+  "nodeMonitor": {
+    "title": "Node monitor",
+    "panelLatencyHint": "Latency measures the panel's connection to each node. Carrier latency and packet loss require probes on those networks.",
+    "loadFailed": "Could not update monitoring data",
+    "coreIssues": "Core issues",
+    "updatedAt": "Updated at",
+    "local": "Local",
+    "panelLatency": "Panel latency",
+    "config": "Node configuration and traffic",
+    "noConfig": "No visible configuration",
+    "name": "Name",
+    "protocol": "Protocol",
+    "port": "Port",
+    "used": "Used",
+    "remaining": "Remaining",
+    "status": "Status",
+    "unlimited": "Unlimited",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "memory": "Memory",
+    "disk": "Disk",
+    "traffic": "Traffic",
+    "latency": "Latency",
+    "packetLoss": "Packet loss",
+    "uptimeDays": "Online {count} days",
+    "statusOverview": "Node status overview",
+    "onlineNodes": "Nodes online",
+    "carrier0": "Telecom",
+    "carrier1": "Mobile",
+    "carrier2": "Unicom",
+    "manageNodes": "Manage nodes",
+    "setupSummary": "How do I add or configure a node?",
+    "setupGuide": "An administrator adds the remote panel under Nodes, enters its address and connection credentials, tests the connection, and saves it. The node then appears here. Users can view node health and their own inbound configurations. Carrier latency and packet loss need separate probes.",
+    "noNodes": "No nodes to monitor yet",
+    "panelLatencyDetail": "Panel to node",
+    "carrierMonitoring": "Carrier monitoring",
+    "probeNotConfigured": "Probe not configured",
+    "offlineMetrics": "Live metrics are unavailable while this node is offline",
+    "lastHeartbeatShort": "Heartbeat {time}"
+  },
+  "subscriptions": {}
 }

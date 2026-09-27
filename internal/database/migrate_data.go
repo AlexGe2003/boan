@@ -38,6 +38,11 @@ import (
 func migrationModels() []any {
 	return []any{
 		&model.User{},
+		&model.PanelRoleDefinition{},
+		&model.SubscriptionPlan{},
+		&model.SupportTicket{},
+		&model.SupportMessage{},
+		&model.SubscriptionAssignment{},
 		&model.Setting{},
 		&model.HistoryOfSeeders{},
 		&model.Node{},

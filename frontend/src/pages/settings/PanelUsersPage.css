@@ -1,0 +1,58 @@
+.users-page-header {
+  margin-bottom: 16px;
+}
+
+.users-page-header .ant-typography {
+  margin-bottom: 4px;
+}
+
+.users-page .panel-users-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.users-page .panel-users-toolbar .ant-typography {
+  margin: 0;
+}
+
+.users-page .panel-users-toolbar .ant-btn {
+  flex-shrink: 0;
+}
+
+.users-page .panel-user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.users-page .role-page-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.users-page .role-page-grid .ant-checkbox-wrapper {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .users-page .content-area {
+    padding: 8px;
+  }
+
+  .users-page-header {
+    padding: 8px 8px 0;
+  }
+
+  .users-page .panel-users-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .users-page .role-page-grid {
+    grid-template-columns: 1fr;
+  }
+}

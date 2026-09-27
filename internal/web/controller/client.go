@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/entity"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -50,12 +53,16 @@ func NewClientController(g *gin.RouterGroup) *ClientController {
 }
 
 func (a *ClientController) initRouter(g *gin.RouterGroup) {
+	g.Use(a.guardClientEmail)
 	g.GET("/list", a.list)
+	g.GET("/mySubscriptions", a.mySubscriptions)
+	g.GET("/account/:email", a.clientAccount)
+	g.POST("/account/:email", a.clientAccount)
 	g.GET("/list/paged", a.listPaged)
 	g.GET("/get/:email", a.get)
 	g.GET("/get/tgId/:tgId", a.getByTgId)
 	g.GET("/traffic/:email", a.getTrafficByEmail)
-	g.GET("/subLinks/:subId", a.getSubLinks)
+	g.GET("/subLinks/:subId", a.guardSubID, a.getSubLinks)
 	g.GET("/links/:email", a.getClientLinks)
 	g.POST("/happLink/:id", a.generateHappLink)
 
@@ -98,7 +105,207 @@ func (a *ClientController) list(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
 		return
 	}
+	rows, err = a.filterVisibleClients(c, rows)
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
+		return
+	}
 	jsonObj(c, rows, nil)
+}
+
+// mySubscriptions returns usage and subscription links. Customer accounts are
+// scoped to their linked client; operators retain their inbound ownership scope.
+func (a *ClientController) mySubscriptions(c *gin.Context) {
+	user := session.GetLoginUser(c)
+	var rows []service.ClientWithAttachments
+	var err error
+	if user != nil && user.Role == model.RoleCustomer {
+		id := 0
+		if user.ClientID != nil {
+			id = *user.ClientID
+		}
+		rows, err = a.clientService.List(id)
+	} else {
+		rows, err = a.clientService.List()
+		if err == nil {
+			rows, err = a.filterVisibleClients(c, rows)
+		}
+	}
+
+	if err != nil {
+		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
+		return
+	}
+	base := a.settingService.BuildSubURIBase(c.Request.Host)
+	rawPrefix, _ := a.settingService.GetSubURI()
+	if rawPrefix == "" {
+		path, _ := a.settingService.GetSubPath()
+		rawPrefix = base + path
+	}
+	clashEnabled, _ := a.settingService.GetSubClashEnable()
+	clashPrefix, _ := a.settingService.GetSubClashURI()
+	if clashPrefix == "" {
+		path, _ := a.settingService.GetSubClashPath()
+		clashPrefix = base + path
+	}
+	type link struct {
+		Email      string `json:"email"`
+		PlanName   string `json:"planName"`
+		Configured bool   `json:"configured"`
+		URL        string `json:"url"`
+		ClashURL   string `json:"clashUrl,omitempty"`
+		Used       int64  `json:"used"`
+		Up         int64  `json:"up"`
+		Down       int64  `json:"down"`
+		Remaining  *int64 `json:"remaining"`
+		Total      int64  `json:"total"`
+		ExpiryTime int64  `json:"expiryTime"`
+		Enabled    bool   `json:"enabled"`
+	}
+	var assigned []struct {
+		ClientID int
+		Name     string
+	}
+	ids := make([]int, 0, len(rows))
+	for _, row := range rows {
+		ids = append(ids, row.Id)
+	}
+	if len(ids) > 0 {
+		if err := database.GetDB().Table("subscription_assignments AS a").Select("a.client_id, p.name").Joins("JOIN subscription_plans p ON p.id = a.plan_id").Where("a.client_id IN ?", ids).Scan(&assigned).Error; err != nil {
+			jsonObj(c, nil, err)
+			return
+		}
+	}
+	names := map[int]string{}
+	for _, item := range assigned {
+		names[item.ClientID] = item.Name
+	}
+	result := make([]link, 0, len(rows))
+	seen := make(map[string]bool)
+	for _, row := range rows {
+		if seen[row.Email] {
+			continue
+		}
+		seen[row.Email] = true
+		item := link{Email: row.Email, PlanName: names[row.Id], Total: row.TotalGB, ExpiryTime: row.ExpiryTime, Enabled: row.Enable}
+		item.Configured = names[row.Id] != "" || len(row.InboundIds) > 0
+		if !item.Configured {
+			var externalCount int64
+			if err := database.GetDB().Model(&model.ClientExternalLink{}).Where("client_id = ?", row.Id).Count(&externalCount).Error; err != nil {
+				jsonObj(c, nil, err)
+				return
+			}
+			item.Configured = externalCount > 0
+		}
+		var sharing int64
+		if row.SubID != "" {
+			if err := database.GetDB().Model(&model.ClientRecord{}).Where("sub_id = ?", row.SubID).Count(&sharing).Error; err != nil {
+				jsonObj(c, nil, err)
+				return
+			}
+			if sharing == 1 {
+				item.URL = strings.TrimRight(rawPrefix, "/") + "/" + url.PathEscape(row.SubID)
+			}
+		}
+		if clashEnabled && item.URL != "" {
+			item.ClashURL = strings.TrimRight(clashPrefix, "/") + "/" + url.PathEscape(row.SubID)
+		}
+		if row.Traffic != nil {
+			item.Up = row.Traffic.Up
+			item.Down = row.Traffic.Down
+			item.Used = row.Traffic.Up + row.Traffic.Down
+			item.Total = row.Traffic.Total
+			item.ExpiryTime = row.Traffic.ExpiryTime
+			item.Enabled = row.Enable && row.Traffic.Enable
+			if item.Total > 0 {
+				remaining := max(0, item.Total-item.Used)
+				item.Remaining = &remaining
+			}
+		}
+		if item.Remaining == nil && item.Total > 0 {
+			remaining := max(0, item.Total-item.Used)
+			item.Remaining = &remaining
+		}
+		result = append(result, item)
+	}
+	jsonObj(c, result, nil)
+}
+
+func (a *ClientController) filterVisibleClients(c *gin.Context, rows []service.ClientWithAttachments) ([]service.ClientWithAttachments, error) {
+	user := session.GetLoginUser(c)
+	if user == nil || user.IsAdmin() {
+		return rows, nil
+	}
+	ids, err := a.inboundService.InboundIDsForUser(user.Id)
+	if err != nil {
+		return nil, err
+	}
+	owned := map[int]struct{}{}
+	for _, id := range ids {
+		owned[id] = struct{}{}
+	}
+	out := make([]service.ClientWithAttachments, 0, len(rows))
+	for _, row := range rows {
+		for _, id := range row.InboundIds {
+			if _, ok := owned[id]; ok {
+				out = append(out, row)
+				break
+			}
+		}
+	}
+	return out, nil
+}
+
+func (a *ClientController) inboundsOwned(c *gin.Context, ids []int) bool {
+	user := session.GetLoginUser(c)
+	if user == nil || user.IsAdmin() {
+		return true
+	}
+	owned, err := a.inboundService.InboundIDsForUser(user.Id)
+	if err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+		return false
+	}
+	set := map[int]struct{}{}
+	for _, id := range owned {
+		set[id] = struct{}{}
+	}
+	for _, id := range ids {
+		if _, ok := set[id]; !ok {
+			c.AbortWithStatus(http.StatusNotFound)
+			return false
+		}
+	}
+	return true
+}
+
+func (a *ClientController) guardClientEmail(c *gin.Context) {
+	user := session.GetLoginUser(c)
+	email := strings.TrimSpace(c.Param("email"))
+	if user == nil || user.IsAdmin() || email == "" {
+		c.Next()
+		return
+	}
+	ok, err := a.clientService.EmailOnUserInbound(email, user.Id)
+	if err != nil || !ok {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	c.Next()
+}
+
+func (a *ClientController) guardSubID(c *gin.Context) {
+	user := session.GetLoginUser(c)
+	if user == nil || user.IsAdmin() {
+		c.Next()
+		return
+	}
+	ok, err := a.clientService.SubIDOnUserInbound(c.Param("subId"), user.Id)
+	if err != nil || !ok {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	c.Next()
 }
 
 func (a *ClientController) listPaged(c *gin.Context) {
@@ -106,6 +313,9 @@ func (a *ClientController) listPaged(c *gin.Context) {
 	if err := c.ShouldBindQuery(&params); err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.obtain"), err)
 		return
+	}
+	if user := session.GetLoginUser(c); user != nil && !user.IsAdmin() {
+		params.OwnerUserID = user.Id
 	}
 	resp, err := a.clientService.ListPaged(&a.inboundService, &a.settingService, params)
 	if err != nil {
@@ -191,6 +401,9 @@ func (a *ClientController) create(c *gin.Context) {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
 		return
 	}
+	if !a.inboundsOwned(c, payload.InboundIds) {
+		return
+	}
 	needRestart, err := a.clientService.Create(&a.inboundService, &payload)
 	// Flagged before the error check: a partly-applied create leaves clients
 	// committed on the inbounds that succeeded, and those still need the restart.
@@ -220,6 +433,9 @@ func (a *ClientController) update(c *gin.Context) {
 		return
 	}
 	inboundFilter := parseInboundIdsQuery(c.Query("inboundIds"))
+	if !a.inboundsOwned(c, inboundFilter) {
+		return
+	}
 	needRestart, err := a.clientService.UpdateByEmail(&a.inboundService, email, req.Client, req.LimitHwid, inboundFilter...)
 	// Flagged before the error check: a partly-applied edit leaves the change
 	// committed on the inbounds that succeeded, and those still need the restart.
@@ -272,6 +488,9 @@ func (a *ClientController) attach(c *gin.Context) {
 	var body attachDetachBody
 	if err := c.ShouldBindJSON(&body); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if !a.inboundsOwned(c, body.InboundIds) {
 		return
 	}
 	needRestart, err := a.clientService.AttachByEmail(&a.inboundService, email, body.InboundIds)
@@ -677,6 +896,9 @@ func (a *ClientController) detach(c *gin.Context) {
 	var body attachDetachBody
 	if err := c.ShouldBindJSON(&body); err != nil {
 		jsonMsg(c, I18nWeb(c, "somethingWentWrong"), err)
+		return
+	}
+	if !a.inboundsOwned(c, body.InboundIds) {
 		return
 	}
 	needRestart, err := a.clientService.DetachByEmailMany(&a.inboundService, email, body.InboundIds)

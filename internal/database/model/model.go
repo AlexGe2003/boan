@@ -36,12 +36,31 @@ const (
 	TUIC        Protocol = "tuic"
 )
 
-// User represents a user account in the 3x-ui panel.
+const (
+	RoleAdmin    = "admin"
+	RoleUser     = "user"
+	RoleCustomer = "customer"
+)
+
+// User represents a panel login. Role is a built-in or custom panel role key.
 type User struct {
 	Id         int    `json:"id" gorm:"primaryKey;autoIncrement"`
-	Username   string `json:"username"`
+	Username   string `json:"username" gorm:"uniqueIndex"`
 	Password   string `json:"password"`
+	Role       string `json:"role" gorm:"not null;default:admin"`
 	LoginEpoch int64  `json:"-" gorm:"default:0"`
+	ClientID   *int   `json:"-" gorm:"uniqueIndex"`
+}
+
+// PanelRoleDefinition stores the pages granted to a custom panel role.
+type PanelRoleDefinition struct {
+	Key   string `json:"key" gorm:"primaryKey"`
+	Name  string `json:"name" gorm:"not null;uniqueIndex"`
+	Pages string `json:"-" gorm:"not null"`
+}
+
+func (u *User) IsAdmin() bool {
+	return u != nil && u.Role == RoleAdmin
 }
 
 // Inbound represents an Xray inbound configuration with traffic statistics and settings.

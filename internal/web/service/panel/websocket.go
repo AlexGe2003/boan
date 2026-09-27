@@ -37,7 +37,7 @@ func NewWebSocketService(hub *websocket.Hub) *WebSocketService {
 // HandleConnection takes ownership of an upgraded WebSocket connection:
 // registers a new client, starts the read/write pumps, and returns
 // immediately. The connection is closed when both pumps exit.
-func (s *WebSocketService) HandleConnection(conn *ws.Conn, remoteIP string) {
+func (s *WebSocketService) HandleConnection(conn *ws.Conn, remoteIP string, admin bool) {
 	if s == nil || s.hub == nil || conn == nil {
 		if conn != nil {
 			conn.Close()
@@ -46,6 +46,7 @@ func (s *WebSocketService) HandleConnection(conn *ws.Conn, remoteIP string) {
 	}
 
 	client := websocket.NewClient(uuid.New().String())
+	client.Admin = admin
 	s.hub.Register(client)
 	logger.Debugf("WebSocket client %s registered from %s", client.ID, remoteIP)
 
