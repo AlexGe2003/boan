@@ -1,3 +1,4 @@
+import { lazy, Suspense, useState } from 'react';
 import {
   ReloadOutlined,
   UpOutlined,
@@ -6,7 +7,7 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Button, Empty, Layout, Progress, Spin, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Empty, Layout, Progress, Spin, Table, Tag, Typography, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import AppSidebar from '@/layouts/AppSidebar';
@@ -14,6 +15,34 @@ import { usePanelRole } from '@/api/queries/usePanelRole';
 import { useTheme } from '@/hooks/useTheme';
 import { HttpUtil } from '@/utils';
 import './NodeMonitorPage.css';
+const ServerUsage = lazy(() => import('./ServerUsage'));
+
+function ServerUsageButton({ nodeId }: { nodeId?: number }) {
+  const role = usePanelRole();
+  const [open, setOpen] = useState(false);
+  if (role !== 'admin') return null;
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>
+        {nodeId === undefined ? '服务器流量总览' : '用户流量排行'}
+      </Button>
+      <Modal
+        open={open}
+        title={nodeId === undefined ? '服务器流量总览' : '服务器用户流量排行'}
+        width={1100}
+        footer={null}
+        onCancel={() => setOpen(false)}
+        destroyOnHidden
+      >
+        {open && (
+          <Suspense fallback={<Spin />}>
+            <ServerUsage nodeId={nodeId} />
+          </Suspense>
+        )}
+      </Modal>
+    </>
+  );
+}
 
 export interface MonitoredInbound {
   id: number;
@@ -150,6 +179,7 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
           />
           <strong>{node.local ? t('nodeMonitor.local') : node.name}</strong>
         </div>
+        <ServerUsageButton nodeId={node.local ? 0 : node.id} />
         {node.country && <span className="node-monitor-country">{node.country}</span>}
       </div>
       <div className="node-monitor-meta">
@@ -428,6 +458,7 @@ export default function NodeMonitorPage({ mockData }: { mockData?: MonitoredNode
             {!mockData && (
               <div className="node-monitor-header-actions">
                 <ManageNodesButton />
+                <ServerUsageButton />
                 <Button
                   icon={<ReloadOutlined />}
                   loading={query.isFetching}

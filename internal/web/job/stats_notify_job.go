@@ -1,6 +1,7 @@
 package job
 
 import (
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/tgbot"
 )
@@ -26,6 +27,12 @@ func NewStatsNotifyJob() *StatsNotifyJob {
 
 // Run sends a statistics report via Telegram bot if Xray is running.
 func (j *StatsNotifyJob) Run() {
+	release, allowed := cluster.BeginJob(true)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	if !j.xrayService.IsXrayRunning() {
 		return
 	}

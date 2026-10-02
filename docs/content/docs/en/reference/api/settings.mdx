@@ -31,6 +31,35 @@ _openapi:
         saving it.
       url: '#validate-any-regular-expression-with-the-backend-go-re2-compiler-without-saving-it'
     - depth: 2
+      title: Return the signed-in panel account, role key, and accessible pages.
+      url: '#return-the-signed-in-panel-account-role-key-and-accessible-pages'
+    - depth: 2
+      title: List panel accounts. Admin only. Passwords are not included.
+      url: '#list-panel-accounts-admin-only-passwords-are-not-included'
+    - depth: 2
+      title: Create a panel user with a built-in or custom role. Role defaults to
+        user. Admin only.
+      url: '#create-a-panel-user-with-a-built-in-or-custom-role-role-defaults-to-user-admin-only'
+    - depth: 2
+      title: Update a panel account username. Admin only.
+      url: '#update-a-panel-account-username-admin-only'
+    - depth: 2
+      title: Change a panel account role. The last admin cannot be demoted. Admin
+        only.
+      url: '#change-a-panel-account-role-the-last-admin-cannot-be-demoted-admin-only'
+    - depth: 2
+      title: List built-in and custom roles with accessible page paths. Admin only.
+      url: '#list-built-in-and-custom-roles-with-accessible-page-paths-admin-only'
+    - depth: 2
+      title: Create a custom role with selected accessible pages. Admin only.
+      url: '#create-a-custom-role-with-selected-accessible-pages-admin-only'
+    - depth: 2
+      title: Update a custom role name and page permissions. Admin only.
+      url: '#update-a-custom-role-name-and-page-permissions-admin-only'
+    - depth: 2
+      title: Delete an unassigned custom role. Admin only.
+      url: '#delete-an-unassigned-custom-role-admin-only'
+    - depth: 2
       title: Change the panel admin username and password. Requires the current
         credentials for verification. The session is refreshed with the new
         values on success.
@@ -76,6 +105,26 @@ _openapi:
       - content: Validate any regular expression with the backend Go RE2 compiler
           without saving it.
         id: validate-any-regular-expression-with-the-backend-go-re2-compiler-without-saving-it
+      - content: Return the signed-in panel account, role key, and accessible pages.
+        id: return-the-signed-in-panel-account-role-key-and-accessible-pages
+      - content: List panel accounts. Admin only. Passwords are not included.
+        id: list-panel-accounts-admin-only-passwords-are-not-included
+      - content: Create a panel user with a built-in or custom role. Role defaults to
+          user. Admin only.
+        id: create-a-panel-user-with-a-built-in-or-custom-role-role-defaults-to-user-admin-only
+      - content: Update a panel account username. Admin only.
+        id: update-a-panel-account-username-admin-only
+      - content: Change a panel account role. The last admin cannot be demoted. Admin
+          only.
+        id: change-a-panel-account-role-the-last-admin-cannot-be-demoted-admin-only
+      - content: List built-in and custom roles with accessible page paths. Admin only.
+        id: list-built-in-and-custom-roles-with-accessible-page-paths-admin-only
+      - content: Create a custom role with selected accessible pages. Admin only.
+        id: create-a-custom-role-with-selected-accessible-pages-admin-only
+      - content: Update a custom role name and page permissions. Admin only.
+        id: update-a-custom-role-name-and-page-permissions-admin-only
+      - content: Delete an unassigned custom role. Admin only.
+        id: delete-an-unassigned-custom-role-admin-only
       - content: Change the panel admin username and password. Requires the current
           credentials for verification. The session is refreshed with the new
           values on success.
@@ -108,7 +157,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/setting/all","method":"post"},{"path":"/panel/api/setting/defaultSettings","method":"post"},{"path":"/panel/api/setting/factoryDefaults","method":"post"},{"path":"/panel/api/setting/update","method":"post"},{"path":"/panel/api/setting/validateRegex","method":"post"},{"path":"/panel/api/setting/updateUser","method":"post"},{"path":"/panel/api/setting/restartPanel","method":"post"},{"path":"/panel/api/setting/testSmtp","method":"post"},{"path":"/panel/api/setting/testTgBot","method":"post"},{"path":"/panel/api/setting/testDiscord","method":"post"},{"path":"/panel/api/setting/getDefaultJsonConfig","method":"get"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/setting/all","method":"post"},{"path":"/panel/api/setting/defaultSettings","method":"post"},{"path":"/panel/api/setting/factoryDefaults","method":"post"},{"path":"/panel/api/setting/update","method":"post"},{"path":"/panel/api/setting/validateRegex","method":"post"},{"path":"/panel/api/setting/session","method":"get"},{"path":"/panel/api/setting/users","method":"get"},{"path":"/panel/api/setting/users","method":"post"},{"path":"/panel/api/setting/users/name/{id}","method":"post"},{"path":"/panel/api/setting/users/role/{id}","method":"post"},{"path":"/panel/api/setting/roles","method":"get"},{"path":"/panel/api/setting/roles","method":"post"},{"path":"/panel/api/setting/roles/{key}","method":"post"},{"path":"/panel/api/setting/roles/delete/{key}","method":"post"},{"path":"/panel/api/setting/updateUser","method":"post"},{"path":"/panel/api/setting/restartPanel","method":"post"},{"path":"/panel/api/setting/testSmtp","method":"post"},{"path":"/panel/api/setting/testTgBot","method":"post"},{"path":"/panel/api/setting/testDiscord","method":"post"},{"path":"/panel/api/setting/getDefaultJsonConfig","method":"get"}]} showTitle />
     </>
   );
 }

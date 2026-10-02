@@ -293,6 +293,17 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
 
               <SettingListItem
                 paddings="small"
+                title={t('pages.settings.websiteGeoBlockEnable')}
+                description={t('pages.settings.websiteGeoBlockEnableDesc')}
+              >
+                <Switch
+                  checked={allSetting.websiteGeoBlockEnable}
+                  onChange={(checked) => updateSetting({ websiteGeoBlockEnable: checked })}
+                />
+              </SettingListItem>
+
+              <SettingListItem
+                paddings="small"
                 title={t('pages.settings.panelOutbound')}
                 description={t('pages.settings.panelOutboundDesc')}
               >

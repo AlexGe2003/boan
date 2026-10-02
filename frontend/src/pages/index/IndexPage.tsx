@@ -23,6 +23,8 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import AppSidebar from '@/layouts/AppSidebar';
 import { LazyMount } from '@/components/utility';
 import { setMessageInstance } from '@/utils/messageBus';
+import AdminOverview from './AdminOverview';
+import { usePanelRole } from '@/api/queries/usePanelRole';
 import OverviewActionBar from './OverviewActionBar';
 import VitalTile from './VitalTile';
 import ThroughputCard from './ThroughputCard';
@@ -43,6 +45,8 @@ import './IndexPage.css';
 
 export default function IndexPage() {
   const { t } = useTranslation();
+  const panelRole = usePanelRole();
+  const [showRuntime, setShowRuntime] = useState(false);
   const { isDark, isUltra, antdThemeConfig } = useTheme();
   const { status, fetched, fetchError, refresh } = useStatusQuery();
   const { isMobile } = useMediaQuery();
@@ -172,128 +176,146 @@ export default function IndexPage() {
 
         <Layout className="content-shell">
           <Layout.Content className="content-area">
-            <Spin
-              spinning={loading || !fetched}
-              delay={200}
-              description={loading ? loadingTip : t('loading')}
-              size="large"
-            >
-              {!fetched ? (
-                <div className="loading-spacer" />
-              ) : fetchError ? (
-                <Result
-                  status="error"
-                  title={t('somethingWentWrong')}
-                  subTitle={fetchError}
-                  extra={
-                    <Button type="primary" onClick={refresh}>
-                      {t('refresh')}
-                    </Button>
-                  }
-                />
-              ) : (
-                <div className="ov-page">
-                  <OverviewActionBar
-                    status={status}
-                    isMobile={isMobile}
-                    accessLogEnable={accessLogEnable}
-                    panelVersion={displayVersion}
-                    latestVersion={panelUpdateInfo.latestVersion}
-                    updateAvailable={panelUpdateInfo.updateAvailable}
-                    onStopXray={stopXray}
-                    onRestartXray={restartXray}
-                    onOpenLogs={() => setLogsOpen(true)}
-                    onOpenXrayLogs={() => setXrayLogsOpen(true)}
-                    onOpenAmneziaWGLogs={() => setAmneziawgLogsOpen(true)}
-                    onOpenConfig={openConfig}
-                    onOpenBackup={() => setBackupOpen(true)}
-                    onOpenSystemHistory={() => setSysHistoryOpen(true)}
-                    onOpenXrayMetrics={() => setXrayMetricsOpen(true)}
-                    onOpenPanelUpdate={() => setPanelUpdateOpen(true)}
-                    onOpenVersionSwitch={() => setVersionOpen(true)}
+            {panelRole === 'admin' && <AdminOverview />}
+            {panelRole === 'admin' && (
+              <Button
+                className="admin-runtime-toggle"
+                onClick={() => setShowRuntime((value) => !value)}
+                aria-expanded={showRuntime}
+              >
+                <span>{t('adminOverview.runtime')}</span>
+                <span>
+                  {fetched
+                    ? `Xray · ${t(status.xray.state === 'running' ? 'pages.index.xrayStatusRunning' : status.xray.state === 'error' ? 'pages.index.xrayStatusError' : 'pages.index.xrayStatusStop')}`
+                    : t('loading')}{' '}
+                  {showRuntime ? '−' : '+'}
+                </span>
+              </Button>
+            )}
+            {(panelRole !== 'admin' || showRuntime) && (
+              <Spin
+                spinning={loading || !fetched}
+                delay={200}
+                description={loading ? loadingTip : t('loading')}
+                size="large"
+              >
+                {!fetched ? (
+                  <div className="loading-spacer" />
+                ) : fetchError ? (
+                  <Result
+                    status="error"
+                    title={t('somethingWentWrong')}
+                    subTitle={fetchError}
+                    extra={
+                      <Button type="primary" onClick={refresh}>
+                        {t('refresh')}
+                      </Button>
+                    }
                   />
+                ) : (
+                  <div className="ov-page">
+                    <OverviewActionBar
+                      status={status}
+                      isMobile={isMobile}
+                      accessLogEnable={accessLogEnable}
+                      panelVersion={displayVersion}
+                      latestVersion={panelUpdateInfo.latestVersion}
+                      updateAvailable={panelUpdateInfo.updateAvailable}
+                      onStopXray={stopXray}
+                      onRestartXray={restartXray}
+                      onOpenLogs={() => setLogsOpen(true)}
+                      onOpenXrayLogs={() => setXrayLogsOpen(true)}
+                      onOpenAmneziaWGLogs={() => setAmneziawgLogsOpen(true)}
+                      onOpenConfig={openConfig}
+                      onOpenBackup={() => setBackupOpen(true)}
+                      onOpenSystemHistory={() => setSysHistoryOpen(true)}
+                      onOpenXrayMetrics={() => setXrayMetricsOpen(true)}
+                      onOpenPanelUpdate={() => setPanelUpdateOpen(true)}
+                      onOpenVersionSwitch={() => setVersionOpen(true)}
+                    />
 
-                  {health && (
-                    <div className="ov-health" style={{ color: health.color }}>
-                      <span className="ov-health-mark" />
-                      {health.text}
+                    {health && (
+                      <div className="ov-health" style={{ color: health.color }}>
+                        <span className="ov-health-mark" />
+                        {health.text}
+                      </div>
+                    )}
+
+                    <hr className="ov-rule" />
+
+                    <div className="ov-vitals">
+                      <VitalTile
+                        icon={<DashboardOutlined />}
+                        label={t('pages.index.cpu')}
+                        percent={status.cpu.percent}
+                        statusColor={status.cpu.color}
+                        detail={`${CPUFormatter.cpuCoreFormat(status.cpuCores)} / ${status.logicalPro}T · ${CPUFormatter.cpuSpeedFormat(status.cpuSpeedMhz)}`}
+                        footLeft={`${t('pages.index.avg')} ${mean(history.series.cpu).toFixed(0)}%`}
+                        footRight={`${t('pages.index.peak')} ${peak(history.series.cpu).toFixed(0)}%`}
+                        data={history.series.cpu}
+                        isMobile={isMobile}
+                      />
+                      <VitalTile
+                        icon={<DatabaseOutlined />}
+                        label={t('pages.index.memory')}
+                        percent={status.mem.percent}
+                        statusColor={status.mem.color}
+                        detail={`${SizeFormatter.sizeFormat(status.mem.current)} / ${SizeFormatter.sizeFormat(status.mem.total)}`}
+                        footLeft={`${t('pages.index.avg')} ${mean(history.series.mem).toFixed(0)}%`}
+                        footRight={`${t('pages.index.peak')} ${peak(history.series.mem).toFixed(0)}%`}
+                        data={history.series.mem}
+                        isMobile={isMobile}
+                      />
+                      <VitalTile
+                        icon={<SwapOutlined />}
+                        label={t('pages.index.swap')}
+                        percent={status.swap.percent}
+                        statusColor={status.swap.color}
+                        detail={`${SizeFormatter.sizeFormat(status.swap.current)} / ${SizeFormatter.sizeFormat(status.swap.total)}`}
+                        footLeft={`${t('pages.index.avg')} ${mean(history.series.swap).toFixed(1)}%`}
+                        footRight={`${t('pages.index.peak')} ${peak(history.series.swap).toFixed(0)}%`}
+                        data={history.series.swap}
+                        isMobile={isMobile}
+                      />
+                      <VitalTile
+                        icon={<HddOutlined />}
+                        label={t('pages.index.storage')}
+                        percent={status.disk.percent}
+                        statusColor={status.disk.color}
+                        detail={`${SizeFormatter.sizeFormat(status.disk.current)} / ${SizeFormatter.sizeFormat(totalDisk)}`}
+                        footLeft={`${t('pages.index.free')} ${SizeFormatter.sizeFormat(freeDisk)}`}
+                        footRight={`${t('pages.index.avg')} ${mean(history.series.diskUsage).toFixed(1)}%`}
+                        data={history.series.diskUsage}
+                        isMobile={isMobile}
+                      />
                     </div>
-                  )}
 
-                  <hr className="ov-rule" />
+                    <div className="ov-mid">
+                      <ThroughputCard
+                        status={status}
+                        up={history.series.netUp}
+                        down={history.series.netDown}
+                        labels={history.labels}
+                        isMobile={isMobile}
+                      />
+                      <ConnectionsCard
+                        status={status}
+                        tcp={history.series.tcpCount}
+                        udp={history.series.udpCount}
+                        labels={history.labels}
+                        isMobile={isMobile}
+                      />
+                    </div>
 
-                  <div className="ov-vitals">
-                    <VitalTile
-                      icon={<DashboardOutlined />}
-                      label={t('pages.index.cpu')}
-                      percent={status.cpu.percent}
-                      statusColor={status.cpu.color}
-                      detail={`${CPUFormatter.cpuCoreFormat(status.cpuCores)} / ${status.logicalPro}T · ${CPUFormatter.cpuSpeedFormat(status.cpuSpeedMhz)}`}
-                      footLeft={`${t('pages.index.avg')} ${mean(history.series.cpu).toFixed(0)}%`}
-                      footRight={`${t('pages.index.peak')} ${peak(history.series.cpu).toFixed(0)}%`}
-                      data={history.series.cpu}
-                      isMobile={isMobile}
-                    />
-                    <VitalTile
-                      icon={<DatabaseOutlined />}
-                      label={t('pages.index.memory')}
-                      percent={status.mem.percent}
-                      statusColor={status.mem.color}
-                      detail={`${SizeFormatter.sizeFormat(status.mem.current)} / ${SizeFormatter.sizeFormat(status.mem.total)}`}
-                      footLeft={`${t('pages.index.avg')} ${mean(history.series.mem).toFixed(0)}%`}
-                      footRight={`${t('pages.index.peak')} ${peak(history.series.mem).toFixed(0)}%`}
-                      data={history.series.mem}
-                      isMobile={isMobile}
-                    />
-                    <VitalTile
-                      icon={<SwapOutlined />}
-                      label={t('pages.index.swap')}
-                      percent={status.swap.percent}
-                      statusColor={status.swap.color}
-                      detail={`${SizeFormatter.sizeFormat(status.swap.current)} / ${SizeFormatter.sizeFormat(status.swap.total)}`}
-                      footLeft={`${t('pages.index.avg')} ${mean(history.series.swap).toFixed(1)}%`}
-                      footRight={`${t('pages.index.peak')} ${peak(history.series.swap).toFixed(0)}%`}
-                      data={history.series.swap}
-                      isMobile={isMobile}
-                    />
-                    <VitalTile
-                      icon={<HddOutlined />}
-                      label={t('pages.index.storage')}
-                      percent={status.disk.percent}
-                      statusColor={status.disk.color}
-                      detail={`${SizeFormatter.sizeFormat(status.disk.current)} / ${SizeFormatter.sizeFormat(totalDisk)}`}
-                      footLeft={`${t('pages.index.free')} ${SizeFormatter.sizeFormat(freeDisk)}`}
-                      footRight={`${t('pages.index.avg')} ${mean(history.series.diskUsage).toFixed(1)}%`}
-                      data={history.series.diskUsage}
-                      isMobile={isMobile}
+                    <SystemStrip
+                      status={status}
+                      showIp={showIp}
+                      onToggleIp={() => setShowIp((v) => !v)}
                     />
                   </div>
-
-                  <div className="ov-mid">
-                    <ThroughputCard
-                      status={status}
-                      up={history.series.netUp}
-                      down={history.series.netDown}
-                      labels={history.labels}
-                      isMobile={isMobile}
-                    />
-                    <ConnectionsCard
-                      status={status}
-                      tcp={history.series.tcpCount}
-                      udp={history.series.udpCount}
-                      labels={history.labels}
-                      isMobile={isMobile}
-                    />
-                  </div>
-
-                  <SystemStrip
-                    status={status}
-                    showIp={showIp}
-                    onToggleIp={() => setShowIp((v) => !v)}
-                  />
-                </div>
-              )}
-            </Spin>
+                )}
+              </Spin>
+            )}
           </Layout.Content>
         </Layout>
 

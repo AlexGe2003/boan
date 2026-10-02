@@ -6,6 +6,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
 )
 
@@ -16,6 +17,13 @@ import (
 // own direct nodes, and a master walks one level via each direct node's
 // endpoint, which covers the Node1 -> Node2 -> Node3 case.
 func (s *NodeService) LocalDescendants() ([]model.NodeSummary, error) {
+	state, err := cluster.Load(database.GetDB())
+	if err != nil {
+		return nil, err
+	}
+	if state != nil && state.Primary != state.Self {
+		return []model.NodeSummary{}, nil
+	}
 	selfGuid, _ := (&SettingService{}).GetPanelGuid()
 	db := database.GetDB()
 	var nodes []*model.Node

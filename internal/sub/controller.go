@@ -402,7 +402,6 @@ func (a *SUBController) maybeServeSubInfo(c *gin.Context) bool {
 		return true
 	}
 	info := a.subPageContext(page)
-	delete(info, "links")
 	info["emails"] = dedupeEmails(page.Emails)
 	setNoCacheHeaders(c)
 	c.JSON(http.StatusOK, info)
@@ -486,6 +485,7 @@ func (a *SUBController) subs(c *gin.Context) {
 	if err != nil || subs == nil {
 		writeSubError(c, err)
 	} else {
+		subs = filterShadowrocketLinks(subs, userAgent, c.Query("flag"), shadowrocketCoreVersion())
 		var result strings.Builder
 		for _, sub := range subs {
 			result.WriteString(sub)
@@ -653,7 +653,7 @@ func (a *SUBController) serveSubPage(c *gin.Context, basePath string, page PageD
 
 // subPageContext builds the shared view-model map: the template context for
 // custom sub themes, the window.__SUB_PAGE_DATA__ payload the SPA reads, and
-// (without links) the ?format=info JSON body. The panel's "Calendar Type"
+// the ?format=info JSON body. The panel's "Calendar Type"
 // setting decides whether dates render Gregorian or Jalali — surfaced here so
 // consumers match the rest of the panel without a round-trip.
 func (a *SUBController) subPageContext(page PageData) map[string]any {
@@ -684,7 +684,6 @@ func (a *SUBController) subPageContext(page PageData) map[string]any {
 		"subTitle":      page.SubTitle,
 		"subSupportUrl": page.SubSupportUrl,
 		"subUpdates":    updateHours,
-		"links":         page.Result,
 		"emails":        page.Emails,
 		"datepicker":    datepicker,
 		"announce":      page.SubAnnounce,

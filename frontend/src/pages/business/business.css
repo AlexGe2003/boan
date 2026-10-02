@@ -1,0 +1,106 @@
+.business-page .content-area {
+  max-width: 1600px;
+  margin-inline: auto;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+.business-page h2 {
+  margin-top: 0;
+  text-wrap: balance;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.business-page .ant-table-cell {
+  vertical-align: top;
+}
+
+.business-page .ant-table-cell strong + div {
+  color: var(--ant-color-text-secondary);
+  margin-top: 6px;
+  max-width: 320px;
+}
+
+.plan-mobile-list {
+  display: grid;
+  gap: 16px;
+}
+
+.plan-quota {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--ant-color-primary, #1e5eff);
+}
+
+.plan-quota .ant-typography {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ant-color-text-secondary);
+}
+
+.plan-prices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.store-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 20px;
+}
+
+.store-plan {
+  border-radius: 12px;
+  border: 1px solid var(--ant-color-border-secondary);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+}
+
+.store-plan:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--ant-color-primary, #1e5eff) 30%, var(--ant-color-border-secondary));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.store-plan .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: calc(100% - 56px);
+  padding: 22px;
+}
+
+.store-plan .ant-space {
+  margin-top: auto;
+}
+
+.store-price {
+  font-size: 32px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+  color: var(--ant-color-primary, #1e5eff);
+}
+
+.store-price .ant-typography {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ant-color-text-secondary);
+}
+
+@media (max-width: 767px) {
+  .business-page .content-area {
+    padding: 14px !important;
+  }
+  .plan-mobile-list .ant-btn {
+    min-height: 44px;
+  }
+  .business-page .ant-card-body {
+    padding: 16px;
+  }
+}

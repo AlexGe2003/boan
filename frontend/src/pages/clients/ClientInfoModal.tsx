@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Divider, Modal, Popover, Tag, Tooltip, message } from 'antd';
+import { Button, Divider, Modal, Popover, Tag, Tooltip, Spin, message } from 'antd';
 import {
   CopyOutlined,
   DownloadOutlined,
@@ -32,6 +32,9 @@ import {
 } from './amneziawgConfig';
 import './ClientInfoModal.css';
 
+const ClientActivity = lazy(() => import('./ClientActivity'));
+const ServerUsage = lazy(() => import('@/pages/nodes/ServerUsage'));
+
 const INBOUND_PROTOCOL_COLORS: Record<string, string> = {
   vless: 'blue',
   vmess: 'geekblue',
@@ -61,6 +64,7 @@ interface SubSettings {
 
 interface ClientInfoModalProps {
   open: boolean;
+  admin?: boolean;
   client: ClientRecord | null;
   inboundsById: Record<number, InboundOption>;
   tunnelAllowedIPs?: Record<number, string>;
@@ -92,6 +96,7 @@ const SUBSCRIPTION_DOWNLOAD_NAMES = {
 
 export default function ClientInfoModal({
   open,
+  admin = false,
   client,
   inboundsById,
   tunnelAllowedIPs,
@@ -115,6 +120,8 @@ export default function ClientInfoModal({
   const [clientIps, setClientIps] = useState<ClientIpInfo[]>([]);
   const [ipsLoading, setIpsLoading] = useState(false);
   const [ipsClearing, setIpsClearing] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
+  const [serverUsageOpen, setServerUsageOpen] = useState(false);
   const [ipsModalOpen, setIpsModalOpen] = useState(false);
   const {
     clientHwids,
@@ -140,6 +147,8 @@ export default function ClientInfoModal({
       setLinks([]);
       setClientIps([]);
       setIpsModalOpen(false);
+      setActivityOpen(false);
+      setServerUsageOpen(false);
       resetHwids();
       setHwidsModalOpen(false);
     }
@@ -303,6 +312,12 @@ export default function ClientInfoModal({
       >
         {client && (
           <>
+            {admin && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+                <Button onClick={() => setServerUsageOpen(true)}>服务器流量分布</Button>
+                <Button onClick={() => setActivityOpen(true)}>访问概览 · 网站与分类</Button>
+              </div>
+            )}
             <table className="info-table block">
               <tbody>
                 <tr>
@@ -886,6 +901,34 @@ export default function ClientInfoModal({
         )}
       </Modal>
 
+      <Modal
+        open={open && activityOpen && admin}
+        title={`用户访问概览 · ${client?.email || ''}`}
+        width={1120}
+        footer={null}
+        onCancel={() => setActivityOpen(false)}
+        destroyOnHidden
+      >
+        {open && activityOpen && admin && client && (
+          <Suspense fallback={<Spin />}>
+            <ClientActivity key={client.email} email={client.email} />
+          </Suspense>
+        )}
+      </Modal>
+      <Modal
+        open={open && serverUsageOpen && admin}
+        title={`服务器流量 · ${client?.email || ''}`}
+        width={1100}
+        footer={null}
+        onCancel={() => setServerUsageOpen(false)}
+        destroyOnHidden
+      >
+        {open && serverUsageOpen && admin && client && (
+          <Suspense fallback={<Spin />}>
+            <ServerUsage key={client.email} email={client.email} />
+          </Suspense>
+        )}
+      </Modal>
       <ClientHwidListModal
         open={hwidsModalOpen}
         email={client?.email}

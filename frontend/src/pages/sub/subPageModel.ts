@@ -28,12 +28,13 @@ export function usagePercent(usedByte: number, totalByte: number): number {
   return Number.isFinite(pct) ? Math.min(100, Math.max(0, pct)) : 0;
 }
 
-export type AppPlatform = 'android' | 'ios';
+export type AppPlatform = 'windows' | 'macos' | 'android' | 'ios';
 
 export function detectPlatform(userAgent: string): AppPlatform {
-  // iPadOS sends a Macintosh UA, and App Store clients also run on Apple-silicon Macs.
-  if (/iphone|ipad|ipod|macintosh/i.test(userAgent)) return 'ios';
-  return 'android';
+  if (/iphone|ipad|ipod/i.test(userAgent)) return 'ios';
+  if (/android/i.test(userAgent)) return 'android';
+  if (/macintosh|mac os x/i.test(userAgent)) return 'macos';
+  return 'windows';
 }
 
 export interface SubApp {
@@ -70,6 +71,8 @@ export function buildSubApps({
   const rocketRemark = encodeURIComponent(subTitle || sId || 'Subscription');
 
   return {
+    windows: [],
+    macos: [],
     android: [
       v2box,
       { name: 'V2RayNG', url: `v2rayng://install-config?url=${encSub}` },

@@ -331,3 +331,60 @@ body.dark .ant-drawer-body .drawer-menu .ant-menu-item-group-list {
     top: max(12px, env(safe-area-inset-top));
   }
 }
+
+.sidebar-brand-name {
+  margin-inline-end: auto;
+  font-size: 18px;
+  font-weight: 650;
+  color: var(--ant-color-text);
+  letter-spacing: 0.5px;
+}
+.sider-nav .ant-menu-item-group-title,
+.drawer-nav .ant-menu-item-group-title {
+  font-size: 11px;
+  padding-top: 18px;
+  color: var(--ant-color-text-secondary);
+}
+.sider-nav .ant-menu-item-group-list {
+  margin: 0;
+}
+.sidebar-theme-cycle:focus-visible,
+.sidebar-pin:focus-visible {
+  outline: 2px solid var(--ant-color-text);
+  outline-offset: 2px;
+}
+.drawer-handle {
+  width: 44px;
+  height: 44px;
+}
+
+.sider-brand {
+  height: 64px;
+  box-sizing: border-box;
+}
+.sidebar-brand-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+}
+.sidebar-brand-name .anticon {
+  color: #477aff;
+  font-size: 25px;
+}
+.sider-brand {
+  padding: 0 24px;
+}
+.drawer-header {
+  height: 64px;
+  min-height: 64px;
+  box-sizing: border-box;
+}
+
+.ant-layout-sider-collapsed .sider-brand {
+  padding: 0;
+  justify-content: center;
+}
+.ant-layout-sider-collapsed .sidebar-brand-name {
+  margin-inline-end: 0;
+}

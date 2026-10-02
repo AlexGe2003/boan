@@ -21,6 +21,27 @@ export type trafficLocalApplyAction = z.infer<typeof trafficLocalApplyActionSche
 export const transportBitsSchema = z.number().int();
 export type transportBits = z.infer<typeof transportBitsSchema>;
 
+export const ActivityCategorySchema = z.object({
+  count: z.number().int(),
+  name: z.string(),
+});
+export type ActivityCategory = z.infer<typeof ActivityCategorySchema>;
+
+export const ActivityDestinationSchema = z.object({
+  category: z.string(),
+  count: z.number().int(),
+  host: z.string(),
+  lastSeen: z.number().int(),
+});
+export type ActivityDestination = z.infer<typeof ActivityDestinationSchema>;
+
+export const ActivityVisitSchema = z.object({
+  category: z.string(),
+  host: z.string(),
+  time: z.number().int(),
+});
+export type ActivityVisit = z.infer<typeof ActivityVisitSchema>;
+
 export const AllSettingSchema = z.object({
   datepicker: z.string(),
   discordAdminIds: z.string(),
@@ -169,6 +190,7 @@ export const AllSettingSchema = z.object({
   webKeyFile: z.string(),
   webListen: z.string(),
   webPort: z.number().int().min(1).max(65535),
+  websiteGeoBlockEnable: z.boolean(),
 });
 export type AllSetting = z.infer<typeof AllSettingSchema>;
 
@@ -328,6 +350,7 @@ export const AllSettingViewSchema = z.object({
   webKeyFile: z.string(),
   webListen: z.string(),
   webPort: z.number().int().min(1).max(65535),
+  websiteGeoBlockEnable: z.boolean(),
 });
 export type AllSettingView = z.infer<typeof AllSettingViewSchema>;
 
@@ -394,6 +417,20 @@ export const ClientSchema = z.object({
   updated_at: z.number().int().optional(),
 });
 export type Client = z.infer<typeof ClientSchema>;
+
+export const ClientActivitySchema = z.object({
+  categories: z.array(z.lazy(() => ActivityCategorySchema)),
+  connections: z.number().int(),
+  demo: z.boolean(),
+  destinations: z.array(z.lazy(() => ActivityDestinationSchema)),
+  generatedAt: z.number().int(),
+  recent: z.array(z.lazy(() => ActivityVisitSchema)),
+  sampled: z.boolean(),
+  since: z.number().int(),
+  status: z.string(),
+  visits: z.array(z.lazy(() => ActivityVisitSchema)),
+});
+export type ClientActivity = z.infer<typeof ClientActivitySchema>;
 
 export const ClientInboundSchema = z.object({
   clientId: z.number().int(),
@@ -815,6 +852,63 @@ export const NodeSchema = z.object({
 });
 export type Node = z.infer<typeof NodeSchema>;
 
+export const NodeGroupSchema = z.object({
+  description: z.string(),
+  id: z.number().int(),
+  name: z.string(),
+});
+export type NodeGroup = z.infer<typeof NodeGroupSchema>;
+
+export const NodeGroupBuyConfigSchema = z.object({
+  bandwidthMbps: z.number().int(),
+  bandwidthMode: z.string(),
+  expiresAt: z.number().int(),
+  feeMode: z.string(),
+  feeValue: z.number().int(),
+  groupName: z.string(),
+  memberCount: z.number().int(),
+  monthlyPrice: z.number().int(),
+  monthlyTraffic: z.number().int(),
+  nodeId: z.number().int(),
+  notes: z.string(),
+  provider: z.string(),
+  region: z.string(),
+  updatedAt: z.number().int(),
+});
+export type NodeGroupBuyConfig = z.infer<typeof NodeGroupBuyConfigSchema>;
+
+export const NodeGroupBuyItemSchema = z.object({
+  config: z.lazy(() => NodeGroupBuyConfigSchema),
+  configured: z.boolean(),
+  expiryStatus: z.string(),
+  monthlyFee: z.number().int(),
+  monthlyTotal: z.number().int(),
+  name: z.string(),
+  nodeId: z.number().int(),
+  perMember: z.number().int(),
+});
+export type NodeGroupBuyItem = z.infer<typeof NodeGroupBuyItemSchema>;
+
+export const NodeGroupBuyReportSchema = z.object({
+  checkedAt: z.number().int(),
+  dueSoon: z.number().int(),
+  expired: z.number().int(),
+  monthlyCost: z.number().int(),
+  monthlyFee: z.number().int(),
+  monthlyTotal: z.number().int(),
+  nodes: z.array(z.lazy(() => NodeGroupBuyItemSchema)),
+});
+export type NodeGroupBuyReport = z.infer<typeof NodeGroupBuyReportSchema>;
+
+export const NodeGroupViewSchema = z.object({
+  description: z.string(),
+  id: z.number().int(),
+  inboundIds: z.array(z.number().int()),
+  name: z.string(),
+  planCount: z.number().int(),
+});
+export type NodeGroupView = z.infer<typeof NodeGroupViewSchema>;
+
 export const NodeMutationRequestSchema = z.object({
   address: z.string(),
   allowPrivateAddress: z.boolean(),
@@ -880,6 +974,13 @@ export const NodeViewSchema = z.object({
 });
 export type NodeView = z.infer<typeof NodeViewSchema>;
 
+export const OrderPageSchema = z.object({
+  items: z.array(z.lazy(() => ServiceOrderSchema)),
+  page: z.number().int(),
+  total: z.number().int(),
+});
+export type OrderPage = z.infer<typeof OrderPageSchema>;
+
 export const OutboundTrafficsSchema = z.object({
   down: z.number().int(),
   id: z.number().int(),
@@ -910,6 +1011,13 @@ export const PeerActivitySchema = z.object({
   up: z.number().int(),
 });
 export type PeerActivity = z.infer<typeof PeerActivitySchema>;
+
+export const PlanPriceSchema = z.object({
+  amount: z.number().int(),
+  days: z.number().int(),
+  period: z.string(),
+});
+export type PlanPrice = z.infer<typeof PlanPriceSchema>;
 
 export const ProbeResultUISchema = z.object({
   cpuPct: z.number(),
@@ -991,12 +1099,118 @@ export const ServerSettingsSchema = z.object({
 });
 export type ServerSettings = z.infer<typeof ServerSettingsSchema>;
 
+export const ServerUsageBillingRequestSchema = z.object({
+  multiplier: z.number().int(),
+  nodeId: z.number().int(),
+});
+export type ServerUsageBillingRequest = z.infer<typeof ServerUsageBillingRequestSchema>;
+
+export const ServerUsageControlRequestSchema = z.object({
+  adjustUsage: z.boolean(),
+  basis: z.string(),
+  email: z.string(),
+  nodeId: z.number().int(),
+  quota: z.number().int(),
+  used: z.number().int(),
+});
+export type ServerUsageControlRequest = z.infer<typeof ServerUsageControlRequestSchema>;
+
+export const ServerUsageReportSchema = z.object({
+  billableTotal: z.number(),
+  generatedAt: z.number().int(),
+  servers: z.array(z.lazy(() => ServerUsageSummarySchema)),
+  total: z.number().int(),
+  truncated: z.boolean(),
+  userCount: z.number().int(),
+  users: z.array(z.lazy(() => ServerUsageUserSchema)),
+});
+export type ServerUsageReport = z.infer<typeof ServerUsageReportSchema>;
+
+export const ServerUsageSummarySchema = z.object({
+  adjustment: z.number().int(),
+  billable: z.number(),
+  billingMultiplier: z.number().int(),
+  billingShare: z.number(),
+  down: z.number().int(),
+  exceeded: z.boolean(),
+  local: z.boolean(),
+  name: z.string(),
+  nodeId: z.number().int(),
+  quota: z.number().int(),
+  quotaBasis: z.string(),
+  quotaUsed: z.number(),
+  recorded: z.number().int(),
+  remaining: z.number(),
+  share: z.number(),
+  startedAt: z.number().int(),
+  unattributed: z.number().int(),
+  up: z.number().int(),
+  updatedAt: z.number().int(),
+  used: z.number().int(),
+  users: z.number().int(),
+});
+export type ServerUsageSummary = z.infer<typeof ServerUsageSummarySchema>;
+
+export const ServerUsageUserSchema = z.object({
+  adjustment: z.number().int(),
+  billable: z.number(),
+  down: z.number().int(),
+  email: z.string(),
+  exceeded: z.boolean(),
+  quota: z.number().int(),
+  quotaBasis: z.string(),
+  quotaUsed: z.number(),
+  recorded: z.number().int(),
+  remaining: z.number(),
+  share: z.number(),
+  startedAt: z.number().int(),
+  up: z.number().int(),
+  updatedAt: z.number().int(),
+  used: z.number().int(),
+  username: z.string(),
+});
+export type ServerUsageUser = z.infer<typeof ServerUsageUserSchema>;
+
+export const ServiceOrderSchema = z.object({
+  amount: z.number().int(),
+  completedAt: z.number().int(),
+  createdAt: z.number().int(),
+  currency: z.string(),
+  durationDays: z.number().int(),
+  expiresAt: z.number().int(),
+  id: z.string(),
+  kind: z.string(),
+  lastError: z.string(),
+  paidAt: z.number().int(),
+  paidBy: z.number().int(),
+  paymentNote: z.string(),
+  period: z.string(),
+  planId: z.number().int(),
+  planName: z.string(),
+  status: z.string(),
+  targetExpiry: z.number().int(),
+  userId: z.number().int(),
+});
+export type ServiceOrder = z.infer<typeof ServiceOrderSchema>;
+
 export const SettingSchema = z.object({
   id: z.number().int(),
   key: z.string(),
   value: z.string(),
 });
 export type Setting = z.infer<typeof SettingSchema>;
+
+export const StorePlanSchema = z.object({
+  description: z.string(),
+  id: z.number().int(),
+  limitHwid: z.number().int(),
+  limitIp: z.number().int(),
+  name: z.string(),
+  nodeCount: z.number().int(),
+  prices: z.array(z.lazy(() => PlanPriceSchema)),
+  totalGB: z.number().int(),
+});
+export type StorePlan = z.infer<typeof StorePlanSchema>;
 
 export const SubBalancerSchema = z.object({
   createdAt: z.number().int(),
@@ -1010,6 +1224,33 @@ export const SubBalancerSchema = z.object({
   updatedAt: z.number().int(),
 });
 export type SubBalancer = z.infer<typeof SubBalancerSchema>;
+
+export const SubscriptionPlanSchema = z.object({
+  description: z.string(),
+  durationDays: z.number().int(),
+  enabled: z.boolean(),
+  id: z.number().int(),
+  limitHwid: z.number().int(),
+  limitIp: z.number().int(),
+  name: z.string(),
+  totalGB: z.number().int(),
+});
+export type SubscriptionPlan = z.infer<typeof SubscriptionPlanSchema>;
+
+export const SubscriptionPlanViewSchema = z.object({
+  description: z.string(),
+  durationDays: z.number().int(),
+  enabled: z.boolean(),
+  id: z.number().int(),
+  inboundIds: z.array(z.number().int()),
+  limitHwid: z.number().int(),
+  limitIp: z.number().int(),
+  name: z.string(),
+  nodeGroupIds: z.array(z.number().int()),
+  prices: z.array(z.lazy(() => PlanPriceSchema)),
+  totalGB: z.number().int(),
+});
+export type SubscriptionPlanView = z.infer<typeof SubscriptionPlanViewSchema>;
 
 export const TrafficSchema = z.object({
   Down: z.number().int(),
@@ -1045,6 +1286,7 @@ export type TuicServerSettings = z.infer<typeof TuicServerSettingsSchema>;
 export const UserSchema = z.object({
   id: z.number().int(),
   password: z.string(),
+  role: z.string(),
   username: z.string(),
 });
 export type User = z.infer<typeof UserSchema>;

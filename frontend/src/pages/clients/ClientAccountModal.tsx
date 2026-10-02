@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Form, Input, Modal, Typography } from 'antd';
+import { SubscriberPasswordSchema } from '@/schemas/commerce';
 import { HttpUtil } from '@/utils';
 
 export default function ClientAccountModal({
@@ -31,7 +32,10 @@ export default function ClientAccountModal({
   const exists = !!account.data?.username;
   useEffect(() => {
     if (account.isSuccess)
-      form.setFieldsValue({ username: account.data?.username || email || '', password: '' });
+      form.setFieldsValue({
+        username: account.data?.username || 'user',
+        password: account.data?.username ? '' : 'user',
+      });
   }, [account.data, account.isSuccess, email, form]);
   async function save(values: { username: string; password?: string }) {
     if (!email) return;
@@ -72,7 +76,16 @@ export default function ClientAccountModal({
         <Form.Item
           name="password"
           label={exists ? '新密码（留空保留原密码）' : '登录密码'}
-          rules={[{ required: !exists }, { min: 8 }]}
+          rules={[
+            { required: !exists },
+            {
+              validator: async (_, value: string) => {
+                if (!value && exists) return;
+                const result = SubscriberPasswordSchema.safeParse(value);
+                if (!result.success) throw new Error(result.error.issues[0].message);
+              },
+            },
+          ]}
         >
           <Input.Password autoComplete="new-password" />
         </Form.Item>

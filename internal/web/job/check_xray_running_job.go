@@ -5,6 +5,7 @@ package job
 import (
 	"github.com/mhsanaei/3x-ui/v3/internal/eventbus"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
@@ -24,6 +25,12 @@ func NewCheckXrayRunningJob() *CheckXrayRunningJob {
 
 // Run checks if Xray has crashed and restarts it after confirming it's down for 2 consecutive checks.
 func (j *CheckXrayRunningJob) Run() {
+	release, allowed := cluster.BeginJob(false)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	if !j.xrayService.DidXrayCrash() {
 		j.checkTime = 0
 	} else {

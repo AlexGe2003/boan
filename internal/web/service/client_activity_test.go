@@ -1,0 +1,66 @@
+package service
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+)
+
+func TestClientActivityExactIdentityAndWindow(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	line := func(when time.Time, host, email string) string {
+		return fmt.Sprintf("%s from 192.0.2.1:123 accepted tcp:%s:443 [inbound >> proxy] email: %s\n", when.Format("2006/01/02 15:04:05"), host, email)
+	}
+	path := filepath.Join(t.TempDir(), "access.log")
+	text := line(now.Add(-time.Minute), "www.youtube.com", "alice") + line(now.Add(-3*time.Minute), "api.github.com", "alice") + line(now.Add(-4*time.Minute), "www.youtube.com", "alice") + line(now.Add(-time.Minute), "private.example", "alice2") + line(now.Add(-25*time.Hour), "old.example", "alice") + line(now.Add(time.Minute), "future.example", "alice") + "malformed email: alice\n"
+	if err := os.WriteFile(path, []byte(text), 0600); err != nil {
+		t.Fatal(err)
+	}
+	r, err := readClientActivity(path, "alice", 24, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Connections != 3 || len(r.Destinations) != 2 || len(r.Recent) != 1 || r.Destinations[0].Host != "www.youtube.com" || r.Destinations[0].Count != 2 {
+		t.Fatalf("incorrect aggregate: %+v", r)
+	}
+	if r.Recent[0].Category != "视频影音" {
+		t.Fatal(r.Recent)
+	}
+	if r.Demo || r.Sampled {
+		t.Fatal("real log marked demo/sample")
+	}
+}
+
+func TestActivityHostAndClassification(t *testing.T) {
+	for input, want := range map[string]string{"udp:[2001:db8::1]:443": "2001:db8::1", "https://EXAMPLE.COM:443/private?token=secret": "example.com", "tcp:api.github.com:443": "api.github.com", "//google.com:443": "google.com", "tcp:bad<script>:443": ""} {
+		if got := activityHost(input); got != want {
+			t.Errorf("%q: got %q want %q", input, got, want)
+		}
+	}
+	if activityCategory("youtube.com.attacker.example") != "其他 / 未分类" {
+		t.Fatal("suffix spoofing classified as youtube")
+	}
+	if activityCategory("gemini.google.com") != "AI 服务" {
+		t.Fatal("specific domain priority lost")
+	}
+}
+
+func TestActivityBoundedTailAndDisabled(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	r, err := readClientActivity("none", "alice", 1, now)
+	if err != nil || r.Status != "disabled" {
+		t.Fatal(r, err)
+	}
+	path := filepath.Join(t.TempDir(), "access.log")
+	text := strings.Repeat("x", 9<<20) + "\n" + fmt.Sprintf("%s accepted tcp:github.com:443 email: alice [boan-demo]\n", now.Format("2006/01/02 15:04:05"))
+	if err := os.WriteFile(path, []byte(text), 0600); err != nil {
+		t.Fatal(err)
+	}
+	r, err = readClientActivity(path, "alice", 1, now)
+	if err != nil || !r.Sampled || !r.Demo || r.Connections != 1 {
+		t.Fatal(r, err)
+	}
+}

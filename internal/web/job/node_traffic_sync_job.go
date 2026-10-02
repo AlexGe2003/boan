@@ -9,6 +9,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/websocket"
@@ -81,6 +82,12 @@ func NewNodeTrafficSyncJob() *NodeTrafficSyncJob {
 }
 
 func (j *NodeTrafficSyncJob) Run() {
+	release, allowed := cluster.BeginJob(true)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	if !j.running.TryLock() {
 		return
 	}

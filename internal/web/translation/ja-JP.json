@@ -105,7 +105,7 @@
     "qrTitle": "スキャン。インポート。接続。",
     "qrHint": "クライアントアプリでスキャンしてください。このコードは他人に見せないでください。",
     "saveQr": "QR を保存",
-    "tabConfigs": "設定"
+    "desktopImportHint": "Copy a subscription URL and paste it into your app's Add subscription or Import from URL action. Use the dedicated profile URL for Clash / Mihomo."
   },
   "menu": {
     "theme": "テーマ",
@@ -636,6 +636,7 @@
         "minClientVer": "最小クライアントバージョン",
         "maxClientVer": "最大クライアントバージョン",
         "minClientVerHint": "空欄は下限なしを意味します。Xray-core は Mihomo や sing-box などのサードパーティコアを含め、あらゆるクライアントバージョンを受け入れます。古いバージョンを申告するクライアントを拒否するにはバージョンを設定してください。",
+        "shadowrocketRealityHint": "Xray-core 26.9.8 以降では Shadowrocket は REALITY に接続できないため、このインバウンドは Shadowrocket のサブスクリプションから外れます。それらのユーザーには TLS、VMess、Trojan、または Hysteria2 のインバウンドを追加してください。Clash と Mihomo は ML-KEM を既定で有効にしたまま受け取ります。",
         "maxClientVerHint": "空欄は上限なしを意味します。設定する場合は最小クライアントバージョンを下回ってはいけません。下回るとすべてのクライアントが拒否されます。",
         "clientVerInvalid": "クライアントバージョンはドット区切りの数値（最大 3 つ、各 0-255）で指定してください（例：26.3.27）",
         "maxClientVerBelowMin": "最大クライアントバージョンは最小クライアントバージョンを下回れません",
@@ -708,10 +709,7 @@
         "peerNumberConfig": "Peer {n} 設定"
       },
       "sniffingDestOverride": "宛先のオーバーライド",
-      "advancedTitle": "詳細設定",
-      "streamSettings": {
-        "reality": {}
-      }
+      "advancedTitle": "詳細設定"
     },
     "clients": {
       "tabBasics": "基本",
@@ -1499,6 +1497,8 @@
       "calendarJalalian": "Jalalian (شمسی)",
       "ipLimitAllowlist": "IP 制限の許可リスト",
       "ipLimitAllowlistDesc": "IP 制限がカウントもブロックもしないアドレスとネットワーク。オフィスや学内の共有アドレスがクライアントの上限を使い切らないようにします。IP/CIDR (カンマ区切り)。",
+      "websiteGeoBlockEnable": "Block website visitors by region",
+      "websiteGeoBlockEnableDesc": "Return 403 for visitors from mainland China, Hong Kong, Macau, or Taiwan on the panel and subscription sites. Uses local geoip.dat; configure trusted proxy CIDRs when behind a reverse proxy. Proxy node connections are unaffected.",
       "subBalancers": {
         "menu": "サブスクリプションバランサー",
         "title": "サブスクリプションバランサー",
@@ -2622,5 +2622,34 @@
     "offlineMetrics": "Live metrics are unavailable while this node is offline",
     "lastHeartbeatShort": "Heartbeat {time}"
   },
-  "subscriptions": {}
+  "subscriptions": {},
+  "adminOverview": {
+    "title": "Admin overview",
+    "admin": "Administration",
+    "subtitle": "Manage services and daily operations in one place.",
+    "users": "Subscribers",
+    "online": "{count} online",
+    "plans": "Enabled plans",
+    "orders": "Pending orders",
+    "tickets": "Open tickets",
+    "manageUsers": "Manage users",
+    "managePlans": "Manage plans",
+    "confirmOrders": "Verify payment and activate service",
+    "ticketWindow": "Ticket scope: latest 200 records",
+    "loadError": "Some business data could not load. Refresh to retry.",
+    "shortcuts": "Quick access",
+    "attention": "Needs attention",
+    "viewTickets": "View tickets",
+    "userHint": "Create accounts, assign plans and inspect activity",
+    "planHint": "Configure quotas and billing periods",
+    "nodeGroups": "Node groups",
+    "groupHint": "Organize routes and connect plans",
+    "monitor": "Node monitoring",
+    "monitorHint": "Check node health and connectivity",
+    "noTickets": "No tickets waiting for a reply",
+    "operations": "Service management",
+    "infrastructure": "Nodes and networking",
+    "system": "System configuration",
+    "runtime": "System status"
+  }
 }

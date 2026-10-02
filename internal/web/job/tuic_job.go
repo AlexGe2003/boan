@@ -5,6 +5,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/tuic"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
@@ -18,6 +19,12 @@ func NewTuicJob() *TuicJob {
 }
 
 func (j *TuicJob) Run() {
+	release, allowed := cluster.BeginJob(false)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	desired, err := j.inboundService.DesiredTuicInstances()
 	if err != nil {
 		logger.Warning("tuic job: get desired instances failed:", err)

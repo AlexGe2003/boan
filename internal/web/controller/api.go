@@ -173,10 +173,13 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	api.Use(a.checkAPIAuth)
 	api.Use(a.enforceTokenScope)
 	api.Use(a.enforceRole)
+	api.Use(enforceClusterRole)
 	// Decode + verify the node config envelope (zstd + X-Config-Sha256) and
 	// advertise support, before CSRF/handlers read the body.
 	api.Use(middleware.ConfigEnvelopeMiddleware())
 	api.Use(middleware.CSRFMiddleware())
+
+	registerCluster(api.Group("/cluster"))
 
 	api.GET("/openapi.json", ServeOpenAPISpec)
 
@@ -189,6 +192,8 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	NewGroupController(clients)
 	NewSubscriptionPlanController(api.Group("/subscription-plans"))
 	NewSupportController(api.Group("/support"))
+	NewNodeGroupController(api.Group("/node-groups"))
+	NewCommerceController(api.Group("/commerce"))
 
 	// Server API
 	server := api.Group("/server")

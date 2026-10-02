@@ -203,66 +203,95 @@
 }
 .login-app {
   display: grid;
-  grid-template-columns: 42% 58%;
+  grid-template-columns: 44% 56%;
+  background: #11141c;
 }
 .login-panel {
-  background: linear-gradient(110deg, #192133 0%, #272128 100%);
+  background: radial-gradient(circle at 20% 20%, #1a2236 0%, #12151d 75%);
   box-sizing: border-box;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 35px 34px;
+  padding: 40px 44px;
+  position: relative;
+  z-index: 1;
 }
 .login-panel .portal-brand {
   align-self: flex-start;
 }
 .login-card {
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
   margin: auto;
-  padding: 48px 0;
+  padding: 32px 0;
 }
 .login-card h1 {
-  font-size: 25px;
-  line-height: 1.4;
-  margin: 0 0 8px;
-  font-weight: 650;
+  font-size: 28px;
+  line-height: 1.3;
+  margin: 0 0 10px;
+  font-weight: 700;
+  color: #f1f4fa;
+  letter-spacing: -0.5px;
 }
 .login-subtitle {
-  color: #8d95a7;
+  color: #949db1;
   font-size: 15px;
   margin: 0 0 32px;
+  line-height: 1.5;
 }
 .login-form .ant-form-item {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 .login-form .ant-input-affix-wrapper {
-  background: #ffffff0d;
-  border-color: #ffffff12;
-  font-size: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  font-size: 15px;
+  padding: 10px 14px;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+.login-form .ant-input-affix-wrapper:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+}
+.login-form .ant-input-affix-wrapper-focused,
+.login-form .ant-input-affix-wrapper:focus-within {
+  border-color: #1e5eff !important;
+  box-shadow: 0 0 0 3px rgba(30, 94, 255, 0.25) !important;
+  background: rgba(255, 255, 255, 0.09) !important;
 }
 .login-form .ant-input-prefix {
-  color: #8c94a6;
-  margin-right: 10px;
+  color: #8c97ad;
+  margin-right: 12px;
+  font-size: 16px;
 }
 .login-help {
-  font-size: 12px;
-  color: #929aab;
-  line-height: 1.8;
+  font-size: 13px;
+  color: #8a94a6;
+  line-height: 1.6;
   text-align: center;
-  margin-top: 24px;
+  margin-top: 20px;
 }
 .login-back {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
   text-align: center;
   font-size: 13px;
-  margin-top: 22px;
-  color: #a8b7d7 !important;
+  margin-top: 20px;
+  color: #9fb5e1 !important;
+  transition: color 0.15s ease;
+}
+.login-back:hover {
+  color: #ffffff !important;
 }
 .login-panel footer {
   text-align: center;
-  color: #758094;
+  color: #657084;
   font-size: 12px;
+  padding-top: 16px;
 }
 .login-visual {
   background-size: cover;

@@ -8,6 +8,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	ldaputil "github.com/mhsanaei/3x-ui/v3/internal/util/ldap"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
@@ -63,6 +64,12 @@ func NewLdapSyncJob() *LdapSyncJob {
 }
 
 func (j *LdapSyncJob) Run() {
+	release, allowed := cluster.BeginJob(true)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	logger.Info("LDAP sync job started")
 
 	enabled, err := j.settingService.GetLdapEnable()

@@ -13,6 +13,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/eventbus"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/websocket"
 )
@@ -36,6 +37,12 @@ func NewNodeHeartbeatJob() *NodeHeartbeatJob {
 }
 
 func (j *NodeHeartbeatJob) Run() {
+	release, allowed := cluster.BeginJob(true)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	if !j.running.TryLock() {
 		return
 	}

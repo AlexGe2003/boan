@@ -2,6 +2,7 @@ package job
 
 import (
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/websocket"
 )
@@ -25,6 +26,12 @@ func NewOutboundSubscriptionJob() *OutboundSubscriptionJob {
 
 // Run is invoked by the cron scheduler.
 func (j *OutboundSubscriptionJob) Run() {
+	release, allowed := cluster.BeginJob(false)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	if j.subService == nil {
 		j.subService = &service.OutboundSubscriptionService{}
 	}

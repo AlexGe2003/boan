@@ -1,3 +1,10 @@
+import { FormProvider } from 'react-hook-form';
+import { FormField, useZodForm } from '@/components/form/rhf';
+import {
+  SubscriberFormSchema,
+  subscriberDefaults,
+  type SubscriberValues,
+} from '@/schemas/commerce';
 import { useState } from 'react';
 import { Alert, Form, Input, Modal, Select, Typography } from 'antd';
 import { useSubscriptionPlans, postPlan, planSummary } from './api';
@@ -12,11 +19,13 @@ export default function SubscriberModal({
 }) {
   const assigning = !!emails;
   const plans = useSubscriptionPlans(assigning);
-  const [form] = Form.useForm();
+  const form = useZodForm(SubscriberFormSchema, {
+    defaultValues: { ...subscriberDefaults, assigning },
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  async function save(v: { username: string; password: string; planId: number }) {
+  async function save(v: SubscriberValues) {
     if (saving) return;
     setSaving(true);
     setError('');
@@ -43,7 +52,7 @@ export default function SubscriberModal({
       cancelText="取消"
       title={assigning ? '批量分配套餐' : '创建用户账号'}
       onCancel={() => !saving && onClose()}
-      onOk={() => form.submit()}
+      onOk={() => void form.handleSubmit(save)()}
       confirmLoading={saving}
       okText={assigning ? '分配套餐' : '创建用户'}
       okButtonProps={{
@@ -55,7 +64,7 @@ export default function SubscriberModal({
       <Typography.Paragraph>
         {assigning
           ? `将套餐应用到选中的 ${emails.length} 个用户，统一设置节点、额度和使用限制。`
-          : '填写登录账号和密码即可创建用户。创建后可在用户列表中选择用户，再分配订阅套餐。'}
+          : '默认账号与密码为 user / user，可在创建前修改。账号需要唯一；创建后选择用户并分配套餐。'}
       </Typography.Paragraph>
       {assigning && (
         <Alert
@@ -69,39 +78,30 @@ export default function SubscriberModal({
       {assigning && plans.isSuccess && !plans.data.some((p) => p.enabled) && (
         <Alert type="info" title="请先在“订阅套餐”页面创建并启用套餐。" />
       )}
-      <Form form={form} layout="vertical" onFinish={save} disabled={saving}>
-        {!assigning && (
-          <>
-            <Form.Item
-              name="username"
-              label="登录账号"
-              rules={[
-                { required: true, whitespace: true },
-                { pattern: /^[^\s/\\]+$/, message: '账号不能包含空格或斜线' },
-              ]}
-            >
-              <Input autoComplete="off" maxLength={120} />
-            </Form.Item>
-            <Form.Item name="password" label="登录密码" rules={[{ required: true }, { min: 8 }]}>
-              <Input.Password autoComplete="new-password" />
-            </Form.Item>
-          </>
-        )}
-        {assigning && (
-          <Form.Item
-            name="planId"
-            label="订阅套餐"
-            rules={[{ required: true, message: '请选择套餐' }]}
-          >
-            <Select
-              loading={plans.isLoading}
-              options={plans.data
-                ?.filter((p) => p.enabled)
-                .map((p) => ({ value: p.id, label: `${p.name} — ${planSummary(p)}` }))}
-            />
-          </Form.Item>
-        )}
-      </Form>
+      <FormProvider {...form}>
+        <Form layout="vertical" disabled={saving}>
+          {!assigning && (
+            <>
+              <FormField name="username" label="登录账号">
+                <Input autoComplete="off" maxLength={120} />
+              </FormField>
+              <FormField name="password" label="登录密码">
+                <Input.Password autoComplete="new-password" />
+              </FormField>
+            </>
+          )}
+          {assigning && (
+            <FormField name="planId" label="订阅套餐">
+              <Select
+                loading={plans.isLoading}
+                options={plans.data
+                  ?.filter((p) => p.enabled)
+                  .map((p) => ({ value: p.id, label: `${p.name} — ${planSummary(p)}` }))}
+              />
+            </FormField>
+          )}
+        </Form>
+      </FormProvider>
     </Modal>
   );
 }

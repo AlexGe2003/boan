@@ -138,14 +138,14 @@
     "ofTotal": "共 {total}",
     "tabLinks": "订阅",
     "tabApps": "应用",
+    "desktopImportHint": "复制订阅 URL，然后在客户端的“添加订阅”或“从 URL 导入”中粘贴。Clash / Mihomo 请使用专用配置 URL。",
     "scanTitle": "用手机扫码",
     "scanHint": "在 VPN 应用中扫描此二维码，无需复制链接即可添加订阅。",
     "updateInterval": "每 {hours} 小时自动更新",
     "support": "支持",
     "qrTitle": "扫码。导入。连接。",
     "qrHint": "使用客户端应用扫描。请勿泄露此二维码。",
-    "saveQr": "保存二维码",
-    "tabConfigs": "配置"
+    "saveQr": "保存二维码"
   },
   "menu": {
     "mySubscriptions": "我的首页",
@@ -676,6 +676,7 @@
         "minClientVer": "最小客户端版本",
         "maxClientVer": "最大客户端版本",
         "minClientVerHint": "留空表示不设下限：Xray-core 接受任何客户端版本，包括 Mihomo、sing-box 等第三方内核。填写版本可拒绝自报版本更低的客户端。",
+        "shadowrocketRealityHint": "Xray-core 26.9.8 及更新版本上，小火箭连不上 REALITY，因此这条入站不会出现在小火箭订阅里。请给这些用户另建 TLS、VMess、Trojan 或 Hysteria2 入站。Clash 和 Mihomo 仍会收到这条入站，并默认启用 ML-KEM。",
         "maxClientVerHint": "留空表示无上限。若填写，不得低于最小客户端版本，否则所有客户端都会被拒绝。",
         "clientVerInvalid": "客户端版本须为最多三段以点分隔的数字，每段 0-255（例如 26.3.27）",
         "maxClientVerBelowMin": "最大客户端版本不得低于最小客户端版本",
@@ -749,10 +750,7 @@
         "peerNumberConfig": "Peer {n} 配置"
       },
       "sniffingDestOverride": "目标覆盖",
-      "advancedTitle": "高级设置",
-      "streamSettings": {
-        "reality": {}
-      }
+      "advancedTitle": "高级设置"
     },
     "clients": {
       "managementIntro": "新增用户时只需设置登录账号和密码；创建后勾选用户即可分配套餐。每个用户拥有独立的订阅链接与流量记录。",
@@ -1540,6 +1538,8 @@
       "calendarJalalian": "Jalalian (شمسی)",
       "ipLimitAllowlist": "IP 限制白名单",
       "ipLimitAllowlistDesc": "IP 限制永远不会计入也不会封禁的地址和网段，避免办公室或校园的共享地址耗尽客户端的限额。IP/CIDR(逗号分隔)。",
+      "websiteGeoBlockEnable": "屏蔽指定地区的网站访客",
+      "websiteGeoBlockEnableDesc": "阻止来源 IP 属于中国大陆、香港、澳门或台湾的访客访问后台网站，返回 403。订阅 URL 保持可用。依据本机 geoip.dat 判断；反向代理请配置可信代理 CIDR。",
       "subBalancers": {
         "menu": "订阅均衡器",
         "title": "订阅均衡器",
@@ -2622,5 +2622,34 @@
     "restartXray": "重启 Xray 服务",
     "restartXraySuccess": "Xray 服务已成功重启",
     "settings": "设置"
+  },
+  "adminOverview": {
+    "title": "管理概览",
+    "admin": "管理后台",
+    "subtitle": "服务经营与日常处理，一处掌握。",
+    "users": "订阅用户",
+    "online": "{count} 位在线",
+    "plans": "已启用套餐",
+    "orders": "待确认订单",
+    "tickets": "待处理工单",
+    "manageUsers": "用户管理",
+    "managePlans": "套餐管理",
+    "confirmOrders": "核实收款与开通服务",
+    "ticketWindow": "工单统计范围：最近 200 条",
+    "loadError": "部分经营数据加载失败，可刷新重试。",
+    "shortcuts": "常用管理",
+    "attention": "待办事项",
+    "viewTickets": "查看工单",
+    "userHint": "开通账号、分配套餐与查看访问概览",
+    "planHint": "设置流量额度与多周期价格",
+    "nodeGroups": "节点分组",
+    "groupHint": "组织线路并关联套餐",
+    "monitor": "节点监控",
+    "monitorHint": "检查节点状态与网络连接",
+    "noTickets": "当前没有待处理工单",
+    "operations": "服务管理",
+    "infrastructure": "节点与网络",
+    "system": "系统配置",
+    "runtime": "系统运行"
   }
 }

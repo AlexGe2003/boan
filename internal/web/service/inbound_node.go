@@ -906,6 +906,7 @@ func (s *InboundService) setRemoteTrafficLocked(nodeID int, snap *runtime.Traffi
 		structuralChange = true
 	}
 
+	usageRecorded := make(map[string]bool)
 	for _, snapIb := range snap.Inbounds {
 		if snapIb == nil {
 			continue
@@ -1085,6 +1086,16 @@ func (s *InboundService) setRemoteTrafficLocked(nodeID int, snap *runtime.Traffi
 					existing.Total = cs.Total
 					existing.Reset = cs.Reset
 				}
+			}
+			if !usageRecorded[cs.Email] {
+				usageUp, usageDown := deltaUp, deltaDown
+				if renewed {
+					usageUp, usageDown = canon.Up, canon.Down
+				}
+				if err := recordServerUsage(tx, nodeID, cs.Email, usageUp, usageDown); err != nil {
+					return false, err
+				}
+				usageRecorded[cs.Email] = true
 			}
 			// A dip plus a lagging longer expiry mimics nodeClientRenewed and would
 			// undo a master shorten once the freeze lifts (#6228).

@@ -8,9 +8,11 @@ const IndexPage = lazy(() => import('@/pages/index/IndexPage'));
 const InboundsPage = lazy(() => import('@/pages/inbounds/InboundsPage'));
 const ClientsPage = lazy(() => import('@/pages/clients/ClientsPage'));
 const SupportPage = lazy(() => import('@/pages/support/SupportPage'));
+const BusinessPage = lazy(() => import('@/pages/business/BusinessPage'));
 const PlansPage = lazy(() => import('@/pages/plans/PlansPage'));
 const GroupsPage = lazy(() => import('@/pages/groups/GroupsPage'));
 const NodesPage = lazy(() => import('@/pages/nodes/NodesPage'));
+const NodeGroupBuyPage = lazy(() => import('@/pages/nodes/NodeGroupBuyPage'));
 const HostsPage = lazy(() => import('@/pages/hosts/HostsPage'));
 const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'));
 const XrayPage = lazy(() => import('@/pages/xray/XrayPage'));
@@ -52,8 +54,11 @@ const routes: RouteObject[] = [
       { path: 'node-monitor', element: withSuspense(<NodeMonitorPage />) },
       { path: 'support', element: withSuspense(<SupportPage />) },
       { path: 'plans', element: withSuspense(<PlansPage />) },
+      { path: 'node-groups', element: withSuspense(<BusinessPage section="groups" />) },
+      { path: 'orders', element: withSuspense(<BusinessPage section="orders" />) },
       { path: 'groups', element: withSuspense(<GroupsPage />) },
       { path: 'nodes', element: withSuspense(<NodesPage />) },
+      { path: 'group-buy', element: withSuspense(<NodeGroupBuyPage />) },
       { path: 'hosts', element: withSuspense(<HostsPage />) },
       { path: 'settings', element: withSuspense(<SettingsPage />) },
       { path: 'users', element: withSuspense(<PanelUsersPage />) },

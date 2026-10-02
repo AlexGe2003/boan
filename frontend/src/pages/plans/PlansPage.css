@@ -1,0 +1,381 @@
+.plans-content {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.plans-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.plans-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ant-color-primary, #1e5eff);
+  background: color-mix(in srgb, var(--ant-color-primary, #1e5eff) 10%, transparent);
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+  border: 1px solid color-mix(in srgb, var(--ant-color-primary, #1e5eff) 20%, transparent);
+}
+
+.plans-heading h2.ant-typography {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 4px 0 6px;
+  letter-spacing: -0.5px;
+}
+
+.plans-heading .ant-typography {
+  margin-bottom: 0;
+}
+
+.plans-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--ant-color-border-secondary);
+  background: var(--ant-color-bg-container);
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  padding: 20px 0;
+  margin-bottom: 24px;
+}
+
+.plans-summary > div {
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-right: 1px solid var(--ant-color-border-secondary);
+}
+
+.plans-summary > div:last-child {
+  border: 0;
+}
+
+.plans-summary span {
+  font-size: 13px;
+  color: var(--ant-color-text-secondary);
+}
+
+.plans-summary strong {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.plans-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.plans-toolbar .ant-input-affix-wrapper {
+  max-width: 360px;
+  border-radius: 8px;
+}
+
+.plans-toolbar .ant-select {
+  min-width: 140px;
+}
+
+.plans-toolbar > .ant-typography {
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--ant-color-text-tertiary);
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.admin-plan-card {
+  height: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--ant-color-border-secondary);
+  background: var(--ant-color-bg-container);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+}
+
+.admin-plan-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--ant-color-primary, #1e5eff) 40%, var(--ant-color-border-secondary, transparent));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.admin-plan-card .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 22px;
+}
+
+.admin-plan-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-plan-title h3.ant-typography {
+  font-size: 19px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.admin-plan-title .ant-tag {
+  margin: 0;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 0 10px;
+}
+
+.admin-plan-description {
+  min-height: 22px;
+  margin: 10px 0 16px;
+  font-size: 13px;
+  color: var(--ant-color-text-secondary);
+  line-height: 1.5;
+}
+
+.admin-plan-quota {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  background: var(--ant-color-fill-quaternary);
+  border-radius: 10px;
+  border: 1px solid var(--ant-color-border-secondary);
+}
+
+.admin-plan-quota strong {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.2;
+  color: var(--ant-color-primary, #1e5eff);
+}
+
+.admin-plan-quota span {
+  font-size: 13px;
+  color: var(--ant-color-text-secondary);
+}
+
+.admin-plan-specs {
+  margin: 0 0 20px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-plan-specs dt {
+  font-size: 12px;
+  color: var(--ant-color-text-tertiary);
+  margin-bottom: 4px;
+}
+
+.admin-plan-specs dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+.admin-plan-pricing {
+  border-top: 1px solid var(--ant-color-border-secondary);
+  padding-top: 16px;
+  margin-top: auto;
+}
+
+.admin-plan-section-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ant-color-text-secondary);
+  margin-bottom: 10px;
+}
+
+.admin-plan-price-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-plan-price-list > div {
+  flex: 1 0 80px;
+  background: var(--ant-color-fill-quaternary);
+  border: 1px solid var(--ant-color-border-secondary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.18s ease;
+}
+
+.admin-plan-price-list > div:hover {
+  border-color: color-mix(in srgb, var(--ant-color-primary, #1e5eff) 30%, transparent);
+  background: color-mix(in srgb, var(--ant-color-primary, #1e5eff) 6%, var(--ant-color-fill-quaternary, transparent));
+}
+
+.admin-plan-price-list span {
+  display: block;
+  color: var(--ant-color-text-secondary);
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.admin-plan-price-list strong {
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+  color: var(--ant-color-text);
+}
+
+.admin-plan-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.admin-plan-actions > .ant-btn:first-child {
+  flex: 1;
+  margin-right: 12px;
+}
+
+.admin-plan-card.is-disabled {
+  opacity: 0.75;
+}
+
+.admin-plan-card.is-disabled .admin-plan-quota strong {
+  color: var(--ant-color-text-tertiary);
+}
+
+.plans-rule-note {
+  margin-top: 24px;
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+}
+
+.plans-rule-note summary {
+  cursor: pointer;
+  padding: 12px 0;
+  font-weight: 500;
+}
+
+.plans-rule-note summary .anticon {
+  margin-right: 6px;
+}
+
+.plans-rule-note p {
+  max-width: 900px;
+  line-height: 1.8;
+  margin: 0 0 8px;
+}
+
+.plan-editor h5.ant-typography {
+  border-top: 1px solid var(--ant-color-border-secondary);
+  padding-top: 20px;
+  margin-top: 24px;
+  font-weight: 600;
+}
+
+.plan-editor h5.ant-typography:first-child {
+  border: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.plan-price-editor {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+  margin-bottom: 12px;
+}
+
+.plan-price-editor .ant-input-number {
+  width: 100%;
+}
+
+.plan-price-editor > .ant-btn {
+  margin-bottom: 24px;
+}
+
+@media (min-width: 1600px) {
+  .plans-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .plans-content {
+    padding: 16px;
+  }
+  .plans-heading {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .plans-heading h2.ant-typography {
+    font-size: 22px;
+  }
+  .plans-heading .ant-typography-secondary {
+    font-size: 12px;
+  }
+  .plans-heading > .ant-btn {
+    margin-top: 16px;
+    width: 100%;
+  }
+  .plans-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0;
+  }
+  .plans-summary > div {
+    padding: 16px;
+    border-bottom: 1px solid var(--ant-color-border-secondary);
+  }
+  .plans-summary > div:nth-child(2) {
+    border-right: 0;
+  }
+  .plans-summary > div:nth-child(n + 3) {
+    border-bottom: 0;
+  }
+  .plans-toolbar {
+    flex-wrap: wrap;
+  }
+  .plans-toolbar .ant-input-affix-wrapper {
+    max-width: none;
+    width: 100%;
+  }
+  .plans-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .admin-plan-card .ant-card-body {
+    padding: 18px;
+  }
+  .plan-price-editor {
+    grid-template-columns: 1fr 1fr;
+  }
+  .plan-price-editor > .ant-btn {
+    grid-column: 1 / -1;
+    margin-bottom: 16px;
+  }
+}

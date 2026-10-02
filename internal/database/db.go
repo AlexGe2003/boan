@@ -64,9 +64,13 @@ const (
 
 func allModels() []any {
 	return []any{
+		&model.ClusterState{},
+		&model.ClusterBackup{},
 		&model.User{},
 		&model.PanelRoleDefinition{},
 		&model.SubscriptionPlan{},
+		&model.NodeGroup{},
+		&model.ServiceOrder{},
 		&model.SupportTicket{},
 		&model.SupportMessage{},
 		&model.SubscriptionAssignment{},
@@ -86,6 +90,10 @@ func allModels() []any {
 		&model.InboundFallback{},
 		&model.Host{},
 		&model.NodeClientTraffic{},
+		&model.ServerClientUsage{},
+		&model.ServerUsageBilling{},
+		&model.ServerUsageControl{},
+		&model.NodeGroupBuyConfig{},
 		&model.NodeClientIp{},
 		&model.ClientGlobalTraffic{},
 		&model.OutboundSubscription{},

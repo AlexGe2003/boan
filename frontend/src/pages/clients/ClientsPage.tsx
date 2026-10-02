@@ -71,7 +71,7 @@ import ClientTrafficCell from '@/components/clients/ClientTrafficCell';
 import ClientSpeedTag, { isActiveSpeed } from '@/components/clients/ClientSpeedTag';
 import ClientCardComment from '@/components/clients/ClientCardComment';
 import AppSidebar from '@/layouts/AppSidebar';
-import { IntlUtil, SizeFormatter } from '@/utils';
+import { IntlUtil, SizeFormatter, FileManager } from '@/utils';
 import { setMessageInstance } from '@/utils/messageBus';
 import { LazyMount } from '@/components/utility';
 import {
@@ -79,6 +79,7 @@ import {
   SPEED_TAG_CLASS_NAME,
   SPEED_TAG_STYLE,
 } from '@/components/utility/speedTagStyle';
+const ClientImportModal = lazy(() => import('./ClientImportModal'));
 const ClientFormModal = lazy(() => import('./ClientFormModal'));
 const ClientInfoModal = lazy(() => import('./ClientInfoModal'));
 const ClientQrModal = lazy(() => import('./ClientQrModal'));
@@ -89,8 +90,6 @@ const SubLinksModal = lazy(() => import('./SubLinksModal'));
 const BulkAddToGroupModal = lazy(() => import('./BulkAddToGroupModal'));
 const BulkAttachInboundsModal = lazy(() => import('./BulkAttachInboundsModal'));
 const BulkDetachInboundsModal = lazy(() => import('./BulkDetachInboundsModal'));
-const TextModal = lazy(() => import('@/components/feedback/TextModal'));
-const PromptModal = lazy(() => import('@/components/feedback/PromptModal'));
 import { ClientInboundChips, ClientRowActions } from './RowCells';
 import { emptyFilters, activeFilterCount } from './filters';
 import type { ClientFilters } from './filters';
@@ -413,19 +412,6 @@ export default function ClientsPage() {
   const [bulkDetachOpen, setBulkDetachOpen] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
 
-  const [textOpen, setTextOpen] = useState(false);
-  const [textTitle, setTextTitle] = useState('');
-  const [textContent, setTextContent] = useState('');
-  const [textFileName, setTextFileName] = useState('');
-  const [promptOpen, setPromptOpen] = useState(false);
-  const [promptTitle, setPromptTitle] = useState('');
-  const [promptOkText, setPromptOkText] = useState('');
-  const [promptInitial, setPromptInitial] = useState('');
-  const [promptLoading, setPromptLoading] = useState(false);
-  const [promptHandler, setPromptHandler] = useState<
-    ((value: string) => Promise<boolean | void> | boolean | void) | null
-  >(null);
-
   const initial = readFilterState();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -680,6 +666,8 @@ export default function ClientsPage() {
     }
   }
 
+  const [clientImportOpen, setClientImportOpen] = useState(false);
+  const [exportingClients, setExportingClients] = useState(false);
   const [subscriberMode, setSubscriberMode] = useState<'create' | 'assign' | null>(null);
 
   function onAdd() {
@@ -788,46 +776,6 @@ export default function ClientsPage() {
     }
   }, [refresh]);
 
-  const openText = useCallback((opts: { title: string; content: string; fileName?: string }) => {
-    setTextTitle(opts.title);
-    setTextContent(opts.content);
-    setTextFileName(opts.fileName || '');
-    setTextOpen(true);
-  }, []);
-
-  const openPrompt = useCallback(
-    (opts: {
-      title: string;
-      okText?: string;
-      value?: string;
-      confirm: (value: string) => Promise<boolean | void> | boolean | void;
-    }) => {
-      setPromptTitle(opts.title);
-      setPromptOkText(opts.okText || t('confirm'));
-      setPromptInitial(opts.value || '');
-      setPromptHandler(() => opts.confirm);
-      setPromptOpen(true);
-    },
-    [t],
-  );
-
-  const onPromptConfirm = useCallback(
-    async (value: string) => {
-      if (!promptHandler) {
-        setPromptOpen(false);
-        return;
-      }
-      setPromptLoading(true);
-      try {
-        const ok = await promptHandler(value);
-        if (ok !== false) setPromptOpen(false);
-      } finally {
-        setPromptLoading(false);
-      }
-    },
-    [promptHandler],
-  );
-
   function onResetAllTraffics() {
     modal.confirm({
       title: t('pages.clients.resetAllTrafficsTitle'),
@@ -877,38 +825,25 @@ export default function ClientsPage() {
   }
 
   async function onExportClients() {
-    const items = await exportClients();
-    if (!items) return;
-    openText({
-      title: t('pages.clients.exportClients'),
-      content: JSON.stringify(items, null, 2),
-      fileName: 'clients-export.json',
-    });
+    if (exportingClients) return;
+    setExportingClients(true);
+    try {
+      const items = await exportClients();
+      if (!items) return;
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      FileManager.downloadTextFile(JSON.stringify(items, null, 2), `boan-users-${stamp}.json`, {
+        type: 'application/json',
+      });
+      messageApi.success(`已导出全部 ${items.length} 位用户配置`);
+    } catch {
+      messageApi.error('导出失败，请重试');
+    } finally {
+      setExportingClients(false);
+    }
   }
 
   function onImportClients() {
-    openPrompt({
-      title: t('pages.clients.importClients'),
-      okText: t('pages.clients.import'),
-      value: '',
-      confirm: async (value) => {
-        const msg = await importClients(value);
-        if (!msg?.success) return false;
-        const created = msg.obj?.created ?? 0;
-        const skipped = msg.obj?.skipped ?? [];
-        if (skipped.length === 0) {
-          messageApi.success(t('pages.clients.toasts.imported', { count: created }));
-        } else {
-          const firstError = skipped[0]?.reason ?? '';
-          messageApi.warning(
-            firstError
-              ? `${t('pages.clients.toasts.importedMixed', { ok: created, failed: skipped.length })} — ${firstError}`
-              : t('pages.clients.toasts.importedMixed', { ok: created, failed: skipped.length }),
-          );
-        }
-        return true;
-      },
-    });
+    setClientImportOpen(true);
   }
 
   function onBulkUngroup() {
@@ -1403,6 +1338,26 @@ export default function ClientsPage() {
                       hoverable
                       title={
                         <div className="card-toolbar">
+                          {panelRole === 'admin' && (
+                            <>
+                              <Button
+                                icon={<DownloadOutlined />}
+                                loading={exportingClients}
+                                onClick={() => void onExportClients()}
+                                aria-label="导出全部用户配置"
+                              >
+                                导出备份
+                              </Button>
+                              <Button
+                                icon={<UploadOutlined />}
+                                onClick={onImportClients}
+                                aria-label="导入用户配置备份"
+                              >
+                                导入备份
+                              </Button>
+                            </>
+                          )}
+
                           {selectedRowKeys.length === 0 ? (
                             <Button
                               type="primary"
@@ -1720,7 +1675,7 @@ export default function ClientsPage() {
                           rowSelection={rowSelection}
                           pagination={tablePagination}
                           size="small"
-                          scroll={{ x: 1200 }}
+                          scroll={{ x: 'max-content' }}
                           onChange={onTableChange}
                           locale={{
                             emptyText: (
@@ -1924,6 +1879,30 @@ export default function ClientsPage() {
             }}
           />
         )}
+        <LazyMount when={clientImportOpen}>
+          {clientImportOpen && (
+            <ClientImportModal
+              onClose={() => setClientImportOpen(false)}
+              onImport={async (data) => {
+                const msg = await importClients(data);
+                if (!msg?.success) throw new Error(msg?.msg || '导入失败，请重试');
+                const created = msg.obj?.created ?? 0;
+                const skipped = msg.obj?.skipped ?? [];
+                if (skipped.length === 0) {
+                  messageApi.success(t('pages.clients.toasts.imported', { count: created }));
+                } else {
+                  messageApi.info(
+                    t('pages.clients.toasts.importedMixed', {
+                      ok: created,
+                      failed: skipped.length,
+                    }),
+                  );
+                }
+                return { created, skipped };
+              }}
+            />
+          )}
+        </LazyMount>
         <ClientAccountModal
           key={accountEmail ?? 'closed'}
           email={accountEmail}
@@ -1947,6 +1926,7 @@ export default function ClientsPage() {
         </LazyMount>
         <LazyMount when={infoOpen}>
           <ClientInfoModal
+            admin={panelRole === 'admin'}
             open={infoOpen}
             client={infoClient}
             inboundsById={inboundsById}
@@ -2064,28 +2044,6 @@ export default function ClientsPage() {
             protocols={protocolOptions}
             groups={groupOptions}
             nodes={nodes}
-          />
-        </LazyMount>
-        <LazyMount when={textOpen}>
-          <TextModal
-            open={textOpen}
-            onClose={() => setTextOpen(false)}
-            title={textTitle}
-            content={textContent}
-            fileName={textFileName}
-            json
-          />
-        </LazyMount>
-        <LazyMount when={promptOpen}>
-          <PromptModal
-            open={promptOpen}
-            onClose={() => setPromptOpen(false)}
-            title={promptTitle}
-            okText={promptOkText}
-            initialValue={promptInitial}
-            loading={promptLoading}
-            json
-            onConfirm={onPromptConfirm}
           />
         </LazyMount>
       </Layout>

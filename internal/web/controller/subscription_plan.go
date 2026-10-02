@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -28,10 +29,7 @@ type SubscriptionPlanController struct {
 	inbounds service.InboundService
 	xray     service.XrayService
 }
-type planInput struct {
-	model.SubscriptionPlan
-	InboundIDs []int `json:"inboundIds"`
-}
+type planInput = service.SubscriptionPlanView
 
 func NewSubscriptionPlanController(g *gin.RouterGroup) {
 	a := &SubscriptionPlanController{}
@@ -63,7 +61,19 @@ func (a *SubscriptionPlanController) list(c *gin.Context) {
 			jsonObj(c, nil, err)
 			return
 		}
-		result = append(result, planInput{r, ids})
+		groups, decodeErr := service.DecodePlanIDs(r.NodeGroupIDs)
+		if decodeErr != nil {
+			jsonObj(c, nil, decodeErr)
+			return
+		}
+		prices := []model.PlanPrice{}
+		if r.Prices != "" {
+			if decodeErr := json.Unmarshal([]byte(r.Prices), &prices); decodeErr != nil {
+				jsonObj(c, nil, decodeErr)
+				return
+			}
+		}
+		result = append(result, planInput{SubscriptionPlan: r, InboundIDs: ids, NodeGroupIDs: groups, Prices: prices})
 	}
 	jsonObj(c, result, nil)
 }
@@ -75,30 +85,34 @@ func validatePlan(p *planInput) error {
 	if p.TotalGB < 0 || p.TotalGB > 1<<60 || p.DurationDays < 0 || p.DurationDays > 36500 || p.LimitIP < 0 || p.LimitHwid < 0 {
 		return errors.New("套餐额度或限制无效")
 	}
-	if len(p.InboundIDs) == 0 || len(p.InboundIDs) > 500 {
-		return errors.New("请选择 1 至 500 个节点入站")
+	if p.ID < 0 || len(p.Description) > 4000 {
+		return errors.New("套餐 ID 或说明无效")
 	}
-	seen := map[int]bool{}
-	ids := []int{}
-	for _, id := range p.InboundIDs {
-		if id <= 0 {
-			return errors.New("无效的节点入站")
-		}
-		if !seen[id] {
-			ids = append(ids, id)
-			seen[id] = true
-		}
-	}
-	var count int64
-	if err := database.GetDB().Model(&model.Inbound{}).Where("id IN ?", ids).Count(&count).Error; err != nil {
+	slices.Sort(p.NodeGroupIDs)
+	p.NodeGroupIDs = slices.Compact(p.NodeGroupIDs)
+	if _, err := service.ResolvePlanInbounds(database.GetDB(), p.InboundIDs, p.NodeGroupIDs); err != nil {
 		return err
 	}
-	if count != int64(len(ids)) {
-		return errors.New("套餐中有节点入站已被删除，请重新选择")
+	slices.Sort(p.InboundIDs)
+	p.InboundIDs = slices.Compact(p.InboundIDs)
+	if p.InboundIDs == nil {
+		p.InboundIDs = []int{}
 	}
-	p.InboundIDs = ids
-	b, _ := json.Marshal(ids)
+	if p.NodeGroupIDs == nil {
+		p.NodeGroupIDs = []int{}
+	}
+	if p.Prices == nil {
+		p.Prices = []model.PlanPrice{}
+	}
+	if err := service.ValidatePlanPrices(p.Prices); err != nil {
+		return err
+	}
+	b, _ := json.Marshal(p.InboundIDs)
 	p.SubscriptionPlan.InboundIDs = string(b)
+	b, _ = json.Marshal(p.NodeGroupIDs)
+	p.SubscriptionPlan.NodeGroupIDs = string(b)
+	b, _ = json.Marshal(p.Prices)
+	p.SubscriptionPlan.Prices = string(b)
 	return nil
 }
 func (a *SubscriptionPlanController) save(c *gin.Context) {
@@ -121,7 +135,7 @@ func (a *SubscriptionPlanController) save(c *gin.Context) {
 		var existing model.SubscriptionPlan
 		err = db.First(&existing, p.ID).Error
 		if err == nil {
-			err = db.Model(&existing).Select("Name", "Description", "InboundIDs", "TotalGB", "DurationDays", "LimitIP", "LimitHwid", "Enabled").Updates(&p.SubscriptionPlan).Error
+			err = db.Model(&existing).Select("Name", "Description", "InboundIDs", "TotalGB", "DurationDays", "LimitIP", "LimitHwid", "Enabled", "NodeGroupIDs", "Prices").Updates(&p.SubscriptionPlan).Error
 		}
 	}
 	jsonObj(c, p, err)
@@ -144,6 +158,13 @@ func (a *SubscriptionPlanController) delete(c *gin.Context) {
 		if count > 0 {
 			return errors.New("套餐仍有用户使用，请停用套餐或先给用户更换套餐")
 		}
+		var orders int64
+		if err := tx.Model(&model.ServiceOrder{}).Where("plan_id = ? AND status IN ?", req.ID, []string{"pending", "paid", "failed"}).Count(&orders).Error; err != nil {
+			return err
+		}
+		if orders > 0 {
+			return errors.New("套餐仍有关联的待处理订单，请先处理订单")
+		}
 		return tx.Delete(&model.SubscriptionPlan{}, req.ID).Error
 	})
 	jsonObj(c, nil, err)
@@ -162,7 +183,21 @@ func loadPlan(id int) (planInput, error) {
 	if err := json.Unmarshal([]byte(p.SubscriptionPlan.InboundIDs), &p.InboundIDs); err != nil {
 		return p, err
 	}
-	return p, validatePlan(&p)
+	groups, err := service.DecodePlanIDs(p.SubscriptionPlan.NodeGroupIDs)
+	if err != nil {
+		return p, err
+	}
+	p.NodeGroupIDs = groups
+	if p.SubscriptionPlan.Prices != "" {
+		if err := json.Unmarshal([]byte(p.SubscriptionPlan.Prices), &p.Prices); err != nil {
+			return p, err
+		}
+	}
+	if err := validatePlan(&p); err != nil {
+		return p, err
+	}
+	p.InboundIDs, err = service.ResolvePlanInbounds(database.GetDB(), p.InboundIDs, p.NodeGroupIDs)
+	return p, err
 }
 
 // Remote node updates cannot share a database transaction. Keep the account on
@@ -179,8 +214,8 @@ func (a *SubscriptionPlanController) subscribe(c *gin.Context) {
 		return
 	}
 	req.Username = strings.TrimSpace(req.Username)
-	if req.Username == "" || len(req.Username) > 120 || strings.IndexFunc(req.Username, func(r rune) bool { return unicode.IsSpace(r) || unicode.IsControl(r) || r == '/' || r == '\\' }) >= 0 || len(req.Password) < 8 || len(req.Password) > 72 {
-		jsonObj(c, nil, errors.New("账号不能包含空格或斜线；密码需为 8–72 字节"))
+	if req.Username == "" || len(req.Username) > 120 || strings.IndexFunc(req.Username, func(r rune) bool { return unicode.IsSpace(r) || unicode.IsControl(r) || r == '/' || r == '\\' }) >= 0 || !validSubscriberPassword(req.Password) {
+		jsonObj(c, nil, errors.New("账号不能包含空格或斜线；密码可用默认 user，或设置为 8–72 字节"))
 		return
 	}
 	planMutationMu.Lock()
@@ -224,6 +259,10 @@ func (a *SubscriptionPlanController) subscribe(c *gin.Context) {
 	jsonObj(c, gin.H{"email": rec.Email, "created": true}, err)
 }
 func (a *SubscriptionPlanController) applyOne(email string, p planInput) error {
+	return a.applyWithExpiry(email, p, nil)
+}
+
+func (a *SubscriptionPlanController) applyWithExpiry(email string, p planInput, expiry *int64) error {
 	rec, err := a.clients.GetRecordByEmail(nil, email)
 	if err != nil {
 		return err
@@ -241,7 +280,10 @@ func (a *SubscriptionPlanController) applyOne(email string, p planInput) error {
 	if lookup != nil && !errors.Is(lookup, gorm.ErrRecordNotFound) {
 		return lookup
 	}
-	if assignment.PlanID != p.ID {
+	if expiry != nil {
+		client.ExpiryTime = *expiry
+		client.Enable = true
+	} else if assignment.PlanID != p.ID {
 		client.ExpiryTime = 0
 		if p.DurationDays > 0 {
 			client.ExpiryTime = time.Now().Add(time.Duration(p.DurationDays) * 24 * time.Hour).UnixMilli()

@@ -16,6 +16,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/locale"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/network"
@@ -54,6 +55,7 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	gin.SetMode(gin.ReleaseMode)
 
 	engine := gin.Default()
+	engine.Use(cluster.SubscriptionGateway())
 
 	subDomain, err := s.settingService.GetSubDomain()
 	if err != nil {

@@ -191,6 +191,10 @@ func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTr
 			t.Up, t.Down, now, ct.Email,
 		).Error; err != nil {
 			logger.Warning("AddClientTraffic update data ", err)
+			continue
+		}
+		if err := recordServerUsage(tx, 0, ct.Email, t.Up, t.Down); err != nil {
+			return err
 		}
 	}
 
@@ -613,6 +617,12 @@ func (s *InboundService) UpdateClientStat(tx *gorm.DB, email string, client *mod
 }
 
 func (s *InboundService) DelClientStat(tx *gorm.DB, email string) error {
+	if err := tx.Where("email = ?", email).Delete(&model.ServerUsageControl{}).Error; err != nil {
+		return err
+	}
+	if err := tx.Where("email = ?", email).Delete(&model.ServerClientUsage{}).Error; err != nil {
+		return err
+	}
 	if err := adjustGroupBaselinesForRemovedTraffic(tx, []string{email}); err != nil {
 		return err
 	}
@@ -633,6 +643,12 @@ func (s *InboundService) delClientStatsByEmails(tx *gorm.DB, emails []string) er
 	for start := 0; start < len(emails); start += chunk {
 		end := min(start+chunk, len(emails))
 		batch := emails[start:end]
+		if err := tx.Where("email IN ?", batch).Delete(&model.ServerUsageControl{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("email IN ?", batch).Delete(&model.ServerClientUsage{}).Error; err != nil {
+			return err
+		}
 		if err := tx.Where("email IN ?", batch).Delete(xray.ClientTraffic{}).Error; err != nil {
 			return err
 		}

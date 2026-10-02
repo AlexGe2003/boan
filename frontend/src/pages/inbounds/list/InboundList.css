@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .protocol-tags {
@@ -13,86 +13,109 @@
 
 .client-count-tag {
   font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  border-radius: 10px;
 }
 
 .row-action-trigger {
   font-size: 20px;
   cursor: pointer;
+  color: var(--ant-color-text-secondary);
+  transition: color 0.18s;
+}
+
+.row-action-trigger:hover {
+  color: var(--ant-color-primary);
 }
 
 .client-email-list {
   max-height: 200px;
   overflow-y: auto;
-  min-width: 150px;
+  min-width: 160px;
 }
 
 .client-email-list > div {
-  padding: 2px 0;
+  padding: 4px 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+}
+
+.client-email-list > div:last-child {
+  border-bottom: 0;
 }
 
 .inbounds-page .ant-table {
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
 .inbounds-page .ant-table-container {
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .inbounds-page .ant-table-thead > tr:first-child > *:first-child {
-  border-start-start-radius: 8px;
+  border-start-start-radius: 12px;
 }
 
 .inbounds-page .ant-table-thead > tr:first-child > *:last-child {
-  border-start-end-radius: 8px;
+  border-start-end-radius: 12px;
 }
 
 .inbounds-page .ant-table-tbody > tr:last-child > *:first-child {
-  border-end-start-radius: 8px;
+  border-end-start-radius: 12px;
 }
 
 .inbounds-page .ant-table-tbody > tr:last-child > *:last-child {
-  border-end-end-radius: 8px;
+  border-end-end-radius: 12px;
 }
 
 .inbound-cards {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .inbound-card {
   border: 1px solid var(--ant-color-border-secondary);
-  border-radius: 10px;
-  padding: 12px;
-  background: var(--ant-color-fill-quaternary);
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: var(--ant-color-bg-container);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+}
+
+.inbound-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  border-color: color-mix(in srgb, var(--ant-color-primary) 30%, var(--ant-color-border-secondary));
 }
 
 .inbound-card.is-selected {
   border-color: var(--ant-color-primary);
-  background: color-mix(in srgb, var(--ant-color-primary) 6%, transparent);
+  background: color-mix(in srgb, var(--ant-color-primary) 6%, var(--ant-color-bg-container));
 }
 
 .card-bulk-bar {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 4px 8px;
+  padding: 6px 4px 10px;
 }
 
 .bulk-count {
   font-size: 12px;
-  background: color-mix(in srgb, var(--ant-color-primary) 12%, transparent);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--ant-color-primary) 14%, transparent);
   color: var(--ant-color-primary);
-  padding: 1px 8px;
-  border-radius: 10px;
+  padding: 2px 10px;
+  border-radius: 12px;
 }
 
 .card-head {
@@ -104,12 +127,14 @@
 }
 
 .card-id {
-  font-size: 11px;
-  opacity: 0.6;
+  font-size: 12px;
+  color: var(--ant-color-text-tertiary);
+  font-weight: 600;
 }
 
 .tag-name {
   font-weight: 600;
+  font-size: 14px;
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -127,37 +152,39 @@
 .card-stats {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .stat-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .stat-label {
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  opacity: 0.6;
+  letter-spacing: 0.05em;
+  color: var(--ant-color-text-tertiary);
   min-width: 96px;
   flex-shrink: 0;
 }
 
 .card-stats .ant-tag {
   margin: 0;
+  border-radius: 8px;
 }
 
 .card-empty {
   text-align: center;
   color: var(--ant-color-text-secondary);
-  padding: 24px 12px;
+  padding: 32px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 @media (max-width: 768px) {
@@ -172,7 +199,7 @@
   }
 
   .inbounds-page .ant-card-body {
-    padding: 8px;
+    padding: 10px;
   }
 
   .inbounds-page .row-action-trigger {
@@ -194,12 +221,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
 }
 
 .inbound-host-remarks {
   font-size: 11px;
   font-weight: 400;
-  opacity: 0.65;
+  color: var(--ant-color-text-tertiary);
   line-height: 1.2;
   max-width: 100%;
   overflow: hidden;

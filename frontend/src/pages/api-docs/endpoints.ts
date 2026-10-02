@@ -198,6 +198,206 @@ const hwidStatusErrorResponses = {
 
 export const sections: readonly Section[] = [
   {
+    id: 'subscription-business',
+    title: 'Subscription Business',
+    description:
+      'Administrators manage plans and node groups. Customers can create and cancel their own orders. Amounts are integer CNY cents. Only administrators can confirm offline receipts and retry service delivery. Renewals preserve measured traffic. Failed delivery retains its fixed expiry target for idempotent retries.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/clients/account/:email',
+        summary: 'Read the subscription login account. Admin only.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/account/:email',
+        summary: 'Create or update the subscription login account. Admin only.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/clients/activity/:email',
+        summary:
+          'Admin only. Local Xray accepted-connection activity by exact client email. Optional hours=1 or 24; reads at most the last 8 MiB. Domain categories and connection counts are approximate; no per-domain byte counts or live-session guarantees.',
+        responseSchema: 'ClientActivity',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/clients/mySubscriptions',
+        summary: 'Read own subscription quota, expiry and links.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/nodes/usage',
+        summary:
+          'Admin only. Observed lifetime client byte counters, manual corrections and budget status by directly connected node. Adjusted usage drives estimates and shares; raw uploaded/downloaded bytes remain intact. Omitting both filters returns all directly connected servers. Optional email shows a user distribution; nodeId (0 for local) shows the top 100 users. Billing estimates sum each server’s recorded bytes times its own multiplier. Shares use all recorded current users, including those outside the top 100. Counters start when observed and are retained across quota resets; baseline snapshots are not usage. Chained nodes are grouped under their directly connected parent.',
+        responseSchema: 'ServerUsageReport',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/usage/billing',
+        summary:
+          'Admin only. Set node billing estimation multiplier: 1 for recorded proxy bytes, 2 for relay ingress plus egress. Recalculates estimates for all recorded usage; never changes subscriber quota. This is not NIC telemetry or a provider invoice.',
+        requestSchema: { $ref: '#/components/schemas/ServerUsageBillingRequest' },
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/usage/control',
+        summary:
+          'Admin only. Set a lifetime manual node budget (empty email) or user/node budget, with proxy or billing-estimate basis. Optional absolute usage correction preserves observed counters and subsequent deltas. Node totals cannot fall below attributed user totals. Budgets provide status only: no automatic disconnect or monthly reset; subscriber quota is unchanged.',
+        requestSchema: { $ref: '#/components/schemas/ServerUsageControlRequest' },
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/nodes/group-buy',
+        summary:
+          'Admin only. Node monthly cost, expiry, bandwidth and traffic metadata, planned group size and estimated monthly service fees. Amounts are CNY minor units. Estimates are not payment receipts or enforced bandwidth limits.',
+        responseSchema: 'NodeGroupBuyReport',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/nodes/group-buy',
+        summary:
+          'Admin only. Save node group-buy metadata (0 for local). Fee mode fixed uses total monthly fee in CNY cents; percent uses basis points of monthly node cost. Expiry is Unix milliseconds; 0 means unset. Member prices round up to cents. Does not modify connection credentials, quotas or node availability.',
+        requestSchema: { $ref: '#/components/schemas/NodeGroupBuyConfig' },
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/nodes/monitor',
+        summary: 'Read authorized node monitoring data.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/setting/users/migrationTargets',
+        summary: 'List legacy account migration targets. Admin only.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/setting/users/delete/:id',
+        summary: 'Delete a panel account. Admin only.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/setting/users/migrate/:id',
+        summary: 'Explicitly migrate a legacy account into a subscription account. Admin only.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/node-groups',
+        summary: 'List node resource groups and referenced plan counts.',
+        responseSchema: 'NodeGroupView',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/node-groups/save',
+        summary: 'Create or update a resource group. Admin only.',
+        responseSchema: 'NodeGroupView',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/node-groups/delete',
+        summary: 'Delete an unreferenced resource group. Admin only.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/subscription-plans',
+        summary: 'List service templates and purchase prices. Admin only.',
+        responseSchema: 'SubscriptionPlanView',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/subscription-plans/assignments',
+        summary: 'List assigned subscriptions. Admin only.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/subscription-plans/save',
+        summary:
+          'Save a plan. Purchase periods are monthly, quarterly, half_yearly, yearly, two_yearly, three_yearly and onetime. Empty prices keep manual allocation only.',
+        responseSchema: 'SubscriptionPlanView',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/subscription-plans/delete',
+        summary: 'Delete a plan without assigned users or outstanding orders. Admin only.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/subscription-plans/subscribe',
+        summary: 'Create a customer account, optionally allocating a plan. Admin only.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/subscription-plans/apply',
+        summary: 'Apply a plan to selected customer emails. Admin only.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/commerce/plans',
+        summary: 'List enabled, purchasable plans with valid resources. Customers and admins.',
+        responseSchema: 'StorePlan',
+        responseSchemaArray: true,
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/commerce/orders',
+        summary:
+          'List orders with page and status filters. Page size 50. Customers see only their own orders.',
+        responseSchema: 'OrderPage',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/commerce/orders',
+        summary:
+          'Create a customer order using planId and period. The server determines price and keeps a snapshot. One outstanding order per customer.',
+        responseSchema: 'ServiceOrder',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/commerce/orders/:id/cancel',
+        summary: 'Cancel an owned pending order. Admins can cancel any pending order.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/commerce/orders/:id/confirm',
+        summary:
+          'Confirm offline payment or retry paid service delivery. Admin only; note is required. Duplicate confirmations do not extend service again.',
+        responseSchema: 'ServiceOrder',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/support/nodes',
+        summary: 'List the current customer node configuration states.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/support/tickets',
+        summary: 'List tickets, scoped to the customer or all tickets for admins.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/support/tickets',
+        summary: 'Create a ticket using subject and body.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/support/tickets/:id',
+        summary: 'Read an owned ticket and replies; admins can read all.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/support/tickets/:id/reply',
+        summary: 'Reply to an owned open ticket using body.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/support/tickets/:id/close',
+        summary: 'Close an owned ticket.',
+      },
+    ],
+  },
+  {
     id: 'authentication',
     title: 'Authentication',
     description:
@@ -1276,7 +1476,7 @@ export const sections: readonly Section[] = [
         method: 'GET',
         path: '/panel/api/clients/export',
         summary:
-          'Return every client as a {client, inboundIds} array — the same shape /bulkCreate and /import accept — so the payload round-trips straight back through /import. Clients with no inbound attachment are included with an empty inboundIds list. The UI shows this in a CodeMirror viewer (copy / download); programmatic callers get the array in obj.',
+          'Return every client as a {client, inboundIds} array — the same shape /bulkCreate and /import accept — so the payload round-trips straight back through /import. Clients with no inbound attachment are included with an empty inboundIds list. The administrator user page downloads a timestamped JSON backup; programmatic callers get the array in obj. This exports subscription configuration and inbound associations, not panel login accounts, orders or usage history.',
         response:
           '{\n  "success": true,\n  "obj": [\n    {\n      "client": {\n        "email": "alice@example.com",\n        "id": "...",\n        "totalGB": 53687091200,\n        "expiryTime": 0,\n        "limitHwid": 2,\n        "enable": true,\n        "subId": "..."\n      },\n      "inboundIds": [7, 9]\n    }\n  ]\n}',
       },
@@ -1597,6 +1797,86 @@ export const sections: readonly Section[] = [
   },
 
   {
+    id: 'cluster',
+    title: 'Primary handoff and unified login',
+    description:
+      'Opt-in manual handoff for a fixed set of direct nodes. All nodes must use verified HTTPS, the same panel base path and database schema, full inbound synchronization, and admin API tokens. Browser sessions and subscriptions follow the current primary. Only one primary writes fleet data; interrupted transfers must be resumed. Membership and site connection settings are locked while enrolled; account security and ordinary preferences remain editable. Snapshot limit: 8 MiB. This does not provide offline election or automatic failover.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/cluster/status',
+        summary:
+          'Administrator-only public cluster status, membership, epoch and pending operation. Never includes credentials or snapshots.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/cluster/initialize',
+        summary:
+          'Validate and enroll the configured direct nodes, using this panel as the initial primary. Nodes with independent business records, non-admin panel users, child nodes, or Telegram, Discord or LDAP management must be reconciled first.',
+        params: [
+          {
+            name: 'url',
+            in: 'body (json)',
+            type: 'string',
+            desc: 'Reachable HTTPS URL of this panel, including its base path.',
+          },
+          {
+            name: 'allowPrivate',
+            in: 'body (json)',
+            type: 'boolean',
+            optional: true,
+            desc: 'Allow other nodes to connect to this panel over a private address.',
+          },
+        ],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/cluster/transfer',
+        summary:
+          'Freeze management writes, stage a business-data snapshot, demote the current primary, then activate the selected member. Existing destination sessions are invalidated. Reauthenticate after completion.',
+        params: [
+          {
+            name: 'target',
+            in: 'body (json)',
+            type: 'string',
+            desc: 'Stable GUID of the enrolled member to promote.',
+          },
+        ],
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/cluster/resume',
+        summary:
+          'Resume the durable enrollment or transfer journal on the initiating primary. Safe to retry after a lost response; never reactivates the former primary.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/cluster/abort',
+        summary:
+          'Cancel a frozen transfer only before committing the new epoch. Once committing begins, use resume instead.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/cluster/rpc',
+        summary:
+          'Internal cluster transport. Requires an admin bearer token; browser sessions, monitor tokens and node-sync tokens are rejected. State and snapshot payloads are sensitive and must not be logged.',
+        security: [{ bearerAuth: [] }],
+        params: [
+          {
+            name: 'action',
+            in: 'body (json)',
+            type: 'string',
+            enum: ['inspect', 'join', 'freeze', 'stage', 'follow', 'activate', 'abort', 'transfer'],
+          },
+          { name: 'state', in: 'body (json)', type: 'object', optional: true },
+          { name: 'snapshot', in: 'body (json)', type: 'object', optional: true },
+          { name: 'target', in: 'body (json)', type: 'string', optional: true },
+        ],
+      },
+    ],
+  },
+
+  {
     id: 'nodes',
     title: 'Nodes',
     description:
@@ -1883,6 +2163,57 @@ export const sections: readonly Section[] = [
           'Validate any regular expression with the backend Go RE2 compiler without saving it.',
         body: '{\n  "regex": "(?m)^general-purpose$"\n}',
         response: '{\n  "success": true,\n  "msg": ""\n}',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/setting/session',
+        summary: 'Return the signed-in panel account, role key, and accessible pages.',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/setting/users',
+        summary: 'List panel accounts. Admin only. Passwords are not included.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/setting/users',
+        summary:
+          'Create a panel user with a built-in or custom role. Role defaults to user. Admin only.',
+        body: '{\n  "username": "ops",\n  "password": "secret",\n  "role": "user"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/setting/users/name/:id',
+        summary: 'Update a panel account username. Admin only.',
+        body: '{\n  "username": "ops-renamed"\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/setting/users/role/:id',
+        summary: 'Change a panel account role. The last admin cannot be demoted. Admin only.',
+        body: '{\n  "role": "user"\n}',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/setting/roles',
+        summary: 'List built-in and custom roles with accessible page paths. Admin only.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/setting/roles',
+        summary: 'Create a custom role with selected accessible pages. Admin only.',
+        body: '{\n  "name": "Operations",\n  "pages": ["/inbounds", "/clients"]\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/setting/roles/:key',
+        summary: 'Update a custom role name and page permissions. Admin only.',
+        body: '{\n  "name": "Operations",\n  "pages": ["/inbounds", "/clients"]\n}',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/setting/roles/delete/:key',
+        summary: 'Delete an unassigned custom role. Admin only.',
       },
       {
         method: 'POST',

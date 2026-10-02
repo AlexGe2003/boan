@@ -13,6 +13,10 @@ import (
 	"gorm.io/gorm"
 )
 
+func validSubscriberPassword(password string) bool {
+	return password == "user" || (len(password) >= 8 && len(password) <= 72)
+}
+
 // clientAccount configures the login belonging to a single subscription identity.
 func (a *ClientController) clientAccount(c *gin.Context) {
 	current := session.GetLoginUser(c)
@@ -59,8 +63,8 @@ func (a *ClientController) clientAccount(c *gin.Context) {
 			return errors.New("首次开通需要设置登录密码")
 		}
 		if form.Password != "" {
-			if len(form.Password) < 8 {
-				return errors.New("登录密码至少需要 8 个字符")
+			if !validSubscriberPassword(form.Password) {
+				return errors.New("使用默认密码 user，或设置 8–72 字节的密码")
 			}
 			hashed, err := crypto.HashPasswordAsBcrypt(form.Password)
 			if err != nil {

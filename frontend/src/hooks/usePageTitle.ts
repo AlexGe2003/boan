@@ -30,9 +30,11 @@ export function usePageTitle() {
           ? '工单服务'
           : pathname === '/plans'
             ? '订阅套餐'
-            : key
-              ? t(key)
-              : '3X-UI';
+            : pathname === '/group-buy'
+              ? '拼团节点'
+              : key
+                ? t(key)
+                : '3X-UI';
     const host = window.location.hostname;
     document.title = host ? `${host} - ${title}` : title;
   }, [pathname, hash, t]);

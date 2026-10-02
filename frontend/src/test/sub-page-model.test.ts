@@ -75,13 +75,13 @@ describe('detectPlatform', () => {
     ],
     [
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/17.5 Safari/605.1.15',
-      'ios',
+      'macos',
     ],
     [
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/128.0 Safari/537.36',
-      'android',
+      'windows',
     ],
-    ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/128.0 Safari/537.36', 'android'],
+    ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/128.0 Safari/537.36', 'windows'],
   ])('%s -> %s', (ua, want) => {
     expect(detectPlatform(ua)).toBe(want);
   });
@@ -92,8 +92,8 @@ describe('buildSubApps', () => {
   const encSub = encodeURIComponent(subUrl);
   const sub = { subUrl, sId: 'abc', subTitle: 'Nova Net' };
 
-  it('offers Android and iOS app lists only', () => {
-    expect(Object.keys(buildSubApps(sub))).toEqual(['android', 'ios']);
+  it('covers desktop and mobile platforms', () => {
+    expect(Object.keys(buildSubApps(sub))).toEqual(['windows', 'macos', 'android', 'ios']);
   });
 
   it('gives every Android app a one-tap import link', () => {

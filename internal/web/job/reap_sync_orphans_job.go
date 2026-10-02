@@ -2,6 +2,7 @@ package job
 
 import (
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
@@ -16,6 +17,12 @@ func NewReapSyncOrphansJob() *ReapSyncOrphansJob {
 }
 
 func (j *ReapSyncOrphansJob) Run() {
+	release, allowed := cluster.BeginJob(false)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	reaped, err := j.clientService.ReapSyncOrphans()
 	if err != nil {
 		logger.Warning("reap sync orphans failed:", err)

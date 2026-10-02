@@ -7,14 +7,12 @@ import {
   ClockCircleOutlined,
   CustomerServiceOutlined,
   LinkOutlined,
-  UnorderedListOutlined,
 } from '@ant-design/icons';
 
 import { ClipboardManager, LanguageManager } from '@/utils';
 import { setMessageInstance } from '@/utils/messageBus';
 import { useTheme } from '@/hooks/useTheme';
 import SubAppsTab from './SubAppsTab';
-import SubConfigsTab from './SubConfigsTab';
 import SubHeader from './SubHeader';
 import SubHero from './SubHero';
 import SubLinksTab from './SubLinksTab';
@@ -31,7 +29,6 @@ const subTitle = subData.subTitle || '';
 const subSupportUrl = subData.subSupportUrl || '';
 const updateHours = Number(subData.subUpdates || 0);
 const announce = subData.announce || '';
-const links: string[] = Array.isArray(subData.links) ? subData.links : [];
 const linkEmails: string[] = Array.isArray(subData.emails) ? subData.emails : [];
 const totalByte = Number(subData.totalByte || 0);
 const usedByte =
@@ -126,20 +123,7 @@ export default function SubPage() {
         key: 'apps',
         icon: <AppstoreOutlined />,
         label: t('subscription.tabApps'),
-        children: <SubAppsTab apps={apps} initialPlatform={initialPlatform} onOpen={open} />,
-      });
-    }
-    if (links.length > 0) {
-      items.push({
-        key: 'configs',
-        icon: <UnorderedListOutlined />,
-        label: (
-          <>
-            {t('subscription.tabConfigs')}
-            <span className="sub-tab-count">{links.length}</span>
-          </>
-        ),
-        children: <SubConfigsTab links={links} onCopy={copy} />,
+        children: <SubAppsTab apps={apps} initialPlatform={initialPlatform} onOpen={open} onCopy={copy} subUrl={subUrl} subClashUrl={subClashUrl} />,
       });
     }
     return items;

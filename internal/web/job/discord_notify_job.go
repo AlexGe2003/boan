@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/discord"
 )
@@ -27,6 +28,12 @@ func NewDiscordNotifyJob(discordService *discord.DiscordService) *DiscordNotifyJ
 
 // Run executes the periodic status report if Discord bot is enabled and Xray is running.
 func (j *DiscordNotifyJob) Run() {
+	release, allowed := cluster.BeginJob(true)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	if j.discordService == nil {
 		return
 	}

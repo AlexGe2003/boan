@@ -27,6 +27,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/util/reflect_util"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/totp"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/entity"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/geoblock"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray/dnsconf"
 )
@@ -76,6 +77,7 @@ var defaultValueMap = map[string]string{
 	"trustedProxyCIDRs":           DefaultTrustedProxyCIDRs,
 	"realityScanCandidates":       DefaultRealityScanCandidatesCSV,
 	"ipLimitAllowlist":            "",
+	"websiteGeoBlockEnable":       "false",
 	"pageSize":                    "25",
 	"expireDiff":                  "0",
 	"trafficDiff":                 "0",
@@ -104,7 +106,7 @@ var defaultValueMap = map[string]string{
 	"subJsonAutoDetect":           "false",
 	"subJsonAlwaysArray":          "false",
 	"subJsonUserAgentRegex":       "",
-	"subClashAutoDetect":          "false",
+	"subClashAutoDetect":          "true",
 	"subClashUserAgentRegex":      "",
 	"subTitle":                    "",
 	"subSupportUrl":               "",
@@ -150,7 +152,7 @@ var defaultValueMap = map[string]string{
 	"subURI":                      "",
 	"subJsonPath":                 "/json/",
 	"subJsonURI":                  "",
-	"subClashEnable":              "false",
+	"subClashEnable":              "true",
 	"subClashPath":                "/clash/",
 	"subClashURI":                 "",
 	"subClashEnableRouting":       "false",
@@ -1489,6 +1491,11 @@ type SecretClears struct {
 }
 
 func (s *SettingService) UpdateAllSetting(allSetting *entity.AllSetting, clears SecretClears) error {
+	if allSetting.WebsiteGeoBlockEnable {
+		if err := (&geoblock.Matcher{}).Load(xray.GetGeoipPath()); err != nil {
+			return fmt.Errorf("cannot enable website region block: %w", err)
+		}
+	}
 	switch allSetting.SubProfileMode {
 	case "", SubProfileModeNone, SubProfileModeBuiltin, SubProfileModeCustom:
 		allSetting.SubProfileMode = effectiveSubProfileMode(allSetting.SubProfileMode, allSetting.SubProfileUrl)
@@ -1508,6 +1515,9 @@ func (s *SettingService) UpdateAllSetting(allSetting *entity.AllSetting, clears 
 		return err
 	}
 	if err := allSetting.CheckValid(); err != nil {
+		return err
+	}
+	if err := s.validateClusterSettings(allSetting); err != nil {
 		return err
 	}
 
@@ -1545,6 +1555,10 @@ func (s *SettingService) UpdateAllSetting(allSetting *entity.AllSetting, clears 
 		}
 		return nil
 	})
+}
+
+func (s *SettingService) GetWebsiteGeoBlockEnable() (bool, error) {
+	return s.getBool("websiteGeoBlockEnable")
 }
 
 func validateSubUserAgentRegexes(allSetting *entity.AllSetting) error {

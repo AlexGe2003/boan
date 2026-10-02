@@ -105,7 +105,7 @@
     "qrTitle": "掃描。匯入。連線。",
     "qrHint": "使用用戶端應用程式掃描。請勿外洩此 QR 碼。",
     "saveQr": "儲存 QR 碼",
-    "tabConfigs": "設定檔"
+    "desktopImportHint": "Copy a subscription URL and paste it into your app's Add subscription or Import from URL action. Use the dedicated profile URL for Clash / Mihomo."
   },
   "menu": {
     "theme": "主題",
@@ -615,6 +615,7 @@
         "minClientVer": "最小客戶端版本",
         "maxClientVer": "最大客戶端版本",
         "minClientVerHint": "留空表示不設下限：Xray-core 接受任何客戶端版本，包括 Mihomo、sing-box 等第三方核心。填寫版本可拒絕自報版本較低的客戶端。",
+        "shadowrocketRealityHint": "Xray-core 26.9.8 及更新版本上，小火箭連不上 REALITY，因此這條入站不會出現在小火箭訂閱裡。請給這些使用者另建 TLS、VMess、Trojan 或 Hysteria2 入站。Clash 和 Mihomo 仍會收到這條入站，並預設啟用 ML-KEM。",
         "maxClientVerHint": "留空表示無上限。若填寫，不得低於最小客戶端版本，否則所有客戶端都會被拒絕。",
         "clientVerInvalid": "客戶端版本須為最多三段以點分隔的數字，每段 0-255（例如 26.3.27）",
         "maxClientVerBelowMin": "最大客戶端版本不得低於最小客戶端版本",
@@ -708,10 +709,7 @@
         "peerNumberConfig": "Peer {n} 設定"
       },
       "sniffingDestOverride": "目標覆寫",
-      "advancedTitle": "進階設定",
-      "streamSettings": {
-        "reality": {}
-      }
+      "advancedTitle": "進階設定"
     },
     "clients": {
       "tabBasics": "基本",
@@ -1499,6 +1497,8 @@
       "calendarJalalian": "Jalalian (شمسی)",
       "ipLimitAllowlist": "IP 限制白名單",
       "ipLimitAllowlistDesc": "IP 限制永遠不會計入也不會封鎖的位址與網段，避免辦公室或校園的共用位址耗盡客戶端的額度。IP/CIDR(逗號分隔)。",
+      "websiteGeoBlockEnable": "依地區封鎖網站訪客",
+      "websiteGeoBlockEnableDesc": "對來源 IP 屬於中國大陸、香港、澳門或台灣的訪客，在面板和訂閱網站回傳 403。依本機 geoip.dat 判斷；反向代理請設定可信代理 CIDR。不影響代理節點連線。",
       "subBalancers": {
         "menu": "訂閱平衡器",
         "title": "訂閱平衡器",
@@ -2622,5 +2622,34 @@
     "offlineMetrics": "Live metrics are unavailable while this node is offline",
     "lastHeartbeatShort": "Heartbeat {time}"
   },
-  "subscriptions": {}
+  "subscriptions": {},
+  "adminOverview": {
+    "title": "管理概览",
+    "admin": "管理后台",
+    "subtitle": "服务经营与日常处理，一处掌握。",
+    "users": "订阅用户",
+    "online": "{count} 位在线",
+    "plans": "已启用套餐",
+    "orders": "待确认订单",
+    "tickets": "待处理工单",
+    "manageUsers": "用户管理",
+    "managePlans": "套餐管理",
+    "confirmOrders": "核实收款与开通服务",
+    "ticketWindow": "工单统计范围：最近 200 条",
+    "loadError": "部分经营数据加载失败，可刷新重试。",
+    "shortcuts": "常用管理",
+    "attention": "待办事项",
+    "viewTickets": "查看工单",
+    "userHint": "开通账号、分配套餐与查看访问概览",
+    "planHint": "设置流量额度与多周期价格",
+    "nodeGroups": "节点分组",
+    "groupHint": "组织线路并关联套餐",
+    "monitor": "节点监控",
+    "monitorHint": "检查节点状态与网络连接",
+    "noTickets": "当前没有待处理工单",
+    "operations": "服务管理",
+    "infrastructure": "节点与网络",
+    "system": "系统配置",
+    "runtime": "系统运行"
+  }
 }

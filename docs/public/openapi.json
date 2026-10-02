@@ -26,6 +26,65 @@
       }
     },
     "schemas": {
+      "ActivityCategory": {
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "count",
+          "name"
+        ],
+        "type": "object"
+      },
+      "ActivityDestination": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "host": {
+            "type": "string"
+          },
+          "lastSeen": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "category",
+          "count",
+          "host",
+          "lastSeen"
+        ],
+        "type": "object"
+      },
+      "ActivityVisit": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "time": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "category",
+          "host",
+          "time"
+        ],
+        "type": "object"
+      },
       "AllSetting": {
         "properties": {
           "datepicker": {
@@ -504,6 +563,9 @@
             "maximum": 65535,
             "minimum": 1,
             "type": "integer"
+          },
+          "websiteGeoBlockEnable": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -653,7 +715,8 @@
           "webDomain",
           "webKeyFile",
           "webListen",
-          "webPort"
+          "webPort",
+          "websiteGeoBlockEnable"
         ],
         "type": "object"
       },
@@ -1159,6 +1222,9 @@
             "maximum": 65535,
             "minimum": 1,
             "type": "integer"
+          },
+          "websiteGeoBlockEnable": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -1316,7 +1382,8 @@
           "webDomain",
           "webKeyFile",
           "webListen",
-          "webPort"
+          "webPort",
+          "websiteGeoBlockEnable"
         ],
         "type": "object"
       },
@@ -1596,6 +1663,67 @@
           "subId",
           "tgId",
           "totalGB"
+        ],
+        "type": "object"
+      },
+      "ClientActivity": {
+        "properties": {
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityCategory"
+            },
+            "type": "array"
+          },
+          "connections": {
+            "type": "integer"
+          },
+          "demo": {
+            "type": "boolean"
+          },
+          "destinations": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityDestination"
+            },
+            "type": "array"
+          },
+          "generatedAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "recent": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityVisit"
+            },
+            "type": "array"
+          },
+          "sampled": {
+            "type": "boolean"
+          },
+          "since": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "visits": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityVisit"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "categories",
+          "connections",
+          "demo",
+          "destinations",
+          "generatedAt",
+          "recent",
+          "sampled",
+          "since",
+          "status",
+          "visits"
         ],
         "type": "object"
       },
@@ -3368,6 +3496,235 @@
         ],
         "type": "object"
       },
+      "NodeGroup": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "NodeGroupBuyConfig": {
+        "description": "Resource and pricing records are operator metadata, not measured limits or payment receipts.",
+        "properties": {
+          "bandwidthMbps": {
+            "example": 1000,
+            "type": "integer"
+          },
+          "bandwidthMode": {
+            "example": "shared",
+            "type": "string"
+          },
+          "expiresAt": {
+            "example": 1793505600000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "feeMode": {
+            "example": "percent",
+            "type": "string"
+          },
+          "feeValue": {
+            "example": 1000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "groupName": {
+            "example": "香港美国拼团",
+            "type": "string"
+          },
+          "memberCount": {
+            "example": 10,
+            "type": "integer"
+          },
+          "monthlyPrice": {
+            "example": 10000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "monthlyTraffic": {
+            "example": 1099511627776,
+            "format": "int64",
+            "type": "integer"
+          },
+          "nodeId": {
+            "example": 1,
+            "type": "integer"
+          },
+          "notes": {
+            "example": "每月分摊，双向计费",
+            "type": "string"
+          },
+          "provider": {
+            "example": "演示供应商",
+            "type": "string"
+          },
+          "region": {
+            "example": "香港",
+            "type": "string"
+          },
+          "updatedAt": {
+            "example": 1790800500000,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bandwidthMbps",
+          "bandwidthMode",
+          "expiresAt",
+          "feeMode",
+          "feeValue",
+          "groupName",
+          "memberCount",
+          "monthlyPrice",
+          "monthlyTraffic",
+          "nodeId",
+          "notes",
+          "provider",
+          "region",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "NodeGroupBuyItem": {
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/NodeGroupBuyConfig"
+          },
+          "configured": {
+            "example": true,
+            "type": "boolean"
+          },
+          "expiryStatus": {
+            "example": "active",
+            "type": "string"
+          },
+          "monthlyFee": {
+            "example": 1000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "monthlyTotal": {
+            "example": 11000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "example": "香港节点",
+            "type": "string"
+          },
+          "nodeId": {
+            "example": 1,
+            "type": "integer"
+          },
+          "perMember": {
+            "example": 1100,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "config",
+          "configured",
+          "expiryStatus",
+          "monthlyFee",
+          "monthlyTotal",
+          "name",
+          "nodeId",
+          "perMember"
+        ],
+        "type": "object"
+      },
+      "NodeGroupBuyReport": {
+        "properties": {
+          "checkedAt": {
+            "example": 1790800500000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "dueSoon": {
+            "example": 1,
+            "type": "integer"
+          },
+          "expired": {
+            "example": 0,
+            "type": "integer"
+          },
+          "monthlyCost": {
+            "example": 10000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "monthlyFee": {
+            "example": 1000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "monthlyTotal": {
+            "example": 11000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/NodeGroupBuyItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "checkedAt",
+          "dueSoon",
+          "expired",
+          "monthlyCost",
+          "monthlyFee",
+          "monthlyTotal",
+          "nodes"
+        ],
+        "type": "object"
+      },
+      "NodeGroupView": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "inboundIds": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "planCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "description",
+          "id",
+          "inboundIds",
+          "name",
+          "planCount"
+        ],
+        "type": "object"
+      },
       "NodeMutationRequest": {
         "description": "NodeMutationRequest is the node write/probe contract. ApiToken is accepted\nonly as input. On update, nil means keep the stored token; replacement and\nclearing are explicit and mutually exclusive.",
         "properties": {
@@ -3677,6 +4034,29 @@
         ],
         "type": "object"
       },
+      "OrderPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceOrder"
+            },
+            "type": "array"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "page",
+          "total"
+        ],
+        "type": "object"
+      },
       "OutboundTraffics": {
         "description": "OutboundTraffics tracks traffic statistics for Xray outbound connections.",
         "properties": {
@@ -3796,6 +4176,29 @@
           "online",
           "tag",
           "up"
+        ],
+        "type": "object"
+      },
+      "PlanPrice": {
+        "properties": {
+          "amount": {
+            "example": 990,
+            "format": "int64",
+            "type": "integer"
+          },
+          "days": {
+            "example": 30,
+            "type": "integer"
+          },
+          "period": {
+            "example": "monthly",
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount",
+          "days",
+          "period"
         ],
         "type": "object"
       },
@@ -4115,6 +4518,411 @@
         ],
         "type": "object"
       },
+      "ServerUsageBillingRequest": {
+        "properties": {
+          "multiplier": {
+            "example": 2,
+            "type": "integer"
+          },
+          "nodeId": {
+            "example": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "multiplier",
+          "nodeId"
+        ],
+        "type": "object"
+      },
+      "ServerUsageControlRequest": {
+        "properties": {
+          "adjustUsage": {
+            "example": false,
+            "type": "boolean"
+          },
+          "basis": {
+            "example": "proxy",
+            "type": "string"
+          },
+          "email": {
+            "example": "alice",
+            "type": "string"
+          },
+          "nodeId": {
+            "example": 1,
+            "type": "integer"
+          },
+          "quota": {
+            "example": 107374182400,
+            "format": "int64",
+            "type": "integer"
+          },
+          "used": {
+            "example": 21474836480,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "adjustUsage",
+          "basis",
+          "email",
+          "nodeId",
+          "quota",
+          "used"
+        ],
+        "type": "object"
+      },
+      "ServerUsageReport": {
+        "properties": {
+          "billableTotal": {
+            "example": 10737418240,
+            "type": "number"
+          },
+          "generatedAt": {
+            "example": 1790800500000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "servers": {
+            "items": {
+              "$ref": "#/components/schemas/ServerUsageSummary"
+            },
+            "type": "array"
+          },
+          "total": {
+            "example": 5368709120,
+            "format": "int64",
+            "type": "integer"
+          },
+          "truncated": {
+            "example": false,
+            "type": "boolean"
+          },
+          "userCount": {
+            "example": 3,
+            "type": "integer"
+          },
+          "users": {
+            "items": {
+              "$ref": "#/components/schemas/ServerUsageUser"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "billableTotal",
+          "generatedAt",
+          "servers",
+          "total",
+          "truncated",
+          "userCount",
+          "users"
+        ],
+        "type": "object"
+      },
+      "ServerUsageSummary": {
+        "properties": {
+          "adjustment": {
+            "example": 1073741824,
+            "format": "int64",
+            "type": "integer"
+          },
+          "billable": {
+            "example": 6442450944,
+            "type": "number"
+          },
+          "billingMultiplier": {
+            "example": 2,
+            "type": "integer"
+          },
+          "billingShare": {
+            "example": 75,
+            "type": "number"
+          },
+          "down": {
+            "example": 2147483648,
+            "format": "int64",
+            "type": "integer"
+          },
+          "exceeded": {
+            "example": false,
+            "type": "boolean"
+          },
+          "local": {
+            "example": false,
+            "type": "boolean"
+          },
+          "name": {
+            "example": "香港节点",
+            "type": "string"
+          },
+          "nodeId": {
+            "example": 1,
+            "type": "integer"
+          },
+          "quota": {
+            "example": 107374182400,
+            "format": "int64",
+            "type": "integer"
+          },
+          "quotaBasis": {
+            "example": "proxy",
+            "type": "string"
+          },
+          "quotaUsed": {
+            "example": 4294967296,
+            "type": "number"
+          },
+          "recorded": {
+            "example": 3221225472,
+            "format": "int64",
+            "type": "integer"
+          },
+          "remaining": {
+            "example": 103079215104,
+            "type": "number"
+          },
+          "share": {
+            "example": 60,
+            "type": "number"
+          },
+          "startedAt": {
+            "example": 1790800000000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "unattributed": {
+            "example": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "up": {
+            "example": 1073741824,
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "example": 1790800500000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "used": {
+            "example": 3221225472,
+            "format": "int64",
+            "type": "integer"
+          },
+          "users": {
+            "example": 3,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "adjustment",
+          "billable",
+          "billingMultiplier",
+          "billingShare",
+          "down",
+          "exceeded",
+          "local",
+          "name",
+          "nodeId",
+          "quota",
+          "quotaBasis",
+          "quotaUsed",
+          "recorded",
+          "remaining",
+          "share",
+          "startedAt",
+          "unattributed",
+          "up",
+          "updatedAt",
+          "used",
+          "users"
+        ],
+        "type": "object"
+      },
+      "ServerUsageUser": {
+        "properties": {
+          "adjustment": {
+            "example": 1073741824,
+            "format": "int64",
+            "type": "integer"
+          },
+          "billable": {
+            "example": 6442450944,
+            "type": "number"
+          },
+          "down": {
+            "example": 2147483648,
+            "format": "int64",
+            "type": "integer"
+          },
+          "email": {
+            "example": "alice",
+            "type": "string"
+          },
+          "exceeded": {
+            "example": false,
+            "type": "boolean"
+          },
+          "quota": {
+            "example": 107374182400,
+            "format": "int64",
+            "type": "integer"
+          },
+          "quotaBasis": {
+            "example": "proxy",
+            "type": "string"
+          },
+          "quotaUsed": {
+            "example": 4294967296,
+            "type": "number"
+          },
+          "recorded": {
+            "example": 3221225472,
+            "format": "int64",
+            "type": "integer"
+          },
+          "remaining": {
+            "example": 103079215104,
+            "type": "number"
+          },
+          "share": {
+            "example": 60,
+            "type": "number"
+          },
+          "startedAt": {
+            "example": 1790800000000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "up": {
+            "example": 1073741824,
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "example": 1790800500000,
+            "format": "int64",
+            "type": "integer"
+          },
+          "used": {
+            "example": 3221225472,
+            "format": "int64",
+            "type": "integer"
+          },
+          "username": {
+            "example": "alice",
+            "type": "string"
+          }
+        },
+        "required": [
+          "adjustment",
+          "billable",
+          "down",
+          "email",
+          "exceeded",
+          "quota",
+          "quotaBasis",
+          "quotaUsed",
+          "recorded",
+          "remaining",
+          "share",
+          "startedAt",
+          "up",
+          "updatedAt",
+          "used",
+          "username"
+        ],
+        "type": "object"
+      },
+      "ServiceOrder": {
+        "properties": {
+          "amount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "completedAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "createdAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "durationDays": {
+            "type": "integer"
+          },
+          "expiresAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "paidAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "paidBy": {
+            "type": "integer"
+          },
+          "paymentNote": {
+            "type": "string"
+          },
+          "period": {
+            "type": "string"
+          },
+          "planId": {
+            "type": "integer"
+          },
+          "planName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetExpiry": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "userId": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "amount",
+          "completedAt",
+          "createdAt",
+          "currency",
+          "durationDays",
+          "expiresAt",
+          "id",
+          "kind",
+          "lastError",
+          "paidAt",
+          "paidBy",
+          "paymentNote",
+          "period",
+          "planId",
+          "planName",
+          "status",
+          "targetExpiry",
+          "userId"
+        ],
+        "type": "object"
+      },
       "Setting": {
         "description": "Setting stores key-value configuration settings for the 3x-ui panel.",
         "properties": {
@@ -4132,6 +4940,49 @@
           "id",
           "key",
           "value"
+        ],
+        "type": "object"
+      },
+      "StorePlan": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "limitHwid": {
+            "type": "integer"
+          },
+          "limitIp": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nodeCount": {
+            "type": "integer"
+          },
+          "prices": {
+            "items": {
+              "$ref": "#/components/schemas/PlanPrice"
+            },
+            "type": "array"
+          },
+          "totalGB": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "description",
+          "id",
+          "limitHwid",
+          "limitIp",
+          "name",
+          "nodeCount",
+          "prices",
+          "totalGB"
         ],
         "type": "object"
       },
@@ -4204,6 +5055,108 @@
           "sortOrder",
           "strategy",
           "updatedAt"
+        ],
+        "type": "object"
+      },
+      "SubscriptionPlan": {
+        "description": "SubscriptionPlan is a reusable service template. Applying it preserves each\nsubscriber's credentials and measured traffic.",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "durationDays": {
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "limitHwid": {
+            "type": "integer"
+          },
+          "limitIp": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "totalGB": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "description",
+          "durationDays",
+          "enabled",
+          "id",
+          "limitHwid",
+          "limitIp",
+          "name",
+          "totalGB"
+        ],
+        "type": "object"
+      },
+      "SubscriptionPlanView": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "durationDays": {
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "inboundIds": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "limitHwid": {
+            "type": "integer"
+          },
+          "limitIp": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nodeGroupIds": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "prices": {
+            "items": {
+              "$ref": "#/components/schemas/PlanPrice"
+            },
+            "type": "array"
+          },
+          "totalGB": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "description",
+          "durationDays",
+          "enabled",
+          "id",
+          "inboundIds",
+          "limitHwid",
+          "limitIp",
+          "name",
+          "nodeGroupIds",
+          "prices",
+          "totalGB"
         ],
         "type": "object"
       },
@@ -4315,12 +5268,15 @@
         "type": "object"
       },
       "User": {
-        "description": "User represents a user account in the 3x-ui panel.",
+        "description": "User represents a panel login. Role is a built-in or custom panel role key.",
         "properties": {
           "id": {
             "type": "integer"
           },
           "password": {
+            "type": "string"
+          },
+          "role": {
             "type": "string"
           },
           "username": {
@@ -4330,6 +5286,7 @@
         "required": [
           "id",
           "password",
+          "role",
           "username"
         ],
         "type": "object"
@@ -4378,6 +5335,10 @@
   ],
   "tags": [
     {
+      "name": "Subscription Business",
+      "description": "Administrators manage plans and node groups. Customers can create and cancel their own orders. Amounts are integer CNY cents. Only administrators can confirm offline receipts and retry service delivery. Renewals preserve measured traffic. Failed delivery retains its fixed expiry target for idempotent retries."
+    },
+    {
       "name": "Authentication",
       "description": "Two authentication modes are supported. UI sessions use a cookie set by the login endpoint. Programmatic clients (bots, scripts, remote panels) authenticate with a Bearer token taken from Settings → Security → API Token. Both work for every endpoint under /panel/api/*."
     },
@@ -4392,6 +5353,10 @@
     {
       "name": "Clients",
       "description": "Manage clients as first-class entities that can be attached to one or more inbounds. A single client row drives the settings.clients entry in every inbound it belongs to. Endpoints live under /panel/api/clients."
+    },
+    {
+      "name": "Primary handoff and unified login",
+      "description": "Opt-in manual handoff for a fixed set of direct nodes. All nodes must use verified HTTPS, the same panel base path and database schema, full inbound synchronization, and admin API tokens. Browser sessions and subscriptions follow the current primary. Only one primary writes fleet data; interrupted transfers must be resumed. Membership and site connection settings are locked while enrolled; account security and ordinary preferences remain editable. Snapshot limit: 8 MiB. This does not provide offline election or automatic failover."
     },
     {
       "name": "Nodes",
@@ -4431,6 +5396,1467 @@
     }
   ],
   "paths": {
+    "/panel/api/clients/account/{email}": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Read the subscription login account. Admin only.",
+        "operationId": "get_panel_api_clients_account_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Create or update the subscription login account. Admin only.",
+        "operationId": "post_panel_api_clients_account_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/activity/{email}": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Admin only. Local Xray accepted-connection activity by exact client email. Optional hours=1 or 24; reads at most the last 8 MiB. Domain categories and connection counts are approximate; no per-domain byte counts or live-session guarantees.",
+        "operationId": "get_panel_api_clients_activity_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ClientActivity"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "categories": [
+                      {
+                        "count": 0,
+                        "name": ""
+                      }
+                    ],
+                    "connections": 0,
+                    "demo": false,
+                    "destinations": [
+                      {
+                        "category": "",
+                        "count": 0,
+                        "host": "",
+                        "lastSeen": 0
+                      }
+                    ],
+                    "generatedAt": 0,
+                    "recent": [
+                      {
+                        "category": "",
+                        "host": "",
+                        "time": 0
+                      }
+                    ],
+                    "sampled": false,
+                    "since": 0,
+                    "status": "",
+                    "visits": [
+                      {
+                        "category": "",
+                        "host": "",
+                        "time": 0
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/mySubscriptions": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Read own subscription quota, expiry and links.",
+        "operationId": "get_panel_api_clients_mySubscriptions",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/usage": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Admin only. Observed lifetime client byte counters, manual corrections and budget status by directly connected node. Adjusted usage drives estimates and shares; raw uploaded/downloaded bytes remain intact. Omitting both filters returns all directly connected servers. Optional email shows a user distribution; nodeId (0 for local) shows the top 100 users. Billing estimates sum each server’s recorded bytes times its own multiplier. Shares use all recorded current users, including those outside the top 100. Counters start when observed and are retained across quota resets; baseline snapshots are not usage. Chained nodes are grouped under their directly connected parent.",
+        "operationId": "get_panel_api_nodes_usage",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ServerUsageReport"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "billableTotal": 10737418240,
+                    "generatedAt": 1790800500000,
+                    "servers": [
+                      {
+                        "adjustment": 1073741824,
+                        "billable": 6442450944,
+                        "billingMultiplier": 2,
+                        "billingShare": 75,
+                        "down": 2147483648,
+                        "exceeded": false,
+                        "local": false,
+                        "name": "香港节点",
+                        "nodeId": 1,
+                        "quota": 107374182400,
+                        "quotaBasis": "proxy",
+                        "quotaUsed": 4294967296,
+                        "recorded": 3221225472,
+                        "remaining": 103079215104,
+                        "share": 60,
+                        "startedAt": 1790800000000,
+                        "unattributed": 0,
+                        "up": 1073741824,
+                        "updatedAt": 1790800500000,
+                        "used": 3221225472,
+                        "users": 3
+                      }
+                    ],
+                    "total": 5368709120,
+                    "truncated": false,
+                    "userCount": 3,
+                    "users": [
+                      {
+                        "adjustment": 1073741824,
+                        "billable": 6442450944,
+                        "down": 2147483648,
+                        "email": "alice",
+                        "exceeded": false,
+                        "quota": 107374182400,
+                        "quotaBasis": "proxy",
+                        "quotaUsed": 4294967296,
+                        "recorded": 3221225472,
+                        "remaining": 103079215104,
+                        "share": 60,
+                        "startedAt": 1790800000000,
+                        "up": 1073741824,
+                        "updatedAt": 1790800500000,
+                        "used": 3221225472,
+                        "username": "alice"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/usage/billing": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Admin only. Set node billing estimation multiplier: 1 for recorded proxy bytes, 2 for relay ingress plus egress. Recalculates estimates for all recorded usage; never changes subscriber quota. This is not NIC telemetry or a provider invoice.",
+        "operationId": "post_panel_api_nodes_usage_billing",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerUsageBillingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/usage/control": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Admin only. Set a lifetime manual node budget (empty email) or user/node budget, with proxy or billing-estimate basis. Optional absolute usage correction preserves observed counters and subsequent deltas. Node totals cannot fall below attributed user totals. Budgets provide status only: no automatic disconnect or monthly reset; subscriber quota is unchanged.",
+        "operationId": "post_panel_api_nodes_usage_control",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerUsageControlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/group-buy": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Admin only. Node monthly cost, expiry, bandwidth and traffic metadata, planned group size and estimated monthly service fees. Amounts are CNY minor units. Estimates are not payment receipts or enforced bandwidth limits.",
+        "operationId": "get_panel_api_nodes_group_buy",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NodeGroupBuyReport"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "checkedAt": 1790800500000,
+                    "dueSoon": 1,
+                    "expired": 0,
+                    "monthlyCost": 10000,
+                    "monthlyFee": 1000,
+                    "monthlyTotal": 11000,
+                    "nodes": [
+                      {
+                        "config": {
+                          "bandwidthMbps": 1000,
+                          "bandwidthMode": "shared",
+                          "expiresAt": 1793505600000,
+                          "feeMode": "percent",
+                          "feeValue": 1000,
+                          "groupName": "香港美国拼团",
+                          "memberCount": 10,
+                          "monthlyPrice": 10000,
+                          "monthlyTraffic": 1099511627776,
+                          "nodeId": 1,
+                          "notes": "每月分摊，双向计费",
+                          "provider": "演示供应商",
+                          "region": "香港",
+                          "updatedAt": 1790800500000
+                        },
+                        "configured": true,
+                        "expiryStatus": "active",
+                        "monthlyFee": 1000,
+                        "monthlyTotal": 11000,
+                        "name": "香港节点",
+                        "nodeId": 1,
+                        "perMember": 1100
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Admin only. Save node group-buy metadata (0 for local). Fee mode fixed uses total monthly fee in CNY cents; percent uses basis points of monthly node cost. Expiry is Unix milliseconds; 0 means unset. Member prices round up to cents. Does not modify connection credentials, quotas or node availability.",
+        "operationId": "post_panel_api_nodes_group_buy",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NodeGroupBuyConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/nodes/monitor": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Read authorized node monitoring data.",
+        "operationId": "get_panel_api_nodes_monitor",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/users/migrationTargets": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "List legacy account migration targets. Admin only.",
+        "operationId": "get_panel_api_setting_users_migrationTargets",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/users/delete/{id}": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Delete a panel account. Admin only.",
+        "operationId": "post_panel_api_setting_users_delete_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/users/migrate/{id}": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Explicitly migrate a legacy account into a subscription account. Admin only.",
+        "operationId": "post_panel_api_setting_users_migrate_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/node-groups": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "List node resource groups and referenced plan counts.",
+        "operationId": "get_panel_api_node_groups",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/NodeGroupView"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "description": "",
+                      "id": 0,
+                      "inboundIds": [
+                        0
+                      ],
+                      "name": "",
+                      "planCount": 0
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/node-groups/save": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Create or update a resource group. Admin only.",
+        "operationId": "post_panel_api_node_groups_save",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/NodeGroupView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "description": "",
+                    "id": 0,
+                    "inboundIds": [
+                      0
+                    ],
+                    "name": "",
+                    "planCount": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/node-groups/delete": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Delete an unreferenced resource group. Admin only.",
+        "operationId": "post_panel_api_node_groups_delete",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/subscription-plans": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "List service templates and purchase prices. Admin only.",
+        "operationId": "get_panel_api_subscription_plans",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SubscriptionPlanView"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "description": "",
+                      "durationDays": 0,
+                      "enabled": false,
+                      "id": 0,
+                      "inboundIds": [
+                        0
+                      ],
+                      "limitHwid": 0,
+                      "limitIp": 0,
+                      "name": "",
+                      "nodeGroupIds": [
+                        0
+                      ],
+                      "prices": [
+                        {
+                          "amount": 990,
+                          "days": 30,
+                          "period": "monthly"
+                        }
+                      ],
+                      "totalGB": 0
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/subscription-plans/assignments": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "List assigned subscriptions. Admin only.",
+        "operationId": "get_panel_api_subscription_plans_assignments",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/subscription-plans/save": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Save a plan. Purchase periods are monthly, quarterly, half_yearly, yearly, two_yearly, three_yearly and onetime. Empty prices keep manual allocation only.",
+        "operationId": "post_panel_api_subscription_plans_save",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/SubscriptionPlanView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "description": "",
+                    "durationDays": 0,
+                    "enabled": false,
+                    "id": 0,
+                    "inboundIds": [
+                      0
+                    ],
+                    "limitHwid": 0,
+                    "limitIp": 0,
+                    "name": "",
+                    "nodeGroupIds": [
+                      0
+                    ],
+                    "prices": [
+                      {
+                        "amount": 990,
+                        "days": 30,
+                        "period": "monthly"
+                      }
+                    ],
+                    "totalGB": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/subscription-plans/delete": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Delete a plan without assigned users or outstanding orders. Admin only.",
+        "operationId": "post_panel_api_subscription_plans_delete",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/subscription-plans/subscribe": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Create a customer account, optionally allocating a plan. Admin only.",
+        "operationId": "post_panel_api_subscription_plans_subscribe",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/subscription-plans/apply": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Apply a plan to selected customer emails. Admin only.",
+        "operationId": "post_panel_api_subscription_plans_apply",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/commerce/plans": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "List enabled, purchasable plans with valid resources. Customers and admins.",
+        "operationId": "get_panel_api_commerce_plans",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/StorePlan"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": [
+                    {
+                      "description": "",
+                      "id": 0,
+                      "limitHwid": 0,
+                      "limitIp": 0,
+                      "name": "",
+                      "nodeCount": 0,
+                      "prices": [
+                        {
+                          "amount": 990,
+                          "days": 30,
+                          "period": "monthly"
+                        }
+                      ],
+                      "totalGB": 0
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/commerce/orders": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "List orders with page and status filters. Page size 50. Customers see only their own orders.",
+        "operationId": "get_panel_api_commerce_orders",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/OrderPage"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "items": [
+                      {
+                        "amount": 0,
+                        "completedAt": 0,
+                        "createdAt": 0,
+                        "currency": "",
+                        "durationDays": 0,
+                        "expiresAt": 0,
+                        "id": "",
+                        "kind": "",
+                        "lastError": "",
+                        "paidAt": 0,
+                        "paidBy": 0,
+                        "paymentNote": "",
+                        "period": "",
+                        "planId": 0,
+                        "planName": "",
+                        "status": "",
+                        "targetExpiry": 0,
+                        "userId": 0
+                      }
+                    ],
+                    "page": 0,
+                    "total": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Create a customer order using planId and period. The server determines price and keeps a snapshot. One outstanding order per customer.",
+        "operationId": "post_panel_api_commerce_orders",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ServiceOrder"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "amount": 0,
+                    "completedAt": 0,
+                    "createdAt": 0,
+                    "currency": "",
+                    "durationDays": 0,
+                    "expiresAt": 0,
+                    "id": "",
+                    "kind": "",
+                    "lastError": "",
+                    "paidAt": 0,
+                    "paidBy": 0,
+                    "paymentNote": "",
+                    "period": "",
+                    "planId": 0,
+                    "planName": "",
+                    "status": "",
+                    "targetExpiry": 0,
+                    "userId": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/commerce/orders/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Cancel an owned pending order. Admins can cancel any pending order.",
+        "operationId": "post_panel_api_commerce_orders_id_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/commerce/orders/{id}/confirm": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Confirm offline payment or retry paid service delivery. Admin only; note is required. Duplicate confirmations do not extend service again.",
+        "operationId": "post_panel_api_commerce_orders_id_confirm",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ServiceOrder"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "amount": 0,
+                    "completedAt": 0,
+                    "createdAt": 0,
+                    "currency": "",
+                    "durationDays": 0,
+                    "expiresAt": 0,
+                    "id": "",
+                    "kind": "",
+                    "lastError": "",
+                    "paidAt": 0,
+                    "paidBy": 0,
+                    "paymentNote": "",
+                    "period": "",
+                    "planId": 0,
+                    "planName": "",
+                    "status": "",
+                    "targetExpiry": 0,
+                    "userId": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/support/nodes": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "List the current customer node configuration states.",
+        "operationId": "get_panel_api_support_nodes",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/support/tickets": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "List tickets, scoped to the customer or all tickets for admins.",
+        "operationId": "get_panel_api_support_tickets",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Create a ticket using subject and body.",
+        "operationId": "post_panel_api_support_tickets",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/support/tickets/{id}": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Read an owned ticket and replies; admins can read all.",
+        "operationId": "get_panel_api_support_tickets_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/support/tickets/{id}/reply": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Reply to an owned open ticket using body.",
+        "operationId": "post_panel_api_support_tickets_id_reply",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/support/tickets/{id}/close": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Close an owned ticket.",
+        "operationId": "post_panel_api_support_tickets_id_close",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "tags": [
@@ -8553,7 +10979,7 @@
         "tags": [
           "Clients"
         ],
-        "summary": "Return every client as a {client, inboundIds} array — the same shape /bulkCreate and /import accept — so the payload round-trips straight back through /import. Clients with no inbound attachment are included with an empty inboundIds list. The UI shows this in a CodeMirror viewer (copy / download); programmatic callers get the array in obj.",
+        "summary": "Return every client as a {client, inboundIds} array — the same shape /bulkCreate and /import accept — so the payload round-trips straight back through /import. Clients with no inbound attachment are included with an empty inboundIds list. The administrator user page downloads a timestamped JSON backup; programmatic callers get the array in obj. This exports subscription configuration and inbound associations, not panel login accounts, orders or usage history.",
         "operationId": "get_panel_api_clients_export",
         "responses": {
           "200": {
@@ -10307,6 +12733,274 @@
             }
           }
         }
+      }
+    },
+    "/panel/api/cluster/status": {
+      "get": {
+        "tags": [
+          "Primary handoff and unified login"
+        ],
+        "summary": "Administrator-only public cluster status, membership, epoch and pending operation. Never includes credentials or snapshots.",
+        "operationId": "get_panel_api_cluster_status",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/cluster/initialize": {
+      "post": {
+        "tags": [
+          "Primary handoff and unified login"
+        ],
+        "summary": "Validate and enroll the configured direct nodes, using this panel as the initial primary. Nodes with independent business records, non-admin panel users, child nodes, or Telegram, Discord or LDAP management must be reconciled first.",
+        "operationId": "post_panel_api_cluster_initialize",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "Reachable HTTPS URL of this panel, including its base path."
+                  },
+                  "allowPrivate": {
+                    "type": "boolean",
+                    "description": "Allow other nodes to connect to this panel over a private address."
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/cluster/transfer": {
+      "post": {
+        "tags": [
+          "Primary handoff and unified login"
+        ],
+        "summary": "Freeze management writes, stage a business-data snapshot, demote the current primary, then activate the selected member. Existing destination sessions are invalidated. Reauthenticate after completion.",
+        "operationId": "post_panel_api_cluster_transfer",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "target": {
+                    "type": "string",
+                    "description": "Stable GUID of the enrolled member to promote."
+                  }
+                },
+                "required": [
+                  "target"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/cluster/resume": {
+      "post": {
+        "tags": [
+          "Primary handoff and unified login"
+        ],
+        "summary": "Resume the durable enrollment or transfer journal on the initiating primary. Safe to retry after a lost response; never reactivates the former primary.",
+        "operationId": "post_panel_api_cluster_resume",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/cluster/abort": {
+      "post": {
+        "tags": [
+          "Primary handoff and unified login"
+        ],
+        "summary": "Cancel a frozen transfer only before committing the new epoch. Once committing begins, use resume instead.",
+        "operationId": "post_panel_api_cluster_abort",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/cluster/rpc": {
+      "post": {
+        "tags": [
+          "Primary handoff and unified login"
+        ],
+        "summary": "Internal cluster transport. Requires an admin bearer token; browser sessions, monitor tokens and node-sync tokens are rejected. State and snapshot payloads are sensitive and must not be logged.",
+        "operationId": "post_panel_api_cluster_rpc",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "inspect",
+                      "join",
+                      "freeze",
+                      "stage",
+                      "follow",
+                      "activate",
+                      "abort",
+                      "transfer"
+                    ],
+                    "description": ""
+                  },
+                  "state": {
+                    "type": "object",
+                    "description": ""
+                  },
+                  "snapshot": {
+                    "type": "object",
+                    "description": ""
+                  },
+                  "target": {
+                    "type": "string",
+                    "description": ""
+                  }
+                },
+                "required": [
+                  "action"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/panel/api/nodes/list": {
@@ -12336,6 +15030,391 @@
                 "example": {
                   "success": true,
                   "msg": ""
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/session": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Return the signed-in panel account, role key, and accessible pages.",
+        "operationId": "get_panel_api_setting_session",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/users": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "List panel accounts. Admin only. Passwords are not included.",
+        "operationId": "get_panel_api_setting_users",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Create a panel user with a built-in or custom role. Role defaults to user. Admin only.",
+        "operationId": "post_panel_api_setting_users",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "username": "ops",
+                "password": "secret",
+                "role": "user"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/users/name/{id}": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Update a panel account username. Admin only.",
+        "operationId": "post_panel_api_setting_users_name_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "username": "ops-renamed"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/users/role/{id}": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Change a panel account role. The last admin cannot be demoted. Admin only.",
+        "operationId": "post_panel_api_setting_users_role_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "role": "user"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/roles": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "List built-in and custom roles with accessible page paths. Admin only.",
+        "operationId": "get_panel_api_setting_roles",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Create a custom role with selected accessible pages. Admin only.",
+        "operationId": "post_panel_api_setting_roles",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Operations",
+                "pages": [
+                  "/inbounds",
+                  "/clients"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/roles/{key}": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Update a custom role name and page permissions. Admin only.",
+        "operationId": "post_panel_api_setting_roles_key",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "Operations",
+                "pages": [
+                  "/inbounds",
+                  "/clients"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/setting/roles/delete/{key}": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Delete an unassigned custom role. Admin only.",
+        "operationId": "post_panel_api_setting_roles_delete_key",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
                 }
               }
             }

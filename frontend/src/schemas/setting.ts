@@ -19,6 +19,7 @@ export const AllSettingSchema = z
     trustedProxyCIDRs: z.string().optional(),
     realityScanCandidates: z.string().optional(),
     ipLimitAllowlist: z.string().optional(),
+    websiteGeoBlockEnable: z.boolean().optional(),
     panelOutbound: z.string().optional(),
     pageSize: z.number().int().min(0).max(1000).optional(),
     expireDiff: nonNegativeInt.optional(),

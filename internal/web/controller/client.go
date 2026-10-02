@@ -62,6 +62,7 @@ func (a *ClientController) initRouter(g *gin.RouterGroup) {
 	g.GET("/get/:email", a.get)
 	g.GET("/get/tgId/:tgId", a.getByTgId)
 	g.GET("/traffic/:email", a.getTrafficByEmail)
+	g.GET("/activity/:email", a.activity)
 	g.GET("/subLinks/:subId", a.guardSubID, a.getSubLinks)
 	g.GET("/links/:email", a.getClientLinks)
 	g.POST("/happLink/:id", a.generateHappLink)

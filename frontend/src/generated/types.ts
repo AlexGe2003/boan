@@ -7,6 +7,24 @@ export type staticEgressResolver = string;
 export type trafficLocalApplyAction = number;
 export type transportBits = number;
 
+export interface ActivityCategory {
+  count: number;
+  name: string;
+}
+
+export interface ActivityDestination {
+  category: string;
+  count: number;
+  host: string;
+  lastSeen: number;
+}
+
+export interface ActivityVisit {
+  category: string;
+  host: string;
+  time: number;
+}
+
 export interface AllSetting {
   datepicker: string;
   discordAdminIds: string;
@@ -155,6 +173,7 @@ export interface AllSetting {
   webKeyFile: string;
   webListen: string;
   webPort: number;
+  websiteGeoBlockEnable: boolean;
 }
 
 export interface AllSettingView {
@@ -313,6 +332,7 @@ export interface AllSettingView {
   webKeyFile: string;
   webListen: string;
   webPort: number;
+  websiteGeoBlockEnable: boolean;
 }
 
 export interface AmneziaWGLogs {
@@ -373,6 +393,19 @@ export interface Client {
   trafficReset?: string;
   trafficResetDay?: number;
   updated_at?: number;
+}
+
+export interface ClientActivity {
+  categories: ActivityCategory[];
+  connections: number;
+  demo: boolean;
+  destinations: ActivityDestination[];
+  generatedAt: number;
+  recent: ActivityVisit[];
+  sampled: boolean;
+  since: number;
+  status: string;
+  visits: ActivityVisit[];
 }
 
 export interface ClientInbound {
@@ -765,6 +798,58 @@ export interface Node {
   xrayVersion: string;
 }
 
+export interface NodeGroup {
+  description: string;
+  id: number;
+  name: string;
+}
+
+export interface NodeGroupBuyConfig {
+  bandwidthMbps: number;
+  bandwidthMode: string;
+  expiresAt: number;
+  feeMode: string;
+  feeValue: number;
+  groupName: string;
+  memberCount: number;
+  monthlyPrice: number;
+  monthlyTraffic: number;
+  nodeId: number;
+  notes: string;
+  provider: string;
+  region: string;
+  updatedAt: number;
+}
+
+export interface NodeGroupBuyItem {
+  config: NodeGroupBuyConfig;
+  configured: boolean;
+  expiryStatus: string;
+  monthlyFee: number;
+  monthlyTotal: number;
+  name: string;
+  nodeId: number;
+  perMember: number;
+}
+
+export interface NodeGroupBuyReport {
+  checkedAt: number;
+  dueSoon: number;
+  expired: number;
+  monthlyCost: number;
+  monthlyFee: number;
+  monthlyTotal: number;
+  nodes: NodeGroupBuyItem[];
+}
+
+export interface NodeGroupView {
+  description: string;
+  id: number;
+  inboundIds: number[];
+  name: string;
+  planCount: number;
+}
+
 export interface NodeMutationRequest {
   address: string;
   allowPrivateAddress: boolean;
@@ -828,6 +913,12 @@ export interface NodeView {
   xrayVersion: string;
 }
 
+export interface OrderPage {
+  items: ServiceOrder[];
+  page: number;
+  total: number;
+}
+
 export interface OutboundTraffics {
   down: number;
   id: number;
@@ -854,6 +945,12 @@ export interface PeerActivity {
   online: boolean;
   tag: string;
   up: number;
+}
+
+export interface PlanPrice {
+  amount: number;
+  days: number;
+  period: string;
 }
 
 export interface ProbeResultUI {
@@ -933,10 +1030,109 @@ export interface ServerSettings {
   subnetIp: string;
 }
 
+export interface ServerUsageBillingRequest {
+  multiplier: number;
+  nodeId: number;
+}
+
+export interface ServerUsageControlRequest {
+  adjustUsage: boolean;
+  basis: string;
+  email: string;
+  nodeId: number;
+  quota: number;
+  used: number;
+}
+
+export interface ServerUsageReport {
+  billableTotal: number;
+  generatedAt: number;
+  servers: ServerUsageSummary[];
+  total: number;
+  truncated: boolean;
+  userCount: number;
+  users: ServerUsageUser[];
+}
+
+export interface ServerUsageSummary {
+  adjustment: number;
+  billable: number;
+  billingMultiplier: number;
+  billingShare: number;
+  down: number;
+  exceeded: boolean;
+  local: boolean;
+  name: string;
+  nodeId: number;
+  quota: number;
+  quotaBasis: string;
+  quotaUsed: number;
+  recorded: number;
+  remaining: number;
+  share: number;
+  startedAt: number;
+  unattributed: number;
+  up: number;
+  updatedAt: number;
+  used: number;
+  users: number;
+}
+
+export interface ServerUsageUser {
+  adjustment: number;
+  billable: number;
+  down: number;
+  email: string;
+  exceeded: boolean;
+  quota: number;
+  quotaBasis: string;
+  quotaUsed: number;
+  recorded: number;
+  remaining: number;
+  share: number;
+  startedAt: number;
+  up: number;
+  updatedAt: number;
+  used: number;
+  username: string;
+}
+
+export interface ServiceOrder {
+  amount: number;
+  completedAt: number;
+  createdAt: number;
+  currency: string;
+  durationDays: number;
+  expiresAt: number;
+  id: string;
+  kind: string;
+  lastError: string;
+  paidAt: number;
+  paidBy: number;
+  paymentNote: string;
+  period: string;
+  planId: number;
+  planName: string;
+  status: string;
+  targetExpiry: number;
+  userId: number;
+}
+
 export interface Setting {
   id: number;
   key: string;
   value: string;
+}
+
+export interface StorePlan {
+  description: string;
+  id: number;
+  limitHwid: number;
+  limitIp: number;
+  name: string;
+  nodeCount: number;
+  prices: PlanPrice[];
+  totalGB: number;
 }
 
 export interface SubBalancer {
@@ -949,6 +1145,31 @@ export interface SubBalancer {
   sortOrder: number;
   strategy: string;
   updatedAt: number;
+}
+
+export interface SubscriptionPlan {
+  description: string;
+  durationDays: number;
+  enabled: boolean;
+  id: number;
+  limitHwid: number;
+  limitIp: number;
+  name: string;
+  totalGB: number;
+}
+
+export interface SubscriptionPlanView {
+  description: string;
+  durationDays: number;
+  enabled: boolean;
+  id: number;
+  inboundIds: number[];
+  limitHwid: number;
+  limitIp: number;
+  name: string;
+  nodeGroupIds: number[];
+  prices: PlanPrice[];
+  totalGB: number;
 }
 
 export interface Traffic {
@@ -982,6 +1203,7 @@ export interface TuicServerSettings {
 export interface User {
   id: number;
   password: string;
+  role: string;
   username: string;
 }
 

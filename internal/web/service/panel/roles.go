@@ -18,7 +18,7 @@ var UserPanelPages = []string{
 
 var AdminPanelPages = []string{
 	"/", "/inbounds", "/clients", "/hosts", "/my-subscriptions", "/node-monitor",
-	"/support", "/plans", "/groups", "/nodes", "/outbound", "/routing", "/settings", "/users", "/xray", "/api-docs",
+	"/support", "/plans", "/group-buy", "/node-groups", "/orders", "/groups", "/nodes", "/outbound", "/routing", "/settings", "/users", "/xray", "/api-docs",
 }
 
 var allowedCustomPage = func() map[string]bool {

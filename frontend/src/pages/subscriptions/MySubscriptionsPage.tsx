@@ -2,21 +2,10 @@ import NodeStatus from '@/pages/support/NodeStatus';
 import SupportTickets from '@/pages/support/SupportTickets';
 import zhCN from 'antd/locale/zh_CN';
 import { ClusterOutlined, CustomerServiceOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Alert,
-  Button,
-  ConfigProvider,
-  Empty,
-  Modal,
-  Progress,
-  Spin,
-  Tag,
-  message,
-  theme,
-} from 'antd';
+import { Alert, Button, ConfigProvider, Empty, Modal, Progress, Spin, Tag, message } from 'antd';
 import {
   AndroidOutlined,
   AppleOutlined,
@@ -29,12 +18,13 @@ import {
   LaptopOutlined,
   LinkOutlined,
   LogoutOutlined,
-  MenuOutlined,
   ReloadOutlined,
   UserOutlined,
   WindowsOutlined,
 } from '@ant-design/icons';
 import AppSidebar from '@/layouts/AppSidebar';
+import PanelTopbar from '@/layouts/PanelTopbar';
+import { useTheme } from '@/hooks/useTheme';
 import { usePanelAccess } from '@/api/queries/usePanelRole';
 import { ClipboardManager, HttpUtil } from '@/utils';
 import './UserHome.css';
@@ -68,6 +58,8 @@ function expiry(value: number) {
   if (value < 0) return `首次使用后 ${Math.ceil(-value / 86400000)} 天`;
   return new Date(value).toLocaleDateString('zh-CN');
 }
+const Store = lazy(() => import('@/pages/business/Store'));
+const Orders = lazy(() => import('@/pages/business/Orders'));
 const sections = [
   { key: 'home', label: '仪表盘', icon: <DashboardOutlined />, group: '基础' },
   {
@@ -77,6 +69,8 @@ const sections = [
     group: '订阅',
   },
   { key: 'nodes', label: '节点状态', icon: <ClusterOutlined />, group: '订阅' },
+  { key: 'store', label: '购买套餐', icon: <LinkOutlined />, group: '订阅' },
+  { key: 'orders', label: '我的订单', icon: <BookOutlined />, group: '账户' },
   { key: 'profile', label: '个人中心', icon: <UserOutlined />, group: '账户' },
   { key: 'guide', label: '使用教程', icon: <BookOutlined />, group: '支持' },
   { key: 'tickets', label: '工单服务', icon: <CustomerServiceOutlined />, group: '支持' },
@@ -84,10 +78,11 @@ const sections = [
 const platforms = [
   { name: 'Windows', icon: <WindowsOutlined />, format: 'Clash / Mihomo' },
   { name: 'Android', icon: <AndroidOutlined />, format: '通用订阅' },
-  { name: 'iOS', icon: <AppleOutlined />, format: '通用订阅' },
+  { name: 'iOS', icon: <AppleOutlined />, format: 'Shadowrocket / 小火箭' },
   { name: 'macOS', icon: <LaptopOutlined />, format: 'Clash / Mihomo' },
 ];
 export default function MySubscriptionsPage() {
+  const { antdThemeConfig, isDark, isUltra } = useTheme();
   const access = usePanelAccess();
   const location = useLocation();
   const routeNavigate = useNavigate();
@@ -122,19 +117,11 @@ export default function MySubscriptionsPage() {
     setMobileNav(false);
   };
   return (
-    <ConfigProvider
-      locale={zhCN}
-      theme={{
-        algorithm: theme.darkAlgorithm,
-        token: {
-          colorPrimary: '#2464ff',
-          colorBgContainer: '#222633',
-          borderRadius: 6,
-        },
-      }}
-    >
+    <ConfigProvider locale={zhCN} theme={antdThemeConfig}>
       {contextHolder}
-      <div className="customer-app">
+      <div
+        className={`customer-app ${isDark ? 'is-dark' : 'is-light'}${isUltra ? ' is-ultra' : ''}`}
+      >
         {access.roleKey !== 'customer' ? (
           <AppSidebar />
         ) : (
@@ -176,39 +163,46 @@ export default function MySubscriptionsPage() {
           </>
         )}
         <div className="customer-main">
-          <header className="customer-topbar">
-            <Button
-              className="customer-menu"
-              type="text"
-              aria-label="打开导航"
-              icon={<MenuOutlined />}
-              onClick={() => setMobileNav(true)}
-            />
-            <h1>{sections.find((item) => item.key === section)?.label}</h1>
-            <div>
-              <Button
-                type="text"
-                aria-label="刷新用量"
-                loading={query.isFetching}
-                icon={<ReloadOutlined />}
-                onClick={() => void query.refetch()}
-              />
-              <Button
-                type="text"
-                aria-label="退出登录"
-                icon={<LogoutOutlined />}
-                onClick={() => void logout()}
-              />
-              <button
-                className="customer-avatar"
-                aria-label="个人中心"
-                onClick={() => navigate('profile')}
-              >
-                <UserOutlined />
-              </button>
-            </div>
-          </header>
+          <PanelTopbar
+            title={sections.find((item) => item.key === section)?.label || '用户中心'}
+            identity="订阅用户"
+            onMenu={() => setMobileNav(true)}
+            actions={
+              <>
+                <Button
+                  type="text"
+                  aria-label="刷新用量"
+                  loading={query.isFetching}
+                  icon={<ReloadOutlined />}
+                  onClick={() => void query.refetch()}
+                />
+                <Button
+                  type="text"
+                  aria-label="退出登录"
+                  icon={<LogoutOutlined />}
+                  onClick={() => void logout()}
+                />
+                <button
+                  className="customer-avatar"
+                  aria-label="个人中心"
+                  onClick={() => navigate('profile')}
+                >
+                  <UserOutlined />
+                </button>
+              </>
+            }
+          />
           <main className="customer-content">
+            {section === 'store' && (
+              <Suspense fallback={<Spin />}>
+                <Store onOrdered={() => navigate('orders')} />
+              </Suspense>
+            )}
+            {section === 'orders' && (
+              <Suspense fallback={<Spin />}>
+                <Orders />
+              </Suspense>
+            )}
             {section === 'nodes' && (
               <section className="customer-card">
                 <NodeStatus />
@@ -243,8 +237,8 @@ export default function MySubscriptionsPage() {
                       <Alert
                         type="info"
                         showIcon
-                        title="等待管理员分配套餐"
-                        description="账号已创建。管理员配置套餐后，您可以在这里查看流量额度、有效期和订阅链接。"
+                        title="尚未开通服务"
+                        description="账号已创建。可以购买套餐或联系管理员分配服务，开通后可查看额度、有效期和订阅链接。"
                       />
                     </section>
                   );
@@ -333,6 +327,15 @@ export default function MySubscriptionsPage() {
                             >
                               复制通用订阅
                             </Button>
+                            <Button
+                              onClick={() => {
+                                const url = new URL(item.url, window.location.origin);
+                                url.searchParams.set('flag', 'shadowrocket');
+                                void copy(url.toString());
+                              }}
+                            >
+                              复制小火箭订阅
+                            </Button>
                             {item.clashUrl && (
                               <Button onClick={() => void copy(item.clashUrl!)}>
                                 复制 Clash / Mihomo 订阅
@@ -394,7 +397,10 @@ export default function MySubscriptionsPage() {
                     <ol className="customer-guide">
                       <li>
                         <h3>准备兼容客户端</h3>
-                        <p>安装可信来源的客户端，确认支持通用订阅或 Clash / Mihomo 格式。</p>
+                        <p>
+                          Windows / macOS 可使用 Clash / Mihomo；iOS 可使用
+                          Shadowrocket（小火箭），在“我的订阅”复制对应链接后导入。
+                        </p>
                       </li>
                       <li>
                         <h3>导入专属订阅</h3>

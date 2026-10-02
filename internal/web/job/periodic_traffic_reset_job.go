@@ -7,6 +7,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
@@ -60,6 +61,12 @@ func forEachResetBounded(n int, reset func(i int)) {
 // Run resets traffic statistics for all inbounds that match the configured reset
 // period, then for the clients carrying that period on their own (#5497).
 func (j *PeriodicTrafficResetJob) Run() {
+	release, allowed := cluster.BeginJob(true)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	j.resetInboundsOnSchedule()
 	j.resetClientsOnTheirOwnCycle()
 }

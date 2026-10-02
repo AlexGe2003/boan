@@ -1,0 +1,93 @@
+.server-usage {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.server-usage > * {
+  min-width: 0;
+}
+
+.server-usage-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.server-usage-toolbar .ant-select {
+  min-width: 220px;
+}
+
+.server-usage-toolbar h5.ant-typography {
+  margin: 0;
+  font-weight: 600;
+}
+
+.server-usage-toolbar > .ant-btn:last-child {
+  margin-left: auto;
+}
+
+.server-usage-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.server-usage-summary .ant-card {
+  border-radius: 12px;
+  border: 1px solid var(--ant-color-border-secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.server-usage-summary span,
+.server-usage-summary small {
+  display: block;
+  color: var(--ant-color-text-secondary);
+  font-size: 13px;
+}
+
+.server-usage-summary strong {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+  letter-spacing: -0.5px;
+}
+
+.server-usage-share {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.server-usage-share .ant-progress {
+  margin: 0;
+  width: 110px;
+}
+
+.server-usage-share span {
+  min-width: 48px;
+  font-weight: 600;
+}
+
+.server-usage-email {
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 700px) {
+  .server-usage-summary {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .server-usage-summary .ant-card-body {
+    padding: 16px;
+  }
+  .server-usage-summary strong {
+    font-size: 22px;
+  }
+}

@@ -25,6 +25,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/util/common"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/netsafe"
 	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 
 	"gorm.io/gorm"
@@ -191,6 +192,13 @@ func (s *InboundService) GetInbounds(userId int) ([]*model.Inbound, error) {
 	db := database.GetDB()
 	var inbounds []*model.Inbound
 	q := db.Model(model.Inbound{}).Preload("ClientStats")
+	state, stateErr := cluster.Load(db)
+	if stateErr != nil {
+		return nil, stateErr
+	}
+	if state != nil && state.Self != state.Primary {
+		q = q.Where("node_id IS NULL")
+	}
 	// userId < 0 is the admin view: every inbound, not only user_id = 0.
 	if userId >= 0 {
 		q = q.Where("user_id = ?", userId)

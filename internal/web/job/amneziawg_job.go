@@ -6,6 +6,7 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawg"
 	"github.com/mhsanaei/3x-ui/v3/internal/amneziawgnet"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
@@ -24,6 +25,12 @@ func NewAmneziaWGJob() *AmneziaWGJob {
 
 // Run reconciles desired AmneziaWG inbounds with running embedded interfaces.
 func (j *AmneziaWGJob) Run() {
+	release, allowed := cluster.BeginJob(false)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	desired, err := j.inboundService.DesiredAmneziaWGInstances()
 	if err != nil {
 		logger.Warning("amneziawg job: get desired instances failed:", err)

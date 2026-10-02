@@ -1,16 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { HttpUtil } from '@/utils';
-export interface SubscriptionPlan {
-  id: number;
-  name: string;
-  description: string;
-  inboundIds: number[];
-  totalGB: number;
-  durationDays: number;
-  limitIp: number;
-  limitHwid: number;
-  enabled: boolean;
-}
+import { z } from 'zod';
+import { PlanSchema, type Plan } from '@/schemas/commerce';
+export type SubscriptionPlan = Plan;
 export const planQueryKey = ['subscription-plans'];
 export function useSubscriptionPlans(enabled = true) {
   return useQuery({
@@ -23,7 +15,7 @@ export function useSubscriptionPlans(enabled = true) {
         { silent: true },
       );
       if (!result.success) throw new Error(result.msg);
-      return result.obj || [];
+      return z.array(PlanSchema).parse(result.obj || []);
     },
   });
 }

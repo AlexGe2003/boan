@@ -107,8 +107,8 @@ func TestInactiveExternalOnlySubRemainsKnownWithoutExposingLinks(t *testing.T) {
 			if strings.Contains(w.Body.String(), "11111111-1111-1111-1111-111111111111") {
 				t.Fatalf("HTML page exposed inactive external link: %s", w.Body.String())
 			}
-			if !strings.Contains(w.Body.String(), `"links":[]`) {
-				t.Fatalf("HTML page did not render an empty links list: %s", w.Body.String())
+			if strings.Contains(w.Body.String(), `"links":`) {
+				t.Fatalf("HTML bootstrap must not expose connection links: %s", w.Body.String())
 			}
 		})
 	}

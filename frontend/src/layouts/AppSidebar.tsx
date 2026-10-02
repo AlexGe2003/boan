@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentType, CSSProperties } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Drawer, Layout, Menu, Tooltip } from 'antd';
+import { Button, Drawer, Layout, Menu, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   ApiOutlined,
@@ -20,7 +20,7 @@ import {
   ImportOutlined,
   LogoutOutlined,
   MailOutlined,
-  MenuOutlined,
+  ReloadOutlined,
   MessageOutlined,
   MoonFilled,
   MoonOutlined,
@@ -36,6 +36,8 @@ import {
   ToolOutlined,
 } from '@ant-design/icons';
 
+import { useQueryClient } from '@tanstack/react-query';
+import PanelTopbar from './PanelTopbar';
 import { HttpUtil } from '@/utils';
 import { formatPanelVersion } from '@/lib/panel-version';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
@@ -51,7 +53,7 @@ const SHORTCUT_MODIFIER = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? '�
 const REPO_URL = 'https://github.com/MHSanaei/3x-ui';
 const LOGOUT_KEY = '__logout__';
 const RAIL_WIDTH = 72;
-const SIDER_WIDTH = 220;
+const SIDER_WIDTH = 240;
 const SIDEBAR_PINNED_KEY = 'sidebar-pinned';
 
 let hoveredAcrossRemounts = false;
@@ -133,7 +135,7 @@ function ThemeCycleButton({
 
 function readSidebarPinned() {
   try {
-    return localStorage.getItem(SIDEBAR_PINNED_KEY) === 'true';
+    return localStorage.getItem(SIDEBAR_PINNED_KEY) !== 'false';
   } catch {
     return false;
   }
@@ -147,6 +149,7 @@ function saveSidebarPinned(pinned: boolean) {
 
 export default function AppSidebar() {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const { isDark, isUltra, toggleTheme, toggleUltra } = useTheme();
   const { open: openCommandPalette } = useCommandPalette();
   const navigate = useNavigate();
@@ -169,8 +172,8 @@ export default function AppSidebar() {
   }, []);
   const railCollapsed = !hovered && !pinned;
   const railStyle = useMemo(
-    () => ({ '--sider-rail': `${!railCollapsed ? SIDER_WIDTH : RAIL_WIDTH}px` }) as CSSProperties,
-    [railCollapsed],
+    () => ({ '--sider-rail': `${pinned ? SIDER_WIDTH : RAIL_WIDTH}px` }) as CSSProperties,
+    [pinned],
   );
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -198,13 +201,20 @@ export default function AppSidebar() {
 
   const tabs = useMemo<{ key: string; icon: IconName; title: string }[]>(
     () => [
-      { key: '/', icon: 'dashboard', title: t('menu.dashboard') },
+      {
+        key: '/',
+        icon: 'dashboard',
+        title: access.role === 'admin' ? t('adminOverview.title') : t('menu.dashboard'),
+      },
       { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/my-subscriptions', icon: 'team', title: t('menu.mySubscriptions') },
       { key: '/node-monitor', icon: 'cluster', title: t('nodeMonitor.title') },
+      { key: '/group-buy', icon: 'cluster', title: '拼团节点' },
       { key: '/support', title: '工单服务', icon: 'team' },
       { key: '/plans', icon: 'groups', title: '订阅套餐' },
+      { key: '/node-groups', icon: 'cluster', title: '节点分组' },
+      { key: '/orders', icon: 'team', title: '订单管理' },
       { key: '/groups', icon: 'groups', title: t('menu.groups') },
       { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
       { key: '/hosts', icon: 'hosts', title: t('menu.hosts') },
@@ -215,7 +225,7 @@ export default function AppSidebar() {
       { key: '/api-docs', icon: 'apidocs', title: t('menu.apiDocs') },
       { key: LOGOUT_KEY, icon: 'logout', title: t('logout') },
     ],
-    [t],
+    [t, access.role],
   );
 
   const shownTabs = useMemo(
@@ -323,6 +333,34 @@ export default function AppSidebar() {
     [settingsChildren, xrayChildren],
   );
 
+  const groupedNavItems = useMemo<MenuProps['items']>(() => {
+    if (access.role !== 'admin') return toMenuItems(navItems);
+    const sections = [
+      { name: 'operations', keys: ['/', '/group-buy', '/clients', '/plans', '/orders', '/support', '/groups'] },
+      {
+        name: 'infrastructure',
+        keys: [
+          '/node-monitor',
+          '/nodes',
+          '/node-groups',
+          '/inbounds',
+          '/hosts',
+          '/outbound',
+          '/routing',
+        ],
+      },
+      { name: 'system', keys: ['/settings', '/xray', '/api-docs'] },
+    ];
+    return sections.map((section) => ({
+      type: 'group',
+      key: section.name,
+      label: t(`adminOverview.${section.name}`),
+      children: toMenuItems(
+        section.keys.flatMap((key) => navItems.filter((item) => item.key === key)),
+      ),
+    }));
+  }, [access.role, navItems, toMenuItems, t]);
+
   const openLink = useCallback(
     async (key: string) => {
       if (key === LOGOUT_KEY) {
@@ -363,7 +401,10 @@ export default function AppSidebar() {
       ref={rootRef}
       className={`ant-sidebar${pinned ? ' sidebar-pinned' : ''}`}
       style={railStyle}
-      onMouseEnter={() => updateHovered(true)}
+      onMouseEnter={(event) => {
+        if (!(event.target instanceof Element && event.target.closest('.panel-topbar')))
+          updateHovered(true);
+      }}
       onMouseLeave={() => updateHovered(false)}
     >
       <Layout.Sider
@@ -373,6 +414,15 @@ export default function AppSidebar() {
         collapsed={railCollapsed}
       >
         <div className="sider-brand">
+          <span className="sidebar-brand-name">
+            {railCollapsed ? (
+              <GlobalOutlined />
+            ) : (
+              <>
+                <GlobalOutlined /> BOAN
+              </>
+            )}
+          </span>
           {!railCollapsed && (
             <div className="brand-actions">
               <button
@@ -426,7 +476,7 @@ export default function AppSidebar() {
           openKeys={railCollapsed ? undefined : openKeys}
           onOpenChange={(keys) => setOpenKeys(keys as string[])}
           className="sider-nav"
-          items={toMenuItems(navItems)}
+          items={railCollapsed ? toMenuItems(navItems) : groupedNavItems}
           onClick={onMenuClick}
         />
         <Menu
@@ -447,7 +497,7 @@ export default function AppSidebar() {
         closable={false}
         open={drawerOpen}
         rootClassName={`panel-navigation-drawer ${currentTheme}`}
-        size="min(82vw, 320px)"
+        size="min(82vw, 240px)"
         styles={{
           wrapper: { padding: 0 },
           body: {
@@ -462,6 +512,9 @@ export default function AppSidebar() {
         onClose={() => setDrawerOpen(false)}
       >
         <div className="drawer-header">
+          <span className="sidebar-brand-name">
+            <GlobalOutlined /> BOAN
+          </span>
           <div className="drawer-header-actions">
             <ThemeCycleButton
               id="theme-cycle-drawer"
@@ -506,7 +559,7 @@ export default function AppSidebar() {
           openKeys={openKeys}
           onOpenChange={(keys) => setOpenKeys(keys as string[])}
           className="drawer-menu drawer-nav"
-          items={toMenuItems(navItems)}
+          items={groupedNavItems}
           onClick={(info) => {
             onMenuClick(info);
             setDrawerOpen(false);
@@ -528,16 +581,28 @@ export default function AppSidebar() {
         </div>
       </Drawer>
 
-      {!drawerOpen && (
-        <button
-          className="drawer-handle"
-          type="button"
-          aria-label={t('menu.openMenu')}
-          onClick={() => setDrawerOpen(true)}
-        >
-          <MenuOutlined />
-        </button>
-      )}
+      <PanelTopbar
+        fixed
+        title={navItems.find((item) => item.key === selectedKey)?.title || t('menu.dashboard')}
+        identity={access.role === 'admin' ? '管理员' : '用户'}
+        onMenu={() => setDrawerOpen(true)}
+        actions={
+          <>
+            <Button
+              type="text"
+              aria-label="刷新页面数据"
+              icon={<ReloadOutlined />}
+              onClick={() => void queryClient.refetchQueries({ type: 'active' })}
+            />
+            <Button
+              type="text"
+              aria-label={t('logout')}
+              icon={<LogoutOutlined />}
+              onClick={() => void openLink(LOGOUT_KEY)}
+            />
+          </>
+        }
+      />
     </div>
   );
 }

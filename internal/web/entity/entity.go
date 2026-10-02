@@ -29,6 +29,7 @@ type AllSetting struct {
 	TrustedProxyCIDRs     string `json:"trustedProxyCIDRs" form:"trustedProxyCIDRs"`
 	RealityScanCandidates string `json:"realityScanCandidates" form:"realityScanCandidates"`
 	IpLimitAllowlist      string `json:"ipLimitAllowlist" form:"ipLimitAllowlist"`
+	WebsiteGeoBlockEnable bool   `json:"websiteGeoBlockEnable" form:"websiteGeoBlockEnable"`
 	PanelOutbound         string `json:"panelOutbound" form:"panelOutbound"`
 
 	PageSize                   int    `json:"pageSize" form:"pageSize" validate:"gte=0,lte=1000"`

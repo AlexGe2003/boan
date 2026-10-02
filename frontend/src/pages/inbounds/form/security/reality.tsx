@@ -17,6 +17,7 @@ import {
 import { RadarChartOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
+import { useStatusQuery } from '@/api/queries/useStatusQuery';
 import { FormField } from '@/components/form/rhf';
 import { UTLS_FINGERPRINT } from '@/schemas/primitives';
 import {
@@ -28,6 +29,17 @@ import type { RealityScanResult } from '@/generated/types';
 import RealityTargetScannerModal, {
   MLDSA65_MIN_CERT_CHAIN_BYTES,
 } from './RealityTargetScannerModal';
+
+function coreOmitsShadowrocketReality(version: string): boolean {
+  const match = /^v?(\d+)\.(\d+)\.(\d+)/i.exec(version.trim());
+  if (!match) return false;
+  const major = Number(match[1]);
+  const minor = Number(match[2]);
+  const patch = Number(match[3]);
+  if (major !== 26) return major > 26;
+  if (minor !== 9) return minor > 9;
+  return patch >= 8;
+}
 
 interface RealityFormProps {
   saving: boolean;
@@ -59,6 +71,7 @@ export default function RealityForm({
   clearMldsa65,
 }: RealityFormProps) {
   const { t } = useTranslation();
+  const { status } = useStatusQuery();
   const { getFieldState, trigger } = useFormContext();
   const [scannerOpen, setScannerOpen] = useState(false);
   const mldsa65Seed = useWatch({ name: 'streamSettings.realitySettings.mldsa65Seed' });
@@ -93,6 +106,14 @@ export default function RealityForm({
   };
   return (
     <>
+      {coreOmitsShadowrocketReality(status.xray.version) && (
+        <Alert
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16 }}
+          title={t('pages.inbounds.form.shadowrocketRealityHint')}
+        />
+      )}
       <FormField
         name={['streamSettings', 'realitySettings', 'show']}
         label={t('pages.inbounds.form.show')}

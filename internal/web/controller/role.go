@@ -29,6 +29,10 @@ func (a *APIController) enforceRole(c *gin.Context) {
 	}
 	rel := relAPIPath(c.FullPath())
 	if user.Role == model.RoleCustomer {
+		if (c.Request.Method == http.MethodGet && (rel == "/commerce/plans" || rel == "/commerce/orders")) || (c.Request.Method == http.MethodPost && (rel == "/commerce/orders" || rel == "/commerce/orders/:id/cancel")) {
+			c.Next()
+			return
+		}
 		if (c.Request.Method == http.MethodGet && (rel == "/support/nodes" || rel == "/support/tickets" || rel == "/support/tickets/:id")) || (c.Request.Method == http.MethodPost && (rel == "/support/tickets" || rel == "/support/tickets/:id/reply" || rel == "/support/tickets/:id/close")) {
 			c.Next()
 			return

@@ -105,7 +105,7 @@
     "qrTitle": "Pindai. Impor. Terhubung.",
     "qrHint": "Pindai dengan aplikasi klien Anda. Jaga kerahasiaan kode ini.",
     "saveQr": "Simpan QR",
-    "tabConfigs": "Konfigurasi"
+    "desktopImportHint": "Copy a subscription URL and paste it into your app's Add subscription or Import from URL action. Use the dedicated profile URL for Clash / Mihomo."
   },
   "menu": {
     "theme": "Tema",
@@ -615,6 +615,7 @@
         "minClientVer": "Min. versi klien",
         "maxClientVer": "Maks. versi klien",
         "minClientVerHint": "Kosong berarti tanpa minimum: Xray-core menerima semua versi klien, termasuk core pihak ketiga seperti Mihomo dan sing-box. Isi versi untuk menolak klien yang melaporkan versi lebih lama.",
+        "shadowrocketRealityHint": "Shadowrocket tidak dapat terhubung ke REALITY pada Xray-core 26.9.8 atau lebih baru, jadi inbound ini tidak masuk ke langganan Shadowrocket. Tambahkan inbound TLS, VMess, Trojan, atau Hysteria2 untuk pengguna tersebut. Clash dan Mihomo tetap menerimanya, dengan ML-KEM aktif secara bawaan.",
         "maxClientVerHint": "Kosong berarti tanpa batas atas. Jika diisi, tidak boleh lebih rendah dari versi klien minimum — jika tidak, semua klien ditolak.",
         "clientVerInvalid": "Versi klien harus berupa maksimal tiga angka dipisah titik, masing-masing 0-255 (mis. 26.3.27)",
         "maxClientVerBelowMin": "Versi klien maksimum tidak boleh lebih rendah dari versi klien minimum",
@@ -708,10 +709,7 @@
         "peerNumberConfig": "Konfig Peer {n}"
       },
       "sniffingDestOverride": "Penggantian tujuan",
-      "advancedTitle": "Pengaturan Lanjutan",
-      "streamSettings": {
-        "reality": {}
-      }
+      "advancedTitle": "Pengaturan Lanjutan"
     },
     "clients": {
       "tabBasics": "Dasar",
@@ -1499,6 +1497,8 @@
       "calendarJalalian": "Jalalian (شمسی)",
       "ipLimitAllowlist": "Daftar izin batas IP",
       "ipLimitAllowlistDesc": "Alamat dan jaringan yang tidak pernah dihitung maupun diblokir oleh batas IP, sehingga alamat kantor atau kampus bersama tidak menghabiskan batas klien. IP/CIDR (dipisahkan koma).",
+      "websiteGeoBlockEnable": "Block website visitors by region",
+      "websiteGeoBlockEnableDesc": "Return 403 for visitors from mainland China, Hong Kong, Macau, or Taiwan on the panel and subscription sites. Uses local geoip.dat; configure trusted proxy CIDRs when behind a reverse proxy. Proxy node connections are unaffected.",
       "subBalancers": {
         "menu": "Penyeimbang langganan",
         "title": "Penyeimbang langganan",
@@ -2622,5 +2622,34 @@
     "offlineMetrics": "Live metrics are unavailable while this node is offline",
     "lastHeartbeatShort": "Heartbeat {time}"
   },
-  "subscriptions": {}
+  "subscriptions": {},
+  "adminOverview": {
+    "title": "Admin overview",
+    "admin": "Administration",
+    "subtitle": "Manage services and daily operations in one place.",
+    "users": "Subscribers",
+    "online": "{count} online",
+    "plans": "Enabled plans",
+    "orders": "Pending orders",
+    "tickets": "Open tickets",
+    "manageUsers": "Manage users",
+    "managePlans": "Manage plans",
+    "confirmOrders": "Verify payment and activate service",
+    "ticketWindow": "Ticket scope: latest 200 records",
+    "loadError": "Some business data could not load. Refresh to retry.",
+    "shortcuts": "Quick access",
+    "attention": "Needs attention",
+    "viewTickets": "View tickets",
+    "userHint": "Create accounts, assign plans and inspect activity",
+    "planHint": "Configure quotas and billing periods",
+    "nodeGroups": "Node groups",
+    "groupHint": "Organize routes and connect plans",
+    "monitor": "Node monitoring",
+    "monitorHint": "Check node health and connectivity",
+    "noTickets": "No tickets waiting for a reply",
+    "operations": "Service management",
+    "infrastructure": "Nodes and networking",
+    "system": "System configuration",
+    "runtime": "System status"
+  }
 }

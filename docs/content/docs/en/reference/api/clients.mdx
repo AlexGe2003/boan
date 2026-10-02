@@ -81,9 +81,11 @@ _openapi:
       title: Return every client as a {client, inboundIds} array — the same shape
         /bulkCreate and /import accept — so the payload round-trips straight
         back through /import. Clients with no inbound attachment are included
-        with an empty inboundIds list. The UI shows this in a CodeMirror viewer
-        (copy / download); programmatic callers get the array in obj.
-      url: '#return-every-client-as-a-client-inboundids-array--the-same-shape-bulkcreate-and-import-accept--so-the-payload-round-trips-straight-back-through-import-clients-with-no-inbound-attachment-are-included-with-an-empty-inboundids-list-the-ui-shows-this-in-a-codemirror-viewer-copy--download-programmatic-callers-get-the-array-in-obj'
+        with an empty inboundIds list. The administrator user page downloads a
+        timestamped JSON backup; programmatic callers get the array in obj. This
+        exports subscription configuration and inbound associations, not panel
+        login accounts, orders or usage history.
+      url: '#return-every-client-as-a-client-inboundids-array--the-same-shape-bulkcreate-and-import-accept--so-the-payload-round-trips-straight-back-through-import-clients-with-no-inbound-attachment-are-included-with-an-empty-inboundids-list-the-administrator-user-page-downloads-a-timestamped-json-backup-programmatic-callers-get-the-array-in-obj-this-exports-subscription-configuration-and-inbound-associations-not-panel-login-accounts-orders-or-usage-history'
     - depth: 2
       title: 'Import clients from a JSON body { "data": "<json>" }, where data is a
         string-encoded array produced by /export ([{client, inboundIds}]). Items
@@ -354,9 +356,11 @@ _openapi:
       - content: Return every client as a {client, inboundIds} array — the same shape
           /bulkCreate and /import accept — so the payload round-trips straight
           back through /import. Clients with no inbound attachment are included
-          with an empty inboundIds list. The UI shows this in a CodeMirror
-          viewer (copy / download); programmatic callers get the array in obj.
-        id: return-every-client-as-a-client-inboundids-array--the-same-shape-bulkcreate-and-import-accept--so-the-payload-round-trips-straight-back-through-import-clients-with-no-inbound-attachment-are-included-with-an-empty-inboundids-list-the-ui-shows-this-in-a-codemirror-viewer-copy--download-programmatic-callers-get-the-array-in-obj
+          with an empty inboundIds list. The administrator user page downloads a
+          timestamped JSON backup; programmatic callers get the array in obj.
+          This exports subscription configuration and inbound associations, not
+          panel login accounts, orders or usage history.
+        id: return-every-client-as-a-client-inboundids-array--the-same-shape-bulkcreate-and-import-accept--so-the-payload-round-trips-straight-back-through-import-clients-with-no-inbound-attachment-are-included-with-an-empty-inboundids-list-the-administrator-user-page-downloads-a-timestamped-json-backup-programmatic-callers-get-the-array-in-obj-this-exports-subscription-configuration-and-inbound-associations-not-panel-login-accounts-orders-or-usage-history
       - content: 'Import clients from a JSON body { "data": "<json>" }, where data is a
           string-encoded array produced by /export ([{client, inboundIds}]).
           Items with inboundIds are created and attached to those inbounds;

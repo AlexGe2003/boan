@@ -1,0 +1,263 @@
+---
+title: Subscription Business
+description: Administrators manage plans and node groups. Customers can create
+  and cancel their own orders. Amounts are integer CNY cents. Only
+  administrators can confirm offline receipts and retry service delivery.
+  Renewals preserve measured traffic. Failed delivery retains its fixed expiry
+  target for idempotent retries.
+full: true
+_openapi:
+  preload:
+    - ./public/openapi.json
+  toc:
+    - depth: 2
+      title: Read the subscription login account. Admin only.
+      url: '#read-the-subscription-login-account-admin-only'
+    - depth: 2
+      title: Create or update the subscription login account. Admin only.
+      url: '#create-or-update-the-subscription-login-account-admin-only'
+    - depth: 2
+      title: Admin only. Local Xray accepted-connection activity by exact client
+        email. Optional hours=1 or 24; reads at most the last 8 MiB. Domain
+        categories and connection counts are approximate; no per-domain byte
+        counts or live-session guarantees.
+      url: '#admin-only-local-xray-accepted-connection-activity-by-exact-client-email-optional-hours1-or-24-reads-at-most-the-last-8-mib-domain-categories-and-connection-counts-are-approximate-no-per-domain-byte-counts-or-live-session-guarantees'
+    - depth: 2
+      title: Read own subscription quota, expiry and links.
+      url: '#read-own-subscription-quota-expiry-and-links'
+    - depth: 2
+      title: Admin only. Observed lifetime client byte counters, manual corrections
+        and budget status by directly connected node. Adjusted usage drives
+        estimates and shares; raw uploaded/downloaded bytes remain intact.
+        Omitting both filters returns all directly connected servers. Optional
+        email shows a user distribution; nodeId (0 for local) shows the top 100
+        users. Billing estimates sum each server’s recorded bytes times its own
+        multiplier. Shares use all recorded current users, including those
+        outside the top 100. Counters start when observed and are retained
+        across quota resets; baseline snapshots are not usage. Chained nodes are
+        grouped under their directly connected parent.
+      url: '#admin-only-observed-lifetime-client-byte-counters-manual-corrections-and-budget-status-by-directly-connected-node-adjusted-usage-drives-estimates-and-shares-raw-uploadeddownloaded-bytes-remain-intact-omitting-both-filters-returns-all-directly-connected-servers-optional-email-shows-a-user-distribution-nodeid-0-for-local-shows-the-top-100-users-billing-estimates-sum-each-servers-recorded-bytes-times-its-own-multiplier-shares-use-all-recorded-current-users-including-those-outside-the-top-100-counters-start-when-observed-and-are-retained-across-quota-resets-baseline-snapshots-are-not-usage-chained-nodes-are-grouped-under-their-directly-connected-parent'
+    - depth: 2
+      title: 'Admin only. Set node billing estimation multiplier: 1 for recorded proxy
+        bytes, 2 for relay ingress plus egress. Recalculates estimates for all
+        recorded usage; never changes subscriber quota. This is not NIC
+        telemetry or a provider invoice.'
+      url: '#admin-only-set-node-billing-estimation-multiplier-1-for-recorded-proxy-bytes-2-for-relay-ingress-plus-egress-recalculates-estimates-for-all-recorded-usage-never-changes-subscriber-quota-this-is-not-nic-telemetry-or-a-provider-invoice'
+    - depth: 2
+      title: 'Admin only. Set a lifetime manual node budget (empty email) or user/node
+        budget, with proxy or billing-estimate basis. Optional absolute usage
+        correction preserves observed counters and subsequent deltas. Node
+        totals cannot fall below attributed user totals. Budgets provide status
+        only: no automatic disconnect or monthly reset; subscriber quota is
+        unchanged.'
+      url: '#admin-only-set-a-lifetime-manual-node-budget-empty-email-or-usernode-budget-with-proxy-or-billing-estimate-basis-optional-absolute-usage-correction-preserves-observed-counters-and-subsequent-deltas-node-totals-cannot-fall-below-attributed-user-totals-budgets-provide-status-only-no-automatic-disconnect-or-monthly-reset-subscriber-quota-is-unchanged'
+    - depth: 2
+      title: Admin only. Node monthly cost, expiry, bandwidth and traffic metadata,
+        planned group size and estimated monthly service fees. Amounts are CNY
+        minor units. Estimates are not payment receipts or enforced bandwidth
+        limits.
+      url: '#admin-only-node-monthly-cost-expiry-bandwidth-and-traffic-metadata-planned-group-size-and-estimated-monthly-service-fees-amounts-are-cny-minor-units-estimates-are-not-payment-receipts-or-enforced-bandwidth-limits'
+    - depth: 2
+      title: Admin only. Save node group-buy metadata (0 for local). Fee mode fixed
+        uses total monthly fee in CNY cents; percent uses basis points of
+        monthly node cost. Expiry is Unix milliseconds; 0 means unset. Member
+        prices round up to cents. Does not modify connection credentials, quotas
+        or node availability.
+      url: '#admin-only-save-node-group-buy-metadata-0-for-local-fee-mode-fixed-uses-total-monthly-fee-in-cny-cents-percent-uses-basis-points-of-monthly-node-cost-expiry-is-unix-milliseconds-0-means-unset-member-prices-round-up-to-cents-does-not-modify-connection-credentials-quotas-or-node-availability'
+    - depth: 2
+      title: Read authorized node monitoring data.
+      url: '#read-authorized-node-monitoring-data'
+    - depth: 2
+      title: List legacy account migration targets. Admin only.
+      url: '#list-legacy-account-migration-targets-admin-only'
+    - depth: 2
+      title: Delete a panel account. Admin only.
+      url: '#delete-a-panel-account-admin-only'
+    - depth: 2
+      title: Explicitly migrate a legacy account into a subscription account. Admin
+        only.
+      url: '#explicitly-migrate-a-legacy-account-into-a-subscription-account-admin-only'
+    - depth: 2
+      title: List node resource groups and referenced plan counts.
+      url: '#list-node-resource-groups-and-referenced-plan-counts'
+    - depth: 2
+      title: Create or update a resource group. Admin only.
+      url: '#create-or-update-a-resource-group-admin-only'
+    - depth: 2
+      title: Delete an unreferenced resource group. Admin only.
+      url: '#delete-an-unreferenced-resource-group-admin-only'
+    - depth: 2
+      title: List service templates and purchase prices. Admin only.
+      url: '#list-service-templates-and-purchase-prices-admin-only'
+    - depth: 2
+      title: List assigned subscriptions. Admin only.
+      url: '#list-assigned-subscriptions-admin-only'
+    - depth: 2
+      title: Save a plan. Purchase periods are monthly, quarterly, half_yearly,
+        yearly, two_yearly, three_yearly and onetime. Empty prices keep manual
+        allocation only.
+      url: '#save-a-plan-purchase-periods-are-monthly-quarterly-half_yearly-yearly-two_yearly-three_yearly-and-onetime-empty-prices-keep-manual-allocation-only'
+    - depth: 2
+      title: Delete a plan without assigned users or outstanding orders. Admin only.
+      url: '#delete-a-plan-without-assigned-users-or-outstanding-orders-admin-only'
+    - depth: 2
+      title: Create a customer account, optionally allocating a plan. Admin only.
+      url: '#create-a-customer-account-optionally-allocating-a-plan-admin-only'
+    - depth: 2
+      title: Apply a plan to selected customer emails. Admin only.
+      url: '#apply-a-plan-to-selected-customer-emails-admin-only'
+    - depth: 2
+      title: List enabled, purchasable plans with valid resources. Customers and
+        admins.
+      url: '#list-enabled-purchasable-plans-with-valid-resources-customers-and-admins'
+    - depth: 2
+      title: List orders with page and status filters. Page size 50. Customers see
+        only their own orders.
+      url: '#list-orders-with-page-and-status-filters-page-size-50-customers-see-only-their-own-orders'
+    - depth: 2
+      title: Create a customer order using planId and period. The server determines
+        price and keeps a snapshot. One outstanding order per customer.
+      url: '#create-a-customer-order-using-planid-and-period-the-server-determines-price-and-keeps-a-snapshot-one-outstanding-order-per-customer'
+    - depth: 2
+      title: Cancel an owned pending order. Admins can cancel any pending order.
+      url: '#cancel-an-owned-pending-order-admins-can-cancel-any-pending-order'
+    - depth: 2
+      title: Confirm offline payment or retry paid service delivery. Admin only; note
+        is required. Duplicate confirmations do not extend service again.
+      url: '#confirm-offline-payment-or-retry-paid-service-delivery-admin-only-note-is-required-duplicate-confirmations-do-not-extend-service-again'
+    - depth: 2
+      title: List the current customer node configuration states.
+      url: '#list-the-current-customer-node-configuration-states'
+    - depth: 2
+      title: List tickets, scoped to the customer or all tickets for admins.
+      url: '#list-tickets-scoped-to-the-customer-or-all-tickets-for-admins'
+    - depth: 2
+      title: Create a ticket using subject and body.
+      url: '#create-a-ticket-using-subject-and-body'
+    - depth: 2
+      title: Read an owned ticket and replies; admins can read all.
+      url: '#read-an-owned-ticket-and-replies-admins-can-read-all'
+    - depth: 2
+      title: Reply to an owned open ticket using body.
+      url: '#reply-to-an-owned-open-ticket-using-body'
+    - depth: 2
+      title: Close an owned ticket.
+      url: '#close-an-owned-ticket'
+  structuredData:
+    headings:
+      - content: Read the subscription login account. Admin only.
+        id: read-the-subscription-login-account-admin-only
+      - content: Create or update the subscription login account. Admin only.
+        id: create-or-update-the-subscription-login-account-admin-only
+      - content: Admin only. Local Xray accepted-connection activity by exact client
+          email. Optional hours=1 or 24; reads at most the last 8 MiB. Domain
+          categories and connection counts are approximate; no per-domain byte
+          counts or live-session guarantees.
+        id: admin-only-local-xray-accepted-connection-activity-by-exact-client-email-optional-hours1-or-24-reads-at-most-the-last-8-mib-domain-categories-and-connection-counts-are-approximate-no-per-domain-byte-counts-or-live-session-guarantees
+      - content: Read own subscription quota, expiry and links.
+        id: read-own-subscription-quota-expiry-and-links
+      - content: Admin only. Observed lifetime client byte counters, manual corrections
+          and budget status by directly connected node. Adjusted usage drives
+          estimates and shares; raw uploaded/downloaded bytes remain intact.
+          Omitting both filters returns all directly connected servers. Optional
+          email shows a user distribution; nodeId (0 for local) shows the top
+          100 users. Billing estimates sum each server’s recorded bytes times
+          its own multiplier. Shares use all recorded current users, including
+          those outside the top 100. Counters start when observed and are
+          retained across quota resets; baseline snapshots are not usage.
+          Chained nodes are grouped under their directly connected parent.
+        id: admin-only-observed-lifetime-client-byte-counters-manual-corrections-and-budget-status-by-directly-connected-node-adjusted-usage-drives-estimates-and-shares-raw-uploadeddownloaded-bytes-remain-intact-omitting-both-filters-returns-all-directly-connected-servers-optional-email-shows-a-user-distribution-nodeid-0-for-local-shows-the-top-100-users-billing-estimates-sum-each-servers-recorded-bytes-times-its-own-multiplier-shares-use-all-recorded-current-users-including-those-outside-the-top-100-counters-start-when-observed-and-are-retained-across-quota-resets-baseline-snapshots-are-not-usage-chained-nodes-are-grouped-under-their-directly-connected-parent
+      - content: 'Admin only. Set node billing estimation multiplier: 1 for recorded
+          proxy bytes, 2 for relay ingress plus egress. Recalculates estimates
+          for all recorded usage; never changes subscriber quota. This is not
+          NIC telemetry or a provider invoice.'
+        id: admin-only-set-node-billing-estimation-multiplier-1-for-recorded-proxy-bytes-2-for-relay-ingress-plus-egress-recalculates-estimates-for-all-recorded-usage-never-changes-subscriber-quota-this-is-not-nic-telemetry-or-a-provider-invoice
+      - content: 'Admin only. Set a lifetime manual node budget (empty email) or
+          user/node budget, with proxy or billing-estimate basis. Optional
+          absolute usage correction preserves observed counters and subsequent
+          deltas. Node totals cannot fall below attributed user totals. Budgets
+          provide status only: no automatic disconnect or monthly reset;
+          subscriber quota is unchanged.'
+        id: admin-only-set-a-lifetime-manual-node-budget-empty-email-or-usernode-budget-with-proxy-or-billing-estimate-basis-optional-absolute-usage-correction-preserves-observed-counters-and-subsequent-deltas-node-totals-cannot-fall-below-attributed-user-totals-budgets-provide-status-only-no-automatic-disconnect-or-monthly-reset-subscriber-quota-is-unchanged
+      - content: Admin only. Node monthly cost, expiry, bandwidth and traffic metadata,
+          planned group size and estimated monthly service fees. Amounts are CNY
+          minor units. Estimates are not payment receipts or enforced bandwidth
+          limits.
+        id: admin-only-node-monthly-cost-expiry-bandwidth-and-traffic-metadata-planned-group-size-and-estimated-monthly-service-fees-amounts-are-cny-minor-units-estimates-are-not-payment-receipts-or-enforced-bandwidth-limits
+      - content: Admin only. Save node group-buy metadata (0 for local). Fee mode fixed
+          uses total monthly fee in CNY cents; percent uses basis points of
+          monthly node cost. Expiry is Unix milliseconds; 0 means unset. Member
+          prices round up to cents. Does not modify connection credentials,
+          quotas or node availability.
+        id: admin-only-save-node-group-buy-metadata-0-for-local-fee-mode-fixed-uses-total-monthly-fee-in-cny-cents-percent-uses-basis-points-of-monthly-node-cost-expiry-is-unix-milliseconds-0-means-unset-member-prices-round-up-to-cents-does-not-modify-connection-credentials-quotas-or-node-availability
+      - content: Read authorized node monitoring data.
+        id: read-authorized-node-monitoring-data
+      - content: List legacy account migration targets. Admin only.
+        id: list-legacy-account-migration-targets-admin-only
+      - content: Delete a panel account. Admin only.
+        id: delete-a-panel-account-admin-only
+      - content: Explicitly migrate a legacy account into a subscription account. Admin
+          only.
+        id: explicitly-migrate-a-legacy-account-into-a-subscription-account-admin-only
+      - content: List node resource groups and referenced plan counts.
+        id: list-node-resource-groups-and-referenced-plan-counts
+      - content: Create or update a resource group. Admin only.
+        id: create-or-update-a-resource-group-admin-only
+      - content: Delete an unreferenced resource group. Admin only.
+        id: delete-an-unreferenced-resource-group-admin-only
+      - content: List service templates and purchase prices. Admin only.
+        id: list-service-templates-and-purchase-prices-admin-only
+      - content: List assigned subscriptions. Admin only.
+        id: list-assigned-subscriptions-admin-only
+      - content: Save a plan. Purchase periods are monthly, quarterly, half_yearly,
+          yearly, two_yearly, three_yearly and onetime. Empty prices keep manual
+          allocation only.
+        id: save-a-plan-purchase-periods-are-monthly-quarterly-half_yearly-yearly-two_yearly-three_yearly-and-onetime-empty-prices-keep-manual-allocation-only
+      - content: Delete a plan without assigned users or outstanding orders. Admin only.
+        id: delete-a-plan-without-assigned-users-or-outstanding-orders-admin-only
+      - content: Create a customer account, optionally allocating a plan. Admin only.
+        id: create-a-customer-account-optionally-allocating-a-plan-admin-only
+      - content: Apply a plan to selected customer emails. Admin only.
+        id: apply-a-plan-to-selected-customer-emails-admin-only
+      - content: List enabled, purchasable plans with valid resources. Customers and
+          admins.
+        id: list-enabled-purchasable-plans-with-valid-resources-customers-and-admins
+      - content: List orders with page and status filters. Page size 50. Customers see
+          only their own orders.
+        id: list-orders-with-page-and-status-filters-page-size-50-customers-see-only-their-own-orders
+      - content: Create a customer order using planId and period. The server determines
+          price and keeps a snapshot. One outstanding order per customer.
+        id: create-a-customer-order-using-planid-and-period-the-server-determines-price-and-keeps-a-snapshot-one-outstanding-order-per-customer
+      - content: Cancel an owned pending order. Admins can cancel any pending order.
+        id: cancel-an-owned-pending-order-admins-can-cancel-any-pending-order
+      - content: Confirm offline payment or retry paid service delivery. Admin only;
+          note is required. Duplicate confirmations do not extend service again.
+        id: confirm-offline-payment-or-retry-paid-service-delivery-admin-only-note-is-required-duplicate-confirmations-do-not-extend-service-again
+      - content: List the current customer node configuration states.
+        id: list-the-current-customer-node-configuration-states
+      - content: List tickets, scoped to the customer or all tickets for admins.
+        id: list-tickets-scoped-to-the-customer-or-all-tickets-for-admins
+      - content: Create a ticket using subject and body.
+        id: create-a-ticket-using-subject-and-body
+      - content: Read an owned ticket and replies; admins can read all.
+        id: read-an-owned-ticket-and-replies-admins-can-read-all
+      - content: Reply to an owned open ticket using body.
+        id: reply-to-an-owned-open-ticket-using-body
+      - content: Close an owned ticket.
+        id: close-an-owned-ticket
+    contents: []
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+export default function Layout(props) {
+  const { APIPage, OpenAPIPage } = props.components ?? {};
+  // "APIPage" is the old name from v10, this allows both for backward compatibility
+  const Comp = OpenAPIPage ?? APIPage;
+  return (
+    <>
+      {props.children}
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/clients/account/{email}","method":"get"},{"path":"/panel/api/clients/account/{email}","method":"post"},{"path":"/panel/api/clients/activity/{email}","method":"get"},{"path":"/panel/api/clients/mySubscriptions","method":"get"},{"path":"/panel/api/nodes/usage","method":"get"},{"path":"/panel/api/nodes/usage/billing","method":"post"},{"path":"/panel/api/nodes/usage/control","method":"post"},{"path":"/panel/api/nodes/group-buy","method":"get"},{"path":"/panel/api/nodes/group-buy","method":"post"},{"path":"/panel/api/nodes/monitor","method":"get"},{"path":"/panel/api/setting/users/migrationTargets","method":"get"},{"path":"/panel/api/setting/users/delete/{id}","method":"post"},{"path":"/panel/api/setting/users/migrate/{id}","method":"post"},{"path":"/panel/api/node-groups","method":"get"},{"path":"/panel/api/node-groups/save","method":"post"},{"path":"/panel/api/node-groups/delete","method":"post"},{"path":"/panel/api/subscription-plans","method":"get"},{"path":"/panel/api/subscription-plans/assignments","method":"get"},{"path":"/panel/api/subscription-plans/save","method":"post"},{"path":"/panel/api/subscription-plans/delete","method":"post"},{"path":"/panel/api/subscription-plans/subscribe","method":"post"},{"path":"/panel/api/subscription-plans/apply","method":"post"},{"path":"/panel/api/commerce/plans","method":"get"},{"path":"/panel/api/commerce/orders","method":"get"},{"path":"/panel/api/commerce/orders","method":"post"},{"path":"/panel/api/commerce/orders/{id}/cancel","method":"post"},{"path":"/panel/api/commerce/orders/{id}/confirm","method":"post"},{"path":"/panel/api/support/nodes","method":"get"},{"path":"/panel/api/support/tickets","method":"get"},{"path":"/panel/api/support/tickets","method":"post"},{"path":"/panel/api/support/tickets/{id}","method":"get"},{"path":"/panel/api/support/tickets/{id}/reply","method":"post"},{"path":"/panel/api/support/tickets/{id}/close","method":"post"}]} showTitle />
+    </>
+  );
+}

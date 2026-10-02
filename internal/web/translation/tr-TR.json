@@ -105,7 +105,7 @@
     "qrTitle": "Tara. İçe aktar. Bağlan.",
     "qrHint": "İstemci uygulamanızla tarayın. Bu kodu kimseyle paylaşmayın.",
     "saveQr": "QR'ı kaydet",
-    "tabConfigs": "Yapılandırmalar"
+    "desktopImportHint": "Copy a subscription URL and paste it into your app's Add subscription or Import from URL action. Use the dedicated profile URL for Clash / Mihomo."
   },
   "menu": {
     "theme": "Tema",
@@ -615,6 +615,7 @@
         "minClientVer": "Min. Kullanıcı Sürümü",
         "maxClientVer": "Maks. Kullanıcı Sürümü",
         "minClientVerHint": "Boş bırakmak alt sınır yok demektir: Xray-core, Mihomo ve sing-box gibi üçüncü taraf çekirdekler dahil her istemci sürümünü kabul eder. Daha eski sürüm bildiren istemcileri reddetmek için bir sürüm girin.",
+        "shadowrocketRealityHint": "Shadowrocket, Xray-core 26.9.8 ve sonrasında REALITY bağlantısı kuramaz; bu inbound Shadowrocket aboneliklerine eklenmez. Bu kullanıcılar için bir TLS, VMess, Trojan veya Hysteria2 inbound ekleyin. Clash ve Mihomo bu inbound'u varsayılan olarak ML-KEM açık şekilde almaya devam eder.",
         "maxClientVerHint": "Boş, üst sınır yok demektir. Ayarlanırsa Min. İstemci Sürümü'nden düşük olmamalıdır; aksi halde tüm istemciler reddedilir.",
         "clientVerInvalid": "İstemci sürümü noktayla ayrılmış en fazla üç sayıdan oluşmalıdır, her biri 0-255 (örn. 26.3.27)",
         "maxClientVerBelowMin": "Maks. istemci sürümü, en düşük istemci sürümünün altında olamaz",
@@ -708,10 +709,7 @@
         "peerNumberConfig": "Peer {n} Yapılandırması"
       },
       "sniffingDestOverride": "Hedef geçersiz kılma",
-      "advancedTitle": "Gelişmiş Ayarlar",
-      "streamSettings": {
-        "reality": {}
-      }
+      "advancedTitle": "Gelişmiş Ayarlar"
     },
     "clients": {
       "tabBasics": "Temel",
@@ -1499,6 +1497,8 @@
       "calendarJalalian": "Jalalian (Güneş)",
       "ipLimitAllowlist": "IP limiti izin listesi",
       "ipLimitAllowlistDesc": "IP limitinin asla saymadığı ve engellemediği adresler ve ağlar; böylece ortak bir ofis veya kampüs adresi kullanıcının limitini tüketmez. IP'ler/CIDR'ler (virgülle ayrılmış).",
+      "websiteGeoBlockEnable": "Block website visitors by region",
+      "websiteGeoBlockEnableDesc": "Return 403 for visitors from mainland China, Hong Kong, Macau, or Taiwan on the panel and subscription sites. Uses local geoip.dat; configure trusted proxy CIDRs when behind a reverse proxy. Proxy node connections are unaffected.",
       "subBalancers": {
         "menu": "Abonelik dengeleyicileri",
         "title": "Abonelik dengeleyici",
@@ -2622,5 +2622,34 @@
     "offlineMetrics": "Live metrics are unavailable while this node is offline",
     "lastHeartbeatShort": "Heartbeat {time}"
   },
-  "subscriptions": {}
+  "subscriptions": {},
+  "adminOverview": {
+    "title": "Admin overview",
+    "admin": "Administration",
+    "subtitle": "Manage services and daily operations in one place.",
+    "users": "Subscribers",
+    "online": "{count} online",
+    "plans": "Enabled plans",
+    "orders": "Pending orders",
+    "tickets": "Open tickets",
+    "manageUsers": "Manage users",
+    "managePlans": "Manage plans",
+    "confirmOrders": "Verify payment and activate service",
+    "ticketWindow": "Ticket scope: latest 200 records",
+    "loadError": "Some business data could not load. Refresh to retry.",
+    "shortcuts": "Quick access",
+    "attention": "Needs attention",
+    "viewTickets": "View tickets",
+    "userHint": "Create accounts, assign plans and inspect activity",
+    "planHint": "Configure quotas and billing periods",
+    "nodeGroups": "Node groups",
+    "groupHint": "Organize routes and connect plans",
+    "monitor": "Node monitoring",
+    "monitorHint": "Check node health and connectivity",
+    "noTickets": "No tickets waiting for a reply",
+    "operations": "Service management",
+    "infrastructure": "Nodes and networking",
+    "system": "System configuration",
+    "runtime": "System status"
+  }
 }

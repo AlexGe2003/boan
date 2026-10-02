@@ -1,11 +1,12 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
-import { Button, Result } from 'antd';
+import { Button, ConfigProvider, Result } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { usePanelAccess } from '@/api/queries/usePanelRole';
 import { useWebSocketBridge } from '@/api/websocketBridge';
 import { userPathBlocked } from '@/layouts/nav-role';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { useTheme } from '@/hooks/useTheme';
 import CommandPalette from '@/components/command-palette/CommandPalette';
 
 function PanelBridge() {
@@ -14,6 +15,7 @@ function PanelBridge() {
 }
 
 export default function PanelLayout() {
+  const { antdThemeConfig } = useTheme();
   const { t } = useTranslation();
   usePageTitle();
   const access = usePanelAccess();
@@ -32,9 +34,9 @@ export default function PanelLayout() {
     return <Navigate to={access.pages[0] || '/'} replace />;
   }
   return (
-    <>
+    <ConfigProvider theme={antdThemeConfig}>
       <Outlet />
       {access.roleKey !== 'customer' && <PanelBridge />}
-    </>
+    </ConfigProvider>
   );
 }

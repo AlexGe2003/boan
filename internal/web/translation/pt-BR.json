@@ -105,7 +105,7 @@
     "qrTitle": "Escaneie. Importe. Conecte.",
     "qrHint": "Escaneie com seu aplicativo cliente. Mantenha este código em sigilo.",
     "saveQr": "Salvar QR",
-    "tabConfigs": "Configurações"
+    "desktopImportHint": "Copy a subscription URL and paste it into your app's Add subscription or Import from URL action. Use the dedicated profile URL for Clash / Mihomo."
   },
   "menu": {
     "theme": "Tema",
@@ -636,6 +636,7 @@
         "minClientVer": "Mín. versão cliente",
         "maxClientVer": "Máx. versão cliente",
         "minClientVerHint": "Vazio significa sem mínimo: o Xray-core aceita qualquer versão de cliente, incluindo núcleos de terceiros como Mihomo e sing-box. Defina uma versão para rejeitar clientes que informem uma mais antiga.",
+        "shadowrocketRealityHint": "O Shadowrocket não conecta em REALITY no Xray-core 26.9.8 ou mais novo, então este inbound fica de fora das assinaturas do Shadowrocket. Adicione um inbound TLS, VMess, Trojan ou Hysteria2 para esses usuários. Clash e Mihomo continuam recebendo-o, com ML-KEM ativado por padrão.",
         "maxClientVerHint": "Vazio significa sem limite superior. Se definido, não deve ser menor que a versão mínima do cliente; caso contrário, todos os clientes são rejeitados.",
         "clientVerInvalid": "A versão do cliente deve ter até três números separados por pontos, cada um 0-255 (ex.: 26.3.27)",
         "maxClientVerBelowMin": "A versão máxima do cliente não deve ser menor que a versão mínima",
@@ -708,10 +709,7 @@
         "peerNumberConfig": "Config Peer {n}"
       },
       "sniffingDestOverride": "Substituição de destino",
-      "advancedTitle": "Configurações avançadas",
-      "streamSettings": {
-        "reality": {}
-      }
+      "advancedTitle": "Configurações avançadas"
     },
     "clients": {
       "tabBasics": "Básico",
@@ -1499,6 +1497,8 @@
       "calendarJalalian": "Jalalian (شمسی)",
       "ipLimitAllowlist": "Lista de permissões do limite de IP",
       "ipLimitAllowlistDesc": "Endereços e redes que o limite de IP nunca conta nem bane, para que um endereço compartilhado de escritório ou campus não esgote o limite de um cliente. IPs/CIDRs separados por vírgula.",
+      "websiteGeoBlockEnable": "Block website visitors by region",
+      "websiteGeoBlockEnableDesc": "Return 403 for visitors from mainland China, Hong Kong, Macau, or Taiwan on the panel and subscription sites. Uses local geoip.dat; configure trusted proxy CIDRs when behind a reverse proxy. Proxy node connections are unaffected.",
       "subBalancers": {
         "menu": "Balanceadores de assinatura",
         "title": "Balanceador de assinatura",
@@ -2622,5 +2622,34 @@
     "offlineMetrics": "Live metrics are unavailable while this node is offline",
     "lastHeartbeatShort": "Heartbeat {time}"
   },
-  "subscriptions": {}
+  "subscriptions": {},
+  "adminOverview": {
+    "title": "Admin overview",
+    "admin": "Administration",
+    "subtitle": "Manage services and daily operations in one place.",
+    "users": "Subscribers",
+    "online": "{count} online",
+    "plans": "Enabled plans",
+    "orders": "Pending orders",
+    "tickets": "Open tickets",
+    "manageUsers": "Manage users",
+    "managePlans": "Manage plans",
+    "confirmOrders": "Verify payment and activate service",
+    "ticketWindow": "Ticket scope: latest 200 records",
+    "loadError": "Some business data could not load. Refresh to retry.",
+    "shortcuts": "Quick access",
+    "attention": "Needs attention",
+    "viewTickets": "View tickets",
+    "userHint": "Create accounts, assign plans and inspect activity",
+    "planHint": "Configure quotas and billing periods",
+    "nodeGroups": "Node groups",
+    "groupHint": "Organize routes and connect plans",
+    "monitor": "Node monitoring",
+    "monitorHint": "Check node health and connectivity",
+    "noTickets": "No tickets waiting for a reply",
+    "operations": "Service management",
+    "infrastructure": "Nodes and networking",
+    "system": "System configuration",
+    "runtime": "System status"
+  }
 }

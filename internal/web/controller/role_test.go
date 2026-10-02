@@ -71,6 +71,8 @@ func newRoleTestEngineWithUsers(t *testing.T, realUsers bool) *gin.Engine {
 	NewGroupController(api.Group("/clients"))
 	NewSubscriptionPlanController(api.Group("/subscription-plans"))
 	NewSupportController(api.Group("/support"))
+	NewNodeGroupController(api.Group("/node-groups"))
+	NewCommerceController(api.Group("/commerce"))
 	NewNodeController(api.Group("/nodes"))
 	return engine
 }

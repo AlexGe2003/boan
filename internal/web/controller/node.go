@@ -32,6 +32,11 @@ func NewNodeController(g *gin.RouterGroup) *NodeController {
 func (a *NodeController) initRouter(g *gin.RouterGroup) {
 	g.GET("/list", a.list)
 	g.GET("/monitor", a.monitor)
+	g.GET("/usage", a.usage)
+	g.POST("/usage/billing", a.setUsageBilling)
+	g.POST("/usage/control", a.setUsageControl)
+	g.GET("/group-buy", a.groupBuy)
+	g.POST("/group-buy", a.setGroupBuy)
 	g.GET("/get/:id", a.get)
 	g.GET("/webCert/:id", a.webCert)
 

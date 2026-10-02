@@ -105,7 +105,7 @@
     "qrTitle": "اسکن. افزودن. اتصال.",
     "qrHint": "با اپلیکیشن کلاینت اسکن کنید. این کد را به کسی ندهید.",
     "saveQr": "ذخیره QR",
-    "tabConfigs": "کانفیگ‌ها"
+    "desktopImportHint": "Copy a subscription URL and paste it into your app's Add subscription or Import from URL action. Use the dedicated profile URL for Clash / Mihomo."
   },
   "menu": {
     "theme": "تم",
@@ -627,6 +627,7 @@
         "minClientVer": "حداقل نسخه کلاینت",
         "maxClientVer": "حداکثر نسخه کلاینت",
         "minClientVerHint": "خالی یعنی بدون حداقل: Xray-core هر نسخهٔ کلاینتی را می‌پذیرد، از جمله هسته‌های شخص ثالث مانند Mihomo و sing-box. برای رد کردن کلاینت‌هایی که نسخهٔ قدیمی‌تری گزارش می‌دهند، یک نسخه تعیین کنید.",
+        "shadowrocketRealityHint": "Shadowrocket روی Xray-core نسخهٔ ۲۶.۹.۸ و جدیدتر به REALITY وصل نمی‌شود، بنابراین این ورودی در اشتراک Shadowrocket نمی‌آید. برای این کاربران یک ورودی TLS، VMess، Trojan یا Hysteria2 بسازید. Clash و Mihomo همچنان این ورودی را با ML-KEM پیش‌فرض دریافت می‌کنند.",
         "maxClientVerHint": "خالی یعنی بدون سقف. در صورت تنظیم، نباید از حداقل نسخه کلاینت کمتر باشد — در غیر این صورت همهٔ کلاینت‌ها رد می‌شوند.",
         "clientVerInvalid": "نسخهٔ کلاینت باید حداکثر سه عدد جداشده با نقطه باشد، هر یک 0-255 (مثلاً 26.3.27)",
         "maxClientVerBelowMin": "حداکثر نسخهٔ کلاینت نباید از حداقل نسخهٔ کلاینت کمتر باشد",
@@ -708,10 +709,7 @@
         "peerNumberConfig": "پیکربندی Peer {n}"
       },
       "sniffingDestOverride": "بازنویسی مقصد",
-      "advancedTitle": "تنظیمات پیشرفته",
-      "streamSettings": {
-        "reality": {}
-      }
+      "advancedTitle": "تنظیمات پیشرفته"
     },
     "clients": {
       "tabBasics": "پایه",
@@ -1499,6 +1497,8 @@
       "calendarJalalian": "Jalalian (شمسی)",
       "ipLimitAllowlist": "فهرست مجاز محدودیت IP",
       "ipLimitAllowlistDesc": "نشانی‌ها و شبکه‌هایی که محدودیت IP هرگز آن‌ها را نمی‌شمارد و مسدود نمی‌کند، تا نشانی مشترک یک اداره یا دانشگاه محدودیت کاربر را مصرف نکند. IPها/CIDRها (با کاما).",
+      "websiteGeoBlockEnable": "Block website visitors by region",
+      "websiteGeoBlockEnableDesc": "Return 403 for visitors from mainland China, Hong Kong, Macau, or Taiwan on the panel and subscription sites. Uses local geoip.dat; configure trusted proxy CIDRs when behind a reverse proxy. Proxy node connections are unaffected.",
       "subBalancers": {
         "menu": "موزان‌کننده‌های اشتراک",
         "title": "موزان‌کننده اشتراک",
@@ -2622,5 +2622,34 @@
     "offlineMetrics": "Live metrics are unavailable while this node is offline",
     "lastHeartbeatShort": "Heartbeat {time}"
   },
-  "subscriptions": {}
+  "subscriptions": {},
+  "adminOverview": {
+    "title": "Admin overview",
+    "admin": "Administration",
+    "subtitle": "Manage services and daily operations in one place.",
+    "users": "Subscribers",
+    "online": "{count} online",
+    "plans": "Enabled plans",
+    "orders": "Pending orders",
+    "tickets": "Open tickets",
+    "manageUsers": "Manage users",
+    "managePlans": "Manage plans",
+    "confirmOrders": "Verify payment and activate service",
+    "ticketWindow": "Ticket scope: latest 200 records",
+    "loadError": "Some business data could not load. Refresh to retry.",
+    "shortcuts": "Quick access",
+    "attention": "Needs attention",
+    "viewTickets": "View tickets",
+    "userHint": "Create accounts, assign plans and inspect activity",
+    "planHint": "Configure quotas and billing periods",
+    "nodeGroups": "Node groups",
+    "groupHint": "Organize routes and connect plans",
+    "monitor": "Node monitoring",
+    "monitorHint": "Check node health and connectivity",
+    "noTickets": "No tickets waiting for a reply",
+    "operations": "Service management",
+    "infrastructure": "Nodes and networking",
+    "system": "System configuration",
+    "runtime": "System status"
+  }
 }

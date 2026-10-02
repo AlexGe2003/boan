@@ -138,14 +138,14 @@
     "ofTotal": "of {total}",
     "tabLinks": "Subscription",
     "tabApps": "Apps",
+    "desktopImportHint": "Copy a subscription URL and paste it into your app's Add subscription or Import from URL action. Use the dedicated profile URL for Clash / Mihomo.",
     "scanTitle": "Scan with your phone",
     "scanHint": "Scan this code in your VPN app to add the subscription without copying the link.",
     "updateInterval": "Auto-updates every {hours} hours",
     "support": "Support",
     "qrTitle": "Scan. Import. Connect.",
     "qrHint": "Scan with your client app. Keep this code private.",
-    "saveQr": "Save QR",
-    "tabConfigs": "Configs"
+    "saveQr": "Save QR"
   },
   "menu": {
     "mySubscriptions": "My subscriptions",
@@ -670,6 +670,7 @@
         "minClientVer": "Min Client Ver",
         "maxClientVer": "Max Client Ver",
         "minClientVerHint": "Empty means no minimum: Xray-core accepts every client version, including third-party cores such as Mihomo and sing-box. Set a version to reject clients that report an older one.",
+        "shadowrocketRealityHint": "Shadowrocket cannot connect to REALITY on Xray-core 26.9.8 or newer, so this inbound is left out of Shadowrocket subscriptions. Add a TLS, VMess, Trojan, or Hysteria2 inbound for those users. Clash and Mihomo still receive it, with ML-KEM enabled by default.",
         "maxClientVerHint": "Empty means no upper limit. If set, it must not be lower than Min Client Ver — otherwise every client is rejected.",
         "clientVerInvalid": "Client version must be up to three dot-separated numbers, each 0-255 (e.g. 26.3.27)",
         "maxClientVerBelowMin": "Max Client Ver must not be lower than Min Client Ver",
@@ -749,10 +750,7 @@
         "peerNumber": "Peer {n}",
         "peerNumberConfig": "Peer {n} config"
       },
-      "sniffingDestOverride": "Destination override",
-      "streamSettings": {
-        "reality": {}
-      }
+      "sniffingDestOverride": "Destination override"
     },
     "clients": {
       "managementIntro": "Set each user's connection credentials, traffic quota, expiry, device limits, and assigned inbounds. Open Details or Edit on a user to manage their configuration.",
@@ -1658,6 +1656,8 @@
       "calendarJalalian": "Jalalian (شمسی)",
       "ipLimitAllowlist": "IP limit allowlist",
       "ipLimitAllowlistDesc": "Addresses and networks that the IP limit never counts and never bans, so a shared office or campus address cannot use up a client's limit. Comma-separated, IP or CIDR.",
+      "websiteGeoBlockEnable": "Block website visitors by region",
+      "websiteGeoBlockEnableDesc": "Return 403 for visitors from mainland China, Hong Kong, Macau, or Taiwan on the admin website. Subscription URLs remain available. Uses local geoip.dat; configure trusted proxy CIDRs behind a reverse proxy.",
       "subBalancers": {
         "menu": "Sub Balancers",
         "title": "Subscription balancer",
@@ -2622,5 +2622,34 @@
     "restartXray": "Restart Xray Service",
     "restartXraySuccess": "Xray has been successfully relaunched",
     "settings": "Settings"
+  },
+  "adminOverview": {
+    "title": "Admin overview",
+    "admin": "Administration",
+    "subtitle": "Manage services and daily operations in one place.",
+    "users": "Subscribers",
+    "online": "{count} online",
+    "plans": "Enabled plans",
+    "orders": "Pending orders",
+    "tickets": "Open tickets",
+    "manageUsers": "Manage users",
+    "managePlans": "Manage plans",
+    "confirmOrders": "Verify payment and activate service",
+    "ticketWindow": "Ticket scope: latest 200 records",
+    "loadError": "Some business data could not load. Refresh to retry.",
+    "shortcuts": "Quick access",
+    "attention": "Needs attention",
+    "viewTickets": "View tickets",
+    "userHint": "Create accounts, assign plans and inspect activity",
+    "planHint": "Configure quotas and billing periods",
+    "nodeGroups": "Node groups",
+    "groupHint": "Organize routes and connect plans",
+    "monitor": "Node monitoring",
+    "monitorHint": "Check node health and connectivity",
+    "noTickets": "No tickets waiting for a reply",
+    "operations": "Service management",
+    "infrastructure": "Nodes and networking",
+    "system": "System configuration",
+    "runtime": "System status"
   }
 }

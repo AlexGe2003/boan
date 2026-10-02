@@ -3,6 +3,7 @@ package job
 import (
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/mtproto"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
@@ -23,6 +24,12 @@ func NewMtprotoJob() *MtprotoJob {
 // Run reconciles desired mtproto inbounds with running mtg processes and records
 // per-client traffic deltas and online status.
 func (j *MtprotoJob) Run() {
+	release, allowed := cluster.BeginJob(false)
+	if !allowed {
+		return
+	}
+	defer release()
+
 	desired, err := j.inboundService.DesiredMtprotoInstances()
 	if err != nil {
 		logger.Warning("mtproto job: get desired instances failed:", err)
