@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import { Form } from 'antd';
+import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
+import { App, Form } from 'antd';
+import { useSecurityActions } from '@/pages/inbounds/form/useSecurityActions';
 import type { ReactNode } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -174,5 +175,57 @@ describe('REALITY scanner failure and request lifecycle', () => {
     });
     expect(screen.queryByText('old.example:443')).toBeNull();
     expect(screen.getByText('new.example:443')).toBeTruthy();
+  });
+});
+
+describe('REALITY scan application', () => {
+  function useHarness() {
+    const methods = useForm<InboundFormValues>();
+    const { message, modal } = App.useApp();
+    const actions = useSecurityActions({
+      methods,
+      messageApi: message,
+      modal,
+      nodeId: null,
+      setSaving: noop,
+      setScanning: noop,
+      setScanResult: noop,
+    });
+    return { methods, actions };
+  }
+  it('uses only the verified SNI even when the certificate lists many other names', () => {
+    const { result } = renderHook(useHarness);
+    act(() =>
+      result.current.actions.applyRealityScanResult(
+        { ...smallChain, serverNames: ['unprobed.example', 'another.example'] },
+        true,
+      ),
+    );
+    expect(result.current.methods.getValues('streamSettings.realitySettings.serverNames')).toEqual([
+      'www.cloudflare.com',
+    ]);
+    expect(result.current.methods.getValues('streamSettings.realitySettings.target')).toBe(
+      smallChain.target,
+    );
+  });
+  it('keeps existing target and SNI when a probe fails', () => {
+    const { result } = renderHook(useHarness);
+    act(() => {
+      result.current.methods.setValue('streamSettings.realitySettings.target', 'keep.example:443');
+      result.current.methods.setValue('streamSettings.realitySettings.serverNames', [
+        'keep.example',
+      ]);
+      result.current.actions.applyRealityScanResult({
+        ...smallChain,
+        feasible: false,
+        certValid: false,
+      });
+    });
+    expect(result.current.methods.getValues('streamSettings.realitySettings.target')).toBe(
+      'keep.example:443',
+    );
+    expect(result.current.methods.getValues('streamSettings.realitySettings.serverNames')).toEqual([
+      'keep.example',
+    ]);
   });
 });

@@ -128,10 +128,6 @@ func filterUsableSANs(dnsNames []string) []string {
 }
 
 func firstUsableName(leaf *x509.Certificate) string {
-	cn := strings.TrimSpace(leaf.Subject.CommonName)
-	if cn != "" && !strings.HasPrefix(cn, "*.") {
-		return cn
-	}
 	for _, n := range leaf.DNSNames {
 		n = strings.TrimSpace(n)
 		if n != "" && !strings.HasPrefix(n, "*.") {
@@ -278,9 +274,10 @@ func (s *ServerService) probeRealityAddr(dialHost string, port int, sni string, 
 
 		if sni == "" {
 			if discovered := firstUsableName(leaf); discovered != "" {
-				res.Host = discovered
-				res.Target = net.JoinHostPort(discovered, strconv.Itoa(port))
-				verifyHost = discovered
+				// Recheck the same address with the discovered SNI: virtual hosts
+				// may serve different TLS settings once SNI is supplied.
+				_ = conn.Close()
+				return s.probeRealityAddr(dialHost, port, discovered, timeout, xver, allowPrivate)
 			}
 		}
 

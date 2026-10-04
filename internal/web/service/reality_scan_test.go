@@ -3,7 +3,12 @@ package service
 import (
 	"crypto/tls"
 	"net"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"sync"
 	"testing"
+	"time"
 )
 
 func TestTLSVersionName(t *testing.T) {
@@ -178,5 +183,37 @@ func TestParseRealityScanCandidateCSV(t *testing.T) {
 	}
 	if tokens := parseRealityScanCandidateCSV("  , "); len(tokens) != 0 {
 		t.Fatalf("empty CSV should yield no tokens, got %v", tokens)
+	}
+}
+
+func TestRealityIPDiscoveryRetainsAddressAndRechecksSNI(t *testing.T) {
+	var mu sync.Mutex
+	var names []string
+	srv := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	srv.EnableHTTP2 = true
+	srv.TLS = &tls.Config{GetConfigForClient: func(hello *tls.ClientHelloInfo) (*tls.Config, error) {
+		mu.Lock()
+		names = append(names, hello.ServerName)
+		mu.Unlock()
+		return nil, nil
+	}}
+	srv.StartTLS()
+	defer srv.Close()
+	host, portRaw, _ := net.SplitHostPort(srv.Listener.Addr().String())
+	port, _ := strconv.Atoi(portRaw)
+	res := (&ServerService{}).probeRealityAddr(host, port, "", time.Second, 0, true)
+	if res.Target != srv.Listener.Addr().String() {
+		t.Fatalf("target changed to unprobed address: %s", res.Target)
+	}
+	if res.IP != host {
+		t.Fatalf("missing peer IP: %s", res.IP)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if len(names) != 2 || names[0] != "" || names[1] == "" || res.Host != names[1] {
+		t.Fatalf("expected discovery then SNI verification; names=%v result host=%s", names, res.Host)
+	}
+	if res.Feasible {
+		t.Fatal("untrusted test certificate must not pass")
 	}
 }
