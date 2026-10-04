@@ -9,6 +9,7 @@
 
 # Ignore log files
 *.log
+logs/
 
 # Ignore temporary files
 tmp/
