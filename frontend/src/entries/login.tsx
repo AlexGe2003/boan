@@ -11,8 +11,8 @@ import LoginPage from '@/pages/login/LoginPage';
 import LandingPage from '@/pages/login/LandingPage';
 
 document.title = window.location.pathname.endsWith('/login')
-  ? '登录 · BOAN 泊岸网络'
-  : 'BOAN 泊岸网络';
+  ? '登录'
+  : '首页';
 setupHttp();
 CookieManager.setCookie('lang', 'zh-CN', 365);
 
