@@ -491,7 +491,7 @@ uninstall() {
 }
 
 reset_user() {
-    confirm "Are you sure to reset the username and password of the panel?" "n"
+    confirm "确定重置面板用户名和密码？" "n"
     if [[ $? != 0 ]]; then
         if [[ $# == 0 ]]; then
             show_menu
@@ -499,22 +499,22 @@ reset_user() {
         return 0
     fi
 
-    read -rp "Please set the login username [default is a random username]: " config_account
+    read -rp "请输入新用户名 [回车生成随机用户名]：" config_account
     [[ -z $config_account ]] && config_account=$(gen_random_string 10)
-    read -rp "Please set the login password [default is a random password]: " config_password
+    read -rp "请输入新密码 [回车生成随机密码]：" config_password
     [[ -z $config_password ]] && config_password=$(gen_random_string 18)
 
-    read -rp "Do you want to disable currently configured two-factor authentication? (y/n): " twoFactorConfirm
-    if [[ $twoFactorConfirm != "y" && $twoFactorConfirm != "Y" ]]; then
+    read_bool twoFactorConfirm "关闭当前配置的双重验证？" n || return
+    if [[ $twoFactorConfirm != true ]]; then
         ${xui_folder}/x-ui setting -username "${config_account}" -password "${config_password}" > /dev/null 2>&1
     else
         ${xui_folder}/x-ui setting -username "${config_account}" -password "${config_password}" -resetTwoFactor=true > /dev/null 2>&1
-        echo -e "Two factor authentication has been disabled."
+        echo -e "双重验证已关闭。"
     fi
 
-    echo -e "Panel login username has been reset to: ${green} ${config_account} ${plain}"
-    echo -e "Panel login password has been reset to: ${green} ${config_password} ${plain}"
-    echo -e "${green} Please use the new login username and password to access the X-UI panel. Also remember them! ${plain}"
+    echo -e "面板登录用户名已重置为： ${green} ${config_account} ${plain}"
+    echo -e "面板登录密码已重置为： ${green} ${config_password} ${plain}"
+    echo -e "${green} 请保存新用户名和密码，之后使用它们登录面板。 ${plain}"
     confirm_restart
 }
 
@@ -526,11 +526,11 @@ gen_random_string() {
 }
 
 reset_webbasepath() {
-    echo -e "${yellow}Resetting Web Base Path${plain}"
+    echo -e "${yellow}重置面板访问路径${plain}"
 
-    read -rp "Are you sure you want to reset the web base path? (y/n): " confirm
-    if [[ $confirm != "y" && $confirm != "Y" ]]; then
-        echo -e "${yellow}Operation canceled.${plain}"
+    read_bool confirm "确定生成新的随机访问路径？原路径将失效" n || return
+    if [[ $confirm != true ]]; then
+        echo -e "${yellow}操作已取消。${plain}"
         return
     fi
 
@@ -539,13 +539,13 @@ reset_webbasepath() {
     # Apply the new web base path setting
     ${xui_folder}/x-ui setting -webBasePath "${config_webBasePath}" > /dev/null 2>&1
 
-    echo -e "Web base path has been reset to: ${green}${config_webBasePath}${plain}"
+    echo -e "面板访问路径已重置为： ${green}${config_webBasePath}${plain}"
     echo -e "${green}请使用新的网站基础路径访问面板。${plain}"
     restart
 }
 
 reset_config() {
-    confirm "Are you sure you want to reset all panel settings, Account data will not be lost, Username and password will not change" "n"
+    confirm "确定恢复所有面板设置为默认值？账户数据、用户名和密码会保留" "n"
     if [[ $? != 0 ]]; then
         if [[ $# == 0 ]]; then
             show_menu
@@ -558,13 +558,23 @@ reset_config() {
 }
 
 check_config() {
-    local info=$(${xui_folder}/x-ui setting -show true)
-    if [[ $? != 0 ]]; then
+    local info
+    if ! info=$("${xui_folder}/x-ui" setting -show true); then
         LOGE "读取当前设置失败，请查看日志"
         show_menu
         return
     fi
-    LOGI "${info}"
+    local display_info
+    display_info=$(printf '%s\n' "$info" | sed \
+        -e 's/^current panel settings as follows:$/当前面板设置：/' \
+        -e 's/^Warning: Panel is not secure with SSL$/SSL：未配置/' \
+        -e 's/^Panel is secure with SSL$/SSL：已配置/' \
+        -e 's/^hasDefaultCredential: true$/使用默认账号密码：是/' \
+        -e 's/^hasDefaultCredential: false$/使用默认账号密码：否/' \
+        -e 's/^port: /面板端口：/' \
+        -e 's/^webBasePath: /面板访问路径：/' \
+        -e 's/^current username or password is empty$/当前用户名或密码为空/')
+    LOGI "${display_info}"
 
     local db_env_file
     db_env_file="$(xui_env_file_path)"
@@ -573,9 +583,9 @@ check_config() {
         dsn="$(grep -E '^XUI_DB_DSN=' "$db_env_file" | head -1 | cut -d= -f2-)"
         local dsn_safe
         dsn_safe="$(echo "$dsn" | sed -E 's|(://[^:/@]+:)[^@]+@|\1****@|')"
-        echo -e "${green}Database: PostgreSQL — ${dsn_safe}${plain}"
+        echo -e "${green}数据库：PostgreSQL — ${dsn_safe}${plain}"
     else
-        echo -e "${green}Database: SQLite (/etc/x-ui/x-ui.db)${plain}"
+        echo -e "${green}数据库：SQLite (/etc/x-ui/x-ui.db)${plain}"
     fi
 
     local existing_webBasePath=$(echo "$info" | grep -Eo 'webBasePath: .+' | awk '{print $2}')
@@ -601,12 +611,12 @@ check_config() {
     done
 
     if [[ -z "$server_ip" ]]; then
-        echo -e "${yellow}Could not auto-detect server IP from any provider.${plain}"
+        echo -e "${yellow}无法自动获取服务器公网 IP。${plain}"
         while [[ -z "$server_ip" ]]; do
-            read -rp "Please enter your server's public IPv4 address: " server_ip
+            read -rp "请输入服务器公网 IPv4 地址：" server_ip
             server_ip="${server_ip// /}"
             if [[ ! "$server_ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-                echo -e "${red}Invalid IPv4 address. Please try again.${plain}"
+                echo -e "${red}IPv4 地址格式无效，请重新输入。${plain}"
                 server_ip=""
             fi
         done
@@ -627,45 +637,45 @@ check_config() {
         fi
 
         if [[ "$domain" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
-            echo -e "${green}Access URL: https://${domain}:${existing_port}${existing_webBasePath}${plain}"
+            echo -e "${green}访问地址： https://${domain}:${existing_port}${existing_webBasePath}${plain}"
         else
-            echo -e "${green}Access URL: https://${server_ip}:${existing_port}${existing_webBasePath}${plain}"
+            echo -e "${green}访问地址： https://${server_ip}:${existing_port}${existing_webBasePath}${plain}"
         fi
         if [[ -n "$cert_sans" && $(echo "$cert_sans" | wc -l) -gt 1 ]]; then
-            echo -e "${yellow}The certificate also covers:${plain} $(echo "$cert_sans" | grep -vx "$domain" | tr '\n' ' ')"
+            echo -e "${yellow}此证书还支持以下域名：${plain} $(echo "$cert_sans" | grep -vx "$domain" | tr '\n' ' ')"
         fi
     else
-        echo -e "${red}⚠ WARNING: No SSL certificate configured!${plain}"
-        echo -e "${yellow}You can get a Let's Encrypt certificate for your IP address (valid ~6 days, auto-renews).${plain}"
-        read -rp "Generate SSL certificate for IP now? [y/N]: " gen_ssl
-        if [[ "$gen_ssl" == "y" || "$gen_ssl" == "Y" ]]; then
+        echo -e "${red}尚未配置 SSL 证书。${plain}"
+        echo -e "${yellow}可以为公网 IP 申请 Let's Encrypt 证书（有效期约 6 天，自动续期）。${plain}"
+        read_bool gen_ssl "现在为 IP 申请 SSL 证书？" n || return
+        if [[ "$gen_ssl" == true ]]; then
             stop 0 > /dev/null 2>&1
             ssl_cert_issue_for_ip
             if [[ $? -eq 0 ]]; then
-                echo -e "${green}Access URL: https://${server_ip}:${existing_port}${existing_webBasePath}${plain}"
+                echo -e "${green}访问地址： https://${server_ip}:${existing_port}${existing_webBasePath}${plain}"
                 # ssl_cert_issue_for_ip already restarts the panel, but ensure it's running
                 start 0 > /dev/null 2>&1
             else
-                LOGE "IP certificate setup failed."
-                echo -e "${yellow}You can try again via main menu option 20 (SSL Certificate Management).${plain}"
+                LOGE "IP 证书配置失败。"
+                echo -e "${yellow}可以在主菜单的「SSL 证书」中重新尝试。${plain}"
                 start 0 > /dev/null 2>&1
             fi
         else
-            echo -e "${yellow}Access URL: http://${server_ip}:${existing_port}${existing_webBasePath}${plain}"
-            echo -e "${yellow}For security, please configure SSL certificate using main menu option 20 (SSL Certificate Management)${plain}"
+            echo -e "${yellow}访问地址： http://${server_ip}:${existing_port}${existing_webBasePath}${plain}"
+            echo -e "${yellow}请在主菜单的「SSL 证书」中配置证书。${plain}"
         fi
     fi
 }
 
 set_port() {
-    echo -n "Enter port number[1-65535]: "
+    echo -n "请输入面板端口 [1–65535，回车取消]："
     read -r port
     if [[ -z "${port}" ]]; then
-        LOGD "Cancelled"
+        LOGD "操作已取消。"
         before_show_menu
     else
         ${xui_folder}/x-ui setting -port ${port}
-        echo -e "The port is set, Please restart the panel now, and use the new port ${green}${port}${plain} to access web panel"
+        echo -e "端口已设置，请重启面板，然后使用新端口 ${green}${port}${plain} 访问面板"
         confirm_restart
     fi
 }
@@ -1734,14 +1744,14 @@ ssl_cert_issue_for_ip() {
             server_ip=""
         fi
     else
-        LOGI "Could not auto-detect server IP from any provider."
+        LOGI "无法自动获取服务器公网 IP。"
     fi
 
     while [[ -z "$server_ip" ]]; do
-        read -rp "Please enter your server's public IPv4 address: " server_ip
+        read -rp "请输入服务器公网 IPv4 地址：" server_ip
         server_ip="${server_ip// /}"
         if [[ ! "$server_ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            LOGE "Invalid IPv4 address. Please try again."
+            LOGE "IPv4 地址格式无效，请重新输入。"
             server_ip=""
         fi
     done
@@ -1902,7 +1912,7 @@ ssl_cert_issue_for_ip() {
             LOGI "  - Certificate File: $webCertFile"
             LOGI "  - Private Key File: $webKeyFile"
             LOGI "  - Validity: ~6 days (auto-renews via acme.sh cron)"
-            echo -e "${green}Access URL: https://${server_ip}:${existing_port}${existing_webBasePath}${plain}"
+            echo -e "${green}访问地址： https://${server_ip}:${existing_port}${existing_webBasePath}${plain}"
             LOGI "Panel will restart to apply SSL certificate..."
             restart
         else
@@ -2122,7 +2132,7 @@ ssl_cert_issue() {
             LOGI "Panel paths set for domain: $domain"
             LOGI "  - Certificate File: $webCertFile"
             LOGI "  - Private Key File: $webKeyFile"
-            echo -e "${green}Access URL: https://${domain}:${existing_port}${existing_webBasePath}${plain}"
+            echo -e "${green}访问地址： https://${domain}:${existing_port}${existing_webBasePath}${plain}"
             restart
         else
             LOGE "Error: Certificate or private key file not found for domain: $domain."
@@ -2271,7 +2281,7 @@ ssl_cert_issue_CF() {
                 LOGI "Panel paths set for domain: $CF_Domain"
                 LOGI "  - Certificate File: $webCertFile"
                 LOGI "  - Private Key File: $webKeyFile"
-                echo -e "${green}Access URL: https://${CF_Domain}:${existing_port}${existing_webBasePath}${plain}"
+                echo -e "${green}访问地址： https://${CF_Domain}:${existing_port}${existing_webBasePath}${plain}"
                 restart
             else
                 LOGE "Error: Certificate or private key file not found for domain: $CF_Domain."
@@ -2781,12 +2791,12 @@ SSH_port_forwarding() {
     done
 
     if [[ -z "$server_ip" ]]; then
-        echo -e "${yellow}Could not auto-detect server IP from any provider.${plain}"
+        echo -e "${yellow}无法自动获取服务器公网 IP。${plain}"
         while [[ -z "$server_ip" ]]; do
-            read -rp "Please enter your server's public IPv4 address: " server_ip
+            read -rp "请输入服务器公网 IPv4 地址：" server_ip
             server_ip="${server_ip// /}"
             if [[ ! "$server_ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-                echo -e "${red}Invalid IPv4 address. Please try again.${plain}"
+                echo -e "${red}IPv4 地址格式无效，请重新输入。${plain}"
                 server_ip=""
             fi
         done
@@ -3575,7 +3585,7 @@ show_usage() {
     printf "  ${blue}%-28s${plain} %s\n" "x-ui disable" "关闭开机自启"
     printf "  ${blue}%-28s${plain} %s\n" "x-ui log" "查看日志"
     printf "  ${blue}%-28s${plain} %s\n" "x-ui banlog" "查看封禁日志"
-    printf "  ${blue}%-28s${plain} %s\n" "x-ui update" "更新正式版"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui update" "更新程序（自动识别源码安装）"
     printf "  ${blue}%-28s${plain} %s\n" "x-ui update-dev" "更新开发版"
     printf "  ${blue}%-28s${plain} %s\n" "x-ui update-all-geofiles" "更新地区数据"
     printf "  ${blue}%-28s${plain} %s\n" "x-ui migrateDB [文件]" "转换 SQLite 数据库与备份"
@@ -3595,7 +3605,7 @@ menu_service() {
     menu_loop '服务管理' '查看状态' show_status '启动面板' start '停止面板' stop '重启面板' restart '重启 Xray' restart_xray '开机自启开关' menu_autostart '日志管理' show_log
 }
 menu_account() {
-    menu_loop '账户与面板' '重置用户名和密码' reset_user '修改基础路径' reset_webbasepath '修改面板端口' set_port '查看当前设置' check_config '恢复默认设置' reset_config
+    menu_loop '面板设置' '重置用户名和密码' reset_user '重置面板访问路径' reset_webbasepath '修改面板端口' set_port '查看当前设置' check_config '恢复默认设置' reset_config
 }
 menu_advanced() {
     menu_loop '网络与数据库' 'IP 限制管理' iplimit_main '防火墙管理' firewall_menu 'SSH 端口转发' SSH_port_forwarding 'PostgreSQL 管理' postgresql_menu '开启 BBR' bbr_menu '更新地区数据' update_geo '网络测速' run_speedtest
@@ -3607,7 +3617,7 @@ menu_install() {
 show_menu() {
     echo -e "\n${green}Boan / 3X-UI 中文管理菜单${plain}"
     show_status
-    menu_loop '主菜单' '当前配置概览' entry_summary '域名与节点' entry_domain_menu '网站访问控制' entry_access_menu 'SSL 证书' entry_ssl_menu '服务管理' menu_service '账户与面板' menu_account '网络与数据库' menu_advanced '安装与更新' menu_install
+    menu_loop '主菜单' '当前配置概览' entry_summary '域名与节点' entry_domain_menu '网站访问控制' entry_access_menu 'SSL 证书' entry_ssl_menu '服务管理' menu_service '面板设置' menu_account '网络与数据库' menu_advanced '安装与更新' menu_install
 }
 
 if [[ $# > 0 ]]; then
