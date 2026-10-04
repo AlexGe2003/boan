@@ -1,3 +1,4 @@
+import clash from './app-icons/clash.svg';
 import happ from './app-icons/happ.svg';
 import incy from './app-icons/incy.webp';
 import shadowrocket from './app-icons/shadowrocket.webp';
@@ -9,6 +10,7 @@ import v2raytun from './app-icons/v2raytun.svg';
 
 // Tinted entries are Arcticons line art drawn in the theme colour; the rest are full-colour app icons.
 export const APP_ICONS: Record<string, { src: string; tinted: boolean }> = {
+  'Clash / Mihomo': { src: clash, tinted: true },
   V2Box: { src: v2box, tinted: false },
   V2RayNG: { src: v2rayng, tinted: true },
   'Sing-box': { src: singBox, tinted: true },

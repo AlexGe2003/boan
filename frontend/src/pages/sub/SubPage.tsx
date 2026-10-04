@@ -53,7 +53,7 @@ const heroData = {
   datepicker: subData.datepicker || 'gregorian',
 };
 
-const apps = buildSubApps({ subUrl, sId, subTitle });
+const apps = buildSubApps({ subUrl, sId, subTitle, subClashUrl });
 const initialPlatform = detectPlatform(navigator.userAgent);
 const RTL_LANGUAGES = new Set(['fa-IR', 'ar-EG']);
 
@@ -98,7 +98,17 @@ export default function SubPage() {
   );
 
   const open = useCallback((url: string) => {
-    if (url) window.open(url, '_blank');
+    if (url) {
+      if (
+        /^[a-zA-Z0-9_-]+:\/\//.test(url) &&
+        !url.startsWith('http://') &&
+        !url.startsWith('https://')
+      ) {
+        window.location.href = url;
+      } else {
+        window.open(url, '_blank');
+      }
+    }
   }, []);
 
   const tabs = useMemo(() => {

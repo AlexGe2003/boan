@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Segmented } from 'antd';
-import { AndroidOutlined, AppleOutlined, CopyOutlined, DesktopOutlined } from '@ant-design/icons';
+import { Button, Segmented, Space, Tooltip } from 'antd';
+import {
+  AndroidOutlined,
+  AppleOutlined,
+  CopyOutlined,
+  DesktopOutlined,
+  ImportOutlined,
+} from '@ant-design/icons';
 
 import { APP_ICONS } from './appIcons';
 import type { AppPlatform, SubApp } from './subPageModel';
@@ -10,7 +16,7 @@ interface SubAppsTabProps {
   apps: Record<AppPlatform, SubApp[]>;
   initialPlatform: AppPlatform;
   onOpen: (url: string) => void;
-  onCopy: (url: string) => void;
+  onCopy: (url: string, toast?: string) => void;
   subUrl: string;
   subClashUrl: string;
 }
@@ -42,36 +48,55 @@ function AppIcon({ name }: { name: string }) {
   return <img className="sub-app-logo" src={icon.src} alt="" width={32} height={32} />;
 }
 
-export default function SubAppsTab({ apps, initialPlatform, onOpen, onCopy, subUrl, subClashUrl }: SubAppsTabProps) {
+export default function SubAppsTab({
+  apps,
+  initialPlatform,
+  onOpen,
+  onCopy,
+}: SubAppsTabProps) {
   const { t } = useTranslation();
   const [platform, setPlatform] = useState<AppPlatform>(initialPlatform);
 
+  const handleAppAction = (app: SubApp) => {
+    if (app.isCopyOnly) {
+      onCopy(app.copyUrl || app.url, app.toast);
+      return;
+    }
+    onOpen(app.url);
+  };
+
   return (
     <div className="sub-apps">
-      <Segmented<AppPlatform> value={platform} onChange={setPlatform} options={PLATFORM_OPTIONS} />
-      {(platform === 'windows' || platform === 'macos') && (
-        <div className="sub-app-grid">
-          <p className="sub-muted">{t('subscription.desktopImportHint')}</p>
-          {[
-            { name: platform === 'windows' ? 'v2rayN' : 'sing-box', url: subUrl },
-            { name: 'Clash / Mihomo', url: subClashUrl },
-          ].filter((item) => item.url).map((item) => (
-            <div key={item.name} className="sub-row">
-              <span className="sub-app-mark" aria-hidden="true">{item.name.charAt(0)}</span>
-              <span className="sub-app-name">{item.name}</span>
-              <Button icon={<CopyOutlined />} onClick={() => onCopy(item.url)}>{t('copy')}</Button>
-            </div>
-          ))}
-        </div>
-      )}
+      <Segmented<AppPlatform>
+        value={platform}
+        onChange={setPlatform}
+        options={PLATFORM_OPTIONS}
+        style={{ marginBottom: 16 }}
+      />
       <div className="sub-app-grid">
-        {apps[platform].map((app) => (
+        {(apps[platform] || []).map((app) => (
           <div key={app.name} className="sub-row">
             <AppIcon name={app.name} />
-            <span className="sub-app-name">{app.name}</span>
-            <Button type="primary" size="small" onClick={() => onOpen(app.url)}>
-              {t('add')}
-            </Button>
+            <span className="sub-app-name" style={{ fontWeight: 600 }}>
+              {app.name}
+            </span>
+            <Space size="small">
+              <Button
+                type="primary"
+                icon={<ImportOutlined />}
+                size="middle"
+                onClick={() => handleAppAction(app)}
+              >
+                {app.isCopyOnly ? '一键导入' : t('add')}
+              </Button>
+              <Tooltip title={t('copy')}>
+                <Button
+                  icon={<CopyOutlined />}
+                  size="middle"
+                  onClick={() => onCopy(app.copyUrl || app.url, app.toast)}
+                />
+              </Tooltip>
+            </Space>
           </div>
         ))}
       </div>

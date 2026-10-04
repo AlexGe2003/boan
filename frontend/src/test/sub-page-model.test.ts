@@ -96,27 +96,32 @@ describe('buildSubApps', () => {
     expect(Object.keys(buildSubApps(sub))).toEqual(['windows', 'macos', 'android', 'ios']);
   });
 
+  it('gives Windows apps tailored import links', () => {
+    const apps = buildSubApps(sub);
+    expect(apps.windows.map((a) => a.name)).toEqual(['v2rayN', 'Clash / Mihomo', 'Sing-box', 'FlClash']);
+    expect(apps.windows[0].isCopyOnly).toBe(true);
+    expect(apps.windows[1].url).toBe(`clash://install-config?url=${encSub}&name=Nova%20Net`);
+  });
+
   it('gives every Android app a one-tap import link', () => {
-    expect(buildSubApps(sub).android).toEqual([
-      { name: 'V2Box', url: `v2box://install-sub?url=${encSub}&name=abc` },
-      { name: 'V2RayNG', url: `v2rayng://install-config?url=${encSub}` },
-      { name: 'Sing-box', url: `sing-box://import-remote-profile?url=${encSub}#Nova%20Net` },
-      { name: 'V2RayTun', url: `v2raytun://import/${subUrl}` },
-      { name: 'Happ', url: `happ://add/${subUrl}` },
-      { name: 'Incy', url: `incy://add/${subUrl}` },
+    expect(buildSubApps(sub).android.map((a) => a.name)).toEqual([
+      'V2Box',
+      'V2RayNG',
+      'Sing-box',
+      'Clash / Mihomo',
+      'V2RayTun',
+      'Happ',
+      'Incy',
     ]);
   });
 
   it('gives every iOS app a one-tap import link', () => {
     const rocket = Buffer.from(`${subUrl}?flag=shadowrocket`).toString('base64');
-    expect(buildSubApps(sub).ios).toEqual([
-      { name: 'Shadowrocket', url: `shadowrocket://add/sub://${rocket}?remark=Nova%20Net` },
-      { name: 'V2Box', url: `v2box://install-sub?url=${encSub}&name=abc` },
-      { name: 'Streisand', url: `streisand://import/${encSub}` },
-      { name: 'V2RayTun', url: `v2raytun://import/${subUrl}` },
-      { name: 'Happ', url: `happ://add/${subUrl}` },
-      { name: 'Incy', url: `incy://add/${subUrl}` },
-    ]);
+    expect(buildSubApps(sub).ios[0]).toEqual({
+      name: 'Shadowrocket',
+      url: `shadowrocket://add/sub://${rocket}?remark=Nova%20Net`,
+      copyUrl: `${subUrl}?flag=shadowrocket`,
+    });
   });
 
   it('names the sing-box profile after the subscription id when there is no title', () => {

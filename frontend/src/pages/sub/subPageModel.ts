@@ -40,43 +40,79 @@ export function detectPlatform(userAgent: string): AppPlatform {
 export interface SubApp {
   name: string;
   url: string;
+  copyUrl?: string;
+  isCopyOnly?: boolean;
+  toast?: string;
 }
 
 export interface SubAppSource {
   subUrl: string;
+  subClashUrl?: string;
   sId: string;
   subTitle: string;
 }
 
 export function buildSubApps({
   subUrl,
+  subClashUrl,
   sId,
   subTitle,
 }: SubAppSource): Record<AppPlatform, SubApp[]> {
   const encSub = encodeURIComponent(subUrl);
-  const profileName = encodeURIComponent(subTitle || sId);
+  const encClash = encodeURIComponent(subClashUrl || subUrl);
+  const profileName = encodeURIComponent(subTitle || sId || 'Subscription');
 
-  const v2box = {
-    name: 'V2Box',
-    url: `v2box://install-sub?url=${encSub}&name=${encodeURIComponent(sId)}`,
+  const v2rayn: SubApp = {
+    name: 'v2rayN',
+    url: subUrl,
+    copyUrl: subUrl,
+    isCopyOnly: true,
+    toast: '已复制 v2rayN 订阅链接！打开 v2rayN 按 Ctrl+V 即可直接导入。',
   };
-  const singBox = {
+  const clash: SubApp = {
+    name: 'Clash / Mihomo',
+    url: `clash://install-config?url=${encClash}&name=${profileName}`,
+    copyUrl: subClashUrl || subUrl,
+  };
+  const singBox: SubApp = {
     name: 'Sing-box',
     url: `sing-box://import-remote-profile?url=${encSub}#${profileName}`,
+    copyUrl: subUrl,
   };
-  const v2raytun = { name: 'V2RayTun', url: `v2raytun://import/${subUrl}` };
-  const happ = { name: 'Happ', url: `happ://add/${subUrl}` };
-  const incy = { name: 'Incy', url: `incy://add/${subUrl}` };
+  const flclash: SubApp = {
+    name: 'FlClash',
+    url: `flclash://install-config?url=${encClash}`,
+    copyUrl: subClashUrl || subUrl,
+  };
+  const v2box: SubApp = {
+    name: 'V2Box',
+    url: `v2box://install-sub?url=${encSub}&name=${encodeURIComponent(sId)}`,
+    copyUrl: subUrl,
+  };
+  const v2raytun: SubApp = { name: 'V2RayTun', url: `v2raytun://import/${subUrl}`, copyUrl: subUrl };
+  const happ: SubApp = { name: 'Happ', url: `happ://add/${subUrl}`, copyUrl: subUrl };
+  const incy: SubApp = { name: 'Incy', url: `incy://add/${subUrl}`, copyUrl: subUrl };
   const rocketSource = `${subUrl}${subUrl.includes('?') ? '&' : '?'}flag=shadowrocket`;
   const rocketRemark = encodeURIComponent(subTitle || sId || 'Subscription');
 
   return {
-    windows: [],
-    macos: [],
+    windows: [
+      v2rayn,
+      clash,
+      singBox,
+      flclash,
+    ],
+    macos: [
+      clash,
+      singBox,
+      v2box,
+      flclash,
+    ],
     android: [
       v2box,
-      { name: 'V2RayNG', url: `v2rayng://install-config?url=${encSub}` },
+      { name: 'V2RayNG', url: `v2rayng://install-config?url=${encSub}`, copyUrl: subUrl },
       singBox,
+      clash,
       v2raytun,
       happ,
       incy,
@@ -85,9 +121,11 @@ export function buildSubApps({
       {
         name: 'Shadowrocket',
         url: `shadowrocket://add/sub://${btoa(rocketSource)}?remark=${rocketRemark}`,
+        copyUrl: rocketSource,
       },
       v2box,
-      { name: 'Streisand', url: `streisand://import/${encSub}` },
+      { name: 'Streisand', url: `streisand://import/${encSub}`, copyUrl: subUrl },
+      singBox,
       v2raytun,
       happ,
       incy,
