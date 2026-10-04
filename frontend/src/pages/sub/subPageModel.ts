@@ -95,6 +95,12 @@ export function buildSubApps({
   const rocketSource = `${subUrl}${subUrl.includes('?') ? '&' : '?'}flag=shadowrocket`;
   const rocketRemark = encodeURIComponent(subTitle || sId || 'Subscription');
 
+  const shadowrocket: SubApp = {
+    name: 'Shadowrocket',
+    url: `shadowrocket://add/sub://${btoa(rocketSource)}?remark=${rocketRemark}`,
+    copyUrl: rocketSource,
+  };
+
   return {
     windows: [
       v2rayn,
@@ -103,6 +109,7 @@ export function buildSubApps({
       flclash,
     ],
     macos: [
+      shadowrocket,
       clash,
       singBox,
       v2box,
@@ -117,18 +124,6 @@ export function buildSubApps({
       happ,
       incy,
     ],
-    ios: [
-      {
-        name: 'Shadowrocket',
-        url: `shadowrocket://add/sub://${btoa(rocketSource)}?remark=${rocketRemark}`,
-        copyUrl: rocketSource,
-      },
-      v2box,
-      { name: 'Streisand', url: `streisand://import/${encSub}`, copyUrl: subUrl },
-      singBox,
-      v2raytun,
-      happ,
-      incy,
-    ],
+    ios: [shadowrocket],
   };
 }

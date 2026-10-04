@@ -138,3 +138,32 @@ describe('buildSubApps', () => {
     );
   });
 });
+
+
+describe('Apple subscription import', () => {
+  const source = {
+    subUrl: 'https://sub.example.com/raw/abc?token=1',
+    subClashUrl: 'https://sub.example.com/clash/abc?token=1&format=yaml',
+    sId: 'abc',
+    subTitle: '香港节点',
+  };
+
+  it('offers only Shadowrocket on iOS and imports the same subscription on macOS', () => {
+    const apps = buildSubApps(source);
+    expect(apps.ios.map(app => app.name)).toEqual(['Shadowrocket']);
+    const rocket = apps.ios[0];
+    expect(apps.macos.find(app => app.name === 'Shadowrocket')).toEqual(rocket);
+    expect(rocket.url.startsWith('shadowrocket://add/sub://')).toBe(true);
+    const [encoded, query] = rocket.url.split('sub://')[1].split('?');
+    expect(atob(encoded)).toBe(`${source.subUrl}&flag=shadowrocket`);
+    expect(new URLSearchParams(query).get('remark')).toBe('香港节点');
+    expect(rocket.isCopyOnly).not.toBe(true);
+  });
+
+  it('imports the YAML endpoint into Clash on macOS', () => {
+    const app = buildSubApps(source).macos.find(app => app.name === 'Clash / Mihomo')!;
+    const link = new URL(app.url);
+    expect(link.protocol).toBe('clash:');
+    expect(link.searchParams.get('url')).toBe(source.subClashUrl);
+  });
+});
