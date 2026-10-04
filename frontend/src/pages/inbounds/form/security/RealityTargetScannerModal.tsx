@@ -159,7 +159,8 @@ export default function RealityTargetScannerModal({
       title: t('pages.inbounds.form.scanCurve'),
       dataIndex: 'curveID',
       key: 'curveID',
-      width: 130,
+      width: 160,
+      ellipsis: true,
       render: (v: string) => v || '—',
     },
     {
@@ -169,7 +170,9 @@ export default function RealityTargetScannerModal({
       width: 160,
       ellipsis: true,
       render: (_: string, row) =>
-        row.certValid ? (
+        !row.tlsVersion ? (
+          '—'
+        ) : row.certValid ? (
           <Tooltip title={`${row.certSubject} (${row.certIssuer})`}>
             <span>{row.certSubject || '—'}</span>
           </Tooltip>
@@ -210,6 +213,7 @@ export default function RealityTargetScannerModal({
       title: '',
       key: 'action',
       width: 64,
+      fixed: 'right',
       render: (_, row) => (
         <Button
           type="link"

@@ -697,7 +697,7 @@
         "scanReasonCurve": "Target did not use X25519 key exchange.",
         "scanReasonPrivate": "Bulk scanning does not allow private or local addresses.",
         "scanRunning": "Probing from the server. Larger address ranges take longer.",
-        "scanSummary": "{{total}} results; {{usable}} usable with the current configuration.",
+        "scanSummary": "{total} results; {usable} usable with the current configuration.",
         "scanEmpty": "No targets found. Try a specific domain or a smaller address range.",
         "scanModalTitle": "REALITY Target Scanner",
         "scanModalDesc": "Validate a domain, or scan an IP / CIDR range to discover new REALITY targets from their certificates. Leave the box empty to probe common candidates.",

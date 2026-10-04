@@ -703,7 +703,7 @@
         "scanReasonCurve": "目标未使用 X25519 密钥交换。",
         "scanReasonPrivate": "批量扫描不允许访问私有或本地地址。",
         "scanRunning": "正在从服务器探测，请稍候；较大的地址段需要更长时间。",
-        "scanSummary": "共 {{total}} 个结果，当前配置可用 {{usable}} 个。",
+        "scanSummary": "共 {total} 个结果，当前配置可用 {usable} 个。",
         "scanEmpty": "没有发现目标。请尝试具体域名或更小的地址段。",
         "scanModalTitle": "REALITY 目标扫描器",
         "scanModalDesc": "验证某个域名，或扫描 IP / CIDR 范围，从证书中发现新的 REALITY 目标。留空则探测常用候选。",

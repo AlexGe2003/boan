@@ -135,6 +135,9 @@ describe('REALITY scanner failure and request lifecycle', () => {
       />,
     );
     expect(await screen.findByText('DNS lookup failed. Check the server resolver.')).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toBe(
+      '1 results; 0 usable with the current configuration.',
+    );
     const button = screen.getByRole('button', { name: 'Use' });
     expect(button.hasAttribute('disabled')).toBe(true);
     fireEvent.click(button);
