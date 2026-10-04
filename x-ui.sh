@@ -99,23 +99,13 @@ iplimit_log_path="${log_folder}/3xipl.log"
 iplimit_banned_log_path="${log_folder}/3xipl-banned.log"
 
 confirm() {
-    if [[ $# > 1 ]]; then
-        echo && read -rp "$1 [Default $2]: " temp
-        if [[ "${temp}" == "" ]]; then
-            temp=$2
-        fi
-    else
-        read -rp "$1 [y/n]: " temp
-    fi
-    if [[ "${temp}" == "y" || "${temp}" == "Y" ]]; then
-        return 0
-    else
-        return 1
-    fi
+    local confirmation
+    read_bool confirmation "$1" "${2:-n}" || return 1
+    [[ "$confirmation" == true ]]
 }
 
 confirm_restart() {
-    confirm "Restart the panel, Attention: Restarting the panel will also restart xray" "y"
+    confirm "重启面板？这也会重启 Xray" "n"
     if [[ $? == 0 ]]; then
         restart
     else
@@ -123,71 +113,138 @@ confirm_restart() {
     fi
 }
 
-entry_settings_menu() {
-    local choice admin_url user_url sub_url enabled inbound_id node_address target cert_file key_file proxies
+# Prompts write into the caller's variable; no eval or JSON parser is required.
+read_value() {
+    local input_answer
+    read -rp "$2 [当前/默认：${3:-未设置}，回车保留]：" input_answer || return 1
+    printf -v "$1" '%s' "${input_answer:-$3}"
+}
+
+read_bool() {
+    local input_answer input_default="$3"
+    case "$input_default" in true|y|Y) input_default=y ;; false|n|N) input_default=n ;; *) return 1 ;; esac
     while true; do
-        echo ""
-        echo "域名、访问与 SSL 设置"
-        echo "1. 设置管理员和用户 URL（包含当前面板基础路径）"
-        echo "2. 设置订阅 URL（仅协议、域名和可选端口）"
-        echo "3. 设置节点地址（按入站 ID）"
-        echo "4. 开启 / 关闭用户网站"
-        echo "5. 配置 SSL 证书文件"
-        echo "6. 申请 SSL 证书 / 自动续期"
-        echo "7. 查看当前配置"
-        echo "8. 检查证书并重启应用"
-        echo "9. 恢复共用登录入口（故障恢复）"
-        echo "10. 屏蔽 / 放行中国大陆、香港、澳门和台湾的网站访问"
-        echo "11. 设置可信反向代理 IP / CIDR"
-        echo "0. 返回"
-        read -rp "请选择: " choice || return
-        case "$choice" in
-            1)
-                "${xui_folder}/x-ui" entry -show || continue
-                read -rp "管理员完整 URL: " admin_url
-                read -rp "用户完整 URL: " user_url
-                [[ -n "$admin_url" && -n "$user_url" ]] || { LOGE "两个 URL 都不能为空"; continue; }
-                "${xui_folder}/x-ui" entry -admin-url "$admin_url" -user-url "$user_url"
-                ;;
-            2)
-                read -rp "订阅入口，例如 https://sub.example.com:2096: " sub_url
-                [[ -n "$sub_url" ]] && "${xui_folder}/x-ui" entry -subscription-url "$sub_url"
-                ;;
-            3)
-                read -rp "入站 ID（后台入站列表中查看）: " inbound_id
-                read -rp "节点域名或 IP（不含协议和端口）: " node_address
-                "${xui_folder}/x-ui" entry -inbound-id "$inbound_id" -node-address "$node_address"
-                ;;
-            4)
-                read -rp "开放用户网站？输入 true 或 false: " enabled
-                [[ "$enabled" == "true" || "$enabled" == "false" ]] || { LOGE "请输入 true 或 false"; continue; }
-                "${xui_folder}/x-ui" entry -user-enabled "$enabled"
-                ;;
-            5)
-                read -rp "证书用途 admin / user / both / subscription: " target
-                read -rp "证书完整链文件路径: " cert_file
-                read -rp "私钥文件路径: " key_file
-                "${xui_folder}/x-ui" entry -target "$target" -cert "$cert_file" -key "$key_file"
-                ;;
-            6) entry_issue_certificate ;;
-            7) "${xui_folder}/x-ui" entry -show ;;
-            8) "${xui_folder}/x-ui" entry -check && restart 0 ;;
-            9) "${xui_folder}/x-ui" entry -reset ;;
-            10)
-                echo "影响管理员和用户网站；订阅与节点连接不受影响。按来源 IP 判断。"
-                read -rp "启用地区屏蔽？true / false: " enabled
-                [[ "$enabled" == "true" || "$enabled" == "false" ]] || { LOGE "请输入 true 或 false"; continue; }
-                "${xui_folder}/x-ui" entry -block-domestic "$enabled"
-                ;;
-            11)
-                echo "仅填写实际反向代理的 IP/CIDR，逗号分隔。代理需传递 X-Forwarded-For。"
-                read -rp "可信代理（留空表示不信任任何转发头）: " proxies
-                "${xui_folder}/x-ui" entry -trusted-proxies "$proxies"
-                ;;
-            0) return ;;
-            *) LOGE "请选择 0-11" ;;
+        read -rp "$2 [y/n，默认 $input_default]：" input_answer || return 1
+        case "${input_answer:-$input_default}" in
+            y|Y) printf -v "$1" '%s' true; return 0 ;;
+            n|N) printf -v "$1" '%s' false; return 0 ;;
+            *) echo '请输入 y 或 n，或按回车保留默认值。' ;;
         esac
     done
+}
+
+entry_value() { "${xui_folder}/x-ui" entry -value "$1"; }
+entry_summary() { "${xui_folder}/x-ui" entry -summary; }
+
+menu_loop() {
+    local title="$1" choice i
+    shift
+    local items=("$@")
+    local menu_depth=$((${menu_depth:-0}+1))
+    while true; do
+        printf '\n%s\n────────────────────────────────────────\n' "$title"
+        for ((i=0;i<${#items[@]};i+=2)); do printf '  %d. %s\n' "$((i/2+1))" "${items[i]}"; done
+        echo '  0. 返回 / 退出'
+        read -rp '请选择 [默认 0]：' choice || return 0
+        choice=${choice:-0}
+        [[ "$choice" =~ ^[0-9]{1,2}$ ]] || { echo '请输入菜单编号。'; continue; }
+        choice=$((10#$choice))
+        [[ "$choice" -eq 0 ]] && return 0
+        if ((choice*2<=${#items[@]})); then
+            "${items[choice*2-1]}"
+        else
+            echo '编号超出范围，请重新选择。'
+        fi
+    done
+}
+
+entry_domains() {
+    local admin_url user_url current
+    current=$(entry_value admin-url) || return
+    read_value admin_url '管理员完整 URL（包含基础路径）' "$current" || return
+    current=$(entry_value user-url) || return
+    read_value user_url '用户完整 URL（包含基础路径）' "$current" || return
+    [[ -n "$admin_url" && -n "$user_url" ]] || { echo '未配置完整地址，本次不保存。'; return; }
+    "${xui_folder}/x-ui" entry -admin-url "$admin_url" -user-url "$user_url"
+}
+entry_subscription() {
+    local address current
+    current=$(entry_value subscription-url) || return
+    read_value address '订阅入口（协议、域名、可选端口，不含路径）' "$current" || return
+    [[ -n "$address" ]] || return 0
+    "${xui_folder}/x-ui" entry -subscription-url "$address"
+}
+entry_node() {
+    local inbound_id address
+    read_value inbound_id '入站 ID' '' || return
+    [[ -n "$inbound_id" ]] || return 0
+    read_value address '节点域名或 IP（不含协议和端口）' '' || return
+    [[ -n "$address" ]] || return 0
+    "${xui_folder}/x-ui" entry -inbound-id "$inbound_id" -node-address "$address"
+}
+entry_user_access() {
+    local enabled current
+    current=$(entry_value user-enabled) || return
+    read_bool enabled '开放用户网站？' "$current" || return
+    "${xui_folder}/x-ui" entry -user-enabled "$enabled"
+}
+entry_region_access() {
+    local enabled current
+    current=$(entry_value block-domestic) || return
+    echo '屏蔽中国大陆、香港、澳门和台湾的管理员与用户网站访问；订阅及节点不受影响。'
+    read_bool enabled '开启地区屏蔽？' "$current" || return
+    "${xui_folder}/x-ui" entry -block-domestic "$enabled"
+}
+entry_proxies() {
+    local proxies current
+    current=$(entry_value trusted-proxies) || return
+    echo '仅填写实际代理的 IP/CIDR，逗号分隔。输入 - 明确清空。'
+    read_value proxies '可信代理' "$current" || return
+    [[ "$proxies" == '-' ]] && proxies=''
+    "${xui_folder}/x-ui" entry -trusted-proxies "$proxies"
+}
+entry_recover() {
+    local enabled
+    read_bool enabled '恢复共用登录入口？这不会关闭地区限制' n || return
+    [[ "$enabled" == true ]] && "${xui_folder}/x-ui" entry -reset
+    return 0
+}
+entry_cert_target() {
+    local target_choice
+    echo '1. 管理员  2. 用户网站  3. 两个网站共用  4. 订阅服务'
+    read_value target_choice '证书用途编号' 1 || return
+    case "$target_choice" in 1) printf -v "$1" admin ;; 2) printf -v "$1" user ;; 3) printf -v "$1" both ;; 4) printf -v "$1" subscription ;; *) echo '证书用途无效'; return 1 ;; esac
+}
+entry_certificate() {
+    local target key_target cert_file key_file current
+    entry_cert_target target || return
+    key_target=$target
+    [[ "$target" == both ]] && key_target=admin
+    current=$(entry_value "$key_target-cert") || return
+    read_value cert_file '证书完整链文件路径' "$current" || return
+    current=$(entry_value "$key_target-key") || return
+    read_value key_file '私钥文件路径' "$current" || return
+    [[ -n "$cert_file" && -n "$key_file" ]] || { echo '证书或私钥为空，本次不保存。'; return; }
+    "${xui_folder}/x-ui" entry -target "$target" -cert "$cert_file" -key "$key_file"
+}
+entry_check_restart() {
+    local enabled
+    "${xui_folder}/x-ui" entry -check || return
+    read_bool enabled '现在重启面板和 Xray？' n || return
+    [[ "$enabled" == true ]] && restart 0
+    return 0
+}
+entry_domain_menu() {
+    menu_loop '域名与节点' '管理员 / 用户网站地址' entry_domains '订阅入口地址' entry_subscription '节点连接地址' entry_node '查看当前配置' entry_summary
+}
+entry_access_menu() {
+    menu_loop '网站访问控制' '开放 / 关闭用户网站' entry_user_access '地区屏蔽开关' entry_region_access '可信反向代理' entry_proxies '恢复共用登录入口' entry_recover
+}
+entry_ssl_menu() {
+    menu_loop 'SSL 证书' '配置证书与私钥' entry_certificate '申请证书与自动续期' entry_issue_certificate '检查证书并选择是否重启' entry_check_restart '查看证书配置' entry_summary '高级证书管理' ssl_cert_issue_main 'Cloudflare DNS 证书' ssl_cert_issue_CF
+}
+entry_settings_menu() {
+    menu_loop '网站配置' '域名与节点' entry_domain_menu '网站访问控制' entry_access_menu 'SSL 证书' entry_ssl_menu '查看当前配置' entry_summary
 }
 
 entry_issue_certificate() {
@@ -198,7 +255,8 @@ entry_issue_certificate() {
         LOGE "域名格式无效"
         return 1
     fi
-    read -rp "证书用途 admin / user / subscription: " target
+    entry_cert_target target || return
+    [[ "$target" == both ]] && { echo "单域名申请请选择一个用途；共用证书请使用配置证书菜单。"; return 1; }
     case "$target" in admin|user|subscription) ;; *) LOGE "证书用途无效"; return 1 ;; esac
     command -v socat >/dev/null 2>&1 || { LOGE "请先安装 socat，或使用已有 SSL 菜单完成依赖安装"; return 1; }
     if [[ ! -x "$HOME/.acme.sh/acme.sh" ]]; then
@@ -214,10 +272,11 @@ entry_issue_certificate() {
         --reloadcmd "$reload_cmd" || return 1
     chmod 600 "$cert_dir/privkey.pem"
     "${xui_folder}/x-ui" entry -target "$target" -cert "$cert_dir/fullchain.pem" -key "$cert_dir/privkey.pem" || return 1
-    echo "证书已保存；acme.sh 续期后会重启服务。配置好两个网站证书后，使用菜单 8 检查并重启。"
+    echo "证书已保存；acme.sh 续期后会重启服务。配置好两个网站证书后，请在 SSL 菜单中检查并重启。"
 }
 
 before_show_menu() {
+    [[ ${menu_depth:-0} -gt 0 ]] && return 0
     echo && echo -n -e "${yellow}按回车返回主菜单：${plain}" && read -r temp
     show_menu
 }
@@ -316,8 +375,8 @@ installed_script_url() {
 }
 
 update_menu() {
-    echo -e "${yellow}Updating Menu${plain}"
-    confirm "This function will update the menu to the latest changes." "y"
+    echo -e "${yellow}正在更新管理菜单${plain}"
+    confirm "将管理菜单更新到最新版？" "y"
     if [[ $? != 0 ]]; then
         LOGE "Cancelled"
         if [[ $# == 0 ]]; then
@@ -328,10 +387,10 @@ update_menu() {
 
     if replace_xui_script "$(installed_script_url)" "false"; then
         chmod +x ${xui_folder}/x-ui.sh
-        echo -e "${green}Update successful. The panel has automatically restarted.${plain}"
+        echo -e "${green}菜单更新成功，请重新运行 x-ui。${plain}"
         exit 0
     else
-        echo -e "${red}Failed to update the menu.${plain}"
+        echo -e "${red}管理菜单更新失败。${plain}"
         return 1
     fi
 }
@@ -3512,144 +3571,29 @@ show_usage() {
     printf "  ${blue}%-28s${plain} %s\n" "x-ui uninstall" "卸载面板"
 }
 
+menu_autostart() {
+    local current=n enabled
+    check_enabled && current=y
+    read_bool enabled '开启开机自启？' "$current" || return
+    if [[ "$enabled" == true ]]; then enable 0; else disable 0; fi
+}
+menu_service() {
+    menu_loop '服务管理' '查看状态' show_status '启动面板' start '停止面板' stop '重启面板' restart '重启 Xray' restart_xray '开机自启开关' menu_autostart '日志管理' show_log
+}
+menu_account() {
+    menu_loop '账户与面板' '重置用户名和密码' reset_user '修改基础路径' reset_webbasepath '修改面板端口' set_port '查看当前设置' check_config '恢复默认设置' reset_config
+}
+menu_advanced() {
+    menu_loop '网络与数据库' 'IP 限制管理' iplimit_main '防火墙管理' firewall_menu 'SSH 端口转发' SSH_port_forwarding 'PostgreSQL 管理' postgresql_menu '开启 BBR' bbr_menu '更新地区数据' update_geo '网络测速' run_speedtest
+}
+menu_install_new() { check_uninstall 0 && install; }
+menu_install() {
+    menu_loop '安装与更新' '安装面板' menu_install_new '更新正式版' update '更新开发版' update_dev '更新管理菜单' update_menu '安装指定旧版本' legacy_version '卸载面板' uninstall
+}
 show_menu() {
     echo -e "\n${green}Boan / 3X-UI 中文管理菜单${plain}"
-    echo "────────────────────────────────────────"
-    printf "  ${green}%2s.${plain} %s\n" "0" "退出菜单"
-    echo "────────────────────────────────────────"
-    printf "  ${green}%2s.${plain} %s\n" "1" "安装面板"
-    printf "  ${green}%2s.${plain} %s\n" "2" "更新正式版"
-    printf "  ${green}%2s.${plain} %s\n" "3" "更新开发版（最新提交）"
-    printf "  ${green}%2s.${plain} %s\n" "4" "更新管理菜单"
-    printf "  ${green}%2s.${plain} %s\n" "5" "安装指定旧版本"
-    printf "  ${green}%2s.${plain} %s\n" "6" "卸载面板"
-    echo "────────────────────────────────────────"
-    printf "  ${green}%2s.${plain} %s\n" "7" "重置用户名和密码"
-    printf "  ${green}%2s.${plain} %s\n" "8" "重置网站基础路径"
-    printf "  ${green}%2s.${plain} %s\n" "9" "恢复默认设置"
-    printf "  ${green}%2s.${plain} %s\n" "10" "修改面板端口"
-    printf "  ${green}%2s.${plain} %s\n" "11" "查看当前设置"
-    echo "────────────────────────────────────────"
-    printf "  ${green}%2s.${plain} %s\n" "12" "启动面板"
-    printf "  ${green}%2s.${plain} %s\n" "13" "停止面板"
-    printf "  ${green}%2s.${plain} %s\n" "14" "重启面板"
-    printf "  ${green}%2s.${plain} %s\n" "15" "重启 Xray"
-    printf "  ${green}%2s.${plain} %s\n" "16" "查看运行状态"
-    printf "  ${green}%2s.${plain} %s\n" "17" "日志管理"
-    echo "────────────────────────────────────────"
-    printf "  ${green}%2s.${plain} %s\n" "18" "开启开机自启"
-    printf "  ${green}%2s.${plain} %s\n" "19" "关闭开机自启"
-    echo "────────────────────────────────────────"
-    printf "  ${green}%2s.${plain} %s\n" "20" "SSL 证书管理"
-    printf "  ${green}%2s.${plain} %s\n" "21" "Cloudflare DNS 证书"
-    printf "  ${green}%2s.${plain} %s\n" "22" "IP 限制管理"
-    printf "  ${green}%2s.${plain} %s\n" "23" "防火墙管理"
-    printf "  ${green}%2s.${plain} %s\n" "24" "SSH 端口转发"
-    printf "  ${green}%2s.${plain} %s\n" "25" "PostgreSQL 管理"
-    echo "────────────────────────────────────────"
-    printf "  ${green}%2s.${plain} %s\n" "26" "开启 BBR"
-    printf "  ${green}%2s.${plain} %s\n" "27" "更新地区数据"
-    printf "  ${green}%2s.${plain} %s\n" "28" "网络测速（Ookla）"
-    printf "  ${green}%2s.${plain} %s\n" "29" "域名、网站开关与 SSL"
-    echo "────────────────────────────────────────"
     show_status
-    echo && read -rp "请选择操作 [0-29]：" num || return
-
-    case "${num}" in
-        0)
-            exit 0
-            ;;
-        1)
-            check_uninstall && install
-            ;;
-        2)
-            check_install && update
-            ;;
-        3)
-            check_install && update_dev
-            ;;
-        4)
-            check_install && update_menu
-            ;;
-        5)
-            check_install && legacy_version
-            ;;
-        6)
-            check_install && uninstall
-            ;;
-        7)
-            check_install && reset_user
-            ;;
-        8)
-            check_install && reset_webbasepath
-            ;;
-        9)
-            check_install && reset_config
-            ;;
-        10)
-            check_install && set_port
-            ;;
-        11)
-            check_install && check_config
-            ;;
-        12)
-            check_install && start
-            ;;
-        13)
-            check_install && stop
-            ;;
-        14)
-            check_install && restart
-            ;;
-        15)
-            check_install && restart_xray
-            ;;
-        16)
-            check_install && status
-            ;;
-        17)
-            check_install && show_log
-            ;;
-        18)
-            check_install && enable
-            ;;
-        19)
-            check_install && disable
-            ;;
-        20)
-            ssl_cert_issue_main
-            ;;
-        21)
-            ssl_cert_issue_CF
-            ;;
-        22)
-            iplimit_main
-            ;;
-        23)
-            firewall_menu
-            ;;
-        24)
-            SSH_port_forwarding
-            ;;
-        25)
-            postgresql_menu
-            ;;
-        26)
-            bbr_menu
-            ;;
-        27)
-            update_geo
-            ;;
-        28)
-            run_speedtest
-            ;;
-        29)
-            check_install && entry_settings_menu
-            ;;
-        *)
-            LOGE "请输入有效编号 [0-29]"
-            ;;
-    esac
+    menu_loop '主菜单' '当前配置概览' entry_summary '域名与节点' entry_domain_menu '网站访问控制' entry_access_menu 'SSL 证书' entry_ssl_menu '服务管理' menu_service '账户与面板' menu_account '网络与数据库' menu_advanced '安装与更新' menu_install
 }
 
 if [[ $# > 0 ]]; then

@@ -92,3 +92,35 @@ func TestEntryNodeAddressPreservesTransport(t *testing.T) {
 		t.Fatal("accepted a URL as a node hostname")
 	}
 }
+
+func TestEntryMenuReadsCurrentValuesWithoutSecrets(t *testing.T) {
+	t.Setenv("XUI_DB_FOLDER", t.TempDir())
+	run := func(args ...string) string {
+		t.Helper()
+		var out bytes.Buffer
+		if err := entryPointsCLI(args, &out); err != nil {
+			t.Fatal(err)
+		}
+		return strings.TrimSpace(out.String())
+	}
+	if got := run("-value", "user-enabled"); got != "true" {
+		t.Fatalf("default user access=%s", got)
+	}
+	if got := run("-value", "block-domestic"); got != "false" {
+		t.Fatalf("default block=%s", got)
+	}
+	if got := run("-value", "trusted-proxies"); got != "127.0.0.1/32,::1/128" {
+		t.Fatalf("default proxies=%s", got)
+	}
+	summary := run("-summary")
+	if !strings.Contains(summary, "用户网站访问：已开启") || !strings.Contains(summary, "地区屏蔽：已关闭") {
+		t.Fatal(summary)
+	}
+	var out bytes.Buffer
+	if err := entryPointsCLI([]string{"-value", "password"}, &out); err == nil {
+		t.Fatal("accepted secret getter")
+	}
+	if err := entryPointsCLI([]string{"-summary", "-user-enabled", "false"}, &out); err == nil {
+		t.Fatal("mixed read and write accepted")
+	}
+}

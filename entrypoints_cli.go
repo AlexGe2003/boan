@@ -33,6 +33,8 @@ func entryPointsCLI(args []string, out io.Writer) error {
 	key := fs.String("key", "", "Private-key file")
 	inbound := fs.Int("inbound-id", 0, "Inbound to advertise with node-address")
 	address := fs.String("node-address", "", "Node hostname or IP (no scheme, path or port)")
+	value := fs.String("value", "", "Read one non-secret setting for the interactive menu")
+	summary := fs.Bool("summary", false, "Show configuration in Chinese")
 	show := fs.Bool("show", false, "Show entry, subscription and node configuration")
 	check := fs.Bool("check", false, "Validate direct TLS configuration before restarting")
 	reset := fs.Bool("reset", false, "Restore legacy shared login for recovery")
@@ -54,6 +56,9 @@ func entryPointsCLI(args []string, out io.Writer) error {
 	})
 	if regionsSet && *blockDomestic == "" {
 		return fmt.Errorf("use -blocked-regions together with -block-domestic")
+	}
+	if (*value != "" || *summary) && fs.NFlag() != 1 {
+		return fmt.Errorf("read options cannot be combined with changes")
 	}
 	geoChange := *blockDomestic != "" || trustedValue != nil
 	websiteChange := *admin != "" || *user != "" || *enabled != ""
@@ -88,6 +93,12 @@ func entryPointsCLI(args []string, out io.Writer) error {
 	p, err := svc.GetEntryPoints()
 	if err != nil && !*reset {
 		return err
+	}
+	if *value != "" {
+		return entryMenuValue(svc, p, *value, out)
+	}
+	if *summary {
+		return entryMenuSummary(svc, p, out)
 	}
 	switch {
 	case geoChange:
@@ -161,7 +172,7 @@ func entryPointsCLI(args []string, out io.Writer) error {
 			return err
 		}
 		if cfg == nil {
-			fmt.Fprintln(out, "No entry TLS certificates configured; HTTPS requires a reverse proxy or legacy panel TLS.")
+			fmt.Fprintln(out, "未配置独立入口证书；HTTPS 需要由反向代理或原有面板 TLS 提供。")
 		} else {
 			for _, raw := range []string{p.AdminURL, p.UserURL} {
 				host := service.EntryHost(raw)
@@ -169,7 +180,7 @@ func entryPointsCLI(args []string, out io.Writer) error {
 				if err != nil {
 					return err
 				}
-				fmt.Fprintf(out, "%s: certificate valid until %s\n", host, cert.Leaf.NotAfter.Format(time.RFC3339))
+				fmt.Fprintf(out, "%s：证书有效期至 %s\n", host, cert.Leaf.NotAfter.Format(time.RFC3339))
 			}
 		}
 		subCert, err := svc.GetSubCertFile()
@@ -189,11 +200,11 @@ func entryPointsCLI(args []string, out io.Writer) error {
 			if err != nil {
 				return fmt.Errorf("subscription TLS: %w", err)
 			}
-			fmt.Fprintf(out, "Subscription %s: certificate valid until %s\n", host, cert.Leaf.NotAfter.Format(time.RFC3339))
+			fmt.Fprintf(out, "订阅 %s：证书有效期至 %s\n", host, cert.Leaf.NotAfter.Format(time.RFC3339))
 		}
 	}
 	if changes > 0 {
-		fmt.Fprintln(out, "Saved. Website access policy is immediate; restart x-ui after URL/certificate changes. DNS, proxy routing and listener ports must match your URLs.")
+		fmt.Fprintln(out, "已保存。访问开关立即生效；修改地址或证书后请检查配置并重启。域名解析、代理和监听端口需要与地址一致。")
 	}
 	if *show || len(args) == 0 {
 		p, err = svc.GetEntryPoints()
