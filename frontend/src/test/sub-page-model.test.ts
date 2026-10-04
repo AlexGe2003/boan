@@ -103,16 +103,13 @@ describe('buildSubApps', () => {
     expect(apps.windows[1].url).toBe(`clash://install-config?url=${encSub}&name=Nova%20Net`);
   });
 
-  it('gives every Android app a one-tap import link', () => {
-    expect(buildSubApps(sub).android.map((a) => a.name)).toEqual([
-      'V2Box',
-      'V2RayNG',
-      'Sing-box',
-      'Clash / Mihomo',
-      'V2RayTun',
-      'Happ',
-      'Incy',
-    ]);
+  it('offers only Clash and v2rayNG on Android with the correct subscription formats', () => {
+    const subClashUrl = 'https://sub.example.com/clash/abc?format=yaml&token=1';
+    const apps = buildSubApps({ ...sub, subClashUrl }).android;
+    expect(apps.map((app) => app.name)).toEqual(['Clash / Mihomo', 'V2RayNG']);
+    expect(new URL(apps[0].url).searchParams.get('url')).toBe(subClashUrl);
+    expect(apps[1].url).toBe(`v2rayng://install-config?url=${encSub}`);
+    expect(apps.every((app) => !app.isCopyOnly)).toBe(true);
   });
 
   it('gives every iOS app a one-tap import link', () => {
@@ -125,7 +122,7 @@ describe('buildSubApps', () => {
   });
 
   it('names the sing-box profile after the subscription id when there is no title', () => {
-    expect(buildSubApps({ ...sub, subTitle: '' }).android[2].url).toBe(
+    expect(buildSubApps({ ...sub, subTitle: '' }).windows.find((app) => app.name === 'Sing-box')!.url).toBe(
       `sing-box://import-remote-profile?url=${encSub}#abc`,
     );
   });

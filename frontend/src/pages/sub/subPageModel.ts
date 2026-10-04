@@ -89,9 +89,6 @@ export function buildSubApps({
     url: `v2box://install-sub?url=${encSub}&name=${encodeURIComponent(sId)}`,
     copyUrl: subUrl,
   };
-  const v2raytun: SubApp = { name: 'V2RayTun', url: `v2raytun://import/${subUrl}`, copyUrl: subUrl };
-  const happ: SubApp = { name: 'Happ', url: `happ://add/${subUrl}`, copyUrl: subUrl };
-  const incy: SubApp = { name: 'Incy', url: `incy://add/${subUrl}`, copyUrl: subUrl };
   const rocketSource = `${subUrl}${subUrl.includes('?') ? '&' : '?'}flag=shadowrocket`;
   const rocketRemark = encodeURIComponent(subTitle || sId || 'Subscription');
 
@@ -116,13 +113,8 @@ export function buildSubApps({
       flclash,
     ],
     android: [
-      v2box,
-      { name: 'V2RayNG', url: `v2rayng://install-config?url=${encSub}`, copyUrl: subUrl },
-      singBox,
       clash,
-      v2raytun,
-      happ,
-      incy,
+      { name: 'V2RayNG', url: `v2rayng://install-config?url=${encSub}`, copyUrl: subUrl },
     ],
     ios: [shadowrocket],
   };
