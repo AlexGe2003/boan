@@ -71,39 +71,19 @@
 
 </details>
 
-## 快速开始
+## 快速开始（Boan 定制版）
+
+新服务器使用 Debian 13、Ubuntu 24.04 / 26.04，支持 x86_64 和 ARM64。以 root 执行源码安装：
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+apt-get update && apt-get install -y curl ca-certificates
+curl -fL https://raw.githubusercontent.com/AlexGe2003/boan/main/deploy/install-source.sh -o /tmp/boan-install.sh
+bash /tmp/boan-install.sh
 ```
 
-若要安装特定版本，请在命令后附加对应的标签（例如 `v3.7.0`）：
+脚本从本仓库构建前后端，拒绝覆盖已有安装。首次网站仅监听本机，随机管理员凭据保存在 `/root/boan-login.txt`。访问方法、开放 HTTPS 和故障排查见[部署说明](docs/deployment.zh-CN.md)。
 
-```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v3.7.0
-```
-
-若要安装滚动更新的 **dev** 版本（来自 `main` 的最新逐次提交预发布版本，而非稳定版本），请传入 `dev-latest`：
-
-```bash
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) dev-latest
-```
-
-安装过程中会生成随机的用户名、密码和访问路径。安装完成后，运行 `x-ui` 打开管理菜单，您可以在其中启动/停止服务、查看或重置登录凭据、管理 SSL 证书等。
-
-每个发布资源都会在其旁边附带一个 `.sha256` 校验和。`install.sh` 和更新程序都会据此校验压缩包，不匹配时中止。
-
-完整文档（安装、配置、运维以及完整的 API 参考）请访问 **[docs.sanaei.dev](https://docs.sanaei.dev/zh)**。
-
-### 无人值守安装
-
-安装程序也可以**非交互式**运行，适用于 cloud-init。
-设置 `XUI_NONINTERACTIVE=1`（或在无 TTY 的情况下通过管道传入），它就会全程
-零提示地完成端到端安装，生成随机凭据并写入
-`/etc/x-ui/install-result.env`。请参阅 [`deploy/`](deploy/)：
-
-- [Cloud-init user-data](deploy/cloud-init/) — 在任意云平台上无人值守安装（Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle）
-- [Hetzner Cloud 说明](deploy/marketplace/hetzner/) — 在 Hetzner 上基于 cloud-init 的部署
+当前没有定制版预编译 Release；不要使用原版 3x-ui 的安装或更新命令。源码构建需要下载工具链和依赖，建议准备至少 4 GB 内存及足够磁盘空间；这不是运行时最低配置。
 
 ## 支持的平台
 
