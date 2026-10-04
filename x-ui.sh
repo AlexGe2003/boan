@@ -218,7 +218,7 @@ entry_issue_certificate() {
 }
 
 before_show_menu() {
-    echo && echo -n -e "${yellow}Press enter to return to the main menu: ${plain}" && read -r temp
+    echo && echo -n -e "${yellow}按回车返回主菜单：${plain}" && read -r temp
     show_menu
 }
 
@@ -467,7 +467,7 @@ reset_webbasepath() {
     ${xui_folder}/x-ui setting -webBasePath "${config_webBasePath}" > /dev/null 2>&1
 
     echo -e "Web base path has been reset to: ${green}${config_webBasePath}${plain}"
-    echo -e "${green}Please use the new web base path to access the panel.${plain}"
+    echo -e "${green}请使用新的网站基础路径访问面板。${plain}"
     restart
 }
 
@@ -480,14 +480,14 @@ reset_config() {
         return 0
     fi
     ${xui_folder}/x-ui setting -reset
-    echo -e "All panel settings have been reset to default."
+    echo -e "面板设置已恢复为默认值。"
     restart
 }
 
 check_config() {
     local info=$(${xui_folder}/x-ui setting -show true)
     if [[ $? != 0 ]]; then
-        LOGE "get current settings error, please check logs"
+        LOGE "读取当前设置失败，请查看日志"
         show_menu
         return
     fi
@@ -654,9 +654,9 @@ stop() {
         sleep 2
         check_status
         if [[ $? == 1 ]]; then
-            LOGI "x-ui and xray stopped successfully"
+            LOGI "面板和 Xray 已停止"
         else
-            LOGE "Panel stop failed, Probably because the stop time exceeds two seconds, Please check the log information later"
+            LOGE "面板尚未停止，可能需要超过两秒，请查看日志确认"
         fi
     fi
 
@@ -670,16 +670,16 @@ restart() {
         if signal_xui HUP; then
             sleep 1
             signal_xui USR1
-            LOGI "Restart signal sent to the panel and xray-core."
+            LOGI "已向面板和 Xray 发送重启信号。"
         else
-            LOGE "Could not find the running panel process to signal."
+            LOGE "未找到运行中的面板进程。"
         fi
         sleep 2
         check_status
         if [[ $? == 0 ]]; then
-            LOGI "x-ui and xray Restarted successfully"
+            LOGI "面板和 Xray 已重启"
         else
-            LOGE "Panel restart failed, Please check the log information later"
+            LOGE "面板重启失败，请查看日志"
         fi
         if [[ $# == 0 ]]; then
             before_show_menu
@@ -694,9 +694,9 @@ restart() {
     sleep 2
     check_status
     if [[ $? == 0 ]]; then
-        LOGI "x-ui and xray Restarted successfully"
+        LOGI "面板和 Xray 已重启"
     else
-        LOGE "Panel restart failed, Probably because it takes longer than two seconds to start, Please check the log information later"
+        LOGE "面板尚未启动，可能需要超过两秒，请查看日志确认"
     fi
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -706,9 +706,9 @@ restart() {
 restart_xray() {
     if [[ "${running_in_docker}" == "true" ]]; then
         if signal_xui USR1; then
-            LOGI "xray-core Restart signal sent successfully, Please check the log information to confirm whether xray restarted successfully"
+            LOGI "已发送 Xray 重启信号，请查看日志确认结果"
         else
-            LOGE "Could not find the running panel process to signal."
+            LOGE "未找到运行中的面板进程。"
         fi
         sleep 2
         show_xray_status
@@ -722,7 +722,7 @@ restart_xray() {
     else
         systemctl reload x-ui
     fi
-    LOGI "xray-core Restart signal sent successfully, Please check the log information to confirm whether xray restarted successfully"
+    LOGI "已发送 Xray 重启信号，请查看日志确认结果"
     sleep 2
     show_xray_status
     if [[ $# == 0 ]]; then
@@ -763,9 +763,9 @@ enable() {
         systemctl enable x-ui
     fi
     if [[ $? == 0 ]]; then
-        LOGI "x-ui Set to boot automatically on startup successfully"
+        LOGI "已开启面板开机自启"
     else
-        LOGE "x-ui Failed to set Autostart"
+        LOGE "设置开机自启失败"
     fi
 
     if [[ $# == 0 ]]; then
@@ -1049,15 +1049,15 @@ show_status() {
     check_status
     case $? in
         0)
-            echo -e "Panel state: ${green}Running${plain}"
+            echo -e "面板状态：${green}运行中${plain}"
             show_enable_status
             ;;
         1)
-            echo -e "Panel state: ${yellow}Not Running${plain}"
+            echo -e "面板状态：${yellow}未运行${plain}"
             show_enable_status
             ;;
         2)
-            echo -e "Panel state: ${red}Not Installed${plain}"
+            echo -e "面板状态：${red}未安装${plain}"
             ;;
     esac
     show_xray_status
@@ -1066,14 +1066,14 @@ show_status() {
 
 show_enable_status() {
     if [[ "${running_in_docker}" == "true" ]]; then
-        echo -e "Start automatically: ${green}Managed by Docker${plain}"
+        echo -e "开机自启：${green}由 Docker 管理${plain}"
         return
     fi
     check_enabled
     if [[ $? == 0 ]]; then
-        echo -e "Start automatically: ${green}Yes${plain}"
+        echo -e "开机自启：${green}已开启${plain}"
     else
-        echo -e "Start automatically: ${red}No${plain}"
+        echo -e "开机自启：${red}已关闭${plain}"
     fi
 }
 
@@ -1089,9 +1089,9 @@ check_xray_status() {
 show_xray_status() {
     check_xray_status
     if [[ $? == 0 ]]; then
-        echo -e "xray state: ${green}Running${plain}"
+        echo -e "Xray 状态：${green}运行中${plain}"
     else
-        echo -e "xray state: ${red}Not Running${plain}"
+        echo -e "Xray 状态：${red}未运行${plain}"
     fi
 }
 
@@ -1115,9 +1115,9 @@ show_mtproto_status() {
         id=$(echo "${name}" | sed -E 's/mtg-([0-9]+)\.toml/\1/')
         bind=$(grep -E '^[[:space:]]*bind-to' "$f" | head -1 | cut -d'"' -f2)
         if echo "${running}" | grep -qx "${name}"; then
-            echo -e "mtproto inbound ${id} (${bind}): ${green}Running${plain}"
+            echo -e "MTProto 入站 ${id}（${bind}）：${green}运行中${plain}"
         else
-            echo -e "mtproto inbound ${id} (${bind}): ${red}Not Running${plain}"
+            echo -e "MTProto 入站 ${id}（${bind}）：${red}未运行${plain}"
         fi
     done
 }
@@ -3489,76 +3489,71 @@ migrate_db_prompt() {
 }
 
 show_usage() {
-    echo -e "┌────────────────────────────────────────────────────────────────┐
-│  ${blue}x-ui control menu usages (subcommands):${plain}                       │
-│                                                                │
-│  ${blue}x-ui${plain}                       - Admin Management Script          │
-│  ${blue}x-ui start${plain}                 - Start                            │
-│  ${blue}x-ui stop${plain}                  - Stop                             │
-│  ${blue}x-ui restart${plain}               - Restart                          │
-|  ${blue}x-ui restart-xray${plain}          - Restart Xray                     │
-│  ${blue}x-ui status${plain}                - Current Status                   │
-│  ${blue}x-ui settings${plain}              - Current Settings                 │
-│  ${blue}x-ui entry${plain}                 - Domains, access & SSL            │
-│  ${blue}x-ui enable${plain}                - Enable Autostart on OS Startup   │
-│  ${blue}x-ui disable${plain}               - Disable Autostart on OS Startup  │
-│  ${blue}x-ui log${plain}                   - Check logs                       │
-│  ${blue}x-ui banlog${plain}                - Check Fail2ban ban logs          │
-│  ${blue}x-ui update${plain}                - Update                           │
-│  ${blue}x-ui update-dev${plain}            - Update to Dev channel (latest)   │
-│  ${blue}x-ui update-all-geofiles${plain}   - Update all geo files             │
-│  ${blue}x-ui migrateDB [file]${plain}      - Convert .db <-> .dump (SQLite)   │
-│  ${blue}x-ui pgclient [ver]${plain}        - Upgrade pg_dump/pg_restore tools │
-│  ${blue}x-ui legacy${plain}                - Legacy version                   │
-│  ${blue}x-ui install${plain}               - Install                          │
-│  ${blue}x-ui uninstall${plain}             - Uninstall                        │
-└────────────────────────────────────────────────────────────────┘"
+    echo -e "\n${green}Boan / 3X-UI 常用命令${plain}\n"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui" "打开管理菜单"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui start" "启动面板"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui stop" "停止面板"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui restart" "重启面板"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui restart-xray" "重启 Xray"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui status" "查看运行状态"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui settings" "查看当前设置"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui entry" "域名、访问限制与 SSL"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui enable" "开启开机自启"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui disable" "关闭开机自启"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui log" "查看日志"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui banlog" "查看封禁日志"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui update" "更新正式版"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui update-dev" "更新开发版"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui update-all-geofiles" "更新地区数据"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui migrateDB [文件]" "转换 SQLite 数据库与备份"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui pgclient [版本]" "升级 PostgreSQL 客户端工具"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui legacy" "安装指定旧版本"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui install" "安装面板"
+    printf "  ${blue}%-28s${plain} %s\n" "x-ui uninstall" "卸载面板"
 }
 
 show_menu() {
-    echo -e "
-╔────────────────────────────────────────────────╗
-│  ${green}3X-UI Panel Management Script${plain}                │
-│  ${green}0.${plain} Exit Script                               │
-│────────────────────────────────────────────────│
-│  ${green}1.${plain} Install                                   │
-│  ${green}2.${plain} Update                                    │
-│  ${green}3.${plain} Update to Dev Channel (latest commit)     │
-│  ${green}4.${plain} Update Menu                               │
-│  ${green}5.${plain} Legacy Version                            │
-│  ${green}6.${plain} Uninstall                                 │
-│────────────────────────────────────────────────│
-│  ${green}7.${plain} Reset Username & Password                 │
-│  ${green}8.${plain} Reset Web Base Path                       │
-│  ${green}9.${plain} Reset Settings                            │
-│  ${green}10.${plain} Change Port                              │
-│  ${green}11.${plain} View Current Settings                    │
-│────────────────────────────────────────────────│
-│  ${green}12.${plain} Start                                    │
-│  ${green}13.${plain} Stop                                     │
-│  ${green}14.${plain} Restart                                  │
-|  ${green}15.${plain} Restart Xray                             │
-│  ${green}16.${plain} Check Status                             │
-│  ${green}17.${plain} Logs Management                          │
-│────────────────────────────────────────────────│
-│  ${green}18.${plain} Enable Autostart                         │
-│  ${green}19.${plain} Disable Autostart                        │
-│────────────────────────────────────────────────│
-│  ${green}20.${plain} SSL Certificate Management               │
-│  ${green}21.${plain} Cloudflare SSL Certificate               │
-│  ${green}22.${plain} IP Limit Management                      │
-│  ${green}23.${plain} Firewall Management                      │
-│  ${green}24.${plain} SSH Port Forwarding Management           │
-│  ${green}25.${plain} PostgreSQL Management                    │
-│────────────────────────────────────────────────│
-│  ${green}26.${plain} Enable BBR                               │
-│  ${green}27.${plain} Update Geo Files                         │
-│  ${green}28.${plain} Speedtest by Ookla                       │
-│  ${green}29.${plain} Domains, website access & SSL             │
-╚────────────────────────────────────────────────╝
-"
+    echo -e "\n${green}Boan / 3X-UI 中文管理菜单${plain}"
+    echo "────────────────────────────────────────"
+    printf "  ${green}%2s.${plain} %s\n" "0" "退出菜单"
+    echo "────────────────────────────────────────"
+    printf "  ${green}%2s.${plain} %s\n" "1" "安装面板"
+    printf "  ${green}%2s.${plain} %s\n" "2" "更新正式版"
+    printf "  ${green}%2s.${plain} %s\n" "3" "更新开发版（最新提交）"
+    printf "  ${green}%2s.${plain} %s\n" "4" "更新管理菜单"
+    printf "  ${green}%2s.${plain} %s\n" "5" "安装指定旧版本"
+    printf "  ${green}%2s.${plain} %s\n" "6" "卸载面板"
+    echo "────────────────────────────────────────"
+    printf "  ${green}%2s.${plain} %s\n" "7" "重置用户名和密码"
+    printf "  ${green}%2s.${plain} %s\n" "8" "重置网站基础路径"
+    printf "  ${green}%2s.${plain} %s\n" "9" "恢复默认设置"
+    printf "  ${green}%2s.${plain} %s\n" "10" "修改面板端口"
+    printf "  ${green}%2s.${plain} %s\n" "11" "查看当前设置"
+    echo "────────────────────────────────────────"
+    printf "  ${green}%2s.${plain} %s\n" "12" "启动面板"
+    printf "  ${green}%2s.${plain} %s\n" "13" "停止面板"
+    printf "  ${green}%2s.${plain} %s\n" "14" "重启面板"
+    printf "  ${green}%2s.${plain} %s\n" "15" "重启 Xray"
+    printf "  ${green}%2s.${plain} %s\n" "16" "查看运行状态"
+    printf "  ${green}%2s.${plain} %s\n" "17" "日志管理"
+    echo "────────────────────────────────────────"
+    printf "  ${green}%2s.${plain} %s\n" "18" "开启开机自启"
+    printf "  ${green}%2s.${plain} %s\n" "19" "关闭开机自启"
+    echo "────────────────────────────────────────"
+    printf "  ${green}%2s.${plain} %s\n" "20" "SSL 证书管理"
+    printf "  ${green}%2s.${plain} %s\n" "21" "Cloudflare DNS 证书"
+    printf "  ${green}%2s.${plain} %s\n" "22" "IP 限制管理"
+    printf "  ${green}%2s.${plain} %s\n" "23" "防火墙管理"
+    printf "  ${green}%2s.${plain} %s\n" "24" "SSH 端口转发"
+    printf "  ${green}%2s.${plain} %s\n" "25" "PostgreSQL 管理"
+    echo "────────────────────────────────────────"
+    printf "  ${green}%2s.${plain} %s\n" "26" "开启 BBR"
+    printf "  ${green}%2s.${plain} %s\n" "27" "更新地区数据"
+    printf "  ${green}%2s.${plain} %s\n" "28" "网络测速（Ookla）"
+    printf "  ${green}%2s.${plain} %s\n" "29" "域名、网站开关与 SSL"
+    echo "────────────────────────────────────────"
     show_status
-    echo && read -rp "Please enter your selection [0-29]: " num
+    echo && read -rp "请选择操作 [0-29]：" num || return
 
     case "${num}" in
         0)
@@ -3652,7 +3647,7 @@ show_menu() {
             check_install && entry_settings_menu
             ;;
         *)
-            LOGE "Please enter the correct number [0-29]"
+            LOGE "请输入有效编号 [0-29]"
             ;;
     esac
 }
