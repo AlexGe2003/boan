@@ -1539,7 +1539,7 @@
       "ipLimitAllowlist": "IP 限制白名单",
       "ipLimitAllowlistDesc": "IP 限制永远不会计入也不会封禁的地址和网段，避免办公室或校园的共享地址耗尽客户端的限额。IP/CIDR(逗号分隔)。",
       "websiteGeoBlockEnable": "屏蔽指定地区的网站访客",
-      "websiteGeoBlockEnableDesc": "阻止来源 IP 属于中国大陆、香港、澳门或台湾的访客访问后台网站，返回 403。订阅 URL 保持可用。依据本机 geoip.dat 判断；反向代理请配置可信代理 CIDR。",
+      "websiteGeoBlockEnableDesc": "阻止所配置地区的来源 IP 访问管理员和用户网站，返回 403。默认地区：中国大陆、香港、澳门和台湾。可通过 x-ui entry 配置地区和可信代理；依据本机 geoip.dat 判断，订阅 URL 与节点连接保持可用。",
       "subBalancers": {
         "menu": "订阅均衡器",
         "title": "订阅均衡器",

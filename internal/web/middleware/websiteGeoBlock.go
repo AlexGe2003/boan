@@ -13,31 +13,42 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
 
-func WebsiteGeoBlock() gin.HandlerFunc {
+var websiteGeoMatcher geoblock.Matcher
+
+// WebsiteGeoStatus is also used by existing WebSockets after the HTTP upgrade.
+func WebsiteGeoStatus(r *http.Request) int {
 	settings := &service.SettingService{}
-	matcher := &geoblock.Matcher{}
+	enabled, err := settings.GetWebsiteGeoBlockEnable()
+	if err != nil {
+		return http.StatusServiceUnavailable
+	}
+	if !enabled {
+		return 0
+	}
+	regions, err := settings.GetWebsiteGeoBlockRegions()
+	if err != nil {
+		return http.StatusServiceUnavailable
+	}
+	if err := websiteGeoMatcher.LoadRegions(xray.GetGeoipPath(), regions); err != nil {
+		logger.Warning("website geo block unavailable: ", err)
+		return http.StatusServiceUnavailable
+	}
+	trusted, err := settings.GetTrustedProxyCIDRs()
+	if err != nil {
+		return http.StatusServiceUnavailable
+	}
+	ip, ok := websiteVisitorIP(r, trusted)
+	if !ok || websiteGeoMatcher.Contains(ip) {
+		return http.StatusForbidden
+	}
+	return 0
+}
+
+func WebsiteGeoBlock() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		enabled, err := settings.GetWebsiteGeoBlockEnable()
-		if err != nil {
-			c.AbortWithStatus(http.StatusServiceUnavailable)
-			return
-		}
-		if !enabled {
-			c.Next()
-			return
-		}
-		if err := matcher.Load(xray.GetGeoipPath()); err != nil {
-			logger.Warning("website geo block unavailable: ", err)
-			c.AbortWithStatus(http.StatusServiceUnavailable)
-			return
-		}
-		trusted, err := settings.GetTrustedProxyCIDRs()
-		if err != nil {
-			c.AbortWithStatus(http.StatusServiceUnavailable)
-			return
-		}
-		if ip, ok := websiteVisitorIP(c.Request, trusted); ok && matcher.Contains(ip) {
-			c.AbortWithStatus(http.StatusForbidden)
+		if status := WebsiteGeoStatus(c.Request); status != 0 {
+			c.Header("Cache-Control", "no-store")
+			c.AbortWithStatus(status)
 			return
 		}
 		c.Next()
@@ -61,14 +72,14 @@ func websiteVisitorIP(r *http.Request, trusted string) (netip.Addr, bool) {
 	for i := len(forwarded) - 1; i >= 0; i-- {
 		candidate, err := netip.ParseAddr(strings.TrimSpace(forwarded[i]))
 		if err != nil {
-			break
+			return netip.Addr{}, false
 		}
 		peer = candidate.Unmap()
 		if !websiteTrustedProxy(peer, trusted) {
 			break
 		}
 	}
-	return peer, true
+	return peer, !websiteTrustedProxy(peer, trusted)
 }
 
 func websiteTrustedProxy(addr netip.Addr, configured string) bool {

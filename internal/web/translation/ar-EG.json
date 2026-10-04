@@ -1498,7 +1498,7 @@
       "ipLimitAllowlist": "قائمة سماح حد IP",
       "ipLimitAllowlistDesc": "عناوين وشبكات لا يحسبها حد IP ولا يحظرها، حتى لا يستهلك عنوان مكتب أو حرم جامعي مشترك حد العميل. IPs/CIDRs مفصولة بفواصل.",
       "websiteGeoBlockEnable": "Block website visitors by region",
-      "websiteGeoBlockEnableDesc": "Return 403 for visitors from mainland China, Hong Kong, Macau, or Taiwan on the panel and subscription sites. Uses local geoip.dat; configure trusted proxy CIDRs when behind a reverse proxy. Proxy node connections are unaffected.",
+      "websiteGeoBlockEnableDesc": "Block visitors from the configured regions on both administrator and user websites (403). Default regions: mainland China, Hong Kong, Macau and Taiwan. Configure regions and trusted proxies with x-ui entry. Subscription URLs and node connections remain available. Uses local geoip.dat.",
       "subBalancers": {
         "menu": "موزّعات الاشتراك",
         "title": "موزّع الاشتراك",

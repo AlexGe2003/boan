@@ -1657,7 +1657,7 @@
       "ipLimitAllowlist": "IP limit allowlist",
       "ipLimitAllowlistDesc": "Addresses and networks that the IP limit never counts and never bans, so a shared office or campus address cannot use up a client's limit. Comma-separated, IP or CIDR.",
       "websiteGeoBlockEnable": "Block website visitors by region",
-      "websiteGeoBlockEnableDesc": "Return 403 for visitors from mainland China, Hong Kong, Macau, or Taiwan on the admin website. Subscription URLs remain available. Uses local geoip.dat; configure trusted proxy CIDRs behind a reverse proxy.",
+      "websiteGeoBlockEnableDesc": "Block visitors from the configured regions on both administrator and user websites (403). Default regions: mainland China, Hong Kong, Macau and Taiwan. Configure regions and trusted proxies with x-ui entry. Subscription URLs and node connections remain available. Uses local geoip.dat.",
       "subBalancers": {
         "menu": "Sub Balancers",
         "title": "Subscription balancer",

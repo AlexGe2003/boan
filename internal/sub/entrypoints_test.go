@@ -1,6 +1,8 @@
 package sub
 
 import (
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -25,5 +27,32 @@ func TestClosedUserWebsiteKeepsNodeSubscription(t *testing.T) {
 	links, _, _, _, err := NewSubService("").GetSubs("entry-sub", "sub.example.com")
 	if err != nil || len(links) != 1 || !strings.Contains(links[0], "node.example.com:8443") {
 		t.Fatalf("closed website affected subscription: %v %v", links, err)
+	}
+}
+
+func TestWebsiteRegionBlockDoesNotBlockSubscriptionHTTP(t *testing.T) {
+	seedSubDB(t)
+	svc := &service.SettingService{}
+	seedSubInbound(t, "geo-sub", "geo-node", 8443, 0, wsTLSStream)
+	// The subscription router must not consult the website-only switch.
+	if err := database.GetDB().Create(&model.Setting{Key: "websiteGeoBlockEnable", Value: "true"}).Error; err != nil {
+		t.Fatal(err)
+	}
+	server := NewServer()
+	defer server.cancel()
+	router, err := server.initRouter()
+	if err != nil {
+		t.Fatal(err)
+	}
+	path, err := svc.GetSubPath()
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest("GET", "http://sub.example.com"+path+"geo-sub", nil)
+	req.RemoteAddr = "1.2.3.4:54321"
+	result := httptest.NewRecorder()
+	router.ServeHTTP(result, req)
+	if result.Code != 200 {
+		t.Fatalf("subscription blocked by website policy: %d %s", result.Code, result.Body.String())
 	}
 }

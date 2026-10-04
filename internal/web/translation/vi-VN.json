@@ -1498,7 +1498,7 @@
       "ipLimitAllowlist": "Danh sách cho phép của giới hạn IP",
       "ipLimitAllowlistDesc": "Các địa chỉ và mạng mà giới hạn IP không bao giờ tính và không bao giờ chặn, để một địa chỉ dùng chung của văn phòng hoặc trường học không dùng hết giới hạn của người dùng. IPs/CIDRs cách nhau bằng dấu phẩy.",
       "websiteGeoBlockEnable": "Block website visitors by region",
-      "websiteGeoBlockEnableDesc": "Return 403 for visitors from mainland China, Hong Kong, Macau, or Taiwan on the panel and subscription sites. Uses local geoip.dat; configure trusted proxy CIDRs when behind a reverse proxy. Proxy node connections are unaffected.",
+      "websiteGeoBlockEnableDesc": "Block visitors from the configured regions on both administrator and user websites (403). Default regions: mainland China, Hong Kong, Macau and Taiwan. Configure regions and trusted proxies with x-ui entry. Subscription URLs and node connections remain available. Uses local geoip.dat.",
       "subBalancers": {
         "menu": "Bộ cân bằng đăng ký",
         "title": "Bộ cân bằng đăng ký",

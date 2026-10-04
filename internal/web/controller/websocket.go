@@ -8,6 +8,7 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
@@ -83,8 +84,9 @@ func (w *WebSocketController) HandleWebSocket(c *gin.Context) {
 
 	user := session.GetLoginUser(c)
 	host, admin := c.Request.Host, user != nil && user.IsAdmin()
+	request := &http.Request{RemoteAddr: c.Request.RemoteAddr, Header: c.Request.Header.Clone()}
 	w.service.HandleConnection(conn, getRemoteIp(c), admin, func() bool {
 		entries, err := (&service.SettingService{}).GetEntryPoints()
-		return err == nil && entries.Allows(host, admin)
+		return err == nil && entries.Allows(host, admin) && middleware.WebsiteGeoStatus(request) == 0
 	})
 }

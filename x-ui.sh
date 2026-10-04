@@ -123,8 +123,8 @@ confirm_restart() {
     fi
 }
 
-before_entry_settings_menu() {
-    local choice admin_url user_url sub_url enabled inbound_id node_address target cert_file key_file
+entry_settings_menu() {
+    local choice admin_url user_url sub_url enabled inbound_id node_address target cert_file key_file proxies
     while true; do
         echo ""
         echo "域名、访问与 SSL 设置"
@@ -137,8 +137,10 @@ before_entry_settings_menu() {
         echo "7. 查看当前配置"
         echo "8. 检查证书并重启应用"
         echo "9. 恢复共用登录入口（故障恢复）"
+        echo "10. 屏蔽 / 放行中国大陆、香港、澳门和台湾的网站访问"
+        echo "11. 设置可信反向代理 IP / CIDR"
         echo "0. 返回"
-        read -rp "请选择: " choice
+        read -rp "请选择: " choice || return
         case "$choice" in
             1)
                 "${xui_folder}/x-ui" entry -show || continue
@@ -171,8 +173,19 @@ before_entry_settings_menu() {
             7) "${xui_folder}/x-ui" entry -show ;;
             8) "${xui_folder}/x-ui" entry -check && restart 0 ;;
             9) "${xui_folder}/x-ui" entry -reset ;;
+            10)
+                echo "影响管理员和用户网站；订阅与节点连接不受影响。按来源 IP 判断。"
+                read -rp "启用地区屏蔽？true / false: " enabled
+                [[ "$enabled" == "true" || "$enabled" == "false" ]] || { LOGE "请输入 true 或 false"; continue; }
+                "${xui_folder}/x-ui" entry -block-domestic "$enabled"
+                ;;
+            11)
+                echo "仅填写实际反向代理的 IP/CIDR，逗号分隔。代理需传递 X-Forwarded-For。"
+                read -rp "可信代理（留空表示不信任任何转发头）: " proxies
+                "${xui_folder}/x-ui" entry -trusted-proxies "$proxies"
+                ;;
             0) return ;;
-            *) LOGE "请选择 0-9" ;;
+            *) LOGE "请选择 0-11" ;;
         esac
     done
 }
@@ -204,7 +217,7 @@ entry_issue_certificate() {
     echo "证书已保存；acme.sh 续期后会重启服务。配置好两个网站证书后，使用菜单 8 检查并重启。"
 }
 
-show_menu() {
+before_show_menu() {
     echo && echo -n -e "${yellow}Press enter to return to the main menu: ${plain}" && read -r temp
     show_menu
 }

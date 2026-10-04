@@ -47,3 +47,43 @@ func TestMatcherRequiresAllFourRegionsAndReloads(t *testing.T) {
 		t.Fatal("unlisted IP blocked")
 	}
 }
+
+func TestMatcherRegionSelectionIPv6AndPolicyReload(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "geoip.dat")
+	ipv6 := netip.MustParseAddr("2001:db8::")
+	data, err := proto.Marshal(&xraygeodata.GeoIPList{Entry: []*xraygeodata.GeoIP{
+		{Code: "CN", Cidr: []*xraygeodata.CIDR{{Ip: []byte{1, 0, 0, 0}, Prefix: 8}, {Ip: ipv6.AsSlice(), Prefix: 32}}},
+		{Code: "HK", Cidr: []*xraygeodata.CIDR{{Ip: []byte{2, 0, 0, 0}, Prefix: 8}}},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(path, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	m := &Matcher{}
+	if err = m.LoadRegions(path, "cn"); err != nil {
+		t.Fatal(err)
+	}
+	for _, ip := range []string{"1.2.3.4", "::ffff:1.2.3.4", "2001:db8::1"} {
+		if !m.Contains(netip.MustParseAddr(ip)) {
+			t.Fatalf("did not block %s", ip)
+		}
+	}
+	if m.Contains(netip.MustParseAddr("2.2.3.4")) {
+		t.Fatal("CN-only policy blocked HK")
+	}
+	// Same file metadata, different selected regions: cache must rebuild.
+	if err = m.LoadRegions(path, "CN,HK"); err != nil {
+		t.Fatal(err)
+	}
+	if !m.Contains(netip.MustParseAddr("2.2.3.4")) {
+		t.Fatal("policy change did not reload")
+	}
+	if err = m.LoadRegions(path, "CN,HK,MO,TW"); err == nil {
+		t.Fatal("accepted missing required regions")
+	}
+	if _, err = NormalizeRegions("CN,TYPO"); err == nil {
+		t.Fatal("accepted unknown region")
+	}
+}

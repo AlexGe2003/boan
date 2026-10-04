@@ -25,3 +25,16 @@ func TestWebsiteVisitorIPTrustBoundary(t *testing.T) {
 		})
 	}
 }
+
+func TestWebsiteVisitorIPRejectsUnknownAndUnverifiableProxy(t *testing.T) {
+	for _, tc := range []struct{ remote, xff string }{
+		{"not-an-ip", ""}, {"127.0.0.1:443", ""}, {"127.0.0.1:443", "1.2.3.4, invalid"}, {"127.0.0.1:443", "127.0.0.1"},
+	} {
+		r := httptest.NewRequest("GET", "/", nil)
+		r.RemoteAddr = tc.remote
+		r.Header.Set("X-Forwarded-For", tc.xff)
+		if _, ok := websiteVisitorIP(r, "127.0.0.1/32"); ok {
+			t.Fatalf("accepted unverified visitor: %+v", tc)
+		}
+	}
+}

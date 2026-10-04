@@ -24,6 +24,9 @@ func entryPointsCLI(args []string, out io.Writer) error {
 	admin := fs.String("admin-url", "", "Administrator URL including current panel base path")
 	user := fs.String("user-url", "", "User URL including current panel base path")
 	enabled := fs.String("user-enabled", "", "true or false; applies immediately")
+	blockDomestic := fs.String("block-domestic", "", "true or false: block CN, HK, MO and TW website visitors immediately")
+	regions := fs.String("blocked-regions", "CN,HK,MO,TW", "Regions used with -block-domestic: CN,HK,MO,TW")
+	trusted := fs.String("trusted-proxies", "", "Comma-separated trusted proxy IPs/CIDRs; empty disables forwarded headers")
 	sub := fs.String("subscription-url", "", "Subscription origin, e.g. https://sub.example.com:2096")
 	target := fs.String("target", "", "Certificate target: admin, user, both, subscription")
 	cert := fs.String("cert", "", "Certificate full-chain file")
@@ -39,6 +42,20 @@ func entryPointsCLI(args []string, out io.Writer) error {
 	if fs.NArg() != 0 {
 		return fmt.Errorf("unexpected arguments: %v", fs.Args())
 	}
+	var trustedValue *string
+	regionsSet := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == "trusted-proxies" {
+			trustedValue = trusted
+		}
+		if f.Name == "blocked-regions" {
+			regionsSet = true
+		}
+	})
+	if regionsSet && *blockDomestic == "" {
+		return fmt.Errorf("use -blocked-regions together with -block-domestic")
+	}
+	geoChange := *blockDomestic != "" || trustedValue != nil
 	websiteChange := *admin != "" || *user != "" || *enabled != ""
 	certChange := *target != "" || *cert != "" || *key != ""
 	if certChange {
@@ -55,7 +72,7 @@ func entryPointsCLI(args []string, out io.Writer) error {
 	}
 	subscriptionChange := *sub != "" || *target == "subscription"
 	changes := 0
-	for _, changed := range []bool{websiteChange, subscriptionChange, *inbound != 0 || *address != "", *reset} {
+	for _, changed := range []bool{websiteChange, subscriptionChange, *inbound != 0 || *address != "", *reset, geoChange} {
 		if changed {
 			changes++
 		}
@@ -73,6 +90,20 @@ func entryPointsCLI(args []string, out io.Writer) error {
 		return err
 	}
 	switch {
+	case geoChange:
+		var enabledValue *bool
+		selected := ""
+		if *blockDomestic != "" {
+			value, parseErr := strconv.ParseBool(*blockDomestic)
+			if parseErr != nil {
+				return parseErr
+			}
+			enabledValue = &value
+			if value {
+				selected = *regions
+			}
+		}
+		err = svc.ConfigureWebsiteGeoBlock(enabledValue, selected, trustedValue)
 	case *reset:
 		err = svc.SaveEntryPoints(service.EntryPoints{UserEnabled: true})
 	case websiteChange:
@@ -189,7 +220,11 @@ func entryPointsCLI(args []string, out io.Writer) error {
 		if err != nil {
 			return err
 		}
-		return json.NewEncoder(out).Encode(map[string]any{"entries": p, "basePath": base, "subscriptionURL": settings.SubURI, "subscriptionJSONURL": settings.SubJsonURI, "subscriptionClashURL": settings.SubClashURI, "subscriptionCert": subCert, "subscriptionKey": subKey, "nodes": hosts})
+		blockedRegions, err := svc.GetWebsiteGeoBlockRegions()
+		if err != nil {
+			return err
+		}
+		return json.NewEncoder(out).Encode(map[string]any{"websiteGeoBlockEnabled": settings.WebsiteGeoBlockEnable, "websiteBlockedRegions": blockedRegions, "trustedProxyCIDRs": settings.TrustedProxyCIDRs, "entries": p, "basePath": base, "subscriptionURL": settings.SubURI, "subscriptionJSONURL": settings.SubJsonURI, "subscriptionClashURL": settings.SubClashURI, "subscriptionCert": subCert, "subscriptionKey": subKey, "nodes": hosts})
 	}
 	return nil
 }
