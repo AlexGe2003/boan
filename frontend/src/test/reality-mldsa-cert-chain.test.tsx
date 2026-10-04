@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Form } from 'antd';
 import type { ReactNode } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -98,5 +99,77 @@ describe('ML-DSA-65 cert chain warning', () => {
       />,
     );
     expect(await findByText('3427 B')).toBeTruthy();
+  });
+});
+
+describe('REALITY scanner failure and request lifecycle', () => {
+  it('shows request errors instead of silently reporting no targets', async () => {
+    renderWithProviders(
+      <RealityTargetScannerModal
+        open
+        onClose={noop}
+        onPick={noop}
+        scanRealityCandidates={async () => {
+          throw new Error('Network unavailable');
+        }}
+      />,
+    );
+    expect(await screen.findByText('Network unavailable')).toBeTruthy();
+  });
+
+  it('explains failed probes and prevents selecting them', async () => {
+    const pick = vi.fn();
+    renderWithProviders(
+      <RealityTargetScannerModal
+        open
+        onClose={noop}
+        onPick={pick}
+        scanRealityCandidates={async () => [
+          {
+            ...smallChain,
+            feasible: false,
+            tlsVersion: '',
+            reason: 'connection failed: lookup example.com: i/o timeout',
+          },
+        ]}
+      />,
+    );
+    expect(await screen.findByText('DNS lookup failed. Check the server resolver.')).toBeTruthy();
+    const button = screen.getByRole('button', { name: 'Use' });
+    expect(button.hasAttribute('disabled')).toBe(true);
+    fireEvent.click(button);
+    expect(pick).not.toHaveBeenCalled();
+  });
+
+  it('ignores a previous request after the modal is closed and reopened', async () => {
+    let resolveFirst!: (rows: RealityScanResult[]) => void;
+    let resolveSecond!: (rows: RealityScanResult[]) => void;
+    const scan = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<RealityScanResult[]>((resolve) => {
+            resolveFirst = resolve;
+          }),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise<RealityScanResult[]>((resolve) => {
+            resolveSecond = resolve;
+          }),
+      );
+    const props = { onClose: noop, onPick: noop, scanRealityCandidates: scan };
+    const view = render(<RealityTargetScannerModal {...props} open />);
+    view.rerender(<RealityTargetScannerModal {...props} open={false} />);
+    view.rerender(<RealityTargetScannerModal {...props} open />);
+    await act(async () => {
+      resolveSecond([{ ...smallChain, target: 'new.example:443' }]);
+    });
+    expect(await screen.findByText('new.example:443')).toBeTruthy();
+    await act(async () => {
+      resolveFirst([{ ...smallChain, target: 'old.example:443' }]);
+    });
+    expect(screen.queryByText('old.example:443')).toBeNull();
+    expect(screen.getByText('new.example:443')).toBeTruthy();
   });
 });

@@ -216,6 +216,7 @@ func (s *ServerService) probeRealityAddr(dialHost string, port int, sni string, 
 	}
 	defer conn.Close()
 	if remote, ok := conn.RemoteAddr().(*net.TCPAddr); ok {
+		res.IP = remote.IP.String()
 		res.PrivateTarget = netsafe.IsBlockedIP(remote.IP)
 		// The opt-in bypasses the SSRF guard, so leave an audit trail of it.
 		if res.PrivateTarget && allowPrivate {

@@ -167,8 +167,7 @@ export function useSecurityActions({
       { silent: true },
     );
     if (!msg?.success || !Array.isArray(msg.obj)) {
-      messageApi.error(msg?.msg || t('pages.inbounds.toasts.scanRealityTargetError'));
-      return [];
+      throw new Error(msg?.msg || t('pages.inbounds.toasts.scanRealityTargetError'));
     }
     return msg.obj;
   };
