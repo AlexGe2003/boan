@@ -53,14 +53,32 @@ export default function RealityTargetScannerModal({
   }, []);
 
   useEffect(() => {
+    const activeReq = requestId;
     if (open) {
-      setQuery('');
-      void runScan();
+      const id = ++activeReq.current;
+      // oxlint-disable-next-line react/set-state-in-effect
+      setLoading(true);
+      setError('');
+      setResults([]);
+      void scanRef.current().then(
+        (rows) => {
+          if (id === activeReq.current) {
+            setResults(rows);
+            setLoading(false);
+          }
+        },
+        (cause) => {
+          if (id === activeReq.current) {
+            setError(cause instanceof Error ? cause.message : String(cause));
+            setLoading(false);
+          }
+        },
+      );
     }
     return () => {
-      requestId.current++;
+      activeReq.current++;
     };
-  }, [open, runScan]);
+  }, [open]);
 
   const reasonText = (row: RealityScanResult) => {
     if (row.privateTarget) return t('pages.inbounds.form.scanReasonPrivate');

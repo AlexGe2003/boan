@@ -689,7 +689,22 @@
         "bytesPerSecTip": "Eşik aşıldıktan sonra fallback trafiğine uygulanan hız sınırı (bayt/sn); böylece sondalar sunucunuzu hedefe ücretsiz bant genişliği olarak kullanamaz. 0 = sınır yok (bu yönü devre dışı bırakır).",
         "burstBytesPerSec": "Saniye Başına Patlama Baytı",
         "burstBytesPerSecTip": "Sabit hızın üzerindeki kısa patlamalar için pay (token-bucket boyutu). Saniye Başına Bayt değerinden düşükse ona eşitlenecek şekilde yükseltilir.",
-        "autoFill": "Otomatik Doldur"
+        "autoFill": "Otomatik Doldur",
+        "scanReason": "Reason",
+        "scanTechnicalDetails": "Technical details",
+        "scanProbeFailed": "Probe failed",
+        "scanReasonDNS": "DNS lookup failed. Check the server resolver.",
+        "scanReasonTimeout": "Connection or handshake timed out. Retry or choose another target.",
+        "scanReasonConnection": "The server could not connect to this target.",
+        "scanReasonTLS": "TLS handshake failed.",
+        "scanReasonCert": "Certificate verification failed or hostname mismatch.",
+        "scanReasonTLS13": "Target does not support TLS 1.3.",
+        "scanReasonH2": "Target did not negotiate HTTP/2.",
+        "scanReasonCurve": "Target did not use X25519 key exchange.",
+        "scanReasonPrivate": "Bulk scanning does not allow private or local addresses.",
+        "scanRunning": "Probing from the server. Larger address ranges take longer.",
+        "scanSummary": "{total} results; {usable} usable with the current configuration.",
+        "scanEmpty": "No targets found. Try a specific domain or a smaller address range."
       },
       "info": {
         "mode": "Mod",
