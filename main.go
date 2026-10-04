@@ -654,6 +654,11 @@ func main() {
 	}
 
 	switch os.Args[1] {
+	case "entry":
+		if err := entryPointsCLI(os.Args[2:], os.Stdout); err != nil {
+			fmt.Fprintln(os.Stderr, "entry:", err)
+			os.Exit(1)
+		}
 	case "run":
 		err := runCmd.Parse(os.Args[2:])
 		if err != nil {
@@ -767,6 +772,7 @@ Commands:
     migrate        migrate from other/old x-ui
     migrate-db     SQLite <-> .dump (--dump/--restore) or copy into PostgreSQL (--dsn)
     encrypt-tokens encrypt node bearer tokens with the configured active key
+    entry          configure separate website URLs, node address and SSL
     setting        set settings
 `
 }

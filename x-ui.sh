@@ -123,7 +123,88 @@ confirm_restart() {
     fi
 }
 
-before_show_menu() {
+before_entry_settings_menu() {
+    local choice admin_url user_url sub_url enabled inbound_id node_address target cert_file key_file
+    while true; do
+        echo ""
+        echo "域名、访问与 SSL 设置"
+        echo "1. 设置管理员和用户 URL（包含当前面板基础路径）"
+        echo "2. 设置订阅 URL（仅协议、域名和可选端口）"
+        echo "3. 设置节点地址（按入站 ID）"
+        echo "4. 开启 / 关闭用户网站"
+        echo "5. 配置 SSL 证书文件"
+        echo "6. 申请 SSL 证书 / 自动续期"
+        echo "7. 查看当前配置"
+        echo "8. 检查证书并重启应用"
+        echo "9. 恢复共用登录入口（故障恢复）"
+        echo "0. 返回"
+        read -rp "请选择: " choice
+        case "$choice" in
+            1)
+                "${xui_folder}/x-ui" entry -show || continue
+                read -rp "管理员完整 URL: " admin_url
+                read -rp "用户完整 URL: " user_url
+                [[ -n "$admin_url" && -n "$user_url" ]] || { LOGE "两个 URL 都不能为空"; continue; }
+                "${xui_folder}/x-ui" entry -admin-url "$admin_url" -user-url "$user_url"
+                ;;
+            2)
+                read -rp "订阅入口，例如 https://sub.example.com:2096: " sub_url
+                [[ -n "$sub_url" ]] && "${xui_folder}/x-ui" entry -subscription-url "$sub_url"
+                ;;
+            3)
+                read -rp "入站 ID（后台入站列表中查看）: " inbound_id
+                read -rp "节点域名或 IP（不含协议和端口）: " node_address
+                "${xui_folder}/x-ui" entry -inbound-id "$inbound_id" -node-address "$node_address"
+                ;;
+            4)
+                read -rp "开放用户网站？输入 true 或 false: " enabled
+                [[ "$enabled" == "true" || "$enabled" == "false" ]] || { LOGE "请输入 true 或 false"; continue; }
+                "${xui_folder}/x-ui" entry -user-enabled "$enabled"
+                ;;
+            5)
+                read -rp "证书用途 admin / user / both / subscription: " target
+                read -rp "证书完整链文件路径: " cert_file
+                read -rp "私钥文件路径: " key_file
+                "${xui_folder}/x-ui" entry -target "$target" -cert "$cert_file" -key "$key_file"
+                ;;
+            6) entry_issue_certificate ;;
+            7) "${xui_folder}/x-ui" entry -show ;;
+            8) "${xui_folder}/x-ui" entry -check && restart 0 ;;
+            9) "${xui_folder}/x-ui" entry -reset ;;
+            0) return ;;
+            *) LOGE "请选择 0-9" ;;
+        esac
+    done
+}
+
+entry_issue_certificate() {
+    local domain target cert_dir reload_cmd
+    read -rp "证书域名（需已解析到本机，公网 80 端口可用）: " domain
+    # This value is also a directory name; never allow shell syntax or path traversal.
+    if [[ ! "$domain" =~ ^[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?$ || "$domain" == *..* ]]; then
+        LOGE "域名格式无效"
+        return 1
+    fi
+    read -rp "证书用途 admin / user / subscription: " target
+    case "$target" in admin|user|subscription) ;; *) LOGE "证书用途无效"; return 1 ;; esac
+    command -v socat >/dev/null 2>&1 || { LOGE "请先安装 socat，或使用已有 SSL 菜单完成依赖安装"; return 1; }
+    if [[ ! -x "$HOME/.acme.sh/acme.sh" ]]; then
+        install_acme || return 1
+    fi
+    cert_dir="/root/cert/$domain"
+    mkdir -p "$cert_dir" || return 1
+    chmod 700 "$cert_dir"
+    "$HOME/.acme.sh/acme.sh" --issue --server letsencrypt --standalone -d "$domain" || return 1
+    reload_cmd="if ${xui_folder}/x-ui entry -check >/dev/null 2>&1; then systemctl restart x-ui 2>/dev/null || rc-service x-ui restart 2>/dev/null; fi"
+    "$HOME/.acme.sh/acme.sh" --install-cert -d "$domain" \
+        --key-file "$cert_dir/privkey.pem" --fullchain-file "$cert_dir/fullchain.pem" \
+        --reloadcmd "$reload_cmd" || return 1
+    chmod 600 "$cert_dir/privkey.pem"
+    "${xui_folder}/x-ui" entry -target "$target" -cert "$cert_dir/fullchain.pem" -key "$cert_dir/privkey.pem" || return 1
+    echo "证书已保存；acme.sh 续期后会重启服务。配置好两个网站证书后，使用菜单 8 检查并重启。"
+}
+
+show_menu() {
     echo && echo -n -e "${yellow}Press enter to return to the main menu: ${plain}" && read -r temp
     show_menu
 }
@@ -3405,6 +3486,7 @@ show_usage() {
 |  ${blue}x-ui restart-xray${plain}          - Restart Xray                     │
 │  ${blue}x-ui status${plain}                - Current Status                   │
 │  ${blue}x-ui settings${plain}              - Current Settings                 │
+│  ${blue}x-ui entry${plain}                 - Domains, access & SSL            │
 │  ${blue}x-ui enable${plain}                - Enable Autostart on OS Startup   │
 │  ${blue}x-ui disable${plain}               - Disable Autostart on OS Startup  │
 │  ${blue}x-ui log${plain}                   - Check logs                       │
@@ -3459,10 +3541,11 @@ show_menu() {
 │  ${green}26.${plain} Enable BBR                               │
 │  ${green}27.${plain} Update Geo Files                         │
 │  ${green}28.${plain} Speedtest by Ookla                       │
+│  ${green}29.${plain} Domains, website access & SSL             │
 ╚────────────────────────────────────────────────╝
 "
     show_status
-    echo && read -rp "Please enter your selection [0-28]: " num
+    echo && read -rp "Please enter your selection [0-29]: " num
 
     case "${num}" in
         0)
@@ -3552,8 +3635,11 @@ show_menu() {
         28)
             run_speedtest
             ;;
+        29)
+            check_install && entry_settings_menu
+            ;;
         *)
-            LOGE "Please enter the correct number [0-28]"
+            LOGE "Please enter the correct number [0-29]"
             ;;
     esac
 }
@@ -3574,6 +3660,9 @@ if [[ $# > 0 ]]; then
             ;;
         "status")
             check_install 0 && status 0
+            ;;
+        "entry")
+            check_install 0 && entry_settings_menu
             ;;
         "settings")
             check_install 0 && check_config 0

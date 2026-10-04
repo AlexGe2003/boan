@@ -123,6 +123,9 @@ func (a *IndexController) login(c *gin.Context) {
 		return
 	}
 
+	if !middleware.CheckEntryRole(c, user.IsAdmin()) {
+		return
+	}
 	defaultLoginLimiter.registerSuccess(remoteIP, form.Username)
 	logger.Infof("logged in successfully: username=%q, IP=%q", form.Username, remoteIP)
 	a.tgbot.UserLoginNotify(tgbot.LoginAttempt{

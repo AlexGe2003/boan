@@ -403,8 +403,8 @@ func (s *Server) Start() (err error) {
 			listener = tls.NewListener(listener, c)
 			logger.Info("Sub server running HTTPS on", listener.Addr())
 		} else {
-			logger.Error("Error loading certificates:", err)
-			logger.Info("Sub server running HTTP on", listener.Addr())
+			listener.Close()
+			return err
 		}
 	} else {
 		logger.Info("Sub server running HTTP on", listener.Addr())

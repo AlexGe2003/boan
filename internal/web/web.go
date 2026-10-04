@@ -148,6 +148,9 @@ func NewServer() *Server {
 }
 
 func (s *Server) isDirectHTTPSConfigured() bool {
+	if cfg, err := s.settingService.EntryTLSConfig(); err == nil && cfg != nil {
+		return true
+	}
 	certFile, certErr := s.settingService.GetCertFile()
 	keyFile, keyErr := s.settingService.GetKeyFile()
 	if certErr != nil || keyErr != nil || certFile == "" || keyFile == "" {
@@ -188,7 +191,11 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 		return nil, err
 	}
 
-	if webDomain != "" {
+	entries, err := s.settingService.GetEntryPoints()
+	if err != nil {
+		return nil, err
+	}
+	if webDomain != "" && entries.AdminURL == "" {
 		engine.Use(middleware.DomainValidatorMiddleware(webDomain))
 	}
 
@@ -201,7 +208,6 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
-	engine.Use(cluster.Gateway(basePath))
 	engine.Use(gzip.Gzip(gzip.DefaultCompression))
 	assetsBasePath := basePath + "assets/"
 
@@ -218,12 +224,14 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 	}
 	store.Options(sessionOptions)
 	engine.Use(sessions.Sessions("3x-ui", store))
+	engine.Use(middleware.EntryPointGate())
+	engine.Use(cluster.Gateway(basePath))
 	engine.Use(func(c *gin.Context) {
 		c.Set("base_path", basePath)
 	})
 	engine.Use(func(c *gin.Context) {
 		uri := c.Request.RequestURI
-		if strings.HasPrefix(uri, assetsBasePath) {
+		if strings.HasPrefix(uri, assetsBasePath) && c.Writer.Header().Get("Cache-Control") != "no-store" {
 			c.Header("Cache-Control", "max-age=31536000")
 		}
 	})
@@ -616,12 +624,27 @@ func (s *Server) start(restartXray bool, startTgBot bool) (err error) {
 			logger.Info("Using XUI_PORT override for web panel port:", port)
 		}
 	}
+	entryTLS, err := s.settingService.EntryTLSConfig()
+	if err != nil {
+		return err
+	}
 	listenAddr := net.JoinHostPort(listen, strconv.Itoa(port))
 	listener, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", listenAddr)
 	if err != nil {
 		return err
 	}
-	if certFile != "" || keyFile != "" {
+	if entryTLS != nil {
+		pool, err := s.settingService.NodeMtlsClientCAPool()
+		if err != nil {
+			listener.Close()
+			return err
+		}
+		if pool != nil {
+			applyNodeMtls(entryTLS, pool)
+		}
+		listener = tls.NewListener(network.NewAutoHttpsListener(listener), entryTLS)
+		logger.Info("Web server running HTTPS with entry certificates on", listener.Addr())
+	} else if certFile != "" || keyFile != "" {
 		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 		if err == nil {
 			c := &tls.Config{

@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/middleware"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
 )
@@ -14,6 +15,9 @@ import (
 // enforceRole lets admins and node-sync callers through. A panel user may only
 // hit the routes roleAllows lists; resource ownership is checked in the handler.
 func (a *APIController) enforceRole(c *gin.Context) {
+	if user := session.GetLoginUser(c); user != nil && !middleware.CheckEntryRole(c, user.IsAdmin()) {
+		return
+	}
 	if scope, ok := c.Get("api_token_scope"); ok && scope == model.ApiScopeNodeSync {
 		c.Next()
 		return

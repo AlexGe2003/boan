@@ -37,7 +37,7 @@ func NewWebSocketService(hub *websocket.Hub) *WebSocketService {
 // HandleConnection takes ownership of an upgraded WebSocket connection:
 // registers a new client, starts the read/write pumps, and returns
 // immediately. The connection is closed when both pumps exit.
-func (s *WebSocketService) HandleConnection(conn *ws.Conn, remoteIP string, admin bool) {
+func (s *WebSocketService) HandleConnection(conn *ws.Conn, remoteIP string, admin bool, accessChecks ...func() bool) {
 	if s == nil || s.hub == nil || conn == nil {
 		if conn != nil {
 			conn.Close()
@@ -50,7 +50,11 @@ func (s *WebSocketService) HandleConnection(conn *ws.Conn, remoteIP string, admi
 	s.hub.Register(client)
 	logger.Debugf("WebSocket client %s registered from %s", client.ID, remoteIP)
 
-	go s.writePump(client, conn)
+	var allowed func() bool
+	if len(accessChecks) > 0 {
+		allowed = accessChecks[0]
+	}
+	go s.writePump(client, conn, allowed)
 	go s.readPump(client, conn)
 }
 
@@ -82,7 +86,17 @@ func (s *WebSocketService) readPump(client *websocket.Client, conn *ws.Conn) {
 }
 
 // writePump pushes hub messages to the connection and emits keepalive pings.
-func (s *WebSocketService) writePump(client *websocket.Client, conn *ws.Conn) {
+func (s *WebSocketService) writePump(client *websocket.Client, conn *ws.Conn, accessChecks ...func() bool) {
+	var allowed func() bool
+	if len(accessChecks) > 0 {
+		allowed = accessChecks[0]
+	}
+	var policyTick <-chan time.Time
+	if allowed != nil {
+		timer := time.NewTicker(5 * time.Second)
+		defer timer.Stop()
+		policyTick = timer.C
+	}
 	ticker := time.NewTicker(wsPingPeriod)
 	defer func() {
 		if r := common.Recover("WebSocket writePump panic"); r != nil {
@@ -94,7 +108,14 @@ func (s *WebSocketService) writePump(client *websocket.Client, conn *ws.Conn) {
 
 	for {
 		select {
+		case <-policyTick:
+			if !allowed() {
+				return
+			}
 		case msg, ok := <-client.Send:
+			if allowed != nil && !allowed() {
+				return
+			}
 			_ = conn.SetWriteDeadline(time.Now().Add(wsWriteWait))
 			if !ok {
 				_ = conn.WriteMessage(ws.CloseMessage, []byte{})

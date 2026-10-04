@@ -229,3 +229,7 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
   <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=rank&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=rank" /><img alt="Star History Rank" src="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=rank" /></picture> <picture><source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=trending&theme=dark" /><source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=trending" /><img alt="GitHub Trending Repository of the Day" src="https://api.star-history.com/badge?repo=MHSanaei/3x-ui&type=trending" /></picture>
  </a>
 </p>
+
+### 独立域名与用户网站开关
+
+通过 `x-ui entry` 或菜单 29 配置管理员、用户网站、订阅与节点地址，以及独立 SSL 证书和用户网站开关。参见[配置与恢复说明](docs/entrypoints.zh-CN.md)。
