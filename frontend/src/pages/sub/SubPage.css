@@ -722,3 +722,20 @@ a.sub-row-title:hover {
     display: none;
   }
 }
+
+@media (max-width: 600px) {
+  .sub-app-grid .sub-row {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+  .sub-app-grid .sub-app-name {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .sub-app-grid .sub-row > .ant-space {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}

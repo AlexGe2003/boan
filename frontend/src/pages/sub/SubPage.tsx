@@ -136,7 +136,7 @@ export default function SubPage() {
         children: <SubAppsTab apps={apps} initialPlatform={initialPlatform} onOpen={open} onCopy={copy} subUrl={subUrl} subClashUrl={subClashUrl} />,
       });
     }
-    return items;
+    return items.sort((a, b) => (a.key === 'apps' ? -1 : b.key === 'apps' ? 1 : 0));
   }, [t, copy, open]);
 
   const direction = RTL_LANGUAGES.has(lang) ? 'rtl' : 'ltr';

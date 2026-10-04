@@ -15,21 +15,15 @@ const appendRawView = (url: string) => `${url}${url.includes('?') ? '&' : '?'}vi
 
 export default function SubLinksTab({ subUrl, subJsonUrl, subClashUrl, onCopy }: SubLinksTabProps) {
   const { t } = useTranslation();
-  const subLabel = t('pages.settings.subSettings');
   const rows = [
-    { kind: 'SUB', color: 'green', url: subUrl, title: subLabel, downloadable: false },
-    {
-      kind: 'JSON',
-      color: 'purple',
-      url: subJsonUrl,
-      title: `${subLabel} JSON`,
-      downloadable: true,
-    },
-    { kind: 'CLASH', color: 'gold', url: subClashUrl, title: 'Clash / Mihomo', downloadable: true },
+    { kind: 'SUB', color: 'green', url: subUrl, title: t('subscription.standardTitle'), hint: t('subscription.standardHint'), downloadable: false },
+    { kind: 'CLASH', color: 'gold', url: subClashUrl, title: t('subscription.clashTitle'), hint: t('subscription.clashHint'), downloadable: true },
+    { kind: 'JSON', color: 'purple', url: subJsonUrl, title: t('subscription.jsonTitle'), hint: t('subscription.jsonHint'), downloadable: true },
   ].filter((row) => row.url);
 
   return (
     <div className="sub-rows">
+      <p className="sub-muted">{t('subscription.manualHelp')}</p>
       {rows.map((row) => (
         <div key={row.kind} className="sub-row">
           <Tag color={row.color} className="sub-row-tag">
@@ -39,6 +33,7 @@ export default function SubLinksTab({ subUrl, subJsonUrl, subClashUrl, onCopy }:
             <a href={row.url} target="_blank" rel="noopener noreferrer" className="sub-row-title">
               {row.title}
             </a>
+            <div className="sub-muted">{row.hint}</div>
             <div className="sub-row-url" dir="ltr" title={row.url}>
               {row.url}
             </div>

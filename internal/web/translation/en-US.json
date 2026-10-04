@@ -145,7 +145,19 @@
     "support": "Support",
     "qrTitle": "Scan. Import. Connect.",
     "qrHint": "Scan with your client app. Keep this code private.",
-    "saveQr": "Save QR"
+    "saveQr": "Save QR",
+    "importHelp": "Install your app, then choose Open and import. After importing, select a node and connect in the app.",
+    "importFallback": "Nothing happened? Open this page in your system browser, or copy the subscription URL and paste it into Add subscription in your app.",
+    "openImport": "Open and import",
+    "copySubscription": "Copy subscription URL",
+    "rocketName": "Shadowrocket",
+    "manualHelp": "Use one-tap import when possible. For manual import, choose the link matching your app.",
+    "standardTitle": "Shadowrocket / v2rayNG subscription",
+    "standardHint": "Copy this URL into Add subscription in Shadowrocket or v2rayNG.",
+    "clashTitle": "Clash subscription",
+    "clashHint": "Import into the subscriptions page in Clash / Mihomo.",
+    "jsonTitle": "Xray JSON configuration (advanced)",
+    "jsonHint": "Only for apps supporting Xray JSON. Use the matching subscription above for Shadowrocket or Clash."
   },
   "menu": {
     "mySubscriptions": "My subscriptions",

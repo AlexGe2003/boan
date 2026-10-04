@@ -67,6 +67,7 @@ export default function SubAppsTab({
 
   return (
     <div className="sub-apps">
+      <p className="sub-muted">{t('subscription.importHelp')}</p>
       <Segmented<AppPlatform>
         value={platform}
         onChange={setPlatform}
@@ -78,7 +79,7 @@ export default function SubAppsTab({
           <div key={app.name} className="sub-row">
             <AppIcon name={app.name} />
             <span className="sub-app-name" style={{ fontWeight: 600 }}>
-              {app.name}
+              {app.name === 'Shadowrocket' ? t('subscription.rocketName') : app.name}
             </span>
             <Space size="small">
               <Button
@@ -87,11 +88,12 @@ export default function SubAppsTab({
                 size="middle"
                 onClick={() => handleAppAction(app)}
               >
-                {app.isCopyOnly ? '一键导入' : t('add')}
+                {t(app.isCopyOnly ? 'subscription.copySubscription' : 'subscription.openImport')}
               </Button>
-              <Tooltip title={t('copy')}>
+              <Tooltip title={t('subscription.copySubscription')}>
                 <Button
                   icon={<CopyOutlined />}
+                  aria-label={t('subscription.copySubscription')}
                   size="middle"
                   onClick={() => onCopy(app.copyUrl || app.url, app.toast)}
                 />
@@ -100,6 +102,7 @@ export default function SubAppsTab({
           </div>
         ))}
       </div>
+      <p className="sub-muted">{t('subscription.importFallback')}</p>
     </div>
   );
 }
