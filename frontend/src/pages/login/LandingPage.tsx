@@ -19,10 +19,7 @@ export default function LandingPage() {
           <span className="portal-eyebrow">
             <i /> 让每一次连接，更从容
           </span>
-          <h1>
-            泊岸网络 —<br />
-            与世界，自由相连。
-          </h1>
+          <h1>与世界，自由相连。</h1>
           <p>
             一个属于您的网络空间。
             <br />
