@@ -3,12 +3,13 @@ package main
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 )
 
 func TestSourceInstallerHelpAndSyntax(t *testing.T) {
-	for _, path := range []string{"deploy/install-source.sh", "install.sh", "update.sh", "x-ui.sh"} {
+	for _, path := range []string{"deploy/update-source.sh", "deploy/install-source.sh", "install.sh", "update.sh", "x-ui.sh"} {
 		if out, err := exec.Command("bash", "-n", path).CombinedOutput(); err != nil {
 			t.Fatalf("%s: %v %s", path, err, out)
 		}
@@ -39,5 +40,36 @@ func TestBoanInstallAndUpdateOrigins(t *testing.T) {
 		if !strings.Contains(text, "alexge2003/boan") {
 			t.Errorf("%s has no fork download source", path)
 		}
+	}
+}
+
+func TestSourceUpgradeRestoresProgramAndDatabase(t *testing.T) {
+	root := t.TempDir()
+	for _, dir := range []string{"backup/data", "app", "data", "bin"} {
+		if err := os.MkdirAll(filepath.Join(root, dir), 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for path, content := range map[string]string{
+		"backup/x-ui": "old-binary", "backup/menu.sh": "old-menu", "backup/source-commit": "old-commit",
+		"backup/data/x-ui.db": "old-database", "app/x-ui": "new-binary", "app/source-commit": "new-commit",
+		"app/node-settings": "keep-node-settings", "data/x-ui.db": "migrated-database", "data/new-file": "new-state", "bin/x-ui": "new-menu",
+	} {
+		if err := os.WriteFile(filepath.Join(root, path), []byte(content), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cmd := exec.Command("bash", "-c", `source deploy/update-source.sh; upgrade_restore_files "$1/backup" "$1/app" "$1/data" "$1/bin/x-ui"`, "test", root)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("restore: %v %s", err, out)
+	}
+	for path, want := range map[string]string{"app/x-ui": "old-binary", "bin/x-ui": "old-menu", "app/source-commit": "old-commit", "data/x-ui.db": "old-database", "backup/failed-data/x-ui.db": "migrated-database", "app/node-settings": "keep-node-settings"} {
+		got, err := os.ReadFile(filepath.Join(root, path))
+		if err != nil || string(got) != want {
+			t.Fatalf("%s: %s %v", path, got, err)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(root, "data/new-file")); !os.IsNotExist(err) {
+		t.Fatal("failed migration state leaked into restored database directory")
 	}
 }

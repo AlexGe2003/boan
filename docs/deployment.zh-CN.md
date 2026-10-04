@@ -66,4 +66,15 @@ journalctl -u x-ui -n 80 --no-pager
 x-ui entry
 ```
 
-安装和面板更新来源已指向 `AlexGe2003/boan`。目前该仓库没有预编译 Release，所以常规“更新”菜单暂不能完成升级；不要改回原版下载源，否则会失去定制功能。这个源码安装脚本只负责首次安装，不能重复执行来升级。
+通过此前 Boan 源码脚本安装的服务器，可以保留配置升级：
+
+```bash
+curl -fL https://raw.githubusercontent.com/AlexGe2003/boan/main/deploy/update-source.sh -o /tmp/boan-update.sh
+bash /tmp/boan-update.sh
+```
+
+新版菜单也可选择「安装与更新 → 更新程序」，确认 `y`。首次安装脚本仍然不能用于升级。
+
+升级先在临时目录编译，现有程序继续运行。编译完成后短暂停止面板及节点，备份旧程序、菜单、完整 SQLite 数据目录和服务配置，再替换程序与菜单；不改动域名、账号、证书、端口、开机自启、Xray/节点运行时文件。成功后检查服务进程及监听；启动失败时尝试恢复旧程序和数据库，失败数据库另行保留用于诊断。升级前已经停止的服务会保持停止。
+
+备份位于 `/var/backups/boan-update.*`，日志为 `/root/boan-update.log`。此入口只适用于默认路径的 Boan 源码安装和 SQLite；原版、Docker、PostgreSQL 或自定义数据目录会拒绝自动升级。检查和文件恢复测试已通过，尚未在真实 Debian/Ubuntu 服务器完成端到端升级验证。

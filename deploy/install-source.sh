@@ -16,41 +16,13 @@ fetch() {
     curl --fail --location --retry 5 --retry-delay 3 --connect-timeout 20 "$@"
 }
 
-install_source() {
-    [[ ${EUID} -eq 0 ]] || { echo 'Run with sudo bash or as root.' >&2; return 1; }
-    [[ $(uname -s) == Linux && -d /run/systemd/system ]] || { echo 'A Linux server running systemd is required.' >&2; return 1; }
-    # shellcheck source=/dev/null
-    . /etc/os-release
-    case "${ID}:${VERSION_ID}" in debian:13|ubuntu:24.04|ubuntu:26.04) ;; *) echo 'Supported: Debian 13, Ubuntu 24.04 / 26.04.' >&2; return 1 ;; esac
-    local arch node_arch
-    case "$(uname -m)" in x86_64) arch=amd64; node_arch=x64 ;; aarch64|arm64) arch=arm64; node_arch=arm64 ;; *) echo 'Use an x86_64 or ARM64 server.' >&2; return 1 ;; esac
-    local port="${BOAN_PORT:-2053}" ref="${BOAN_REF:-main}"
-    [[ "$port" =~ ^[0-9]{1,5}$ ]] && ((10#$port >= 1 && 10#$port <= 65535)) || { echo 'Invalid BOAN_PORT.' >&2; return 1; }
-    port=$((10#$port))
-    [[ "$ref" =~ ^[a-zA-Z0-9][a-zA-Z0-9._/-]*$ && "$ref" != *..* ]] || { echo 'Invalid BOAN_REF.' >&2; return 1; }
-    local path
-    for path in /usr/local/x-ui /etc/x-ui /etc/default/x-ui /etc/systemd/system/x-ui.service /usr/bin/x-ui /root/boan-login.txt; do
-        [[ ! -e "$path" && ! -L "$path" ]] || { echo "Existing $path found. This installer does not overwrite installations." >&2; return 1; }
-    done
-    if command -v ss >/dev/null && ss -Hln "sport = :$port" | grep -q .; then
-        echo "Port $port is in use; choose BOAN_PORT." >&2; return 1
-    fi
-    umask 077
-    [[ ! -L /root/boan-install.log ]] || { echo 'Refusing symlink at /root/boan-install.log.' >&2; return 1; }
-    touch /root/boan-install.log
-    chmod 600 /root/boan-install.log
-    exec > >(tee -a /root/boan-install.log) 2>&1
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update
-    apt-get install -y ca-certificates curl git build-essential unzip xz-utils tar python3 openssl cron socat iproute2
-    local work
-    work=$(mktemp -d /var/tmp/boan-build.XXXXXXXX)
-    # Keep build failures isolated from the final installation and keep their log.
-    trap 'code=$?; echo "Installation failed (exit $code). Check /root/boan-install.log. Build directory: ${work:-not created}" >&2; exit "$code"' ERR
+# Shared by first installation and in-place panel upgrades.
+build_source() {
+    local work="$1" arch="$2" node_arch="$3" ref="$4"
     git clone --depth 1 --branch "$ref" https://github.com/AlexGe2003/boan.git "$work/source"
     cd "$work/source"
-    local commit go_version go_archive go_sha node_archive
-    commit=$(git rev-parse HEAD)
+    local go_version go_archive go_sha node_archive
+    built_commit=$(git rev-parse HEAD)
     go_version=$(awk '$1 == "go" {print $2}' go.mod)
     fetch -o "$work/go-downloads.json" 'https://go.dev/dl/?mode=json&include=all'
     read -r go_archive go_sha < <(python3 - "$work/go-downloads.json" "$go_version" "$arch" <<'PY'
@@ -84,11 +56,49 @@ PY
     export GOTOOLCHAIN=local
     (cd frontend; npm ci; npm run build)
     mkdir -p build
-    CGO_ENABLED=1 go build -trimpath -ldflags "-s -w -X github.com/mhsanaei/3x-ui/v3/internal/config.buildCommit=${commit:0:8}" -o build/x-ui .
+    CGO_ENABLED=1 go build -trimpath -ldflags "-s -w -X github.com/mhsanaei/3x-ui/v3/internal/config.buildCommit=${built_commit:0:8}" -o build/x-ui .
     # Reuse the repository's Xray, GeoIP and protocol-runtime packaging.
-    sh DockerInit.sh "$arch"
+    if [[ "${5:-full}" == full ]]; then sh DockerInit.sh "$arch"; fi
     build/x-ui entry -h > "$work/entry-help.txt" 2>&1 || [[ $? -eq 1 ]]
     grep -q -- '-block-domestic' "$work/entry-help.txt"
+}
+
+install_source() {
+    [[ ${EUID} -eq 0 ]] || { echo 'Run with sudo bash or as root.' >&2; return 1; }
+    [[ $(uname -s) == Linux && -d /run/systemd/system ]] || { echo 'A Linux server running systemd is required.' >&2; return 1; }
+    umask 077
+    exec 9>/run/lock/boan-deploy.lock
+    flock -n 9 || { echo 'Another Boan installation or upgrade is running.' >&2; return 1; }
+    # shellcheck source=/dev/null
+    . /etc/os-release
+    case "${ID}:${VERSION_ID}" in debian:13|ubuntu:24.04|ubuntu:26.04) ;; *) echo 'Supported: Debian 13, Ubuntu 24.04 / 26.04.' >&2; return 1 ;; esac
+    local arch node_arch
+    case "$(uname -m)" in x86_64) arch=amd64; node_arch=x64 ;; aarch64|arm64) arch=arm64; node_arch=arm64 ;; *) echo 'Use an x86_64 or ARM64 server.' >&2; return 1 ;; esac
+    local port="${BOAN_PORT:-2053}" ref="${BOAN_REF:-main}"
+    [[ "$port" =~ ^[0-9]{1,5}$ ]] && ((10#$port >= 1 && 10#$port <= 65535)) || { echo 'Invalid BOAN_PORT.' >&2; return 1; }
+    port=$((10#$port))
+    [[ "$ref" =~ ^[a-zA-Z0-9][a-zA-Z0-9._/-]*$ && "$ref" != *..* ]] || { echo 'Invalid BOAN_REF.' >&2; return 1; }
+    local path
+    for path in /usr/local/x-ui /etc/x-ui /etc/default/x-ui /etc/systemd/system/x-ui.service /usr/bin/x-ui /root/boan-login.txt; do
+        [[ ! -e "$path" && ! -L "$path" ]] || { echo "Existing $path found. This installer does not overwrite installations." >&2; return 1; }
+    done
+    if command -v ss >/dev/null && ss -Hln "sport = :$port" | grep -q .; then
+        echo "Port $port is in use; choose BOAN_PORT." >&2; return 1
+    fi
+    umask 077
+    [[ ! -L /root/boan-install.log ]] || { echo 'Refusing symlink at /root/boan-install.log.' >&2; return 1; }
+    touch /root/boan-install.log
+    chmod 600 /root/boan-install.log
+    exec > >(tee -a /root/boan-install.log) 2>&1
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y ca-certificates curl git build-essential unzip xz-utils tar python3 openssl cron socat iproute2
+    local work
+    work=$(mktemp -d /var/tmp/boan-build.XXXXXXXX)
+    # Keep build failures isolated from the final installation and keep their log.
+    trap 'code=$?; echo "Installation failed (exit $code). Check /root/boan-install.log. Build directory: ${work:-not created}" >&2; exit "$code"' ERR
+    build_source "$work" "$arch" "$node_arch" "$ref"
+    local commit="$built_commit"
     install -d -m 755 /usr/local/x-ui
     cp -a build/. /usr/local/x-ui/
     install -m 755 x-ui.sh /usr/bin/x-ui

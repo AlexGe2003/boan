@@ -293,6 +293,20 @@ install() {
 }
 
 update() {
+    if [[ -f "${xui_folder}/source-commit" ]]; then
+        local approved update_script
+        read_bool approved '从 Boan 源码升级程序和菜单？完成编译后会短暂停机备份' n || return
+        [[ "$approved" == true ]] || return 0
+        update_script=$(mktemp) || return
+        if curl -fL --retry 5 https://raw.githubusercontent.com/AlexGe2003/boan/main/deploy/update-source.sh -o "$update_script"; then
+            bash "$update_script"
+            local update_status=$?
+            rm -f "$update_script"
+            return "$update_status"
+        fi
+        rm -f "$update_script"
+        return 1
+    fi
     confirm "This function will update all x-ui components to the latest version, and the data will not be lost. Do you want to continue?" "y"
     if [[ $? != 0 ]]; then
         LOGE "Cancelled"
@@ -3588,7 +3602,7 @@ menu_advanced() {
 }
 menu_install_new() { check_uninstall 0 && install; }
 menu_install() {
-    menu_loop '安装与更新' '安装面板' menu_install_new '更新正式版' update '更新开发版' update_dev '更新管理菜单' update_menu '安装指定旧版本' legacy_version '卸载面板' uninstall
+    menu_loop '安装与更新' '安装面板' menu_install_new '更新程序（自动识别源码安装）' update '更新开发版' update_dev '更新管理菜单' update_menu '安装指定旧版本' legacy_version '卸载面板' uninstall
 }
 show_menu() {
     echo -e "\n${green}Boan / 3X-UI 中文管理菜单${plain}"
