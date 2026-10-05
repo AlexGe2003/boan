@@ -2,7 +2,7 @@ import NodeStatus from '@/pages/support/NodeStatus';
 import SupportTickets from '@/pages/support/SupportTickets';
 import zhCN from 'antd/locale/zh_CN';
 import { ClusterOutlined, CustomerServiceOutlined } from '@ant-design/icons';
-import { lazy, Suspense, useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, ConfigProvider, Empty, Modal, Progress, Spin, Tag, message } from 'antd';
@@ -58,8 +58,6 @@ function expiry(value: number) {
   if (value < 0) return `首次使用后 ${Math.ceil(-value / 86400000)} 天`;
   return new Date(value).toLocaleDateString('zh-CN');
 }
-const Store = lazy(() => import('@/pages/business/Store'));
-const Orders = lazy(() => import('@/pages/business/Orders'));
 const sections = [
   { key: 'home', label: '仪表盘', icon: <DashboardOutlined />, group: '基础' },
   {
@@ -69,8 +67,6 @@ const sections = [
     group: '订阅',
   },
   { key: 'nodes', label: '节点状态', icon: <ClusterOutlined />, group: '订阅' },
-  { key: 'store', label: '购买套餐', icon: <LinkOutlined />, group: '订阅' },
-  { key: 'orders', label: '我的订单', icon: <BookOutlined />, group: '账户' },
   { key: 'profile', label: '个人中心', icon: <UserOutlined />, group: '账户' },
   { key: 'guide', label: '使用教程', icon: <BookOutlined />, group: '支持' },
   { key: 'tickets', label: '工单服务', icon: <CustomerServiceOutlined />, group: '支持' },
@@ -193,16 +189,6 @@ export default function MySubscriptionsPage() {
             }
           />
           <main className="customer-content">
-            {section === 'store' && (
-              <Suspense fallback={<Spin />}>
-                <Store onOrdered={() => navigate('orders')} />
-              </Suspense>
-            )}
-            {section === 'orders' && (
-              <Suspense fallback={<Spin />}>
-                <Orders />
-              </Suspense>
-            )}
             {section === 'nodes' && (
               <section className="customer-card">
                 <NodeStatus />
@@ -238,7 +224,7 @@ export default function MySubscriptionsPage() {
                         type="info"
                         showIcon
                         title="尚未开通服务"
-                        description="账号已创建。可以购买套餐或联系管理员分配服务，开通后可查看额度、有效期和订阅链接。"
+                        description="账号已创建。可以联系管理员分配服务，开通后可查看额度、有效期和订阅链接。"
                       />
                     </section>
                   );

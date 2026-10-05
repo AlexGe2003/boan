@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AutoComplete,
@@ -12,6 +12,7 @@ import {
   Row,
   Select,
   Space,
+  Spin,
   Switch,
   Tabs,
   Tag,
@@ -50,6 +51,8 @@ import type {
 import { useFail2banStatusQuery, getLimitIpNotice } from '@/api/queries/useFail2banStatusQuery';
 import { ClientFormSchema, ClientCreateFormSchema, type ClientFormValues } from '@/schemas/client';
 import './ClientFormModal.css';
+
+const ClientActivity = lazy(() => import('./ClientActivity'));
 
 const FLOW_OPTIONS = Object.values(TLS_FLOW_CONTROL);
 const VMESS_SECURITY_OPTIONS = ['auto', 'aes-128-gcm', 'chacha20-poly1305'] as const;
@@ -108,6 +111,7 @@ interface SaveCreatePayload {
 }
 
 interface ClientFormModalProps {
+  admin?: boolean;
   open: boolean;
   mode: Mode;
   client: ClientRecord | null;
@@ -239,6 +243,7 @@ export function resolveTotalBytes(
 }
 
 export default function ClientFormModal({
+  admin = false,
   open,
   mode,
   client,
@@ -255,6 +260,10 @@ export default function ClientFormModal({
   const { t } = useTranslation();
   const [messageApi, messageContextHolder] = message.useMessage();
   const isEdit = mode === 'edit';
+  const [activeTab, setActiveTab] = useState('basic');
+  useEffect(() => {
+    setActiveTab('basic');
+  }, [open, client?.email]);
 
   const methods = useForm<Values>({ defaultValues: EMPTY });
   const inboundIds = useWatch({ control: methods.control, name: 'inboundIds' });
@@ -805,7 +814,7 @@ export default function ClientFormModal({
         title={isEdit ? t('pages.clients.editClient') : t('pages.clients.addClient')}
         destroyOnHidden
         className="client-form-modal"
-        width={720}
+        width={activeTab === 'activity' ? 1100 : 720}
         zIndex={CLIENT_FORM_MODAL_Z_INDEX}
         style={{ top: 20 }}
         styles={{
@@ -813,39 +822,44 @@ export default function ClientFormModal({
         }}
         onCancel={close}
         footer={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {isEdit && resetTraffic && (
-              <Popconfirm
-                title={t('pages.inbounds.resetTraffic')}
-                description={t('pages.inbounds.resetTrafficContent')}
-                okText={t('reset')}
-                cancelText={t('cancel')}
-                zIndex={CLIENT_IP_LOG_MODAL_Z_INDEX}
-                onConfirm={onResetTraffic}
-              >
-                <Button
-                  color="danger"
-                  variant="filled"
-                  icon={<RetweetOutlined />}
-                  loading={resetting}
+          activeTab === 'activity' ? (
+            <Button onClick={close}>{t('close')}</Button>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {isEdit && resetTraffic && (
+                <Popconfirm
+                  title={t('pages.inbounds.resetTraffic')}
+                  description={t('pages.inbounds.resetTrafficContent')}
+                  okText={t('reset')}
+                  cancelText={t('cancel')}
+                  zIndex={CLIENT_IP_LOG_MODAL_Z_INDEX}
+                  onConfirm={onResetTraffic}
                 >
-                  {t('pages.inbounds.resetTraffic')}
+                  <Button
+                    color="danger"
+                    variant="filled"
+                    icon={<RetweetOutlined />}
+                    loading={resetting}
+                  >
+                    {t('pages.inbounds.resetTraffic')}
+                  </Button>
+                </Popconfirm>
+              )}
+              <div style={{ marginInlineStart: 'auto', display: 'flex', gap: 8 }}>
+                <Button onClick={close}>{t('cancel')}</Button>
+                <Button type="primary" loading={submitting} onClick={onSubmit}>
+                  {isEdit ? t('save') : t('create')}
                 </Button>
-              </Popconfirm>
-            )}
-            <div style={{ marginInlineStart: 'auto', display: 'flex', gap: 8 }}>
-              <Button onClick={close}>{t('cancel')}</Button>
-              <Button type="primary" loading={submitting} onClick={onSubmit}>
-                {isEdit ? t('save') : t('create')}
-              </Button>
+              </div>
             </div>
-          </div>
+          )
         }
       >
         <FormProvider {...methods}>
           <Form layout="vertical">
             <Tabs
-              defaultActiveKey="basic"
+              activeKey={activeTab}
+              onChange={setActiveTab}
               items={[
                 {
                   key: 'basic',
@@ -1528,6 +1542,20 @@ export default function ClientFormModal({
                     </>
                   ),
                 },
+                ...(admin && isEdit && client
+                  ? [
+                      {
+                        key: 'activity',
+                        label: '访问记录',
+                        children:
+                          open && activeTab === 'activity' ? (
+                            <Suspense fallback={<Spin />}>
+                              <ClientActivity key={client.email} email={client.email} />
+                            </Suspense>
+                          ) : null,
+                      },
+                    ]
+                  : []),
               ]}
             />
           </Form>

@@ -28,7 +28,7 @@ it('explains missing collection instead of reporting zero website usage', async 
     </QueryClientProvider>,
   );
   await screen.findByText('尚未开启访问日志');
-  expect(screen.queryByText('采样连接记录')).toBeNull();
+  expect(screen.queryByText('记录到的连接次数')).toBeNull();
   expect(HttpUtil.get).toHaveBeenCalledWith(
     '/panel/api/clients/activity/alice%40example.com?hours=24',
   );
@@ -42,5 +42,5 @@ it('reports a denied request without inventing visit statistics', async () => {
     </QueryClientProvider>,
   );
   await screen.findByText('Error: Forbidden');
-  expect(screen.queryByText('网站 / 目标排行 · 最多 50 项')).toBeNull();
+  expect(screen.queryByText('访问目标排行 · 最多 50 项')).toBeNull();
 });

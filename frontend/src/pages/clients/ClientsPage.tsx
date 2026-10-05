@@ -1910,6 +1910,7 @@ export default function ClientsPage() {
         />
         <LazyMount when={formOpen}>
           <ClientFormModal
+            admin={panelRole === 'admin'}
             open={formOpen}
             mode={formMode}
             client={editingClient}

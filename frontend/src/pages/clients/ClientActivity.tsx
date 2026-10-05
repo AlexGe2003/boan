@@ -6,6 +6,8 @@ import {
   Card,
   Col,
   Empty,
+  Input,
+  Select,
   Progress,
   Row,
   Segmented,
@@ -24,6 +26,8 @@ import './ClientActivity.css';
 const date = (time: number) => new Date(time).toLocaleString();
 
 export default function ClientActivity({ email }: { email: string }) {
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState<string>();
   const [hours, setHours] = useState(24);
   const [live, setLive] = useState(false);
   const query = useQuery({
@@ -40,8 +44,13 @@ export default function ClientActivity({ email }: { email: string }) {
     retry: false,
   });
   const data = query.data;
+  const matches = (row: { host: string; category: string }) =>
+    row.host.toLowerCase().includes(search.trim().toLowerCase()) &&
+    (!category || row.category === category);
+
   return (
     <div className="client-activity">
+      <Typography.Text strong>当前用户：{email}</Typography.Text>
       <div className="activity-toolbar">
         <Segmented
           aria-label="统计时间范围"
@@ -64,8 +73,8 @@ export default function ClientActivity({ email }: { email: string }) {
         </Space>
       </div>
       <Typography.Paragraph type="secondary">
-        仅统计本机 Xray 日志中带有用户标识的访问连接记录。分类按域名近似判断，次数不等于流量；HTTPS
-        不显示页面路径，远程节点暂未接入。
+        查看该用户通过本机访问的域名或 IP。分类根据域名推测，连接次数不是浏览次数或流量大小。
+        仅包含开启日志后保留的记录，不显示 HTTPS 网页内容；远程节点暂未接入。
       </Typography.Paragraph>
       {query.isLoading && <Skeleton active paragraph={{ rows: 5 }} />}
       {query.isError && (
@@ -87,7 +96,7 @@ export default function ClientActivity({ email }: { email: string }) {
         <Alert
           type="warning"
           title={data.status === 'disabled' ? '尚未开启访问日志' : '访问日志暂不可读取'}
-          description="在 Xray 配置的日志设置中指定 access 文件路径，并确保入站客户端有 email 标识。开启后产生的新连接会显示在这里；历史记录无法补回。"
+          description="先在代理核心设置中开启访问日志，再让该用户连接节点。新连接会显示在这里，开启前的历史无法补回。"
         />
       )}
       {data?.sampled && (
@@ -102,7 +111,7 @@ export default function ClientActivity({ email }: { email: string }) {
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={8}>
               <Card>
-                <Statistic title="采样连接记录" value={data.connections} />
+                <Statistic title="记录到的连接次数" value={data.connections} />
               </Card>
             </Col>
             <Col xs={24} sm={8}>
@@ -113,7 +122,7 @@ export default function ClientActivity({ email }: { email: string }) {
             </Col>
             <Col xs={24} sm={8}>
               <Card>
-                <Statistic title="识别分类" value={data.categories.length} />
+                <Statistic title="网站分类数" value={data.categories.length} />
                 <Typography.Text type="secondary">更新于 {date(data.generatedAt)}</Typography.Text>
               </Card>
             </Col>
@@ -158,11 +167,32 @@ export default function ClientActivity({ email }: { email: string }) {
               </Card>
             </Col>
             <Col xs={24} lg={16}>
-              <Card title="网站 / 目标排行 · 最多 50 项">
+              <Card title="访问目标排行 · 最多 50 项">
+                <Space wrap style={{ marginBottom: 12 }}>
+                  <Input.Search
+                    aria-label="搜索域名或 IP"
+                    placeholder="搜索域名或 IP"
+                    allowClear
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                  />
+                  <Select
+                    aria-label="筛选网站分类"
+                    placeholder="全部分类"
+                    allowClear
+                    value={category}
+                    onChange={setCategory}
+                    style={{ minWidth: 150 }}
+                    options={data.categories.map((item) => ({
+                      label: item.name,
+                      value: item.name,
+                    }))}
+                  />
+                </Space>
                 <Table
                   rowKey="host"
                   size="small"
-                  dataSource={data.destinations}
+                  dataSource={data.destinations.filter(matches)}
                   scroll={{ x: 520 }}
                   pagination={{ pageSize: 8 }}
                   columns={[
@@ -172,18 +202,21 @@ export default function ClientActivity({ email }: { email: string }) {
                       render: (v: string) => <span dir="ltr">{v}</span>,
                     },
                     { title: '分类', dataIndex: 'category' },
-                    { title: '连接次数', dataIndex: 'count' },
+                    { title: '连接次数', dataIndex: 'count', sorter: (a, b) => a.count - b.count },
                     { title: '最近访问', dataIndex: 'lastSeen', render: date },
                   ]}
                 />
               </Card>
             </Col>
           </Row>
-          <Card title="最近访问记录 · 最多 100 条">
+          <Card
+            title="最近连接记录 · 最多 100 条"
+            extra={search || category ? <Tag>已应用筛选</Tag> : undefined}
+          >
             <Table
               rowKey={(r, index) => `${r.time}-${r.host}-${index}`}
               size="small"
-              dataSource={data.visits}
+              dataSource={data.visits.filter(matches)}
               scroll={{ x: 520 }}
               pagination={{ pageSize: 8 }}
               columns={[
