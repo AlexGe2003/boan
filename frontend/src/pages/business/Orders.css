@@ -1,0 +1,51 @@
+.orders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.orders-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.orders-stat-card {
+  background: var(--ant-color-bg-container, #ffffff);
+  border: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.orders-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.orders-stat-label {
+  font-size: 13px;
+  color: var(--ant-color-text-secondary, #8c8c8c);
+  font-weight: 500;
+}
+
+.orders-stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ant-color-text, #1f1f1f);
+  font-variant-numeric: tabular-nums;
+}
+
+.order-mobile-card {
+  background: var(--ant-color-bg-container, #ffffff);
+  border: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
