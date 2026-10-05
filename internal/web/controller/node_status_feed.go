@@ -29,7 +29,16 @@ func (a *NodeController) statusFeed(c *gin.Context) {
 		applyLocalMonitorStatus(&local, a.serverService.CurrentStatus())
 	}
 	local.CarrierProbes = service.LocalCarrierMonitor.Snapshot(time.Now())
-	result := []gin.H{statusFeedProjection(local)}
+	localFeed := statusFeedProjection(local)
+	if a.serverService != nil {
+		if snapshot := a.serverService.CurrentStatus(); snapshot != nil {
+			localFeed["memoryUsedBytes"], localFeed["memoryTotalBytes"] = snapshot.Mem.Current, snapshot.Mem.Total
+			localFeed["diskUsedBytes"], localFeed["diskTotalBytes"] = snapshot.Disk.Current, snapshot.Disk.Total
+			localFeed["loads"] = snapshot.Loads
+			localFeed["totalUpload"], localFeed["totalDownload"] = snapshot.NetTraffic.Sent, snapshot.NetTraffic.Recv
+		}
+	}
+	result := []gin.H{localFeed}
 	for _, n := range nodes {
 		result = append(result, statusFeedProjection(monitoredNode{
 			ID: n.Id, Status: n.Status, XrayState: n.XrayState, LastHeartbeat: n.LastHeartbeat,
