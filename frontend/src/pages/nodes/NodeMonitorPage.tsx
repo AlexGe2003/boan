@@ -15,6 +15,7 @@ import { usePanelRole } from '@/api/queries/usePanelRole';
 import { useTheme } from '@/hooks/useTheme';
 import { HttpUtil } from '@/utils';
 import './NodeMonitorPage.css';
+import ClientVisitsButton from './ClientVisitsButton';
 const ServerUsage = lazy(() => import('./ServerUsage'));
 
 function ServerUsageButton({ nodeId }: { nodeId?: number }) {
@@ -66,6 +67,7 @@ export interface CarrierProbe {
 export interface MonitoredNode {
   id: number;
   local?: boolean;
+  metricsAvailable?: boolean;
   name: string;
   address: string;
   status: string;
@@ -168,7 +170,7 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
   const probes = carrierNames.map(
     (name) => node.carrierProbes?.find((probe) => probe.name === name) || { name },
   );
-  const validMetric = online && !node.local;
+  const validMetric = online && (!node.local || node.metricsAvailable === true);
 
   return (
     <article className="node-monitor-card" id={`monitor-node-${index}`}>
@@ -459,6 +461,7 @@ export default function NodeMonitorPage({ mockData }: { mockData?: MonitoredNode
               <div className="node-monitor-header-actions">
                 <ManageNodesButton />
                 <ServerUsageButton />
+                <ClientVisitsButton />
                 <Button
                   icon={<ReloadOutlined />}
                   loading={query.isFetching}

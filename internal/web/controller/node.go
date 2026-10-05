@@ -19,12 +19,16 @@ import (
 )
 
 type NodeController struct {
-	nodeService service.NodeService
-	xrayService service.XrayService
+	nodeService   service.NodeService
+	xrayService   service.XrayService
+	serverService *service.ServerService
 }
 
-func NewNodeController(g *gin.RouterGroup) *NodeController {
+func NewNodeController(g *gin.RouterGroup, serverService ...*service.ServerService) *NodeController {
 	a := &NodeController{}
+	if len(serverService) > 0 {
+		a.serverService = serverService[0]
+	}
 	a.initRouter(g)
 	return a
 }
@@ -70,20 +74,26 @@ type monitoredInbound struct {
 }
 
 type monitoredNode struct {
-	ID            int                `json:"id"`
-	Local         bool               `json:"local"`
-	Name          string             `json:"name"`
-	Address       string             `json:"address"`
-	Status        string             `json:"status"`
-	XrayState     string             `json:"xrayState"`
-	LastHeartbeat int64              `json:"lastHeartbeat"`
-	LatencyMs     int                `json:"panelLatencyMs"`
-	CpuPct        float64            `json:"cpuPct"`
-	MemPct        float64            `json:"memPct"`
-	UptimeSecs    uint64             `json:"uptimeSecs"`
-	NetUp         uint64             `json:"netUp"`
-	NetDown       uint64             `json:"netDown"`
-	Inbounds      []monitoredInbound `json:"inbounds"`
+	MetricsAvailable bool               `json:"metricsAvailable"`
+	MemoryUsedBytes  uint64             `json:"memoryUsedBytes,omitempty"`
+	MemoryTotalBytes uint64             `json:"memoryTotalBytes,omitempty"`
+	DiskUsedBytes    uint64             `json:"diskUsedBytes,omitempty"`
+	DiskTotalBytes   uint64             `json:"diskTotalBytes,omitempty"`
+	DiskPct          *float64           `json:"diskPct,omitempty"`
+	ID               int                `json:"id"`
+	Local            bool               `json:"local"`
+	Name             string             `json:"name"`
+	Address          string             `json:"address"`
+	Status           string             `json:"status"`
+	XrayState        string             `json:"xrayState"`
+	LastHeartbeat    int64              `json:"lastHeartbeat"`
+	LatencyMs        int                `json:"panelLatencyMs"`
+	CpuPct           float64            `json:"cpuPct"`
+	MemPct           float64            `json:"memPct"`
+	UptimeSecs       uint64             `json:"uptimeSecs"`
+	NetUp            uint64             `json:"netUp"`
+	NetDown          uint64             `json:"netDown"`
+	Inbounds         []monitoredInbound `json:"inbounds"`
 }
 
 // monitor is a read-only projection. It omits node API credentials and inbound
@@ -128,12 +138,16 @@ func (a *NodeController) monitor(c *gin.Context) {
 		})
 	}
 	result := make([]monitoredNode, 0, len(nodes)+1)
-	localStatus := "offline"
+	localStatus := "stop"
 	if a.xrayService.IsXrayRunning() {
-		localStatus = "online"
+		localStatus = "running"
 	}
 	if user.IsAdmin() || len(byNode[0]) > 0 {
-		result = append(result, monitoredNode{ID: 0, Local: true, Name: "Local", Status: localStatus, XrayState: localStatus, Inbounds: byNode[0]})
+		local := monitoredNode{ID: 0, Local: true, Name: "Local", Status: "online", XrayState: localStatus, Inbounds: byNode[0]}
+		if a.serverService != nil {
+			applyLocalMonitorStatus(&local, a.serverService.CurrentStatus())
+		}
+		result = append(result, local)
 	}
 	for _, node := range nodes {
 		var nodeInbounds []monitoredInbound
@@ -470,4 +484,23 @@ func (a *NodeController) history(c *gin.Context) {
 		return
 	}
 	jsonObj(c, a.nodeService.AggregateNodeMetric(id, metric, bucket, 60), nil)
+}
+
+func applyLocalMonitorStatus(node *monitoredNode, status *service.Status) {
+	if status == nil {
+		return
+	}
+	node.MetricsAvailable = true
+	node.CpuPct = status.Cpu
+	node.MemoryUsedBytes, node.MemoryTotalBytes = status.Mem.Current, status.Mem.Total
+	if status.Mem.Total > 0 {
+		node.MemPct = float64(status.Mem.Current) / float64(status.Mem.Total) * 100
+	}
+	node.DiskUsedBytes, node.DiskTotalBytes = status.Disk.Current, status.Disk.Total
+	if status.Disk.Total > 0 {
+		pct := float64(status.Disk.Current) / float64(status.Disk.Total) * 100
+		node.DiskPct = &pct
+	}
+	node.UptimeSecs, node.NetUp, node.NetDown = status.Uptime, status.NetIO.Up, status.NetIO.Down
+	node.LastHeartbeat = status.T.Unix()
 }

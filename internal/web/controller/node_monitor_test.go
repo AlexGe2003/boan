@@ -2,8 +2,10 @@ package controller
 
 import (
 	"encoding/json"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
@@ -73,5 +75,24 @@ func TestNodeMonitorShowsOnlyUsersOwnLocalInbounds(t *testing.T) {
 	got := nodes[0].Inbounds[0]
 	if got.Remark != "Member" || got.Up != 2 || got.Down != 3 || got.Used != 5 || *got.Remaining != 5 {
 		t.Fatalf("member inbound = %+v", got)
+	}
+}
+
+func TestLocalMonitorUsesSystemSnapshot(t *testing.T) {
+	node := monitoredNode{Local: true, Status: "online", XrayState: "stop"}
+	applyLocalMonitorStatus(&node, nil)
+	if node.MetricsAvailable {
+		t.Fatal("missing samples must not be shown as zero usage")
+	}
+	status := &service.Status{Cpu: 12.5, Uptime: 600, T: time.Unix(1700000000, 0)}
+	status.Mem.Current, status.Mem.Total = 256, 1024
+	status.Disk.Current, status.Disk.Total = 500, 1000
+	status.NetIO.Up, status.NetIO.Down = 12, 34
+	applyLocalMonitorStatus(&node, status)
+	if !node.MetricsAvailable || node.CpuPct != 12.5 || node.MemPct != 25 || node.DiskPct == nil || *node.DiskPct != 50 || node.NetUp != 12 || node.NetDown != 34 || node.LastHeartbeat != 1700000000 {
+		t.Fatalf("incorrect local metrics: %+v", node)
+	}
+	if node.Status != "online" || node.XrayState != "stop" {
+		t.Fatal("host metrics must not hide a stopped proxy core")
 	}
 }
