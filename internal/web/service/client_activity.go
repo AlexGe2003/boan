@@ -56,10 +56,15 @@ func activityHost(target string) string {
 	}
 	target = strings.ToLower(strings.TrimSuffix(target, "."))
 	if net.ParseIP(target) != nil {
-		return target
+		return net.ParseIP(target).String()
 	}
 	if len(target) == 0 || len(target) > 253 {
 		return ""
+	}
+	for _, label := range strings.Split(target, ".") {
+		if len(label) == 0 || len(label) > 63 || strings.HasPrefix(label, "-") || strings.HasSuffix(label, "-") {
+			return ""
+		}
 	}
 	for _, r := range target {
 		if !(r >= 'a' && r <= 'z' || r >= '0' && r <= '9' || r == '-' || r == '.') {
@@ -70,17 +75,25 @@ func activityHost(target string) string {
 }
 
 func activityCategory(host string) string {
-	if net.ParseIP(host) != nil {
-		return "IP / 未识别"
+	if ip := net.ParseIP(host); ip != nil {
+		switch ip.String() {
+		case "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112", "223.5.5.5", "223.6.6.6", "119.29.29.29", "114.114.114.114", "2606:4700:4700::1111", "2606:4700:4700::1001", "2001:4860:4860::8888", "2001:4860:4860::8844":
+			return "DNS / 解析服务"
+		}
+		if ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() || ip.IsUnspecified() || ip.IsMulticast() {
+			return "内网 / 本地网络"
+		}
+		return "纯 IP / 域名不可见"
 	}
 	rules := []struct {
 		name    string
 		domains []string
 	}{
-		{"视频影音", []string{"youtube.com", "googlevideo.com", "ytimg.com", "netflix.com", "nflxvideo.net", "bilibili.com", "biliapi.net", "spotify.com", "twitch.tv"}},
-		{"社交沟通", []string{"telegram.org", "t.me", "discord.com", "discord.gg", "whatsapp.com", "instagram.com", "facebook.com", "x.com", "twitter.com", "reddit.com"}},
-		{"开发工具", []string{"github.com", "githubusercontent.com", "gitlab.com", "npmjs.org", "npmjs.com", "stackoverflow.com", "docker.com"}},
-		{"AI 服务", []string{"openai.com", "chatgpt.com", "anthropic.com", "claude.ai", "gemini.google.com", "deepseek.com"}},
+		{"DNS / 解析服务", []string{"dns.google", "cloudflare-dns.com", "one.one.one.one", "dns.alidns.com", "doh.pub", "dns.quad9.net"}},
+		{"视频影音", []string{"youtube.com", "googlevideo.com", "ytimg.com", "netflix.com", "nflxvideo.net", "bilibili.com", "biliapi.net", "spotify.com", "twitch.tv", "youtu.be", "youtube-nocookie.com", "nflximg.net", "nflxso.net", "nflxext.com", "bilivideo.com", "hdslb.com", "biliapi.com", "scdn.co", "ttvnw.net", "tiktok.com", "tiktokcdn.com", "douyin.com", "douyinvod.com"}},
+		{"社交沟通", []string{"telegram.org", "t.me", "discord.com", "discord.gg", "whatsapp.com", "instagram.com", "facebook.com", "x.com", "twitter.com", "reddit.com", "redd.it", "discordapp.com", "discordapp.net", "telegram.me", "telesco.pe", "twimg.com", "fbcdn.net", "cdninstagram.com", "whatsapp.net", "wechat.com", "weixin.qq.com"}},
+		{"开发工具", []string{"github.com", "githubusercontent.com", "gitlab.com", "npmjs.org", "npmjs.com", "stackoverflow.com", "docker.com", "docker.io", "githubassets.com", "ghcr.io", "pypi.org", "pythonhosted.org", "jsdelivr.net", "unpkg.com"}},
+		{"AI 服务", []string{"openai.com", "chatgpt.com", "anthropic.com", "claude.ai", "gemini.google.com", "deepseek.com", "oaistatic.com", "oaiusercontent.com", "perplexity.ai", "copilot.microsoft.com", "aistudio.google.com"}},
 		{"搜索资讯", []string{"google.com", "bing.com", "baidu.com", "wikipedia.org", "bbc.com", "cnn.com"}},
 		{"购物消费", []string{"amazon.com", "taobao.com", "jd.com", "ebay.com", "aliexpress.com"}},
 	}
@@ -94,7 +107,7 @@ func activityCategory(host string) string {
 	return "其他 / 未分类"
 }
 
-func readClientActivity(path, email string, hours int, now time.Time) (ClientActivity, error) {
+func readClientActivity(path, email string, hours int, now time.Time, scopes ...string) (ClientActivity, error) {
 	r := ClientActivity{Status: "disabled", Since: now.Add(-time.Duration(hours) * time.Hour).UnixMilli(), GeneratedAt: now.UnixMilli(), Destinations: []ActivityDestination{}, Categories: []ActivityCategory{}, Recent: []ActivityVisit{}, Visits: []ActivityVisit{}}
 	if path == "" || path == "none" {
 		return r, nil
@@ -140,6 +153,11 @@ func readClientActivity(path, email string, hours int, now time.Time) (ClientAct
 			continue
 		}
 		category := activityCategory(host)
+		// Filter before ranking and limiting so noisy IP traffic cannot crowd out websites.
+		network := net.ParseIP(host) != nil || category == "DNS / 解析服务"
+		if len(scopes) > 0 && (scopes[0] == "web" && network || scopes[0] == "network" && !network) {
+			continue
+		}
 		d := domains[host]
 		d.Host = host
 		d.Category = category
@@ -192,12 +210,12 @@ func readClientActivity(path, email string, hours int, now time.Time) (ClientAct
 	return r, nil
 }
 
-func (s *ClientService) Activity(email string, hours int) (ClientActivity, error) {
+func (s *ClientService) Activity(email string, hours int, scopes ...string) (ClientActivity, error) {
 	path, err := xray.GetAccessLogPath()
 	if err != nil {
 		result, _ := readClientActivity("", email, hours, time.Now())
 		result.Status = "unavailable"
 		return result, nil
 	}
-	return readClientActivity(path, email, hours, time.Now())
+	return readClientActivity(path, email, hours, time.Now(), scopes...)
 }

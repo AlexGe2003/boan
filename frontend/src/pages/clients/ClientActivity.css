@@ -1,7 +1,7 @@
 .client-activity {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -20,7 +20,7 @@
 .activity-recent {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
+  gap: 10px;
 }
 
 .activity-recent > div {
@@ -28,18 +28,16 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
-  padding: 16px;
+  padding: 12px;
   background: var(--ant-color-bg-container);
   border: 1px solid var(--ant-color-border-secondary);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   overflow-wrap: anywhere;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.activity-recent > div:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+.activity-recent {
+  max-height: 280px;
+  overflow-y: auto;
 }
 
 .activity-category {

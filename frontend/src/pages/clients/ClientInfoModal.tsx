@@ -905,6 +905,7 @@ export default function ClientInfoModal({
         open={open && activityOpen && admin}
         title={`用户访问概览 · ${client?.email || ''}`}
         width={1120}
+        styles={{ body: { maxHeight: '75vh', overflowY: 'auto', paddingRight: 4 } }}
         footer={null}
         onCancel={() => setActivityOpen(false)}
         destroyOnHidden

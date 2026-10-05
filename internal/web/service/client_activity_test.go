@@ -64,3 +64,58 @@ func TestActivityBoundedTailAndDisabled(t *testing.T) {
 		t.Fatal(r, err)
 	}
 }
+
+func TestActivityNetworkClassification(t *testing.T) {
+	for host, want := range map[string]string{
+		"1.1.1.1":                     "DNS / 解析服务",
+		"2606:4700:4700::1111":        "DNS / 解析服务",
+		"dns.google":                  "DNS / 解析服务",
+		"192.168.1.1":                 "内网 / 本地网络",
+		"127.0.0.1":                   "内网 / 本地网络",
+		"fe80::1":                     "内网 / 本地网络",
+		"203.0.113.5":                 "纯 IP / 域名不可见",
+		"cdn.oaistatic.com":           "AI 服务",
+		"api.bilibili.com":            "视频影音",
+		"video.twimg.com":             "社交沟通",
+		"dns.google.attacker.example": "其他 / 未分类",
+	} {
+		if got := activityCategory(host); got != want {
+			t.Errorf("%s: got %s want %s", host, got, want)
+		}
+	}
+	for _, host := range []string{"tcp:bad..example:443", "tcp:-bad.example:443", "tcp:bad-.example:443"} {
+		if got := activityHost(host); got != "" {
+			t.Errorf("invalid host accepted: %s", got)
+		}
+	}
+}
+
+func TestActivityScopeFiltersBeforeLimits(t *testing.T) {
+	now := time.Now().Truncate(time.Second)
+	var log strings.Builder
+	for i := 0; i < 120; i++ {
+		fmt.Fprintf(&log, "%s accepted tcp:1.1.1.1:443 email: alice\n", now.Format("2006/01/02 15:04:05"))
+	}
+	fmt.Fprintf(&log, "%s accepted tcp:chatgpt.com:443 email: alice\n", now.Add(-time.Minute).Format("2006/01/02 15:04:05"))
+	path := filepath.Join(t.TempDir(), "access.log")
+	if err := os.WriteFile(path, []byte(log.String()), 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		scope, host string
+		count       int
+	}{
+		{"web", "chatgpt.com", 1}, {"network", "1.1.1.1", 120}, {"all", "1.1.1.1", 121},
+	} {
+		r, err := readClientActivity(path, "alice", 24, now, tc.scope)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if r.Connections != tc.count || r.Destinations[0].Host != tc.host || r.Visits[0].Host != tc.host || r.Recent[0].Host != tc.host {
+			t.Fatalf("scope %s: %+v", tc.scope, r)
+		}
+		if tc.scope != "all" && (len(r.Categories) != 1 || r.Categories[0].Count != tc.count) {
+			t.Fatalf("inconsistent scoped categories: %+v", r)
+		}
+	}
+}

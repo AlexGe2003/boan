@@ -26,11 +26,16 @@ func (a *ClientController) activity(c *gin.Context) {
 			return
 		}
 	}
+	scope := c.Query("scope")
+	if scope != "" && scope != "web" && scope != "network" && scope != "all" {
+		jsonObj(c, nil, errors.New("不支持的访问目标类型"))
+		return
+	}
 	var client model.ClientRecord
 	if err := database.GetDB().Where("email = ?", c.Param("email")).First(&client).Error; err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	result, err := a.clientService.Activity(client.Email, hours)
+	result, err := a.clientService.Activity(client.Email, hours, scope)
 	jsonObj(c, result, err)
 }

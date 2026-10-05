@@ -105,7 +105,18 @@
     "qrTitle": "スキャン。インポート。接続。",
     "qrHint": "クライアントアプリでスキャンしてください。このコードは他人に見せないでください。",
     "saveQr": "QR を保存",
-    "desktopImportHint": "Copy a subscription URL and paste it into your app's Add subscription or Import from URL action. Use the dedicated profile URL for Clash / Mihomo."
+    "importHelp": "Install your app, then choose Open and import. After importing, select a node and connect in the app.",
+    "importFallback": "Nothing happened? Open this page in your system browser, or copy the subscription URL and paste it into Add subscription in your app.",
+    "openImport": "Open and import",
+    "copySubscription": "Copy subscription URL",
+    "rocketName": "Shadowrocket",
+    "manualHelp": "Use one-tap import when possible. For manual import, choose the link matching your app.",
+    "standardTitle": "Shadowrocket / v2rayNG subscription",
+    "standardHint": "Copy this URL into Add subscription in Shadowrocket or v2rayNG.",
+    "clashTitle": "Clash subscription",
+    "clashHint": "Import into the subscriptions page in Clash / Mihomo.",
+    "jsonTitle": "Xray JSON configuration (advanced)",
+    "jsonHint": "Only for apps supporting Xray JSON. Use the matching subscription above for Shadowrocket or Clash."
   },
   "menu": {
     "theme": "テーマ",
@@ -2605,7 +2616,6 @@
     "updatedAt": "Updated at",
     "local": "Local",
     "panelLatency": "Panel latency",
-    "config": "Node configuration and traffic",
     "noConfig": "No visible configuration",
     "name": "Name",
     "protocol": "Protocol",
@@ -2619,8 +2629,6 @@
     "memory": "Memory",
     "disk": "Disk",
     "traffic": "Traffic",
-    "latency": "Latency",
-    "packetLoss": "Packet loss",
     "uptimeDays": "Online {count} days",
     "statusOverview": "Node status overview",
     "onlineNodes": "Nodes online",
@@ -2628,14 +2636,20 @@
     "carrier1": "Mobile",
     "carrier2": "Unicom",
     "manageNodes": "Manage nodes",
-    "setupSummary": "How do I add or configure a node?",
-    "setupGuide": "An administrator adds the remote panel under Nodes, enters its address and connection credentials, tests the connection, and saves it. The node then appears here. Users can view node health and their own inbound configurations. Carrier latency and packet loss need separate probes.",
     "noNodes": "No nodes to monitor yet",
     "panelLatencyDetail": "Panel to node",
     "carrierMonitoring": "Carrier monitoring",
     "probeNotConfigured": "Probe not configured",
     "offlineMetrics": "Live metrics are unavailable while this node is offline",
-    "lastHeartbeatShort": "Heartbeat {time}"
+    "lastHeartbeatShort": "Heartbeat {time}",
+    "probeStates": {
+      "ok": "Online",
+      "pending": "Waiting for first probe",
+      "timeout": "No reply",
+      "error": "Probe error",
+      "unsupported": "Unsupported system",
+      "stale": "Stale data"
+    }
   },
   "subscriptions": {},
   "adminOverview": {

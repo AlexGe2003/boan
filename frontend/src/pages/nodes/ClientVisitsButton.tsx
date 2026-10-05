@@ -16,8 +16,9 @@ export default function ClientVisitsButton() {
       <Button onClick={() => setOpen(true)}>用户访问记录</Button>
       <Modal
         open={open}
-        title="用户访问记录"
-        width={1000}
+        title="用户访问记录 · 本机网站与分类"
+        width={1120}
+        styles={{ body: { maxHeight: '75vh', overflowY: 'auto', paddingRight: 4 } }}
         footer={null}
         onCancel={() => setOpen(false)}
         destroyOnHidden

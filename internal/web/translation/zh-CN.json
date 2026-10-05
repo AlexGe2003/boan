@@ -1,31 +1,13 @@
 {
-  "networkGuide": {
-    "nodes": {
-      "title": "节点服务器",
-      "hint": "在这里接入和管理其他服务器，查看在线状态并同步配置。只有当前这一台服务器时，可直接到“节点连接”设置协议和端口。"
-    },
-    "inbounds": {
-      "title": "节点连接",
-      "hint": "设置用户连接节点时使用的协议、端口和安全方式，例如 REALITY 或 Trojan TLS。已有节点可以在列表中编辑，修改后让用户更新订阅。"
-    },
-    "hosts": {
-      "title": "节点域名与地址",
-      "hint": "设置订阅中每个节点使用的连接域名或 IP，并关联到对应的节点连接。使用域名前，先将 DNS 解析到节点所在服务器。"
-    },
-    "routing": {
-      "title": "分流规则",
-      "hint": "决定不同网站和应用的流量走哪个出口。规则按顺序匹配，较具体的规则放在前面；普通单节点使用通常无需修改。"
-    },
-    "outbound": {
-      "title": "出口连接",
-      "hint": "设置服务器收到用户流量后，从哪里访问目标网站。可以直连，也可以通过其他代理转发，再在“分流规则”中选择对应出口。"
-    }
-  },
   "nodeMonitor": {
-    "probeRttSummary": "近 5 分钟平均 {avg} ms · 波动（标准差）{jitter} ms",
-    "probeDirection": "本机 → 广东三网公共地址 · ICMP 每 5 秒检测，丢包率统计最近 5 分钟。目标可能限制 ICMP，结果不代表三网用户到节点的实际质量。",
-    "probeSamples": "最近 5 分钟：{count} 个样本",
-    "probeStates": {"ok": "正常", "pending": "等待首次检测", "timeout": "未收到回复", "error": "检测失败", "unsupported": "系统不支持", "stale": "数据已过期"},
+    "probeStates": {
+      "ok": "正常",
+      "pending": "等待首次检测",
+      "timeout": "未收到回复",
+      "error": "检测失败",
+      "unsupported": "系统不支持",
+      "stale": "数据已过期"
+    },
     "title": "节点监控",
     "panelLatencyHint": "查看节点状态、资源占用和网络表现",
     "loadFailed": "监控数据更新失败",
@@ -33,7 +15,6 @@
     "updatedAt": "更新于",
     "local": "默认节点",
     "panelLatency": "面板延迟",
-    "config": "节点配置与流量",
     "noConfig": "暂无可见配置",
     "name": "名称",
     "protocol": "协议",
@@ -47,8 +28,6 @@
     "memory": "内存",
     "disk": "硬盘",
     "traffic": "流量",
-    "latency": "延迟",
-    "packetLoss": "丢包",
     "uptimeDays": "在线 {count} 天",
     "statusOverview": "节点状态概览",
     "onlineNodes": "在线节点",
@@ -56,8 +35,6 @@
     "carrier1": "移动",
     "carrier2": "联通",
     "manageNodes": "管理节点",
-    "setupSummary": "如何添加或设置节点？",
-    "setupGuide": "管理员在“节点管理”添加远程面板，填写地址和连接凭据、测试连接并保存，节点随后会显示在这里。普通用户可查看节点状态和自己的入站配置。运营商延迟与丢包需要单独部署探针。",
     "noNodes": "暂无可监控节点",
     "panelLatencyDetail": "面板到节点",
     "carrierMonitoring": "运营商探测",
@@ -164,7 +141,6 @@
     "ofTotal": "共 {total}",
     "tabLinks": "手动导入",
     "tabApps": "一键导入",
-    "desktopImportHint": "复制订阅 URL，然后在客户端的“添加订阅”或“从 URL 导入”中粘贴。Clash / Mihomo 请使用专用配置 URL。",
     "scanTitle": "用手机扫码",
     "scanHint": "使用支持此订阅格式的软件扫描；Clash 请使用上方的 Clash 专用订阅。",
     "updateInterval": "建议每 {hours} 小时在软件中更新订阅",
@@ -2677,7 +2653,6 @@
     "settings": "设置"
   },
   "adminOverview": {
-    "advancedNetwork": "高级网络",
     "title": "管理概览",
     "admin": "管理后台",
     "subtitle": "服务经营与日常处理，一处掌握。",

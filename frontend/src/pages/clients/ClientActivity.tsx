@@ -26,15 +26,16 @@ import './ClientActivity.css';
 const date = (time: number) => new Date(time).toLocaleString();
 
 export default function ClientActivity({ email }: { email: string }) {
+  const [scope, setScope] = useState('web');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string>();
   const [hours, setHours] = useState(24);
   const [live, setLive] = useState(false);
   const query = useQuery({
-    queryKey: ['client-activity', email, hours],
+    queryKey: ['client-activity', email, hours, scope],
     queryFn: async () => {
       const result = await HttpUtil.get(
-        `/panel/api/clients/activity/${encodeURIComponent(email)}?hours=${hours}`,
+        `/panel/api/clients/activity/${encodeURIComponent(email)}?hours=${hours}&scope=${scope}`,
       );
       if (!result.success) throw new Error(result.msg || '访问记录加载失败');
       return ClientActivitySchema.parse(result.obj);
@@ -72,10 +73,29 @@ export default function ClientActivity({ email }: { email: string }) {
           </Button>
         </Space>
       </div>
+      <Segmented
+        aria-label="访问目标类型"
+        value={scope}
+        onChange={(value) => {
+          setScope(String(value));
+          setCategory(undefined);
+        }}
+        options={[
+          { label: '网站域名', value: 'web' },
+          { label: 'DNS / IP 连接', value: 'network' },
+          { label: '全部记录', value: 'all' },
+        ]}
+      />
       <Typography.Paragraph type="secondary">
-        查看该用户通过本机访问的域名或 IP。分类根据域名推测，连接次数不是浏览次数或流量大小。
-        仅包含开启日志后保留的记录，不显示 HTTPS 网页内容；远程节点暂未接入。
+        默认仅统计网站域名，DNS 和纯 IP 连接单独查看。分类根据域名推测，连接次数不等于浏览次数。
+        仅统计本机开启日志后保留的连接；远程节点暂未接入。
       </Typography.Paragraph>
+      <Alert
+        type="info"
+        showIcon
+        title={scope === 'web' ? '没有域名的连接不会计入网站统计' : 'IP 地址不等于访问的网站'}
+        description="1.1.1.1 等公共解析地址归入 DNS 服务。日志只有 IP 时无法可靠判断网站；可检查对应入站的域名嗅探（HTTP / TLS / QUIC）及客户端 DNS 设置，历史记录无法补全域名。"
+      />
       {query.isLoading && <Skeleton active paragraph={{ rows: 5 }} />}
       {query.isError && (
         <Alert
@@ -111,7 +131,7 @@ export default function ClientActivity({ email }: { email: string }) {
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={8}>
               <Card>
-                <Statistic title="记录到的连接次数" value={data.connections} />
+                <Statistic title="当前范围连接次数" value={data.connections} />
               </Card>
             </Col>
             <Col xs={24} sm={8}>
@@ -122,12 +142,12 @@ export default function ClientActivity({ email }: { email: string }) {
             </Col>
             <Col xs={24} sm={8}>
               <Card>
-                <Statistic title="网站分类数" value={data.categories.length} />
+                <Statistic title="当前范围分类数" value={data.categories.length} />
                 <Typography.Text type="secondary">更新于 {date(data.generatedAt)}</Typography.Text>
               </Card>
             </Col>
           </Row>
-          <Card title="最近 2 分钟访问">
+          <Card title="最近 2 分钟访问 · 最多 30 项">
             {data.recent.length ? (
               <div className="activity-recent">
                 {data.recent.map((v) => (
@@ -193,15 +213,25 @@ export default function ClientActivity({ email }: { email: string }) {
                   rowKey="host"
                   size="small"
                   dataSource={data.destinations.filter(matches)}
+                  locale={{
+                    emptyText:
+                      search || category
+                        ? '没有匹配的访问目标'
+                        : '该时段没有此类记录，可切换目标类型查看',
+                  }}
                   scroll={{ x: 520 }}
-                  pagination={{ pageSize: 8 }}
+                  pagination={{ pageSize: 8, showSizeChanger: false, hideOnSinglePage: true }}
                   columns={[
                     {
                       title: '域名 / IP',
                       dataIndex: 'host',
                       render: (v: string) => <span dir="ltr">{v}</span>,
                     },
-                    { title: '分类', dataIndex: 'category' },
+                    {
+                      title: '分类',
+                      dataIndex: 'category',
+                      render: (value: string) => <Tag>{value}</Tag>,
+                    },
                     { title: '连接次数', dataIndex: 'count', sorter: (a, b) => a.count - b.count },
                     { title: '最近访问', dataIndex: 'lastSeen', render: date },
                   ]}
@@ -218,7 +248,7 @@ export default function ClientActivity({ email }: { email: string }) {
               size="small"
               dataSource={data.visits.filter(matches)}
               scroll={{ x: 520 }}
-              pagination={{ pageSize: 8 }}
+              pagination={{ pageSize: 8, showSizeChanger: false, hideOnSinglePage: true }}
               columns={[
                 { title: '时间', dataIndex: 'time', render: date },
                 {
@@ -226,7 +256,11 @@ export default function ClientActivity({ email }: { email: string }) {
                   dataIndex: 'host',
                   render: (v: string) => <span dir="ltr">{v}</span>,
                 },
-                { title: '分类', dataIndex: 'category' },
+                {
+                  title: '分类',
+                  dataIndex: 'category',
+                  render: (value: string) => <Tag>{value}</Tag>,
+                },
               ]}
             />
           </Card>

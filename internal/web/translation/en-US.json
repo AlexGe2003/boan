@@ -1,31 +1,13 @@
 {
-  "networkGuide": {
-    "nodes": {
-      "title": "Node servers",
-      "hint": "Connect and manage additional servers, check availability and synchronize configuration. For a single local server, configure protocols and ports in Inbounds."
-    },
-    "inbounds": {
-      "title": "Node connections",
-      "hint": "Configure the protocol, port and security clients use to connect, such as REALITY or Trojan TLS. Ask users to update subscriptions after changing a connection."
-    },
-    "hosts": {
-      "title": "Node domains and addresses",
-      "hint": "Choose the domain or IP advertised for each node and link it to an inbound. Point DNS to the node server before using a domain."
-    },
-    "routing": {
-      "title": "Routing rules",
-      "hint": "Choose which outbound handles traffic for each destination. Rules match in order; place specific rules first. Basic single-node setups usually need no changes."
-    },
-    "outbound": {
-      "title": "Outbound connections",
-      "hint": "Choose how the server reaches destination websites: directly or through another proxy. Select the outbound in Routing rules."
-    }
-  },
   "nodeMonitor": {
-    "probeRttSummary": "5-minute mean {avg} ms · RTT standard deviation {jitter} ms",
-    "probeDirection": "Local server → public Guangdong carrier targets. ICMP every 5 seconds; loss over the last 5 minutes. Targets may limit ICMP; this does not measure subscriber-to-node quality.",
-    "probeSamples": "Last 5 minutes: {count} samples",
-    "probeStates": {"ok": "Online", "pending": "Waiting for first probe", "timeout": "No reply", "error": "Probe error", "unsupported": "Unsupported system", "stale": "Stale data"},
+    "probeStates": {
+      "ok": "Online",
+      "pending": "Waiting for first probe",
+      "timeout": "No reply",
+      "error": "Probe error",
+      "unsupported": "Unsupported system",
+      "stale": "Stale data"
+    },
     "title": "Node monitor",
     "panelLatencyHint": "Latency measures the panel's connection to each node. Carrier latency and packet loss require probes on those networks.",
     "loadFailed": "Could not update monitoring data",
@@ -33,7 +15,6 @@
     "updatedAt": "Updated at",
     "local": "Local",
     "panelLatency": "Panel latency",
-    "config": "Node configuration and traffic",
     "noConfig": "No visible configuration",
     "name": "Name",
     "protocol": "Protocol",
@@ -47,8 +28,6 @@
     "memory": "Memory",
     "disk": "Disk",
     "traffic": "Traffic",
-    "latency": "Latency",
-    "packetLoss": "Packet loss",
     "uptimeDays": "Online {count} days",
     "statusOverview": "Node status overview",
     "onlineNodes": "Nodes online",
@@ -56,8 +35,6 @@
     "carrier1": "Mobile",
     "carrier2": "Unicom",
     "manageNodes": "Manage nodes",
-    "setupSummary": "How do I add or configure a node?",
-    "setupGuide": "An administrator adds the remote panel under Nodes, enters its address and connection credentials, tests the connection, and saves it. The node then appears here. Users can view node health and their own inbound configurations. Carrier latency and packet loss need separate probes.",
     "noNodes": "No nodes to monitor yet",
     "panelLatencyDetail": "Panel to node",
     "carrierMonitoring": "Carrier monitoring",
@@ -164,7 +141,6 @@
     "ofTotal": "of {total}",
     "tabLinks": "Subscription",
     "tabApps": "Apps",
-    "desktopImportHint": "Copy a subscription URL and paste it into your app's Add subscription or Import from URL action. Use the dedicated profile URL for Clash / Mihomo.",
     "scanTitle": "Scan with your phone",
     "scanHint": "Scan this code in your VPN app to add the subscription without copying the link.",
     "updateInterval": "Auto-updates every {hours} hours",
@@ -2677,7 +2653,6 @@
     "settings": "Settings"
   },
   "adminOverview": {
-    "advancedNetwork": "Advanced network",
     "title": "Admin overview",
     "admin": "Administration",
     "subtitle": "Manage services and daily operations in one place.",
