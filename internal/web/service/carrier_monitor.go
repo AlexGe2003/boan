@@ -2,14 +2,13 @@ package service
 
 import (
 	"context"
-	"errors"
+	"math"
 	"os"
-	"os/exec"
-	"regexp"
 	"runtime"
-	"strconv"
 	"sync"
 	"time"
+
+	probing "github.com/prometheus-community/pro-bing"
 )
 
 const carrierWindow = 5 * time.Minute
@@ -22,13 +21,15 @@ var carrierTargets = []struct{ name, address string }{
 }
 
 type CarrierProbe struct {
-	Name        string   `json:"name"`
-	Target      string   `json:"target"`
-	LatencyMs   *float64 `json:"latencyMs,omitempty"`
-	LossPct     *float64 `json:"lossPct,omitempty"`
-	Samples     int      `json:"samples"`
-	LastChecked int64    `json:"lastChecked"`
-	State       string   `json:"state"`
+	AvgLatencyMs *float64 `json:"avgLatencyMs,omitempty"`
+	JitterMs     *float64 `json:"jitterMs,omitempty"`
+	Name         string   `json:"name"`
+	Target       string   `json:"target"`
+	LatencyMs    *float64 `json:"latencyMs,omitempty"`
+	LossPct      *float64 `json:"lossPct,omitempty"`
+	Samples      int      `json:"samples"`
+	LastChecked  int64    `json:"lastChecked"`
+	State        string   `json:"state"`
 }
 
 type carrierSample struct {
@@ -47,25 +48,30 @@ type CarrierMonitor struct {
 }
 
 var LocalCarrierMonitor CarrierMonitor
-var pingTime = regexp.MustCompile(`time[=<]([0-9]+(?:\.[0-9]+)?)\s*ms`)
 
-func parseCarrierPing(output []byte, err error) (*float64, string) {
-	if err == nil {
-		match := pingTime.FindSubmatch(output)
-		if len(match) != 2 {
-			return nil, "error"
-		}
-		value, parseErr := strconv.ParseFloat(string(match[1]), 64)
-		if parseErr != nil {
-			return nil, "error"
-		}
-		return &value, "ok"
+func carrierPingResult(stats *probing.Statistics, err error) (*float64, string) {
+	if err != nil || stats == nil || stats.PacketsSent == 0 {
+		return nil, "error"
 	}
-	var exit *exec.ExitError
-	if errors.As(err, &exit) && exit.ExitCode() == 1 {
+	if stats.PacketsRecv == 0 {
 		return nil, "timeout"
 	}
-	return nil, "error"
+	latency := float64(stats.AvgRtt) / float64(time.Millisecond)
+	return &latency, "ok"
+}
+
+func probeCarrier(ctx context.Context, address string) (*float64, string) {
+	pinger, err := probing.NewPinger(address)
+	if err != nil {
+		return nil, "error"
+	}
+	pinger.SetNetwork("ip4")
+	pinger.SetPrivileged(os.Geteuid() == 0)
+	pinger.Count = 1
+	pinger.Timeout = 2 * time.Second
+	pinger.RecordRtts = false
+	err = pinger.RunWithContext(ctx)
+	return carrierPingResult(pinger.Statistics(), err)
 }
 
 func (m *CarrierMonitor) record(index int, now time.Time, latency *float64, state string) {
@@ -103,10 +109,7 @@ func (m *CarrierMonitor) Sample() {
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 			defer cancel()
-			cmd := exec.CommandContext(ctx, "ping", "-n", "-c", "1", "-W", "2", target.address)
-			cmd.Env = append(os.Environ(), "LC_ALL=C")
-			output, err := cmd.CombinedOutput()
-			latency, state := parseCarrierPing(output, err)
+			latency, state := probeCarrier(ctx, target.address)
 			m.record(i, time.Now(), latency, state)
 		}()
 	}
@@ -129,6 +132,7 @@ func (m *CarrierMonitor) Snapshot(now time.Time) []CarrierProbe {
 			}
 		}
 		lost := 0
+		var rtts []float64
 		for _, sample := range h.samples {
 			if !sample.at.After(now.Add(-carrierWindow)) {
 				continue
@@ -136,8 +140,24 @@ func (m *CarrierMonitor) Snapshot(now time.Time) []CarrierProbe {
 			p.Samples++
 			if sample.latency == nil {
 				lost++
+			} else {
+				rtts = append(rtts, *sample.latency)
 			}
 		}
+		if len(rtts) > 0 {
+			sum := 0.0
+			for _, rtt := range rtts {
+				sum += rtt
+			}
+			mean := sum / float64(len(rtts))
+			variance := 0.0
+			for _, rtt := range rtts {
+				variance += (rtt - mean) * (rtt - mean)
+			}
+			jitter := math.Sqrt(variance / float64(len(rtts)))
+			p.AvgLatencyMs, p.JitterMs = &mean, &jitter
+		}
+
 		if p.Samples > 0 {
 			loss := float64(lost) * 100 / float64(p.Samples)
 			p.LossPct = &loss

@@ -22,6 +22,7 @@
     }
   },
   "nodeMonitor": {
+    "probeRttSummary": "近 5 分钟平均 {avg} ms · 波动（标准差）{jitter} ms",
     "probeDirection": "本机 → 广东三网公共地址 · ICMP 每 5 秒检测，丢包率统计最近 5 分钟。目标可能限制 ICMP，结果不代表三网用户到节点的实际质量。",
     "probeSamples": "最近 5 分钟：{count} 个样本",
     "probeStates": {"ok": "正常", "pending": "等待首次检测", "timeout": "未收到回复", "error": "检测失败", "unsupported": "系统不支持", "stale": "数据已过期"},

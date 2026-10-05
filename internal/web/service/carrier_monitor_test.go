@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	probing "github.com/prometheus-community/pro-bing"
 	"testing"
 	"time"
 )
@@ -36,17 +37,45 @@ func TestCarrierProbeWindowAndNoInventedLoss(t *testing.T) {
 	}
 }
 
-func TestCarrierPingParsing(t *testing.T) {
-	for _, output := range []string{"64 bytes from 1.2.3.4: icmp_seq=1 ttl=50 time=15.2 ms", "64 bytes from 1.2.3.4: time<1 ms"} {
-		latency, state := parseCarrierPing([]byte(output), nil)
-		if latency == nil || *latency <= 0 || state != "ok" {
-			t.Fatalf("cannot parse %q", output)
+func TestCarrierPingResult(t *testing.T) {
+	for _, tc := range []struct {
+		stats *probing.Statistics
+		err   error
+		state string
+	}{
+		{nil, nil, "error"},
+		{&probing.Statistics{}, nil, "error"},
+		{&probing.Statistics{PacketsSent: 1}, nil, "timeout"},
+		{&probing.Statistics{PacketsSent: 1}, errors.New("socket failed"), "error"},
+		{&probing.Statistics{PacketsSent: 1, PacketsRecv: 1, AvgRtt: 15 * time.Millisecond}, nil, "ok"},
+	} {
+		latency, state := carrierPingResult(tc.stats, tc.err)
+		if state != tc.state {
+			t.Fatalf("got %s, want %s", state, tc.state)
+		}
+		if state == "ok" && (latency == nil || *latency != 15) {
+			t.Fatal("RTT missing")
+		}
+		if state != "ok" && latency != nil {
+			t.Fatal("failed probe must not report zero RTT")
 		}
 	}
-	for _, err := range []error{nil, errors.New("permission denied")} {
-		latency, state := parseCarrierPing([]byte("no measurement"), err)
-		if latency != nil || state != "error" {
-			t.Fatal("invalid output must not yield an invented measurement")
-		}
+}
+
+func TestCarrierRTTWindowExcludesLossAndExpiredSamples(t *testing.T) {
+	var monitor CarrierMonitor
+	now := time.Now()
+	old, low, high := 1000.0, 10.0, 30.0
+	monitor.record(0, now.Add(-6*time.Minute), &old, "ok")
+	monitor.record(0, now.Add(-10*time.Second), &low, "ok")
+	monitor.record(0, now.Add(-5*time.Second), nil, "timeout")
+	monitor.record(0, now, &high, "ok")
+	p := monitor.Snapshot(now)[0]
+	if p.Samples != 3 || *p.AvgLatencyMs != 20 || *p.JitterMs != 10 {
+		t.Fatalf("incorrect RTT summary: %+v", p)
+	}
+	expired := monitor.Snapshot(now.Add(6 * time.Minute))[0]
+	if expired.AvgLatencyMs != nil || expired.JitterMs != nil {
+		t.Fatal("expired RTT values remain visible")
 	}
 }

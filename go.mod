@@ -3,6 +3,7 @@ module github.com/mhsanaei/3x-ui/v3
 go 1.27.1
 
 require (
+	github.com/prometheus-community/pro-bing v0.9.1
 	github.com/amnezia-vpn/amneziawg-go/v3 v3.1.20260828
 	github.com/gin-contrib/gzip v1.2.7
 	github.com/gin-contrib/sessions v1.1.1

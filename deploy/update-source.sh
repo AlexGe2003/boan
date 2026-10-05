@@ -82,7 +82,7 @@ upgrade_source() {
     trap 'upgrade_failure 143' TERM
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y ca-certificates curl git build-essential xz-utils tar python3 iproute2 iputils-ping
+    apt-get install -y ca-certificates curl git build-essential xz-utils tar python3 iproute2
     # Fetch helper from the selected ref; the helper does not execute on source.
     curl -fL --retry 5 "https://raw.githubusercontent.com/AlexGe2003/boan/${ref}/deploy/install-source.sh" -o "$work/build-helper.sh"
     # shellcheck source=/dev/null

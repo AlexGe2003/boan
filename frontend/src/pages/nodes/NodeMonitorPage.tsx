@@ -65,6 +65,8 @@ export interface CarrierProbe {
   samples?: number;
   lastChecked?: number;
   latencyMs?: number;
+  avgLatencyMs?: number;
+  jitterMs?: number;
   lossPct?: number;
 }
 
@@ -323,6 +325,14 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
                             : `${probe.latencyMs.toFixed(1)} ms`}
                       </strong>
                     </div>
+                    {probe.avgLatencyMs !== undefined && probe.jitterMs !== undefined && (
+                      <div className="node-monitor-metric-detail">
+                        {t('nodeMonitor.probeRttSummary', {
+                          avg: probe.avgLatencyMs.toFixed(1),
+                          jitter: probe.jitterMs.toFixed(1),
+                        })}
+                      </div>
+                    )}
                     {probe.target && (
                       <div className="node-monitor-metric-detail">
                         {probe.target} ·{' '}
