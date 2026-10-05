@@ -8,7 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
 	xraygeodata "github.com/xtls/xray-core/common/geodata"
 	"google.golang.org/protobuf/proto"
 )
@@ -37,6 +39,26 @@ func TestWebsiteGeoBlockLiveSwitchAndForwarding(t *testing.T) {
 	trusted := "127.0.0.1/32"
 	if err = svc.ConfigureWebsiteGeoBlock(&enabled, "CN,HK,MO,TW", &trusted); err != nil {
 		t.Fatal(err)
+	}
+
+	token, err := (&panel.ApiTokenService{}).Create("status-test", model.ApiScopeMonitor, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		path, token string
+		want        int
+	}{
+		{"/panel/api/nodes/status-feed", token.Token, 0},
+		{"/panel/api/nodes/status-feed", "invalid", 403},
+		{"/panel/", token.Token, 403},
+	} {
+		r := httptest.NewRequest("GET", "http://panel.example.com"+tc.path, nil)
+		r.RemoteAddr = "1.2.3.4:1234"
+		r.Header.Set("Authorization", "Bearer "+tc.token)
+		if got := WebsiteGeoStatus(r); got != tc.want {
+			t.Fatalf("monitor geo %s: %d want %d", tc.path, got, tc.want)
+		}
 	}
 	router := gin.New()
 	router.Use(WebsiteGeoBlock())
