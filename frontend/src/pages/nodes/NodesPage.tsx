@@ -1,3 +1,4 @@
+import NetworkPageIntro from '@/components/NetworkPageIntro';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -291,6 +292,7 @@ export default function NodesPage() {
 
         <Layout className="content-shell">
           <Layout.Content id="content-layout" className="content-area">
+            <NetworkPageIntro page="nodes" />
             <div style={{ marginBottom: 12 }}>
               <ClusterControl />
             </div>

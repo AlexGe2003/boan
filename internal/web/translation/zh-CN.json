@@ -1,4 +1,26 @@
 {
+  "networkGuide": {
+    "nodes": {
+      "title": "节点服务器",
+      "description": "在这里接入和管理其他服务器，查看在线状态并同步配置。只有当前这一台服务器时，可直接到“节点连接”设置协议和端口。"
+    },
+    "inbounds": {
+      "title": "节点连接",
+      "description": "设置用户连接节点时使用的协议、端口和安全方式，例如 REALITY 或 Trojan TLS。已有节点可以在列表中编辑，修改后让用户更新订阅。"
+    },
+    "hosts": {
+      "title": "节点域名与地址",
+      "description": "设置订阅中每个节点使用的连接域名或 IP，并关联到对应的节点连接。使用域名前，先将 DNS 解析到节点所在服务器。"
+    },
+    "routing": {
+      "title": "分流规则",
+      "description": "决定不同网站和应用的流量走哪个出口。规则按顺序匹配，较具体的规则放在前面；普通单节点使用通常无需修改。"
+    },
+    "outbound": {
+      "title": "出口连接",
+      "description": "设置服务器收到用户流量后，从哪里访问目标网站。可以直连，也可以通过其他代理转发，再在“分流规则”中选择对应出口。"
+    }
+  },
   "nodeMonitor": {
     "title": "节点监控",
     "panelLatencyHint": "延迟为面板到节点的连接耗时。运营商延迟及丢包需要部署对应网络的探针后才能显示。",
@@ -172,7 +194,7 @@
     "routing": "分流规则",
     "outbounds": "出口连接（出站）",
     "apiDocs": "API 文档",
-    "hosts": "订阅地址",
+    "hosts": "节点域名与地址",
     "openMenu": "打开菜单",
     "pinSidebar": "固定侧边栏",
     "unpinSidebar": "取消固定侧边栏",
@@ -2651,6 +2673,7 @@
     "settings": "设置"
   },
   "adminOverview": {
+    "advancedNetwork": "高级网络",
     "title": "管理概览",
     "admin": "管理后台",
     "subtitle": "服务经营与日常处理，一处掌握。",

@@ -1,4 +1,26 @@
 {
+  "networkGuide": {
+    "nodes": {
+      "title": "Node servers",
+      "description": "Connect and manage additional servers, check availability and synchronize configuration. For a single local server, configure protocols and ports in Inbounds."
+    },
+    "inbounds": {
+      "title": "Node connections",
+      "description": "Configure the protocol, port and security clients use to connect, such as REALITY or Trojan TLS. Ask users to update subscriptions after changing a connection."
+    },
+    "hosts": {
+      "title": "Node domains and addresses",
+      "description": "Choose the domain or IP advertised for each node and link it to an inbound. Point DNS to the node server before using a domain."
+    },
+    "routing": {
+      "title": "Routing rules",
+      "description": "Choose which outbound handles traffic for each destination. Rules match in order; place specific rules first. Basic single-node setups usually need no changes."
+    },
+    "outbound": {
+      "title": "Outbound connections",
+      "description": "Choose how the server reaches destination websites: directly or through another proxy. Select the outbound in Routing rules."
+    }
+  },
   "nodeMonitor": {
     "title": "Node monitor",
     "panelLatencyHint": "Latency measures the panel's connection to each node. Carrier latency and packet loss require probes on those networks.",
@@ -2651,6 +2673,7 @@
     "settings": "Settings"
   },
   "adminOverview": {
+    "advancedNetwork": "Advanced network",
     "title": "Admin overview",
     "admin": "Administration",
     "subtitle": "Manage services and daily operations in one place.",

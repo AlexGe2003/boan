@@ -1,3 +1,4 @@
+import NetworkPageIntro from '@/components/NetworkPageIntro';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
@@ -318,6 +319,9 @@ export default function XrayPage() {
 
         <Layout className="content-shell">
           <Layout.Content id="content-layout" className="content-area">
+            {(location.pathname === '/routing' || location.pathname === '/outbound') && (
+              <NetworkPageIntro page={location.pathname === '/routing' ? 'routing' : 'outbound'} />
+            )}
             <Spin
               spinning={spinning || !fetched}
               delay={200}

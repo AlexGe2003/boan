@@ -336,18 +336,8 @@ export default function AppSidebar() {
     if (access.role !== 'admin') return toMenuItems(navItems);
     const sections = [
       { name: 'operations', keys: ['/', '/clients', '/plans', '/orders', '/support', '/groups'] },
-      {
-        name: 'infrastructure',
-        keys: [
-          '/node-monitor',
-          '/nodes',
-          '/node-groups',
-          '/inbounds',
-          '/hosts',
-          '/outbound',
-          '/routing',
-        ],
-      },
+      { name: 'infrastructure', keys: ['/node-monitor', '/inbounds', '/hosts', '/nodes'] },
+      { name: 'advancedNetwork', keys: ['/node-groups', '/outbound', '/routing'] },
       { name: 'system', keys: ['/settings', '/xray', '/api-docs'] },
     ];
     return sections.map((section) => ({
