@@ -1,18 +1,28 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
   Button,
   Card,
   ConfigProvider,
+  Input,
   Progress,
   Select,
   Skeleton,
   Table,
   Typography,
   Tag,
+  Tooltip,
 } from 'antd';
-import { ReloadOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import {
+  ReloadOutlined,
+  ArrowLeftOutlined,
+  SearchOutlined,
+  UserOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+  TrophyOutlined,
+} from '@ant-design/icons';
 import { ServerUsageReportSchema } from '@/generated/zod';
 import { useTheme } from '@/hooks/useTheme';
 import { HttpUtil, SizeFormatter } from '@/utils';
@@ -24,7 +34,15 @@ const bytes = (value: number) => SizeFormatter.sizeFormat(value);
 const date = (value: number) => (value ? new Date(value).toLocaleString() : '尚无记录');
 const share = (value: number) => (
   <div className="server-usage-share">
-    <Progress percent={Number(value.toFixed(1))} showInfo={false} size="small" />
+    <Progress
+      percent={Number(value.toFixed(1))}
+      showInfo={false}
+      size="small"
+      strokeColor={{
+        '0%': '#1e5eff',
+        '100%': '#7033ff',
+      }}
+    />
     <span>{value.toFixed(1)}%</span>
   </div>
 );
@@ -35,8 +53,10 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
   const [selected, setSelected] = useState<number | undefined>(email ? undefined : (nodeId ?? -1));
   const [includedNodes, setIncludedNodes] = useState<number[]>([]);
   const [editing, setEditing] = useState<UsageControlTarget | null>(null);
+  const [search, setSearch] = useState('');
   const overview = selected === undefined || selected === -1;
   const userView = !!email && selected === undefined;
+
   const query = useQuery({
     queryKey: ['server-client-usage', email, selected],
     queryFn: async () => {
@@ -53,25 +73,45 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
     staleTime: 10_000,
     retry: false,
   });
-  const visibleServers = query.data?.servers.filter(
-    (row) => !includedNodes.length || includedNodes.includes(row.nodeId),
+
+  const visibleServers = useMemo(
+    () =>
+      query.data?.servers.filter(
+        (row) => !includedNodes.length || includedNodes.includes(row.nodeId),
+      ),
+    [query.data?.servers, includedNodes],
   );
   const total = visibleServers?.reduce((sum, row) => sum + row.used, 0) || 0;
   const billableTotal = visibleServers?.reduce((sum, row) => sum + row.billable, 0) || 0;
-  const data =
-    query.data && overview
-      ? {
-          ...query.data,
-          total,
-          billableTotal,
-          servers: visibleServers!.map((row) => ({
-            ...row,
-            share: total ? (row.used / total) * 100 : 0,
-            billingShare: billableTotal ? (row.billable / billableTotal) * 100 : 0,
-          })),
-        }
-      : query.data;
+
+  const data = useMemo(() => {
+    if (!query.data) return undefined;
+    if (!overview) return query.data;
+    return {
+      ...query.data,
+      total,
+      billableTotal,
+      servers: (visibleServers || []).map((row) => ({
+        ...row,
+        share: total ? (row.used / total) * 100 : 0,
+        billingShare: billableTotal ? (row.billable / billableTotal) * 100 : 0,
+      })),
+    };
+  }, [query.data, overview, total, billableTotal, visibleServers]);
+
   const server = data?.servers.find((item) => item.nodeId === selected);
+
+  const filteredUsers = useMemo(() => {
+    if (!data?.users) return [];
+    const term = search.trim().toLowerCase();
+    if (!term) return data.users;
+    return data.users.filter(
+      (u) =>
+        u.username.toLowerCase().includes(term) ||
+        u.email.toLowerCase().includes(term),
+    );
+  }, [data, search]);
+
   const billing = useMutation({
     mutationFn: async (multiplier: number) => {
       const result = await HttpUtil.post(
@@ -86,6 +126,7 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['server-client-usage'] }),
   });
+
   const budget = (row: {
     quota: number;
     remaining: number;
@@ -104,6 +145,7 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
     ) : (
       <span>未设置</span>
     );
+
   const editServer = (row: NonNullable<typeof data>['servers'][number]) =>
     setEditing({
       nodeId: row.nodeId,
@@ -114,6 +156,14 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
       quota: row.quota,
       basis: row.quotaBasis,
     });
+
+  const getRankBadge = (index: number) => {
+    if (index === 0) return <span className="rank-badge rank-1">1</span>;
+    if (index === 1) return <span className="rank-badge rank-2">2</span>;
+    if (index === 2) return <span className="rank-badge rank-3">3</span>;
+    return <span className="rank-badge rank-other">{index + 1}</span>;
+  };
+
   return (
     <ConfigProvider theme={antdThemeConfig}>
       <div className="server-usage">
@@ -142,6 +192,18 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
               ]}
             />
           )}
+
+          {!overview && !userView && (
+            <Input
+              prefix={<SearchOutlined style={{ color: 'var(--ant-color-text-tertiary)' }} />}
+              placeholder="搜索用户 / 邮箱..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              allowClear
+              style={{ maxWidth: 220 }}
+            />
+          )}
+
           <Button
             icon={<ReloadOutlined />}
             loading={query.isFetching}
@@ -150,6 +212,7 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
             刷新
           </Button>
         </div>
+
         {overview && data && (
           <div className="server-usage-toolbar">
             <Typography.Text>汇总服务器（可多选）</Typography.Text>
@@ -170,15 +233,18 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
             </Typography.Text>
           </div>
         )}
+
         <Alert
           type="info"
           showIcon
           title="代理用量与服务器计费流量分开统计"
           description={`香港中转 → 美国落地的计费合计 = 香港统计用量 × 香港计费倍率 ＋ 美国统计用量 × 美国计费倍率。各服务器分别累计，不按链路去重；不会在合计后再统一乘 2。估算不含协议开销、重传和系统流量，不等于运营商账单，也不改变用户套餐扣量。两台服务器须独立接入并上报可归属用户的流量；级联子节点仍归入接入节点，不能从聚合计数还原每一跳。记录从功能启用后累计，续期或额度重置不清零。${overview ? '代理占比和计费占比分别按所选服务器的各自总量计算。' : '用户占比分母包含此服务器全部当前已记录用户。'}`}
         />
+
         {!overview && server && (
           <Button onClick={() => editServer(server)}>设置节点额度 / 用量</Button>
         )}
+
         {!overview && server?.quota ? (
           <Alert
             type={server.exceeded ? 'warning' : 'info'}
@@ -186,6 +252,7 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
             description={budget(server)}
           />
         ) : null}
+
         {!userView && server && (
           <div className="server-usage-toolbar">
             <Typography.Text>此服务器计费口径</Typography.Text>
@@ -202,9 +269,11 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
             <Typography.Text type="secondary">切换后重算全部已记录流量的估算值</Typography.Text>
           </div>
         )}
+
         {billing.isError && (
           <Alert type="error" title="计费口径保存失败" description={String(billing.error)} />
         )}
+
         {query.isLoading && <Skeleton active paragraph={{ rows: 5 }} />}
         {query.isError && (
           <Alert
@@ -214,11 +283,9 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
             action={<Button onClick={() => void query.refetch()}>重试</Button>}
           />
         )}
-        <Alert
-          type="info"
-          title="手动额度用于统计与超额提醒，不会自动断流。校正值不修改实际采集记录或用户套餐扣量。"
-        />
+
         {editing && <UsageControlModal target={editing} onClose={() => setEditing(null)} />}
+
         {data && (
           <>
             <div className="server-usage-summary">
@@ -234,13 +301,21 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
                 <small>按各服务器计费口径累计</small>
               </Card>
               <Card>
-                <span>{overview ? '有流量记录的服务器' : '统计用户'}</span>
+                <span>{overview ? '有流量记录的服务器' : '活跃用户数'}</span>
                 <strong>
                   {overview ? data.servers.filter((item) => item.used > 0).length : data.userCount}
                 </strong>
               </Card>
               <Card>
-                <span>{overview ? '主要使用服务器' : '流量最多的用户'}</span>
+                <span>
+                  {overview ? (
+                    '主要使用服务器'
+                  ) : (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <TrophyOutlined style={{ color: '#faad14' }} /> 流量第一名
+                    </span>
+                  )}
+                </span>
                 <strong>
                   {data.total
                     ? overview
@@ -255,6 +330,7 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
                 </small>
               </Card>
             </div>
+
             {overview ? (
               <Table
                 rowKey="nodeId"
@@ -270,12 +346,14 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
                     dataIndex: 'used',
                     width: 120,
                     render: (v: number) => <strong>{bytes(v)}</strong>,
+                    sorter: (a, b) => a.used - b.used,
                   },
                   {
                     title: userView ? '占该用户所选流量' : '占所选统计用量',
                     dataIndex: 'share',
                     width: 180,
                     render: share,
+                    sorter: (a, b) => a.share - b.share,
                   },
                   {
                     title: '计费口径',
@@ -311,46 +389,104 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
             ) : (
               <Table
                 rowKey="email"
-                dataSource={data.users}
-                pagination={{ pageSize: 10, showSizeChanger: false }}
+                dataSource={filteredUsers}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  pageSizeOptions: ['10', '20', '50', '100'],
+                  showTotal: (total) => `共 ${total} 位用户`,
+                }}
                 scroll={{ x: 1500 }}
                 columns={[
                   {
+                    title: '排名',
+                    key: 'rank',
+                    width: 75,
+                    fixed: 'left',
+                    align: 'center',
+                    render: (_, __, index) => getRankBadge(index),
+                  },
+                  {
                     title: '用户',
-                    width: 170,
+                    width: 200,
                     fixed: 'left',
                     render: (_, row) => (
-                      <div>
-                        <strong>{row.username}</strong>
-                        {row.email !== row.username && (
-                          <div className="server-usage-email">{row.email}</div>
-                        )}
+                      <div className="user-cell">
+                        <div className="user-cell-avatar">
+                          <UserOutlined />
+                        </div>
+                        <div className="user-cell-info">
+                          <strong style={{ fontSize: 14 }}>{row.username}</strong>
+                          {row.email !== row.username && (
+                            <div className="server-usage-email">{row.email}</div>
+                          )}
+                        </div>
                       </div>
                     ),
                   },
-                  { title: '采集上传', dataIndex: 'up', width: 100, render: bytes },
-                  { title: '采集下载', dataIndex: 'down', width: 100, render: bytes },
+                  {
+                    title: '上传流量',
+                    dataIndex: 'up',
+                    width: 120,
+                    sorter: (a, b) => a.up - b.up,
+                    render: (v: number) => (
+                      <span>
+                        <ArrowUpOutlined style={{ color: '#52c41a', marginRight: 4 }} />
+                        {bytes(v)}
+                      </span>
+                    ),
+                  },
+                  {
+                    title: '下载流量',
+                    dataIndex: 'down',
+                    width: 120,
+                    sorter: (a, b) => a.down - b.down,
+                    render: (v: number) => (
+                      <span>
+                        <ArrowDownOutlined style={{ color: '#1890ff', marginRight: 4 }} />
+                        {bytes(v)}
+                      </span>
+                    ),
+                  },
                   {
                     title: '统计用量',
                     dataIndex: 'used',
-                    width: 120,
-                    render: (v: number) => <strong>{bytes(v)}</strong>,
+                    width: 130,
+                    render: (v: number) => (
+                      <strong style={{ color: 'var(--ant-color-text)' }}>{bytes(v)}</strong>
+                    ),
                     defaultSortOrder: 'descend',
                     sorter: (a, b) => a.used - b.used,
                   },
-                  { title: '占服务器用户流量', dataIndex: 'share', width: 180, render: share },
+                  {
+                    title: '占服务器流量比例',
+                    dataIndex: 'share',
+                    width: 190,
+                    render: share,
+                    sorter: (a, b) => a.share - b.share,
+                  },
                   { title: '计费流量（估算）', dataIndex: 'billable', width: 150, render: bytes },
-                  { title: '额度 / 剩余', width: 200, render: (_, row) => budget(row) },
+                  { title: '额度 / 剩余', width: 180, render: (_, row) => budget(row) },
                   {
                     title: '手动校正',
                     dataIndex: 'adjustment',
                     width: 110,
                     render: (v: number) => (v ? `${v > 0 ? '+' : '−'}${bytes(Math.abs(v))}` : '无'),
                   },
-                  { title: '最后产生流量', dataIndex: 'updatedAt', width: 180, render: date },
+                  {
+                    title: '最后产生流量',
+                    dataIndex: 'updatedAt',
+                    width: 180,
+                    sorter: (a, b) => a.updatedAt - b.updatedAt,
+                    render: (v: number) => (
+                      <Tooltip title={v ? new Date(v).toLocaleString() : ''}>
+                        <span style={{ color: 'var(--ant-color-text-secondary)' }}>{date(v)}</span>
+                      </Tooltip>
+                    ),
+                  },
                   {
                     title: '操作',
-                    width: 180,
+                    width: 150,
                     fixed: 'right',
                     render: (_, row) => (
                       <Button

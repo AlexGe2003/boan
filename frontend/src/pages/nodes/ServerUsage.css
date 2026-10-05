@@ -31,8 +31,14 @@
 
 .server-usage-summary {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .server-usage-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .server-usage-summary .ant-card {
@@ -50,9 +56,9 @@
 
 .server-usage-summary strong {
   display: block;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
-  margin-top: 8px;
+  margin-top: 6px;
   overflow-wrap: anywhere;
   letter-spacing: -0.5px;
 }
@@ -65,18 +71,86 @@
 
 .server-usage-share .ant-progress {
   margin: 0;
-  width: 110px;
+  width: 100px;
 }
 
 .server-usage-share span {
   min-width: 48px;
   font-weight: 600;
+  font-size: 13px;
 }
 
 .server-usage-email {
   color: var(--ant-color-text-secondary);
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.rank-badge.rank-1 {
+  background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(255, 170, 0, 0.4);
+}
+
+.rank-badge.rank-2 {
+  background: linear-gradient(135deg, #e0e0e0 0%, #b0b0b0 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(176, 176, 176, 0.4);
+}
+
+.rank-badge.rank-3 {
+  background: linear-gradient(135deg, #e6a066 0%, #cc7a33 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(204, 122, 51, 0.4);
+}
+
+.rank-badge.rank-other {
+  background: var(--ant-color-fill-secondary);
+  color: var(--ant-color-text-secondary);
+  border: 1px solid var(--ant-color-border-secondary);
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-cell-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ant-color-primary) 12%, transparent);
+  color: var(--ant-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.user-cell-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.traffic-split {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
 }
 
 @media (max-width: 700px) {
