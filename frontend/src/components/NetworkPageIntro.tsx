@@ -11,7 +11,7 @@ export default function NetworkPageIntro({ page }: { page: NetworkPage }) {
         {t(`networkGuide.${page}.title`)}
       </Typography.Title>
       <Typography.Paragraph type="secondary" style={{ maxWidth: '65ch', marginBottom: 0 }}>
-        {t(`networkGuide.${page}.description`)}
+        {t(`networkGuide.${page}.hint`)}
       </Typography.Paragraph>
     </header>
   );
