@@ -210,7 +210,6 @@ export default function AppSidebar() {
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/my-subscriptions', icon: 'team', title: t('menu.mySubscriptions') },
       { key: '/node-monitor', icon: 'cluster', title: t('nodeMonitor.title') },
-      { key: '/group-buy', icon: 'cluster', title: '拼团节点' },
       { key: '/support', title: '工单服务', icon: 'team' },
       { key: '/plans', icon: 'groups', title: '订阅套餐' },
       { key: '/node-groups', icon: 'cluster', title: '节点分组' },
@@ -336,7 +335,7 @@ export default function AppSidebar() {
   const groupedNavItems = useMemo<MenuProps['items']>(() => {
     if (access.role !== 'admin') return toMenuItems(navItems);
     const sections = [
-      { name: 'operations', keys: ['/', '/group-buy', '/clients', '/plans', '/orders', '/support', '/groups'] },
+      { name: 'operations', keys: ['/', '/clients', '/plans', '/orders', '/support', '/groups'] },
       {
         name: 'infrastructure',
         keys: [

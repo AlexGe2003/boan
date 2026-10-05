@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { createBrowserRouter, type RouteObject } from 'react-router';
+import { createBrowserRouter, Navigate, type RouteObject } from 'react-router';
 import { Spin } from 'antd';
 
 import PanelLayout from '@/layouts/PanelLayout';
@@ -12,7 +12,6 @@ const BusinessPage = lazy(() => import('@/pages/business/BusinessPage'));
 const PlansPage = lazy(() => import('@/pages/plans/PlansPage'));
 const GroupsPage = lazy(() => import('@/pages/groups/GroupsPage'));
 const NodesPage = lazy(() => import('@/pages/nodes/NodesPage'));
-const NodeGroupBuyPage = lazy(() => import('@/pages/nodes/NodeGroupBuyPage'));
 const HostsPage = lazy(() => import('@/pages/hosts/HostsPage'));
 const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'));
 const XrayPage = lazy(() => import('@/pages/xray/XrayPage'));
@@ -58,7 +57,7 @@ const routes: RouteObject[] = [
       { path: 'orders', element: withSuspense(<BusinessPage section="orders" />) },
       { path: 'groups', element: withSuspense(<GroupsPage />) },
       { path: 'nodes', element: withSuspense(<NodesPage />) },
-      { path: 'group-buy', element: withSuspense(<NodeGroupBuyPage />) },
+      { path: 'group-buy', element: <Navigate to="/nodes" replace /> },
       { path: 'hosts', element: withSuspense(<HostsPage />) },
       { path: 'settings', element: withSuspense(<SettingsPage />) },
       { path: 'users', element: withSuspense(<PanelUsersPage />) },
