@@ -60,6 +60,10 @@ export interface MonitoredInbound {
 
 export interface CarrierProbe {
   name: string;
+  target?: string;
+  state?: string;
+  samples?: number;
+  lastChecked?: number;
   latencyMs?: number;
   lossPct?: number;
 }
@@ -301,6 +305,7 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
 
           {node.carrierProbes?.length ? (
             <div className="node-monitor-probe-grid">
+              <p style={{ gridColumn: '1 / -1', margin: 0 }}>{t('nodeMonitor.probeDirection')}</p>
               <section className="node-monitor-probe-panel">
                 <h3>{t('nodeMonitor.latency')}</h3>
                 {probes.map((probe, probeIndex) => (
@@ -311,22 +316,21 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
                         {t(`nodeMonitor.carrier${probeIndex}`)}
                       </span>
                       <strong>
-                        {probe.latencyMs === undefined ? '—' : `${probe.latencyMs} ms`}
+                        {probe.state && probe.state !== 'ok'
+                          ? t(`nodeMonitor.probeStates.${probe.state}`)
+                          : probe.latencyMs === undefined
+                            ? '—'
+                            : `${probe.latencyMs.toFixed(1)} ms`}
                       </strong>
                     </div>
-                    <Progress
-                      steps={18}
-                      percent={
-                        probe.latencyMs === undefined ? 0 : Math.max(8, 100 - probe.latencyMs / 4)
-                      }
-                      showInfo={false}
-                      strokeColor={
-                        probe.latencyMs !== undefined && probe.latencyMs > 150
-                          ? '#e4c33a'
-                          : '#6bdd56'
-                      }
-                      trailColor="#dfe7eb"
-                    />
+                    {probe.target && (
+                      <div className="node-monitor-metric-detail">
+                        {probe.target} ·{' '}
+                        {probe.lastChecked
+                          ? new Date(probe.lastChecked).toLocaleTimeString(i18n.language)
+                          : '—'}
+                      </div>
+                    )}
                   </div>
                 ))}
               </section>
@@ -343,11 +347,14 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
                         {probe.lossPct === undefined ? '—' : `${probe.lossPct.toFixed(1)}%`}
                       </strong>
                     </div>
+                    <div className="node-monitor-metric-detail">
+                      {t('nodeMonitor.probeSamples', { count: probe.samples ?? 0 })}
+                    </div>
                     <Progress
                       steps={18}
-                      percent={probe.lossPct === undefined ? 0 : 100 - probe.lossPct}
+                      percent={probe.lossPct ?? 0}
                       showInfo={false}
-                      strokeColor="#19a982"
+                      strokeColor={probe.lossPct ? '#d9534f' : '#19a982'}
                       trailColor="#dfe7eb"
                     />
                   </div>
@@ -429,7 +436,7 @@ export default function NodeMonitorPage({ mockData }: { mockData?: MonitoredNode
       if (!response.success) throw new Error(response.msg || 'Could not load node monitoring');
       return response.obj || [];
     },
-    refetchInterval: 30_000,
+    refetchInterval: 5_000,
     retry: 1,
     enabled: !mockData,
     initialData: mockData,

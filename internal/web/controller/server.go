@@ -90,6 +90,7 @@ func (a *ServerController) initRouter(g *gin.RouterGroup) {
 // the cross-service side effects (xrayMetrics sample + websocket broadcast).
 func (a *ServerController) startTask() {
 	c := global.GetWebServer().GetCron()
+	_, _ = c.AddFunc("@every 5s", service.LocalCarrierMonitor.Sample)
 	_, _ = c.AddFunc("@every 2s", func() {
 		status := a.serverService.RefreshStatus()
 		if status == nil {

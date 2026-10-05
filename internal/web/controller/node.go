@@ -74,26 +74,27 @@ type monitoredInbound struct {
 }
 
 type monitoredNode struct {
-	MetricsAvailable bool               `json:"metricsAvailable"`
-	MemoryUsedBytes  uint64             `json:"memoryUsedBytes,omitempty"`
-	MemoryTotalBytes uint64             `json:"memoryTotalBytes,omitempty"`
-	DiskUsedBytes    uint64             `json:"diskUsedBytes,omitempty"`
-	DiskTotalBytes   uint64             `json:"diskTotalBytes,omitempty"`
-	DiskPct          *float64           `json:"diskPct,omitempty"`
-	ID               int                `json:"id"`
-	Local            bool               `json:"local"`
-	Name             string             `json:"name"`
-	Address          string             `json:"address"`
-	Status           string             `json:"status"`
-	XrayState        string             `json:"xrayState"`
-	LastHeartbeat    int64              `json:"lastHeartbeat"`
-	LatencyMs        int                `json:"panelLatencyMs"`
-	CpuPct           float64            `json:"cpuPct"`
-	MemPct           float64            `json:"memPct"`
-	UptimeSecs       uint64             `json:"uptimeSecs"`
-	NetUp            uint64             `json:"netUp"`
-	NetDown          uint64             `json:"netDown"`
-	Inbounds         []monitoredInbound `json:"inbounds"`
+	CarrierProbes    []service.CarrierProbe `json:"carrierProbes,omitempty"`
+	MetricsAvailable bool                   `json:"metricsAvailable"`
+	MemoryUsedBytes  uint64                 `json:"memoryUsedBytes,omitempty"`
+	MemoryTotalBytes uint64                 `json:"memoryTotalBytes,omitempty"`
+	DiskUsedBytes    uint64                 `json:"diskUsedBytes,omitempty"`
+	DiskTotalBytes   uint64                 `json:"diskTotalBytes,omitempty"`
+	DiskPct          *float64               `json:"diskPct,omitempty"`
+	ID               int                    `json:"id"`
+	Local            bool                   `json:"local"`
+	Name             string                 `json:"name"`
+	Address          string                 `json:"address"`
+	Status           string                 `json:"status"`
+	XrayState        string                 `json:"xrayState"`
+	LastHeartbeat    int64                  `json:"lastHeartbeat"`
+	LatencyMs        int                    `json:"panelLatencyMs"`
+	CpuPct           float64                `json:"cpuPct"`
+	MemPct           float64                `json:"memPct"`
+	UptimeSecs       uint64                 `json:"uptimeSecs"`
+	NetUp            uint64                 `json:"netUp"`
+	NetDown          uint64                 `json:"netDown"`
+	Inbounds         []monitoredInbound     `json:"inbounds"`
 }
 
 // monitor is a read-only projection. It omits node API credentials and inbound
@@ -147,6 +148,7 @@ func (a *NodeController) monitor(c *gin.Context) {
 		if a.serverService != nil {
 			applyLocalMonitorStatus(&local, a.serverService.CurrentStatus())
 		}
+		local.CarrierProbes = service.LocalCarrierMonitor.Snapshot(time.Now())
 		result = append(result, local)
 	}
 	for _, node := range nodes {

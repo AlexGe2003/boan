@@ -22,6 +22,9 @@
     }
   },
   "nodeMonitor": {
+    "probeDirection": "本机 → 广东三网公共地址 · ICMP 每 5 秒检测，丢包率统计最近 5 分钟。目标可能限制 ICMP，结果不代表三网用户到节点的实际质量。",
+    "probeSamples": "最近 5 分钟：{count} 个样本",
+    "probeStates": {"ok": "正常", "pending": "等待首次检测", "timeout": "未收到回复", "error": "检测失败", "unsupported": "系统不支持", "stale": "数据已过期"},
     "title": "节点监控",
     "panelLatencyHint": "延迟为面板到节点的连接耗时。运营商延迟及丢包需要部署对应网络的探针后才能显示。",
     "loadFailed": "监控数据更新失败",

@@ -92,7 +92,7 @@ install_source() {
     exec > >(tee -a /root/boan-install.log) 2>&1
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y ca-certificates curl git build-essential unzip xz-utils tar python3 openssl cron socat iproute2
+    apt-get install -y ca-certificates curl git build-essential unzip xz-utils tar python3 openssl cron socat iproute2 iputils-ping
     local work
     work=$(mktemp -d /var/tmp/boan-build.XXXXXXXX)
     # Keep build failures isolated from the final installation and keep their log.
