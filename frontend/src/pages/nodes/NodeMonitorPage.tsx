@@ -25,11 +25,11 @@ function ServerUsageButton({ nodeId }: { nodeId?: number }) {
   return (
     <>
       <Button onClick={() => setOpen(true)}>
-        {nodeId === undefined ? '服务器流量总览' : '用户流量排行'}
+        {nodeId === undefined ? '流量统计' : '用户用量'}
       </Button>
       <Modal
         open={open}
-        title={nodeId === undefined ? '服务器流量总览' : '服务器用户流量排行'}
+        title={nodeId === undefined ? '流量统计' : '用户用量'}
         width={1100}
         footer={null}
         onCancel={() => setOpen(false)}
@@ -158,6 +158,7 @@ function ManageNodesButton() {
 
 function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
   const { t, i18n } = useTranslation();
+  const [configOpen, setConfigOpen] = useState(false);
   const inbounds = node.inbounds || [];
   const used = inbounds.reduce((sum, inbound) => sum + inbound.used, 0);
   const quota = inbounds.reduce((sum, inbound) => sum + inbound.total, 0);
@@ -187,7 +188,6 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
           />
           <strong>{node.local ? t('nodeMonitor.local') : node.name}</strong>
         </div>
-        <ServerUsageButton nodeId={node.local ? 0 : node.id} />
         {node.country && <span className="node-monitor-country">{node.country}</span>}
       </div>
       <div className="node-monitor-meta">
@@ -251,7 +251,9 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
               value={
                 inbounds.length && !hasUnlimited && quota > 0
                   ? `${((used / quota) * 100).toFixed(1)}%`
-                  : '—'
+                  : inbounds.length
+                    ? formatBytes(used)
+                    : '—'
               }
               percent={
                 inbounds.length && !hasUnlimited && quota > 0 ? (used / quota) * 100 : undefined
@@ -267,6 +269,7 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
 
           <div className="node-monitor-quick-stats">
             <div>
+              <small>实时速度</small>
               <span>
                 <UpOutlined />{' '}
                 {validMetric && node.netUp !== undefined ? `${formatBytes(node.netUp)}/s` : '—'}
@@ -277,6 +280,7 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
               </span>
             </div>
             <div>
+              <small>累计流量</small>
               <span>
                 <UpOutlined /> {inbounds.length ? formatBytes(up) : '—'}
               </span>
@@ -285,6 +289,7 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
               </span>
             </div>
             <div>
+              <small>运行时间</small>
               <span>
                 <CalendarOutlined />{' '}
                 {validMetric && node.uptimeSecs !== undefined
@@ -307,69 +312,29 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
 
           {node.carrierProbes?.length ? (
             <div className="node-monitor-probe-grid">
-              <p style={{ gridColumn: '1 / -1', margin: 0 }}>{t('nodeMonitor.probeDirection')}</p>
-              <section className="node-monitor-probe-panel">
-                <h3>{t('nodeMonitor.latency')}</h3>
-                {probes.map((probe, probeIndex) => (
-                  <div className="node-monitor-probe-row" key={probe.name}>
-                    <div className="node-monitor-probe-line">
-                      <span>
-                        <i style={{ background: carrierColors[probeIndex] }} />
-                        {t(`nodeMonitor.carrier${probeIndex}`)}
-                      </span>
-                      <strong>
-                        {probe.state && probe.state !== 'ok'
-                          ? t(`nodeMonitor.probeStates.${probe.state}`)
-                          : probe.latencyMs === undefined
-                            ? '—'
-                            : `${probe.latencyMs.toFixed(1)} ms`}
-                      </strong>
-                    </div>
-                    {probe.avgLatencyMs !== undefined && probe.jitterMs !== undefined && (
-                      <div className="node-monitor-metric-detail">
-                        {t('nodeMonitor.probeRttSummary', {
-                          avg: probe.avgLatencyMs.toFixed(1),
-                          jitter: probe.jitterMs.toFixed(1),
-                        })}
-                      </div>
-                    )}
-                    {probe.target && (
-                      <div className="node-monitor-metric-detail">
-                        {probe.target} ·{' '}
-                        {probe.lastChecked
-                          ? new Date(probe.lastChecked).toLocaleTimeString(i18n.language)
-                          : '—'}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </section>
-              <section className="node-monitor-probe-panel">
-                <h3>{t('nodeMonitor.packetLoss')}</h3>
-                {probes.map((probe, probeIndex) => (
-                  <div className="node-monitor-probe-row" key={probe.name}>
-                    <div className="node-monitor-probe-line">
-                      <span>
-                        <i style={{ background: carrierColors[probeIndex] }} />
-                        {t(`nodeMonitor.carrier${probeIndex}`)}
-                      </span>
-                      <strong>
-                        {probe.lossPct === undefined ? '—' : `${probe.lossPct.toFixed(1)}%`}
-                      </strong>
-                    </div>
-                    <div className="node-monitor-metric-detail">
-                      {t('nodeMonitor.probeSamples', { count: probe.samples ?? 0 })}
-                    </div>
-                    <Progress
-                      steps={18}
-                      percent={probe.lossPct ?? 0}
-                      showInfo={false}
-                      strokeColor={probe.lossPct ? '#d9534f' : '#19a982'}
-                      trailColor="#dfe7eb"
-                    />
-                  </div>
-                ))}
-              </section>
+              <div className="node-monitor-carrier-heading">
+                <span>三网检测</span>
+                <span>延迟</span>
+                <span>丢包</span>
+              </div>
+              {probes.map((probe, probeIndex) => (
+                <div className="node-monitor-carrier-row" key={probe.name}>
+                  <span>
+                    <i style={{ background: carrierColors[probeIndex] }} />
+                    {t(`nodeMonitor.carrier${probeIndex}`)}
+                  </span>
+                  <strong>
+                    {probe.state && probe.state !== 'ok'
+                      ? t(`nodeMonitor.probeStates.${probe.state}`)
+                      : probe.latencyMs === undefined
+                        ? '—'
+                        : `${probe.latencyMs.toFixed(1)} ms`}
+                  </strong>
+                  <strong>
+                    {probe.lossPct === undefined ? '—' : `${probe.lossPct.toFixed(1)}%`}
+                  </strong>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="node-monitor-probe-empty">
@@ -380,10 +345,18 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
         </>
       )}
 
-      <details className="node-monitor-config">
-        <summary>
-          {t('nodeMonitor.config')} <span>{inbounds.length}</span>
-        </summary>
+      <div className="node-monitor-card-actions">
+        <Button onClick={() => setConfigOpen(true)}>连接配置 · {inbounds.length}</Button>
+        <ServerUsageButton nodeId={node.local ? 0 : node.id} />
+      </div>
+      <Modal
+        open={configOpen}
+        title="连接配置"
+        width={760}
+        footer={null}
+        onCancel={() => setConfigOpen(false)}
+        destroyOnHidden
+      >
         <Table
           rowKey="id"
           size="small"
@@ -417,13 +390,12 @@ function NodeCard({ node, index }: { node: MonitoredNode; index: number }) {
             },
           ]}
         />
-      </details>
+      </Modal>
       <div className="node-monitor-card-foot">
-        {node.address || t('nodeMonitor.local')}
+        {node.address}
         {online && (
           <>
-            {' '}
-            ·{' '}
+            更新于{' '}
             {node.lastHeartbeat > 0
               ? new Date(node.lastHeartbeat * 1000).toLocaleString(i18n.language)
               : t('pages.nodes.never')}
@@ -489,10 +461,7 @@ export default function NodeMonitorPage({ mockData }: { mockData?: MonitoredNode
               </div>
             )}
           </div>
-          <details className="node-monitor-setup-help">
-            <summary>{t('nodeMonitor.setupSummary')}</summary>
-            <p>{t('nodeMonitor.setupGuide')}</p>
-          </details>
+
           {query.isError && (
             <Alert
               className="node-monitor-alert"

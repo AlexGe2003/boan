@@ -165,3 +165,20 @@
     font-size: 22px;
   }
 }
+
+.server-usage-help {
+  color: var(--ant-color-text-secondary);
+  font-size: 13px;
+}
+.server-usage-help summary {
+  cursor: pointer;
+  padding: 8px 0;
+}
+.server-usage-summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 600px) {
+  .server-usage-summary {
+    grid-template-columns: 1fr;
+  }
+}

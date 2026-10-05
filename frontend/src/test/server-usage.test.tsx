@@ -61,13 +61,13 @@ const report = {
 it('switches from exact user distribution to a server ranking and back', async () => {
   const get = vi.spyOn(HttpUtil, 'get').mockResolvedValue(new Msg(true, '', report));
   renderWithProviders(<ServerUsage email="alice@example.com" />);
-  fireEvent.click(await screen.findByRole('button', { name: '查看用户排行' }));
+  fireEvent.click(await screen.findByRole('button', { name: '查看用户' }));
   await screen.findByRole('button', { name: /返回用户分布/ });
   await screen.findAllByText('Alice');
   expect(get).toHaveBeenCalledWith('/panel/api/nodes/usage?email=alice%40example.com');
   expect(get).toHaveBeenCalledWith('/panel/api/nodes/usage?nodeId=1');
   fireEvent.click(screen.getByRole('button', { name: /返回用户分布/ }));
-  await screen.findByRole('button', { name: '查看用户排行' });
+  await screen.findByRole('button', { name: '查看用户' });
 });
 
 it('does not show a zero total or ranking when collection cannot be loaded', async () => {
@@ -136,7 +136,7 @@ it('saves a user quota and absolute correction for the selected node only', asyn
   vi.spyOn(HttpUtil, 'get').mockResolvedValue(new Msg(true, '', report));
   const post = vi.spyOn(HttpUtil, 'post').mockResolvedValue(new Msg(true, '', null));
   renderWithProviders(<ServerUsage email="alice@example.com" />);
-  fireEvent.click(await screen.findByRole('button', { name: '设置用户节点用量' }));
+  fireEvent.click(await screen.findByRole('button', { name: '调整用量' }));
   fireEvent.change(screen.getByRole('spinbutton', { name: '此用户在该节点的额度（GB）' }), {
     target: { value: '20' },
   });

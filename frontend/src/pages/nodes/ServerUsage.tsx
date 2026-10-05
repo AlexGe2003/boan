@@ -9,6 +9,7 @@ import {
   Progress,
   Select,
   Skeleton,
+  Switch,
   Table,
   Typography,
   Tag,
@@ -21,7 +22,6 @@ import {
   UserOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
-  TrophyOutlined,
 } from '@ant-design/icons';
 import { ServerUsageReportSchema } from '@/generated/zod';
 import { useTheme } from '@/hooks/useTheme';
@@ -54,6 +54,7 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
   const [includedNodes, setIncludedNodes] = useState<number[]>([]);
   const [editing, setEditing] = useState<UsageControlTarget | null>(null);
   const [search, setSearch] = useState('');
+  const [showBilling, setShowBilling] = useState(false);
   const overview = selected === undefined || selected === -1;
   const userView = !!email && selected === undefined;
 
@@ -68,7 +69,14 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
             : `?nodeId=${selected}`;
       const result = await HttpUtil.get(`/panel/api/nodes/usage${params}`);
       if (!result.success) throw new Error(result.msg || '服务器流量加载失败');
-      return ServerUsageReportSchema.parse(result.obj);
+      const report = ServerUsageReportSchema.parse(result.obj);
+      return {
+        ...report,
+        servers: report.servers.map((server) => ({
+          ...server,
+          name: server.local ? '默认节点' : server.name,
+        })),
+      };
     },
     staleTime: 10_000,
     retry: false,
@@ -106,9 +114,7 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
     const term = search.trim().toLowerCase();
     if (!term) return data.users;
     return data.users.filter(
-      (u) =>
-        u.username.toLowerCase().includes(term) ||
-        u.email.toLowerCase().includes(term),
+      (u) => u.username.toLowerCase().includes(term) || u.email.toLowerCase().includes(term),
     );
   }, [data, search]);
 
@@ -157,13 +163,6 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
       basis: row.quotaBasis,
     });
 
-  const getRankBadge = (index: number) => {
-    if (index === 0) return <span className="rank-badge rank-1">1</span>;
-    if (index === 1) return <span className="rank-badge rank-2">2</span>;
-    if (index === 2) return <span className="rank-badge rank-3">3</span>;
-    return <span className="rank-badge rank-other">{index + 1}</span>;
-  };
-
   return (
     <ConfigProvider theme={antdThemeConfig}>
       <div className="server-usage">
@@ -204,6 +203,10 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
             />
           )}
 
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Switch size="small" checked={showBilling} onChange={setShowBilling} />
+            计费明细
+          </label>
           <Button
             icon={<ReloadOutlined />}
             loading={query.isFetching}
@@ -234,12 +237,15 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
           </div>
         )}
 
-        <Alert
-          type="info"
-          showIcon
-          title="代理用量与服务器计费流量分开统计"
-          description={`香港中转 → 美国落地的计费合计 = 香港统计用量 × 香港计费倍率 ＋ 美国统计用量 × 美国计费倍率。各服务器分别累计，不按链路去重；不会在合计后再统一乘 2。估算不含协议开销、重传和系统流量，不等于运营商账单，也不改变用户套餐扣量。两台服务器须独立接入并上报可归属用户的流量；级联子节点仍归入接入节点，不能从聚合计数还原每一跳。记录从功能启用后累计，续期或额度重置不清零。${overview ? '代理占比和计费占比分别按所选服务器的各自总量计算。' : '用户占比分母包含此服务器全部当前已记录用户。'}`}
-        />
+        <details className="server-usage-help">
+          <summary>统计说明</summary>
+          <Alert
+            type="info"
+            showIcon
+            title="代理用量与服务器计费流量分开统计"
+            description={`香港中转 → 美国落地的计费合计 = 香港统计用量 × 香港计费倍率 ＋ 美国统计用量 × 美国计费倍率。各服务器分别累计，不按链路去重；不会在合计后再统一乘 2。估算不含协议开销、重传和系统流量，不等于运营商账单，也不改变用户套餐扣量。两台服务器须独立接入并上报可归属用户的流量；级联子节点仍归入接入节点，不能从聚合计数还原每一跳。记录从功能启用后累计，续期或额度重置不清零。${overview ? '代理占比和计费占比分别按所选服务器的各自总量计算。' : '用户占比分母包含此服务器全部当前已记录用户。'}`}
+          />
+        </details>
 
         {!overview && server && (
           <Button onClick={() => editServer(server)}>设置节点额度 / 用量</Button>
@@ -290,44 +296,19 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
           <>
             <div className="server-usage-summary">
               <Card>
-                <span>
-                  {overview ? '所选服务器统计用量合计' : `${server?.name || '服务器'} · 统计用量`}
-                </span>
+                <span>{overview ? '累计用量' : `${server?.name || '服务器'} · 统计用量`}</span>
                 <strong>{bytes(data.total)}</strong>
               </Card>
               <Card>
-                <span>{overview ? '所选服务器计费总流量（估算）' : '服务器计费流量（估算）'}</span>
+                <span>{overview ? '计费估算' : '服务器计费流量（估算）'}</span>
                 <strong>{bytes(data.billableTotal)}</strong>
                 <small>按各服务器计费口径累计</small>
               </Card>
               <Card>
-                <span>{overview ? '有流量记录的服务器' : '活跃用户数'}</span>
+                <span>{overview ? '有流量记录的服务器' : '有用量的用户'}</span>
                 <strong>
                   {overview ? data.servers.filter((item) => item.used > 0).length : data.userCount}
                 </strong>
-              </Card>
-              <Card>
-                <span>
-                  {overview ? (
-                    '主要使用服务器'
-                  ) : (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      <TrophyOutlined style={{ color: '#faad14' }} /> 流量第一名
-                    </span>
-                  )}
-                </span>
-                <strong>
-                  {data.total
-                    ? overview
-                      ? data.servers[0]?.name
-                      : data.users[0]?.username
-                    : '暂无记录'}
-                </strong>
-                <small>
-                  {data.total
-                    ? `${(overview ? data.servers[0]?.share : data.users[0]?.share)?.toFixed(1)}%`
-                    : '产生新流量后显示'}
-                </small>
               </Card>
             </div>
 
@@ -336,7 +317,7 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
                 rowKey="nodeId"
                 dataSource={data.servers}
                 pagination={false}
-                scroll={{ x: 1750 }}
+                scroll={{ x: showBilling ? 1750 : 1050 }}
                 columns={[
                   { title: '服务器', dataIndex: 'name', width: 170, fixed: 'left' },
                   { title: '采集上传', dataIndex: 'up', width: 100, render: bytes },
@@ -357,13 +338,21 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
                   },
                   {
                     title: '计费口径',
+                    hidden: !showBilling,
                     dataIndex: 'billingMultiplier',
                     render: (value: number) => (value === 2 ? '中转双向 × 2' : '代理用量 × 1'),
                   },
-                  { title: '计费流量（估算）', dataIndex: 'billable', width: 150, render: bytes },
+                  {
+                    title: '计费流量（估算）',
+                    hidden: !showBilling,
+                    dataIndex: 'billable',
+                    width: 150,
+                    render: bytes,
+                  },
                   { title: '额度 / 剩余', width: 200, render: (_, row) => budget(row) },
                   {
                     title: '手动校正',
+                    hidden: !showBilling,
                     dataIndex: 'adjustment',
                     width: 110,
                     render: (v: number) => (v ? `${v > 0 ? '+' : '−'}${bytes(Math.abs(v))}` : '无'),
@@ -376,10 +365,10 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
                     render: (_, row) => (
                       <div>
                         <Button type="link" onClick={() => setSelected(row.nodeId)}>
-                          查看用户排行
+                          查看用户
                         </Button>
                         <Button type="link" onClick={() => editServer(row)}>
-                          {userView ? '设置用户节点用量' : '设置节点用量'}
+                          {userView ? '调整用量' : '设置节点用量'}
                         </Button>
                       </div>
                     ),
@@ -396,16 +385,8 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
                   pageSizeOptions: ['10', '20', '50', '100'],
                   showTotal: (total) => `共 ${total} 位用户`,
                 }}
-                scroll={{ x: 1500 }}
+                scroll={{ x: showBilling ? 1500 : 1100 }}
                 columns={[
-                  {
-                    title: '排名',
-                    key: 'rank',
-                    width: 75,
-                    fixed: 'left',
-                    align: 'center',
-                    render: (_, __, index) => getRankBadge(index),
-                  },
                   {
                     title: '用户',
                     width: 200,
@@ -459,16 +440,23 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
                     sorter: (a, b) => a.used - b.used,
                   },
                   {
-                    title: '占服务器流量比例',
+                    title: '用量占比',
                     dataIndex: 'share',
                     width: 190,
                     render: share,
                     sorter: (a, b) => a.share - b.share,
                   },
-                  { title: '计费流量（估算）', dataIndex: 'billable', width: 150, render: bytes },
+                  {
+                    title: '计费流量（估算）',
+                    hidden: !showBilling,
+                    dataIndex: 'billable',
+                    width: 150,
+                    render: bytes,
+                  },
                   { title: '额度 / 剩余', width: 180, render: (_, row) => budget(row) },
                   {
                     title: '手动校正',
+                    hidden: !showBilling,
                     dataIndex: 'adjustment',
                     width: 110,
                     render: (v: number) => (v ? `${v > 0 ? '+' : '−'}${bytes(Math.abs(v))}` : '无'),
@@ -503,7 +491,7 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
                           })
                         }
                       >
-                        设置用户节点用量
+                        调整用量
                       </Button>
                     ),
                   },
