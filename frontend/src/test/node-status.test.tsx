@@ -49,7 +49,7 @@ it('switches between grid and table view', async () => {
   const tableButton = screen.getByText('列表视图');
   fireEvent.click(tableButton);
 
-  expect(screen.getByText('地区 / 节点')).toBeTruthy();
+  expect(screen.getAllByText('地区 / 节点').length).toBeGreaterThan(0);
   expect(screen.getAllByText('传输协议').length).toBeGreaterThan(0);
   expect(screen.getAllByText('节点状态').length).toBeGreaterThan(0);
 });

@@ -210,10 +210,7 @@ export default function AppSidebar() {
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/my-subscriptions', icon: 'team', title: t('menu.mySubscriptions') },
       { key: '/node-monitor', icon: 'cluster', title: t('nodeMonitor.title') },
-      { key: '/support', title: '工单服务', icon: 'team' },
-      { key: '/plans', icon: 'groups', title: '订阅套餐' },
       { key: '/node-groups', icon: 'cluster', title: '节点分组' },
-      { key: '/orders', icon: 'team', title: '订单管理' },
       { key: '/groups', icon: 'groups', title: t('menu.groups') },
       { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
       { key: '/hosts', icon: 'hosts', title: t('menu.hosts') },
@@ -403,15 +400,6 @@ export default function AppSidebar() {
         collapsed={railCollapsed}
       >
         <div className="sider-brand">
-          <span className="sidebar-brand-name">
-            {railCollapsed ? (
-              <GlobalOutlined />
-            ) : (
-              <>
-                <GlobalOutlined /> BOAN
-              </>
-            )}
-          </span>
           {!railCollapsed && (
             <div className="brand-actions">
               <button
@@ -501,9 +489,6 @@ export default function AppSidebar() {
         onClose={() => setDrawerOpen(false)}
       >
         <div className="drawer-header">
-          <span className="sidebar-brand-name">
-            <GlobalOutlined /> BOAN
-          </span>
           <div className="drawer-header-actions">
             <ThemeCycleButton
               id="theme-cycle-drawer"

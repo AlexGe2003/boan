@@ -1,32 +1,24 @@
 import NodeStatus from '@/pages/support/NodeStatus';
-import SupportTickets from '@/pages/support/SupportTickets';
+import SubscriptionDevicePicker from './SubscriptionDevicePicker';
 import zhCN from 'antd/locale/zh_CN';
-import { ClusterOutlined, CustomerServiceOutlined } from '@ant-design/icons';
+import { ClusterOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
-import { Alert, Button, ConfigProvider, Empty, Modal, Progress, Spin, Tag, message } from 'antd';
+import { useQuery, useQueryClient, useIsFetching } from '@tanstack/react-query';
+import { Alert, Button, ConfigProvider, Empty, Progress, Spin, Tag } from 'antd';
 import {
-  AndroidOutlined,
-  AppleOutlined,
   ArrowDownOutlined,
   ArrowUpOutlined,
-  BookOutlined,
-  CopyOutlined,
   DashboardOutlined,
-  GlobalOutlined,
-  LaptopOutlined,
   LinkOutlined,
   LogoutOutlined,
   ReloadOutlined,
-  UserOutlined,
-  WindowsOutlined,
 } from '@ant-design/icons';
 import AppSidebar from '@/layouts/AppSidebar';
 import PanelTopbar from '@/layouts/PanelTopbar';
 import { useTheme } from '@/hooks/useTheme';
 import { usePanelAccess } from '@/api/queries/usePanelRole';
-import { ClipboardManager, HttpUtil } from '@/utils';
+import { HttpUtil } from '@/utils';
 import './UserHome.css';
 interface SubscriptionLink {
   email: string;
@@ -67,28 +59,20 @@ const sections = [
     group: '订阅',
   },
   { key: 'nodes', label: '节点状态', icon: <ClusterOutlined />, group: '订阅' },
-  { key: 'profile', label: '个人中心', icon: <UserOutlined />, group: '账户' },
-  { key: 'guide', label: '使用教程', icon: <BookOutlined />, group: '支持' },
-  { key: 'tickets', label: '工单服务', icon: <CustomerServiceOutlined />, group: '支持' },
-];
-const platforms = [
-  { name: 'Windows', icon: <WindowsOutlined />, format: 'Clash / Mihomo' },
-  { name: 'Android', icon: <AndroidOutlined />, format: '通用订阅' },
-  { name: 'iOS', icon: <AppleOutlined />, format: 'Shadowrocket / 小火箭' },
-  { name: 'macOS', icon: <LaptopOutlined />, format: 'Clash / Mihomo' },
 ];
 export default function MySubscriptionsPage() {
   const { antdThemeConfig, isDark, isUltra } = useTheme();
   const access = usePanelAccess();
+  const queryClient = useQueryClient();
+  const nodesFetching = useIsFetching({queryKey: ['customer-node-status', access.userId]});
   const location = useLocation();
   const routeNavigate = useNavigate();
   const hash = location.hash.slice(1);
   const section = sections.some((item) => item.key === hash) ? hash : 'home';
   const [mobileNav, setMobileNav] = useState(false);
-  const [platform, setPlatform] = useState<(typeof platforms)[number] | null>(null);
-  const [messageApi, contextHolder] = message.useMessage();
   const query = useQuery({
     queryKey: ['clients', 'mySubscriptions', access.userId],
+    enabled: access.userId > 0,
     queryFn: async () => {
       const msg = await HttpUtil.get<SubscriptionLink[]>(
         '/panel/api/clients/mySubscriptions',
@@ -100,10 +84,6 @@ export default function MySubscriptionsPage() {
     },
     refetchInterval: 30000,
   });
-  const copy = async (value: string) => {
-    if (await ClipboardManager.copyText(value)) messageApi.success('订阅链接已复制');
-    else messageApi.error('复制失败，请检查剪贴板权限');
-  };
   const logout = async () => {
     const result = await HttpUtil.post('/logout');
     if (result.success) window.location.href = `${window.X_UI_BASE_PATH || '/'}login`;
@@ -114,7 +94,6 @@ export default function MySubscriptionsPage() {
   };
   return (
     <ConfigProvider locale={zhCN} theme={antdThemeConfig}>
-      {contextHolder}
       <div
         className={`customer-app ${isDark ? 'is-dark' : 'is-light'}${isUltra ? ' is-ultra' : ''}`}
       >
@@ -130,11 +109,7 @@ export default function MySubscriptionsPage() {
               />
             )}
             <aside className={`customer-sidebar ${mobileNav ? 'is-open' : ''}`}>
-              <a className="customer-brand" href={window.X_UI_BASE_PATH || '/'}>
-                <GlobalOutlined />
-                <strong>BOAN</strong>
-                <span>泊岸网络</span>
-              </a>
+
               <nav aria-label="用户导航">
                 {sections.map((item, index) => (
                   <div key={item.key}>
@@ -142,6 +117,7 @@ export default function MySubscriptionsPage() {
                       <p>{item.group}</p>
                     )}
                     <button
+                      aria-current={section === item.key ? "page" : undefined}
                       className={section === item.key ? 'active' : ''}
                       onClick={() => navigate(item.key)}
                     >
@@ -151,26 +127,26 @@ export default function MySubscriptionsPage() {
                   </div>
                 ))}
               </nav>
-              <div className="customer-sidebar-bottom">
-                <span className="connection-dot" />
-                专属用户空间<small>您的连接，尽在掌握</small>
-              </div>
+
             </aside>
           </>
         )}
         <div className="customer-main">
           <PanelTopbar
             title={sections.find((item) => item.key === section)?.label || '用户中心'}
-            identity="订阅用户"
+            identity=""
             onMenu={() => setMobileNav(true)}
             actions={
               <>
                 <Button
                   type="text"
-                  aria-label="刷新用量"
-                  loading={query.isFetching}
+                  aria-label={section === 'nodes' ? '刷新节点状态' : '刷新账户信息'}
+                  loading={section === 'nodes' ? nodesFetching > 0 : query.isFetching}
                   icon={<ReloadOutlined />}
-                  onClick={() => void query.refetch()}
+                  onClick={() => {
+                    if (section === 'nodes') void queryClient.invalidateQueries({queryKey: ['customer-node-status', access.userId]});
+                    else void query.refetch();
+                  }}
                 />
                 <Button
                   type="text"
@@ -178,29 +154,16 @@ export default function MySubscriptionsPage() {
                   icon={<LogoutOutlined />}
                   onClick={() => void logout()}
                 />
-                <button
-                  className="customer-avatar"
-                  aria-label="个人中心"
-                  onClick={() => navigate('profile')}
-                >
-                  <UserOutlined />
-                </button>
+
               </>
             }
           />
           <main className="customer-content">
             {section === 'nodes' && (
-              <section className="customer-card">
-                <NodeStatus />
-              </section>
+              <NodeStatus />
             )}
-            {section === 'tickets' && (
-              <section className="customer-card">
-                <SupportTickets />
-              </section>
-            )}
-            {['home', 'subscription', 'profile'].includes(section) && query.isLoading && <Spin />}
-            {['home', 'subscription', 'profile'].includes(section) && query.isError && (
+            {['home', 'subscription'].includes(section) && query.isLoading && <Spin />}
+            {['home', 'subscription'].includes(section) && query.isError && (
               <Alert
                 type="error"
                 title="加载失败"
@@ -208,17 +171,17 @@ export default function MySubscriptionsPage() {
                 action={<Button onClick={() => void query.refetch()}>重试</Button>}
               />
             )}
-            {['home', 'subscription', 'profile'].includes(section) && query.data?.length === 0 && (
+            {['home', 'subscription'].includes(section) && query.data?.length === 0 && (
               <section className="customer-card">
                 <Empty description="还没有分配客户端配置，请联系管理员。" />
               </section>
             )}
-            {['home', 'subscription', 'profile'].includes(section) &&
+            {['home', 'subscription'].includes(section) &&
               query.data?.map((item) => {
                 if (!item.configured) {
                   return (
                     <section className="customer-card detail-card" key={item.email}>
-                      <h2>{section === 'profile' ? '账户信息' : '我的服务'}</h2>
+                      <h2>我的服务</h2>
                       <p>用户账号：{item.email}</p>
                       <Alert
                         type="info"
@@ -242,198 +205,128 @@ export default function MySubscriptionsPage() {
                 return (
                   <div key={item.email}>
                     {section === 'home' && (
-                      <div className="customer-stats">
-                        <section className="customer-card quota-card">
-                          <h2>
-                            我的套餐 <Tag color={available ? 'green' : 'red'}>{status}</Tag>
-                          </h2>
-                          <h3>{item.planName || '管理员配置的订阅'}</h3>
-                          <p className="quota-expiry">{expiry(item.expiryTime)}</p>
-                          <Progress
-                            aria-label="剩余流量比例"
-                            percent={
-                              item.total > 0
-                                ? Math.max(
-                                    0,
-                                    Math.min(
-                                      100,
-                                      ((item.remaining ?? Math.max(0, item.total - item.used)) /
-                                        item.total) *
+                      <>
+                        <div className="dashboard-quick-actions">
+                          <div
+                            className="dashboard-action-card"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => navigate('subscription')}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') navigate('subscription');
+                            }}
+                          >
+                            <div className="dashboard-action-info">
+                              <div className="dashboard-action-icon">
+                                <LinkOutlined />
+                              </div>
+                              <div className="dashboard-action-text">
+                                <strong>我的订阅配置</strong>
+                                <span>支持一键导入 Shadowrocket / Clash / v2rayN 等客户端</span>
+                              </div>
+                            </div>
+                            <Button type="primary" size="middle">
+                              获取订阅
+                            </Button>
+                          </div>
+
+                          <div
+                            className="dashboard-action-card"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => navigate('nodes')}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') navigate('nodes');
+                            }}
+                          >
+                            <div className="dashboard-action-info">
+                              <div className="dashboard-action-icon">
+                                <ClusterOutlined />
+                              </div>
+                              <div className="dashboard-action-text">
+                                <strong>节点线路状态</strong>
+                                <span>实时查看可用地区节点与协议详情</span>
+                              </div>
+                            </div>
+                            <Button size="middle">
+                              查看节点
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="customer-stats">
+                          <section className="customer-card quota-card">
+                            <h2>
+                              我的服务 <Tag color={available ? 'green' : 'red'}>{status}</Tag>
+                            </h2>
+                            <h3>{item.planName || '管理员配置的订阅'}</h3>
+                            <p className="quota-expiry">{expiry(item.expiryTime)}</p>
+                            <Progress
+                              aria-label="剩余流量比例"
+                              percent={
+                                item.total > 0
+                                  ? Math.max(
+                                      0,
+                                      Math.min(
                                         100,
-                                    ),
-                                  )
-                                : 100
-                            }
-                            showInfo={false}
-                            strokeColor={depleted ? '#ef6565' : '#2bc66c'}
-                          />
-                          <strong className="quota-summary">
-                            剩余 {item.remaining === null ? '不限量' : bytes(item.remaining)}{' '}
-                            <span>/ 总计 {item.total > 0 ? bytes(item.total) : '不限量'}</span>
-                          </strong>
-                        </section>
-                        <section className="customer-card">
-                          <h2>流量使用</h2>
-                          <dl className="traffic-list">
-                            <div>
-                              <dt>
-                                <ArrowUpOutlined className="up" /> 上行流量
-                              </dt>
-                              <dd>{bytes(item.up || 0)}</dd>
-                            </div>
-                            <div>
-                              <dt>
-                                <ArrowDownOutlined className="down" /> 下行流量
-                              </dt>
-                              <dd>{bytes(item.down || 0)}</dd>
-                            </div>
-                            <div>
-                              <dt>
-                                <span className="total-mark" /> 总计使用
-                              </dt>
-                              <dd>{bytes(item.used)}</dd>
-                            </div>
-                          </dl>
-                        </section>
-                      </div>
+                                        ((item.remaining ?? Math.max(0, item.total - item.used)) /
+                                          item.total) *
+                                          100,
+                                      ),
+                                    )
+                                  : 100
+                              }
+                              showInfo={false}
+                              strokeColor={depleted ? '#ef6565' : '#2bc66c'}
+                            />
+                            <strong className="quota-summary">
+                              剩余 {item.remaining === null ? '不限量' : bytes(item.remaining)}{' '}
+                              <span>/ 总计 {item.total > 0 ? bytes(item.total) : '不限量'}</span>
+                            </strong>
+                          </section>
+                          <section className="customer-card">
+                            <h2>流量使用</h2>
+                            <dl className="traffic-list">
+                              <div>
+                                <dt>
+                                  <ArrowUpOutlined className="up" /> 上行流量
+                                </dt>
+                                <dd>{bytes(item.up || 0)}</dd>
+                              </div>
+                              <div>
+                                <dt>
+                                  <ArrowDownOutlined className="down" /> 下行流量
+                                </dt>
+                                <dd>{bytes(item.down || 0)}</dd>
+                              </div>
+                              <div>
+                                <dt>
+                                  <span className="total-mark" /> 总计使用
+                                </dt>
+                                <dd>{bytes(item.used)}</dd>
+                              </div>
+                            </dl>
+                          </section>
+                        </div>
+                      </>
                     )}
                     {section === 'subscription' && (
-                      <section className="customer-card detail-card">
-                        <h2>
-                          <LinkOutlined /> {item.email}{' '}
-                          <Tag color={available ? 'green' : 'red'}>{status}</Tag>
-                        </h2>
-                        <p className="muted">复制链接后，在兼容客户端中选择“从 URL 导入订阅”。</p>
+                      <section className="customer-card detail-card subscription-design-card">
                         {item.url ? (
-                          <div className="subscription-actions">
-                            <Button
-                              type="primary"
-                              icon={<CopyOutlined />}
-                              onClick={() => void copy(item.url)}
-                            >
-                              复制通用订阅
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                const url = new URL(item.url, window.location.origin);
-                                url.searchParams.set('flag', 'shadowrocket');
-                                void copy(url.toString());
-                              }}
-                            >
-                              复制小火箭订阅
-                            </Button>
-                            {item.clashUrl && (
-                              <Button onClick={() => void copy(item.clashUrl!)}>
-                                复制 Clash / Mihomo 订阅
-                              </Button>
-                            )}
-                            <p>订阅链接包含您的专属访问凭据，请勿分享给他人。</p>
-                          </div>
+                          <SubscriptionDevicePicker url={item.url} clashUrl={item.clashUrl} />
                         ) : (
                           <Alert type="info" title="订阅尚未配置，请联系管理员。" />
                         )}
                       </section>
                     )}
-                    {section === 'profile' && (
-                      <section className="customer-card detail-card">
-                        <h2>账户与服务信息</h2>
-                        <dl className="profile-list">
-                          {[
-                            ['用户标识', item.email],
-                            ['服务状态', status],
-                            ['到期时间', expiry(item.expiryTime)],
-                            ['总流量额度', item.total ? bytes(item.total) : '不限量'],
-                          ].map(([label, value]) => (
-                            <div key={label}>
-                              <dt>{label}</dt>
-                              <dd>{value}</dd>
-                            </div>
-                          ))}
-                        </dl>
-                        <Alert type="info" title="修改密码、调整流量或续期，请联系您的管理员。" />
-                      </section>
-                    )}
+
                   </div>
                 );
               })}
-            {section === 'guide' && (
-              <>
-                <section className="customer-card clients-card">
-                  <h2>
-                    客户端使用指南 <span>选择您的设备</span>
-                  </h2>
-                  <div className="platform-grid">
-                    <button onClick={() => navigate('guide')}>
-                      <span>
-                        <BookOutlined />
-                      </span>
-                      使用教程
-                    </button>
-                    {platforms.map((item) => (
-                      <button key={item.name} onClick={() => setPlatform(item)}>
-                        <span>{item.icon}</span>
-                        {item.name}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-                {section === 'guide' && (
-                  <section className="customer-card detail-card">
-                    <h2>快速开始</h2>
-                    <ol className="customer-guide">
-                      <li>
-                        <h3>准备兼容客户端</h3>
-                        <p>
-                          Windows / macOS 可使用 Clash / Mihomo；iOS 可使用
-                          Shadowrocket（小火箭），在“我的订阅”复制对应链接后导入。
-                        </p>
-                      </li>
-                      <li>
-                        <h3>导入专属订阅</h3>
-                        <p>打开“我的订阅”，复制相应链接，在客户端中选择“从 URL 导入”。</p>
-                      </li>
-                      <li>
-                        <h3>更新并连接</h3>
-                        <p>
-                          更新订阅、选择可用节点并启用连接。如无法连接，请检查流量余量与有效期。
-                        </p>
-                      </li>
-                    </ol>
-                    <Button type="primary" onClick={() => navigate('subscription')}>
-                      打开我的订阅
-                    </Button>
-                  </section>
-                )}
-              </>
-            )}
-            <footer className="customer-footer">
-              <span>BOAN · 泊岸网络</span>
-              <span>您的专属连接空间</span>
-            </footer>
+
           </main>
         </div>
       </div>
-      <Modal
-        title={`${platform?.name || ''} 使用指南`}
-        open={!!platform}
-        onCancel={() => setPlatform(null)}
-        footer={
-          <Button
-            type="primary"
-            onClick={() => {
-              setPlatform(null);
-              navigate('subscription');
-            }}
-          >
-            前往我的订阅
-          </Button>
-        }
-      >
-        <p>1. 安装支持 {platform?.format} 的可信客户端。</p>
-        <p>2. 在“我的订阅”中复制匹配的订阅链接。</p>
-        <p>3. 在客户端选择从 URL 导入，粘贴链接并更新。</p>
-        <p>4. 选择节点并连接。切勿将订阅链接发送给他人。</p>
-      </Modal>
     </ConfigProvider>
   );
 }

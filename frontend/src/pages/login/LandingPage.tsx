@@ -1,4 +1,4 @@
-import { ArrowRightOutlined, GlobalOutlined } from '@ant-design/icons';
+import { ArrowRightOutlined } from '@ant-design/icons';
 import serverImage from '@/assets/portal/server-rack.png';
 import './LoginPage.css';
 
@@ -7,9 +7,7 @@ export default function LandingPage() {
   return (
     <main className="portal-landing">
       <header className="landing-nav">
-        <a className="portal-brand" href={window.X_UI_BASE_PATH || '/'}>
-          <GlobalOutlined /> BOAN <span>泊岸网络</span>
-        </a>
+
         <a className="portal-button small" href={login}>
           登录账户 <ArrowRightOutlined />
         </a>
@@ -32,7 +30,6 @@ export default function LandingPage() {
         </div>
       </section>
       <footer className="landing-footer">
-        <span>BOAN · 泊岸网络</span>
         <a href={login}>
           登录账户 <ArrowRightOutlined />
         </a>

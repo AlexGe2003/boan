@@ -7,6 +7,7 @@ import {
   Input,
   Segmented,
   Space,
+  Spin,
   Table,
   Tag,
   Tooltip,
@@ -16,14 +17,14 @@ import {
 import {
   SearchOutlined,
   ReloadOutlined,
-  AppstoreOutlined,
-  BarsOutlined,
   CopyOutlined,
   GlobalOutlined,
   CheckCircleOutlined,
+  AppstoreOutlined,
+  BarsOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import { HttpUtil } from '@/utils';
+import { ClipboardManager, HttpUtil } from '@/utils';
 import './NodeStatus.css';
 
 interface Node {
@@ -40,18 +41,18 @@ interface RegionInfo {
 
 function parseRegion(nodeName: string): RegionInfo {
   const n = (nodeName || '').toLowerCase();
-  if (n.includes('香港') || n.includes('hk') || n.includes('hong kong') || n.includes('hongkong')) {
+  if (n.includes('香港') || /(^|[^a-z])hk(?=[^a-z]|$)/.test(n) || n.includes('hong kong') || n.includes('hongkong')) {
     return { flag: '🇭🇰', name: '香港' };
   }
-  if (n.includes('日本') || n.includes('jp') || n.includes('japan') || n.includes('tokyo') || n.includes('osaka')) {
+  if (n.includes('日本') || /(^|[^a-z])jp(?=[^a-z]|$)/.test(n) || n.includes('japan') || n.includes('tokyo') || n.includes('osaka')) {
     return { flag: '🇯🇵', name: '日本' };
   }
-  if (n.includes('新加坡') || n.includes('sg') || n.includes('singapore')) {
+  if (n.includes('新加坡') || /(^|[^a-z])sg(?=[^a-z]|$)/.test(n) || n.includes('singapore')) {
     return { flag: '🇸🇬', name: '新加坡' };
   }
   if (
     n.includes('美国') ||
-    n.includes('us') ||
+    /(^|[^a-z])us(?=[^a-z]|$)/.test(n) ||
     n.includes('usa') ||
     n.includes('america') ||
     n.includes('los angeles') ||
@@ -61,31 +62,31 @@ function parseRegion(nodeName: string): RegionInfo {
   ) {
     return { flag: '🇺🇸', name: '美国' };
   }
-  if (n.includes('台湾') || n.includes('tw') || n.includes('taiwan') || n.includes('taipei')) {
+  if (n.includes('台湾') || /(^|[^a-z])tw(?=[^a-z]|$)/.test(n) || n.includes('taiwan') || n.includes('taipei')) {
     return { flag: '🇹🇼', name: '台湾' };
   }
-  if (n.includes('韩国') || n.includes('kr') || n.includes('korea') || n.includes('seoul')) {
+  if (n.includes('韩国') || /(^|[^a-z])kr(?=[^a-z]|$)/.test(n) || n.includes('korea') || n.includes('seoul')) {
     return { flag: '🇰🇷', name: '韩国' };
   }
-  if (n.includes('英国') || n.includes('uk') || n.includes('gb') || n.includes('london')) {
+  if (n.includes('英国') || /(^|[^a-z])uk(?=[^a-z]|$)/.test(n) || /(^|[^a-z])gb(?=[^a-z]|$)/.test(n) || n.includes('london')) {
     return { flag: '🇬🇧', name: '英国' };
   }
-  if (n.includes('德国') || n.includes('de') || n.includes('germany') || n.includes('frankfurt')) {
+  if (n.includes('德国') || /(^|[^a-z])de(?=[^a-z]|$)/.test(n) || n.includes('germany') || n.includes('frankfurt')) {
     return { flag: '🇩🇪', name: '德国' };
   }
-  if (n.includes('加拿大') || n.includes('ca') || n.includes('canada')) {
+  if (n.includes('加拿大') || /(^|[^a-z])ca(?=[^a-z]|$)/.test(n) || n.includes('canada')) {
     return { flag: '🇨🇦', name: '加拿大' };
   }
-  if (n.includes('澳大利亚') || n.includes('au') || n.includes('australia') || n.includes('sydney')) {
+  if (n.includes('澳大利亚') || /(^|[^a-z])au(?=[^a-z]|$)/.test(n) || n.includes('australia') || n.includes('sydney')) {
     return { flag: '🇦🇺', name: '澳大利亚' };
   }
-  if (n.includes('法国') || n.includes('fr') || n.includes('france') || n.includes('paris')) {
+  if (n.includes('法国') || /(^|[^a-z])fr(?=[^a-z]|$)/.test(n) || n.includes('france') || n.includes('paris')) {
     return { flag: '🇫🇷', name: '法国' };
   }
-  if (n.includes('荷兰') || n.includes('nl') || n.includes('netherlands')) {
+  if (n.includes('荷兰') || /(^|[^a-z])nl(?=[^a-z]|$)/.test(n) || n.includes('netherlands')) {
     return { flag: '🇳🇱', name: '荷兰' };
   }
-  return { flag: '🌐', name: '全球网络' };
+  return { flag: '🌐', name: '地区未标注' };
 }
 
 function getProtocolTag(protocol: string) {
@@ -135,7 +136,7 @@ export default function NodeStatus() {
   const filteredNodes = useMemo(() => {
     const list = query.data ?? [];
     if (!search.trim()) return list;
-    const term = search.toLowerCase();
+    const term = search.trim().toLowerCase();
     return list.filter(
       (n) =>
         n.name.toLowerCase().includes(term) ||
@@ -147,15 +148,13 @@ export default function NodeStatus() {
   const stats = useMemo(() => {
     const list = query.data ?? [];
     const total = list.length;
-    const online = list.filter((n) => n.status === '已启用').length;
-    const regions = new Set(list.map((n) => parseRegion(n.name).name)).size;
-    const protocols = new Set(list.map((n) => (n.protocol || '').toLowerCase())).size;
-    return { total, online, regions, protocols };
+    const enabled = list.filter((n) => n.status === '已启用').length;
+    return { total, enabled, disabled: total - enabled };
   }, [query.data]);
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('节点名称已复制');
+  const handleCopy = async (text: string) => {
+    if (await ClipboardManager.copyText(text)) toast.success('节点名称已复制');
+    else toast.error('复制失败，请重试');
   };
 
   return (
@@ -164,11 +163,11 @@ export default function NodeStatus() {
       <div className="node-status-header">
         <div className="node-status-title-group">
           <Typography.Title level={3} className="node-status-title">
-            节点状态
+            我的节点
           </Typography.Title>
-          <Tag color="processing" icon={<CheckCircleOutlined />}>
-            30s 实时同步
-          </Tag>
+          <span className="node-status-updated">
+            {query.dataUpdatedAt > 0 ? `更新于 ${new Date(query.dataUpdatedAt).toLocaleTimeString('zh-CN')}` : '正在获取配置'} · 每 30 秒自动更新
+          </span>
         </div>
         <Space wrap>
           <Button
@@ -182,67 +181,71 @@ export default function NodeStatus() {
       </div>
 
       <div className="node-status-stats">
-        <div className="node-stat-card">
-          <span className="node-stat-label">总接入节点</span>
-          <span className="node-stat-value">
-            {stats.total} <span className="node-stat-unit">个</span>
-          </span>
-        </div>
-        <div className="node-stat-card">
-          <span className="node-stat-label">运行状态</span>
-          <span className="node-stat-value" style={{ color: '#52c41a' }}>
-            {stats.online} <span className="node-stat-unit">可用</span>
-          </span>
-        </div>
-        <div className="node-stat-card">
-          <span className="node-stat-label">覆盖地区</span>
-          <span className="node-stat-value">
-            {stats.regions} <span className="node-stat-unit">个国家/地区</span>
-          </span>
-        </div>
-        <div className="node-stat-card">
-          <span className="node-stat-label">传输协议</span>
-          <span className="node-stat-value">
-            {stats.protocols} <span className="node-stat-unit">种</span>
-          </span>
-        </div>
+        {[
+          ['总接入节点', stats.total],
+          ['已启用配置', stats.enabled],
+          ['未启用配置', stats.disabled],
+        ].map(([label, count]) => (
+          <div className="node-stat-card" key={label}>
+            <span className="node-stat-label">{label}</span>
+            <span className="node-stat-value">
+              {query.data ? count : '—'}<span className="node-stat-unit">个</span>
+            </span>
+          </div>
+        ))}
       </div>
+      <p className="node-status-note">
+        配置状态不代表实际连通性。连接异常时，请先在客户端更新订阅。
+        {query.isError && query.data ? ' 当前刷新失败，展示上次结果。' : ''}
+      </p>
 
-      <Alert
-        type="info"
-        showIcon
-        description="展示管理员分配给您的节点及配置状态，每 30 秒自动更新。若节点已启用但在客户端无法连通，请确保客户端已更新最新订阅，并检查账号有效期及剩余流量额度。"
-      />
-
-      {query.isError && <Alert type="error" title={String(query.error)} showIcon />}
+      {query.isError && (
+        <Alert
+          type="error"
+          title="节点状态更新失败"
+          description="请检查网络后重试。"
+          action={<Button onClick={() => void query.refetch()}>重试</Button>}
+          showIcon
+        />
+      )}
 
       <div className="node-status-toolbar">
         <Input
           prefix={<SearchOutlined style={{ color: 'var(--ant-color-text-tertiary)' }} />}
+          aria-label="搜索节点"
           placeholder="搜索节点名称、地区或协议 (如 香港, VLESS)..."
           allowClear
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{ maxWidth: 360 }}
         />
-        <Segmented
-          value={viewMode}
-          onChange={(v) => setViewMode(v as 'grid' | 'table')}
-          options={[
-            { value: 'grid', icon: <AppstoreOutlined />, label: '卡片视图' },
-            { value: 'table', icon: <BarsOutlined />, label: '列表视图' },
-          ]}
-        />
+        <div className="node-status-actions">
+          <span className="node-status-count">
+            {query.data ? `${filteredNodes.length} / ${stats.total} 个节点` : ''}
+          </span>
+          <Segmented
+            value={viewMode}
+            onChange={(v) => setViewMode(v as 'grid' | 'table')}
+            options={[
+              { value: 'grid', icon: <AppstoreOutlined />, label: '卡片视图' },
+              { value: 'table', icon: <BarsOutlined />, label: '列表视图' },
+            ]}
+          />
+        </div>
       </div>
 
-      {viewMode === 'grid' ? (
+      {query.isLoading ? (
+        <div style={{ padding: 48, textAlign: 'center' }}>
+          <Spin description="正在获取节点…" />
+        </div>
+      ) : query.isError && !query.data ? null : viewMode === 'grid' ? (
         filteredNodes.length === 0 ? (
-          <Empty description={search ? '未找到匹配的节点' : '暂无节点，请等待管理员分配套餐'} />
+          <Empty description={search.trim() ? '没有符合筛选条件的节点' : '尚未分配节点，请联系管理员'} />
         ) : (
           <div className="node-status-grid">
             {filteredNodes.map((item) => {
               const reg = parseRegion(item.name);
-              const isOnline = item.status === '已启用';
+              const isEnabled = item.status === '已启用';
               return (
                 <div className="node-card-item" key={item.id}>
                   <div className="node-card-top">
@@ -253,28 +256,27 @@ export default function NodeStatus() {
                     {getProtocolTag(item.protocol)}
                   </div>
                   <div className="node-card-name" title={item.name}>
-                    <ThunderboltOutlined style={{ color: 'var(--ant-color-primary)' }} />
-                    <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {item.name}
-                    </span>
+                    <ThunderboltOutlined style={{ color: 'var(--ant-color-primary, #1e5eff)' }} />
+                    <span className="node-card-name-text">{item.name}</span>
                     <Tooltip title="复制节点名称">
                       <Button
                         type="text"
                         size="small"
+                        aria-label="复制节点名称"
                         icon={<CopyOutlined />}
-                        onClick={() => handleCopy(item.name)}
+                        onClick={() => void handleCopy(item.name)}
                       />
                     </Tooltip>
                   </div>
                   <div className="node-card-bottom">
-                    <div style={{ display: 'flex', alignItems: 'center', fontSize: 13 }}>
-                      <span className={`node-pulse-dot ${isOnline ? 'online' : 'offline'}`} />
-                      <span style={{ color: isOnline ? '#52c41a' : 'var(--ant-color-text-secondary)' }}>
-                        {isOnline ? '正常在线' : item.status || '未启用'}
+                    <div className="node-card-status">
+                      <span className={`node-pulse-dot ${isEnabled ? 'online' : 'offline'}`} />
+                      <span style={{ color: isEnabled ? '#52c41a' : 'var(--ant-color-text-secondary)' }}>
+                        {isEnabled ? '已启用' : item.status || '未启用'}
                       </span>
                     </div>
-                    <Tag bordered={false} style={{ margin: 0, fontSize: 11, color: 'var(--ant-color-text-tertiary)' }}>
-                      ID #{item.id}
+                    <Tag variant="filled" style={{ margin: 0, fontSize: 11, color: 'var(--ant-color-text-tertiary)' }}>
+                      #{item.id}
                     </Tag>
                   </div>
                 </div>
@@ -284,10 +286,14 @@ export default function NodeStatus() {
         )
       ) : (
         <Table<Node>
+          className="node-status-table"
+          size="middle"
+          scroll={{ x: 580 }}
+          pagination={{ hideOnSinglePage: true, pageSize: 20, showSizeChanger: false }}
           rowKey="id"
           dataSource={filteredNodes}
           loading={query.isLoading}
-          locale={{ emptyText: search ? '未找到匹配的节点' : '暂无节点，请等待管理员分配套餐' }}
+          locale={{ emptyText: search.trim() ? '没有符合筛选条件的节点' : '尚未分配节点，请联系管理员' }}
           columns={[
             {
               title: '地区 / 节点',
@@ -295,43 +301,46 @@ export default function NodeStatus() {
               render: (name: string) => {
                 const reg = parseRegion(name);
                 return (
-                  <Space orientation="vertical" size={2}>
-                    <Space>
-                      <span style={{ fontSize: 18, lineHeight: 1 }}>{reg.flag}</span>
+                  <div className="node-list-name">
+                    <span className="node-list-flag">{reg.flag}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                       <Typography.Text strong>{name}</Typography.Text>
-                      <Tooltip title="复制节点名称">
-                        <Button
-                          type="text"
-                          size="small"
-                          icon={<CopyOutlined />}
-                          onClick={() => handleCopy(name)}
-                        />
-                      </Tooltip>
-                    </Space>
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {reg.name} 节点
-                    </Typography.Text>
-                  </Space>
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        {reg.name} 节点
+                      </Typography.Text>
+                    </div>
+                    <Tooltip title="复制节点名称">
+                      <Button
+                        type="text"
+                        size="small"
+                        aria-label="复制节点名称"
+                        icon={<CopyOutlined />}
+                        onClick={() => void handleCopy(name)}
+                      />
+                    </Tooltip>
+                  </div>
                 );
               },
             },
             {
               title: '传输协议',
+              width: 140,
               dataIndex: 'protocol',
               render: (protocol: string) => getProtocolTag(protocol),
             },
             {
               title: '节点状态',
+              width: 140,
               dataIndex: 'status',
               render: (v: string) => {
-                const isOnline = v === '已启用';
+                const isEnabled = v === '已启用';
                 return (
                   <Tag
-                    color={isOnline ? 'success' : 'default'}
-                    icon={isOnline ? <CheckCircleOutlined /> : <GlobalOutlined />}
+                    color={isEnabled ? 'success' : 'default'}
+                    icon={isEnabled ? <CheckCircleOutlined /> : <GlobalOutlined />}
                     style={{ borderRadius: 6 }}
                   >
-                    {isOnline ? '正常在线' : v || '未启用'}
+                    {isEnabled ? '已启用' : v || '未启用'}
                   </Tag>
                 );
               },

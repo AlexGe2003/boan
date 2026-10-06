@@ -8,11 +8,8 @@ import { readyI18n } from '@/i18n/react';
 import { ThemeProvider } from '@/hooks/useTheme';
 import { QueryProvider } from '@/api/QueryProvider';
 import LoginPage from '@/pages/login/LoginPage';
-import LandingPage from '@/pages/login/LandingPage';
 
-document.title = window.location.pathname.endsWith('/login')
-  ? '登录'
-  : '首页';
+document.title = '登录';
 setupHttp();
 CookieManager.setCookie('lang', 'zh-CN', 365);
 
@@ -27,12 +24,7 @@ readyI18n().then(() => {
     createRoot(root).render(
       <ThemeProvider>
         <QueryProvider>
-          {window.location.pathname.replace(/\/$/, '').endsWith('/login') ||
-          window.location.pathname.endsWith('/login.html') ? (
-            <LoginPage />
-          ) : (
-            <LandingPage />
-          )}
+          <LoginPage />
         </QueryProvider>
       </ThemeProvider>,
     );

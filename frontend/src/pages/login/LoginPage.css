@@ -221,49 +221,69 @@
 }
 .login-card {
   width: 100%;
-  max-width: 360px;
+  max-width: 380px;
   margin: auto;
-  padding: 32px 0;
+  padding: 36px 32px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
 }
 .login-card h1 {
-  font-size: 28px;
+  font-size: 26px;
   line-height: 1.3;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-weight: 700;
   color: #f1f4fa;
   letter-spacing: -0.5px;
 }
 .login-subtitle {
-  color: #949db1;
-  font-size: 15px;
-  margin: 0 0 32px;
+  color: #8c96ab;
+  font-size: 14px;
+  margin: 0 0 28px;
   line-height: 1.5;
 }
 .login-form .ant-form-item {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 .login-form .ant-input-affix-wrapper {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   font-size: 15px;
   padding: 10px 14px;
   transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 .login-form .ant-input-affix-wrapper:hover {
-  border-color: rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.07);
 }
 .login-form .ant-input-affix-wrapper-focused,
 .login-form .ant-input-affix-wrapper:focus-within {
   border-color: #1e5eff !important;
   box-shadow: 0 0 0 3px rgba(30, 94, 255, 0.25) !important;
-  background: rgba(255, 255, 255, 0.09) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 .login-form .ant-input-prefix {
   color: #8c97ad;
   margin-right: 12px;
   font-size: 16px;
+}
+.login-form .submit-row .ant-btn-primary {
+  height: 46px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1e5eff 0%, #387aff 100%);
+  box-shadow: 0 4px 14px rgba(30, 94, 255, 0.3);
+  border: 0;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+.login-form .submit-row .ant-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #336eff 0%, #4f8aff 100%) !important;
+  box-shadow: 0 6px 20px rgba(30, 94, 255, 0.42);
+  transform: translateY(-1px);
 }
 .login-help {
   font-size: 13px;

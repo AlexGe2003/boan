@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate, type RouteObject } from 'react-router';
 import { Spin } from 'antd';
 
 import PanelLayout from '@/layouts/PanelLayout';
+import RouteError from '@/components/RouteError';
 
 const IndexPage = lazy(() => import('@/pages/index/IndexPage'));
 const InboundsPage = lazy(() => import('@/pages/inbounds/InboundsPage'));
@@ -45,6 +46,7 @@ const routes: RouteObject[] = [
   {
     path: '/',
     element: <PanelLayout />,
+    errorElement: <RouteError />,
     children: [
       { index: true, element: withSuspense(<IndexPage />) },
       { path: 'inbounds', element: withSuspense(<InboundsPage />) },

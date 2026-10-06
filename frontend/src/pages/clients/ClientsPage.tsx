@@ -95,8 +95,6 @@ import { emptyFilters, activeFilterCount } from './filters';
 import type { ClientFilters } from './filters';
 import './ClientsPage.css';
 import ClientAccountModal from './ClientAccountModal';
-import SubscriberModal from '@/pages/plans/SubscriberModal';
-import { usePlanAssignments } from '@/pages/plans/api';
 import { usePanelRole } from '@/api/queries/usePanelRole';
 
 const FILTER_STATE_KEY = 'clientsFilterState';
@@ -321,7 +319,6 @@ function sortValueFor(column: string | null, order: 'ascend' | 'descend' | null)
 
 export default function ClientsPage() {
   const panelRole = usePanelRole();
-  const planAssignments = usePlanAssignments(panelRole === 'admin');
   const [accountEmail, setAccountEmail] = useState<string | null>(null);
   const { t } = useTranslation();
   const { isDark, isUltra, antdThemeConfig } = useTheme();
@@ -668,13 +665,8 @@ export default function ClientsPage() {
 
   const [clientImportOpen, setClientImportOpen] = useState(false);
   const [exportingClients, setExportingClients] = useState(false);
-  const [subscriberMode, setSubscriberMode] = useState<'create' | 'assign' | null>(null);
 
   function onAdd() {
-    if (panelRole === 'admin') {
-      setSubscriberMode('create');
-      return;
-    }
     setFormMode('add');
     setEditingClient(null);
     setEditingAttachedIds([]);
@@ -1072,13 +1064,6 @@ export default function ClientsPage() {
         ),
       },
       {
-        title: '订阅套餐',
-        key: 'subscriptionPlan',
-        width: 160,
-        hidden: panelRole !== 'admin',
-        render: (_v, record) => planAssignments.data?.[record.email] || '未分配套餐',
-      },
-      {
         title: t('pages.clients.group'),
         key: 'group',
         width: 130,
@@ -1171,7 +1156,6 @@ export default function ClientsPage() {
     [
       t,
       panelRole,
-      planAssignments.data,
       togglingEmail,
       clientBucket,
       isOnline,
@@ -1376,9 +1360,6 @@ export default function ClientsPage() {
                             >
                               {t('pages.clients.selectedCount', { count: selectedRowKeys.length })}
                             </Tag>
-                          )}
-                          {panelRole === 'admin' && selectedRowKeys.length > 0 && (
-                            <Button onClick={() => setSubscriberMode('assign')}>分配套餐</Button>
                           )}
                           <Dropdown
                             trigger={['click']}
@@ -1869,16 +1850,6 @@ export default function ClientsPage() {
           </Layout.Content>
         </Layout>
 
-        {subscriberMode && (
-          <SubscriberModal
-            emails={subscriberMode === 'assign' ? selectedRowKeys : undefined}
-            onClose={() => setSubscriberMode(null)}
-            onSaved={() => {
-              void refresh();
-              void planAssignments.refetch();
-            }}
-          />
-        )}
         <LazyMount when={clientImportOpen}>
           {clientImportOpen && (
             <ClientImportModal
