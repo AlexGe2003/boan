@@ -73,7 +73,9 @@ func (a *ClientController) clientAccount(c *gin.Context) {
 			user.Password = hashed
 		}
 		user.Username = form.Username
-		user.Role = model.RoleCustomer
+		if !user.IsAdmin() {
+			user.Role = model.RoleCustomer
+		}
 		user.ClientID = &client.Id
 		user.LoginEpoch++
 		return tx.Save(&user).Error

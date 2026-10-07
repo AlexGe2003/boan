@@ -35,9 +35,19 @@ export const ActivityDestinationSchema = z.object({
 });
 export type ActivityDestination = z.infer<typeof ActivityDestinationSchema>;
 
+export const ActivitySourceSchema = z.object({
+  connections: z.number().int(),
+  name: z.string(),
+  nodeId: z.number().int(),
+  sampled: z.boolean(),
+  status: z.string(),
+});
+export type ActivitySource = z.infer<typeof ActivitySourceSchema>;
+
 export const ActivityVisitSchema = z.object({
   category: z.string(),
   host: z.string(),
+  nodeName: z.string().optional(),
   time: z.number().int(),
 });
 export type ActivityVisit = z.infer<typeof ActivityVisitSchema>;
@@ -191,6 +201,7 @@ export const AllSettingSchema = z.object({
   webListen: z.string(),
   webPort: z.number().int().min(1).max(65535),
   websiteGeoBlockEnable: z.boolean(),
+  websiteGeoBlockRegions: z.string(),
 });
 export type AllSetting = z.infer<typeof AllSettingSchema>;
 
@@ -351,6 +362,7 @@ export const AllSettingViewSchema = z.object({
   webListen: z.string(),
   webPort: z.number().int().min(1).max(65535),
   websiteGeoBlockEnable: z.boolean(),
+  websiteGeoBlockRegions: z.string(),
 });
 export type AllSettingView = z.infer<typeof AllSettingViewSchema>;
 
@@ -427,7 +439,9 @@ export const ClientActivitySchema = z.object({
   recent: z.array(z.lazy(() => ActivityVisitSchema)),
   sampled: z.boolean(),
   since: z.number().int(),
+  sources: z.array(z.lazy(() => ActivitySourceSchema)).optional(),
   status: z.string(),
+  usage: z.lazy(() => DestinationUsageSchema).nullable().optional(),
   visits: z.array(z.lazy(() => ActivityVisitSchema)),
 });
 export type ClientActivity = z.infer<typeof ClientActivitySchema>;
@@ -502,6 +516,7 @@ export const ClientSlimSchema = z.object({
   inboundIds: z.array(z.number().int()),
   limitHwid: z.number().int(),
   limitIp: z.number().int(),
+  loginUsername: z.string().optional(),
   reset: z.number().int(),
   resetDay: z.number().int(),
   resetMax: z.number().int(),
@@ -521,6 +536,9 @@ export const ClientTrafficSchema = z.object({
   inboundId: z.number().int(),
   lastOnline: z.number().int(),
   lastSubFetch: z.number().int(),
+  rawDown: z.number().int(),
+  rawKnown: z.boolean(),
+  rawUp: z.number().int(),
   reset: z.number().int(),
   resetCount: z.number().int(),
   resetDay: z.number().int(),
@@ -545,6 +563,27 @@ export const ClientsSummarySchema = z.object({
   total: z.number().int(),
 });
 export type ClientsSummary = z.infer<typeof ClientsSummarySchema>;
+
+export const DestinationUsageSchema = z.object({
+  down: z.number().int(),
+  overflow: z.boolean(),
+  partial: z.boolean(),
+  rows: z.array(z.lazy(() => DestinationUsageRowSchema)),
+  since: z.number().int(),
+  status: z.string(),
+  up: z.number().int(),
+  updatedAt: z.number().int(),
+});
+export type DestinationUsage = z.infer<typeof DestinationUsageSchema>;
+
+export const DestinationUsageRowSchema = z.object({
+  category: z.string(),
+  down: z.number().int(),
+  host: z.string(),
+  lastSeen: z.number().int(),
+  up: z.number().int(),
+});
+export type DestinationUsageRow = z.infer<typeof DestinationUsageRowSchema>;
 
 export const FallbackParentInfoSchema = z.object({
   masterId: z.number().int(),

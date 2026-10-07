@@ -135,7 +135,8 @@
     "pinSidebar": "固定側邊欄",
     "unpinSidebar": "取消固定側邊欄",
     "subFormats": "Sub Formats",
-    "mySubscriptions": "My subscriptions"
+    "mySubscriptions": "My subscriptions",
+    "nodePlans": "節點套餐"
   },
   "pages": {
     "login": {
@@ -1523,6 +1524,10 @@
       "calendarJalalian": "Jalalian (شمسی)",
       "ipLimitAllowlist": "IP 限制白名單",
       "ipLimitAllowlistDesc": "IP 限制永遠不會計入也不會封鎖的位址與網段，避免辦公室或校園的共用位址耗盡客戶端的額度。IP/CIDR(逗號分隔)。",
+      "allowMainlandAccess": "允許中國大陸存取",
+      "allowMainlandAccessDesc": "控制大陸 IP 能否開啟管理員及使用者網站，儲存後立即生效。關閉後，大陸網路將無法存取這些頁面；訂閱與節點連線不受影響。",
+      "regionAllowed": "允許",
+      "regionBlocked": "禁止",
       "websiteGeoBlockEnable": "依地區封鎖網站訪客",
       "websiteGeoBlockEnableDesc": "阻止所設定地區的來源 IP 存取管理員和使用者網站，回傳 403。預設地區：中國大陸、香港、澳門和台灣。可透過 x-ui entry 設定地區和可信代理；依本機 geoip.dat 判斷，訂閱 URL 與節點連線保持可用。",
       "subBalancers": {
@@ -1700,7 +1705,17 @@
       "discordNotifyTimeDesc": "Discord 機器人傳送週期性報告的頻率。選擇預設間隔，或選擇「自訂」以輸入 crontab 運算式。",
       "discordNotifyBackup": "資料庫備份",
       "discordNotifyBackupDesc": "傳送帶有報告的資料庫備份檔案",
-      "discordEventBusNotifyDesc": "選擇觸發 Discord 通知的事件"
+      "discordEventBusNotifyDesc": "選擇觸發 Discord 通知的事件",
+      "allowedWebsiteRegions": "允許存取的地區",
+      "allowedWebsiteRegionsDesc": "選擇允許開啟管理員和使用者網站的地區，未選地區將被禁止存取。全選允許這四個地區，清空則全部禁止；儲存後立即生效。訂閱和節點連線不受影響，其他地區保留原有規則。",
+      "noWebsiteRegionsAllowed": "這四個地區均禁止存取",
+      "selectAllWebsiteRegions": "全選",
+      "websiteRegions": {
+        "CN": "中國大陸",
+        "HK": "香港",
+        "TW": "台灣",
+        "MO": "澳門"
+      }
     },
     "xray": {
       "save": "儲存",
@@ -2659,6 +2674,29 @@
     "operations": "服务管理",
     "infrastructure": "节点与网络",
     "system": "系统配置",
-    "runtime": "系统运行"
+    "runtime": "系统运行",
+    "advancedNetwork": "進階網路"
+  },
+  "networkGuide": {
+    "nodes": {
+      "title": "節點管理",
+      "hint": "新增和管理伺服器節點，查看連線狀態並設定節點參數。"
+    },
+    "inbounds": {
+      "title": "入站管理",
+      "hint": "設定用戶端連線使用的協定與連接埠，並將節點加入套餐供使用者使用。"
+    },
+    "hosts": {
+      "title": "訂閱節點顯示",
+      "hint": "設定訂閱中顯示的節點名稱、位址與連線參數。"
+    },
+    "outbound": {
+      "title": "出站管理",
+      "hint": "設定流量離開伺服器時使用的連線方式，可透過路由規則選擇對應出站。"
+    },
+    "routing": {
+      "title": "路由規則",
+      "hint": "按網域、IP 或協定匹配流量，指定直連、代理或封鎖；規則按順序匹配。"
+    }
   }
 }

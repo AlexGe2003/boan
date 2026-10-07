@@ -168,7 +168,8 @@
     "openMenu": "打开菜单",
     "pinSidebar": "固定侧边栏",
     "unpinSidebar": "取消固定侧边栏",
-    "subFormats": "订阅格式"
+    "subFormats": "订阅格式",
+    "nodePlans": "节点套餐"
   },
   "subscriptions": {},
   "pages": {
@@ -1557,6 +1558,10 @@
       "calendarJalalian": "Jalalian (شمسی)",
       "ipLimitAllowlist": "IP 限制白名单",
       "ipLimitAllowlistDesc": "IP 限制永远不会计入也不会封禁的地址和网段，避免办公室或校园的共享地址耗尽客户端的限额。IP/CIDR(逗号分隔)。",
+      "allowMainlandAccess": "允许中国大陆访问",
+      "allowMainlandAccessDesc": "控制大陆 IP 能否打开管理员和用户网站，保存后立即生效。关闭后，大陆网络将无法访问这些页面；订阅和节点连接不受影响。",
+      "regionAllowed": "允许",
+      "regionBlocked": "禁止",
       "websiteGeoBlockEnable": "屏蔽指定地区的网站访客",
       "websiteGeoBlockEnableDesc": "阻止所配置地区的来源 IP 访问管理员和用户网站，返回 403。默认地区：中国大陆、香港、澳门和台湾。可通过 x-ui entry 配置地区和可信代理；依据本机 geoip.dat 判断，订阅 URL 与节点连接保持可用。",
       "subBalancers": {
@@ -1734,7 +1739,17 @@
       "discordNotifyTimeDesc": "Discord 机器人发送周期性报告的频率。选择预设间隔，或选择“自定义”以输入 crontab 表达式。",
       "discordNotifyBackup": "数据库备份",
       "discordNotifyBackupDesc": "发送带有报告的数据库备份文件",
-      "discordEventBusNotifyDesc": "选择触发 Discord 通知的事件"
+      "discordEventBusNotifyDesc": "选择触发 Discord 通知的事件",
+      "allowedWebsiteRegions": "允许访问的地区",
+      "allowedWebsiteRegionsDesc": "选择允许打开管理员和用户网站的地区，未选地区将被禁止访问。全选允许这四个地区，清空则全部禁止；保存后立即生效。订阅和节点连接不受影响，其他地区保持原有规则。",
+      "noWebsiteRegionsAllowed": "这四个地区均禁止访问",
+      "selectAllWebsiteRegions": "全选",
+      "websiteRegions": {
+        "CN": "中国大陆",
+        "HK": "香港",
+        "TW": "台湾",
+        "MO": "澳门"
+      }
     },
     "xray": {
       "importRules": "导入规则",
@@ -2659,6 +2674,29 @@
     "operations": "服务管理",
     "infrastructure": "节点与网络",
     "system": "系统配置",
-    "runtime": "系统运行"
+    "runtime": "系统运行",
+    "advancedNetwork": "高级网络"
+  },
+  "networkGuide": {
+    "nodes": {
+      "title": "节点管理",
+      "hint": "添加和管理服务器节点，查看连接状态并配置节点参数。"
+    },
+    "inbounds": {
+      "title": "入站管理",
+      "hint": "配置客户端连接使用的协议与端口，并将节点加入套餐供用户使用。"
+    },
+    "hosts": {
+      "title": "订阅节点展示",
+      "hint": "配置订阅中显示的节点名称、地址与连接参数。"
+    },
+    "outbound": {
+      "title": "出站管理",
+      "hint": "配置流量离开服务器时使用的连接方式，可通过路由规则选择对应出站。"
+    },
+    "routing": {
+      "title": "路由规则",
+      "hint": "按域名、IP 或协议匹配流量，指定直连、代理或阻断；规则按顺序匹配。"
+    }
   }
 }

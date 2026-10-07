@@ -10,9 +10,9 @@ export function subscriptionAddress(client: SubscriptionClient, rawUrl: string, 
 export function subscriptionImportLink(client: SubscriptionClient, address: string) {
   if (client === 'shadowrocket') {
     const encoded = btoa(String.fromCharCode(...new TextEncoder().encode(address)));
-    return `shadowrocket://add/sub://${encoded}?remark=${encodeURIComponent('我的订阅')}`;
+    return `shadowrocket://add/sub://${encoded}?remark=${encodeURIComponent('status.huckge.com')}`;
   }
-  if (client === 'v2rayng') return `v2rayng://install-config?url=${encodeURIComponent(address)}&name=${encodeURIComponent('我的订阅')}`;
+  if (client === 'v2rayng') return `v2rayng://install-config?url=${encodeURIComponent(address)}&name=${encodeURIComponent('status.huckge.com')}`;
   if (client === 'clash-verge') return `clash://install-config?url=${encodeURIComponent(address)}`;
   if (client === 'clash-mi') return `clashmi://install-config?url=${encodeURIComponent(address)}`;
   return null;

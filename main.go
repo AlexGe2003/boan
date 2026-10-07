@@ -90,6 +90,9 @@ func runWebServer() {
 	}
 
 	_ = godotenv.Load()
+	if _, err := config.LocalTrafficRate(); err != nil {
+		log.Fatalf("Invalid traffic accounting configuration: %v", err)
+	}
 
 	for _, line := range sys.ApplyMemoryTuning() {
 		logger.Info(line)

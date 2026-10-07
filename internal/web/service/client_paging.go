@@ -18,22 +18,23 @@ import (
 // so the list payload stays compact even when the panel manages thousands
 // of clients. Modals that need the full record still call /get/:email.
 type ClientSlim struct {
-	Email      string              `json:"email" example:"alice@example.com"`
-	SubID      string              `json:"subId" example:"abcd1234"`
-	Enable     bool                `json:"enable" example:"true"`
-	TotalGB    int64               `json:"totalGB" example:"53687091200"`
-	ExpiryTime int64               `json:"expiryTime" example:"1735689600000"`
-	LimitIP    int                 `json:"limitIp" example:"0"`
-	LimitHwid  int                 `json:"limitHwid" example:"0"`
-	Reset      int                 `json:"reset" example:"0"`
-	ResetDay   int                 `json:"resetDay" example:"0"`
-	ResetMax   int                 `json:"resetMax" example:"0"`
-	Group      string              `json:"group,omitempty" example:"staff"`
-	Comment    string              `json:"comment,omitempty" example:"Primary device"`
-	InboundIds []int               `json:"inboundIds" example:"[3,5]"`
-	Traffic    *xray.ClientTraffic `json:"traffic,omitempty"`
-	CreatedAt  int64               `json:"createdAt" example:"1735000000000"`
-	UpdatedAt  int64               `json:"updatedAt" example:"1735100000000"`
+	LoginUsername string              `json:"loginUsername,omitempty"`
+	Email         string              `json:"email" example:"alice@example.com"`
+	SubID         string              `json:"subId" example:"abcd1234"`
+	Enable        bool                `json:"enable" example:"true"`
+	TotalGB       int64               `json:"totalGB" example:"53687091200"`
+	ExpiryTime    int64               `json:"expiryTime" example:"1735689600000"`
+	LimitIP       int                 `json:"limitIp" example:"0"`
+	LimitHwid     int                 `json:"limitHwid" example:"0"`
+	Reset         int                 `json:"reset" example:"0"`
+	ResetDay      int                 `json:"resetDay" example:"0"`
+	ResetMax      int                 `json:"resetMax" example:"0"`
+	Group         string              `json:"group,omitempty" example:"staff"`
+	Comment       string              `json:"comment,omitempty" example:"Primary device"`
+	InboundIds    []int               `json:"inboundIds" example:"[3,5]"`
+	Traffic       *xray.ClientTraffic `json:"traffic,omitempty"`
+	CreatedAt     int64               `json:"createdAt" example:"1735000000000"`
+	UpdatedAt     int64               `json:"updatedAt" example:"1735100000000"`
 }
 
 // ClientPageParams are the query params accepted by /panel/api/clients/list/paged.
@@ -44,14 +45,15 @@ type ClientSlim struct {
 // fields treat 0 as "unset" on the lower bound and 0 (or negative) as
 // "unbounded" on the upper bound.
 type ClientPageParams struct {
-	Page     int    `form:"page"`
-	PageSize int    `form:"pageSize"`
-	Search   string `form:"search"`
-	Filter   string `form:"filter"`
-	Protocol string `form:"protocol"`
-	Inbound  string `form:"inbound"`
-	Sort     string `form:"sort"`
-	Order    string `form:"order"`
+	AccountScope string `form:"accountScope"`
+	Page         int    `form:"page"`
+	PageSize     int    `form:"pageSize"`
+	Search       string `form:"search"`
+	Filter       string `form:"filter"`
+	Protocol     string `form:"protocol"`
+	Inbound      string `form:"inbound"`
+	Sort         string `form:"sort"`
+	Order        string `form:"order"`
 
 	ExpiryFrom int64  `form:"expiryFrom"`
 	ExpiryTo   int64  `form:"expiryTo"`
@@ -117,6 +119,7 @@ const (
 )
 
 const clientSearchCond = `(LOWER(c.email) LIKE ? ESCAPE '\'
+	OR EXISTS (SELECT 1 FROM users u WHERE u.client_id = c.id AND LOWER(u.username) LIKE ? ESCAPE '\')
 	OR LOWER(COALESCE(c.sub_id, '')) LIKE ? ESCAPE '\'
 	OR LOWER(COALESCE(c.comment, '')) LIKE ? ESCAPE '\'
 	OR LOWER(COALESCE(c.uuid, '')) LIKE ? ESCAPE '\'
@@ -137,6 +140,7 @@ type clientQuery struct {
 	nowMs            int64
 	expireDiffMs     int64
 	trafficDiffBytes int64
+	accountScope     string
 	ownerUserID      int
 }
 
@@ -182,7 +186,19 @@ func (q clientQuery) from() *gorm.DB {
 	if q.ownerUserID > 0 {
 		tx = tx.Where(`EXISTS (SELECT 1 FROM client_inbounds ci JOIN inbounds ib ON ib.id = ci.inbound_id WHERE ci.client_id = c.id AND ib.user_id = ?)`, q.ownerUserID)
 	}
-	return tx
+	return applyAccountScope(tx, q.accountScope, "c.id")
+}
+
+func applyAccountScope(tx *gorm.DB, scope, idColumn string) *gorm.DB {
+	predicate := "EXISTS (SELECT 1 FROM users u WHERE u.client_id = " + idColumn + ")"
+	switch scope {
+	case "accounts":
+		return tx.Where(predicate)
+	case "unlinked":
+		return tx.Where("NOT " + predicate)
+	default:
+		return tx
+	}
 }
 
 func (q clientQuery) depletedExpr() string {
@@ -222,7 +238,7 @@ func (q clientQuery) applyParams(tx *gorm.DB, params ClientPageParams, onlines [
 
 	if needle := strings.ToLower(strings.TrimSpace(params.Search)); needle != "" {
 		pattern := "%" + escapeLikeLiteral(needle) + "%"
-		where(clientSearchCond, pattern, pattern, pattern, pattern, pattern, pattern, pattern)
+		where(clientSearchCond, pattern, pattern, pattern, pattern, pattern, pattern, pattern, pattern)
 	}
 	if protocols := parseCSVStrings(params.Protocol); len(protocols) > 0 {
 		where("EXISTS (SELECT 1 FROM client_inbounds ci JOIN inbounds ib ON ib.id = ci.inbound_id"+
@@ -369,9 +385,10 @@ func (s *ClientService) ListPaged(inboundSvc *InboundService, settingSvc *Settin
 	onlines := inboundSvc.GetOnlineClients()
 	q := newClientQuery(db, time.Now().UnixMilli(), expireDiffMs, trafficDiffBytes)
 	q.ownerUserID = params.OwnerUserID
+	q.accountScope = params.AccountScope
 
 	var total int64
-	countQ := db.Model(&model.ClientRecord{})
+	countQ := applyAccountScope(db.Model(&model.ClientRecord{}), params.AccountScope, "clients.id")
 	if params.OwnerUserID > 0 {
 		countQ = countQ.Where(`EXISTS (SELECT 1 FROM client_inbounds ci JOIN inbounds ib ON ib.id = ci.inbound_id WHERE ci.client_id = clients.id AND ib.user_id = ?)`, params.OwnerUserID)
 	}
@@ -466,17 +483,29 @@ func (q clientQuery) pageRows(params ClientPageParams, onlines []string, offset,
 		}
 	}
 
+	var accounts []model.User
+	if err := q.db.Select("username", "client_id").Where("client_id IN ?", ids).Find(&accounts).Error; err != nil {
+		return nil, err
+	}
+	logins := make(map[int]string, len(accounts))
+	for _, account := range accounts {
+		if account.ClientID != nil {
+			logins[*account.ClientID] = account.Username
+		}
+	}
 	items := make([]ClientSlim, 0, len(ids))
 	for _, id := range ids {
 		rec := byId[id]
 		if rec == nil {
 			continue
 		}
-		items = append(items, toClientSlim(ClientWithAttachments{
+		item := toClientSlim(ClientWithAttachments{
 			ClientRecord: *rec,
 			InboundIds:   attachments[rec.Id],
 			Traffic:      trafficByEmail[rec.Email],
-		}))
+		})
+		item.LoginUsername = logins[id]
+		items = append(items, item)
 	}
 	return items, nil
 }
@@ -554,10 +583,10 @@ func (q clientQuery) onlineEmails(onlines []string) ([]string, int, error) {
 	count := 0
 	for _, batch := range chunkStrings(onlines, sqlInChunk) {
 		var page []string
-		if err := q.db.Model(&model.ClientRecord{}).
-			Where("COALESCE(enable, FALSE) = TRUE AND email IN ?", batch).
-			Order("id ASC").
-			Pluck("email", &page).Error; err != nil {
+		if err := q.from().
+			Where("COALESCE(c.enable, FALSE) = TRUE AND c.email IN ?", batch).
+			Order("c.id ASC").
+			Pluck("c.email", &page).Error; err != nil {
 			return nil, 0, err
 		}
 		count += len(page)

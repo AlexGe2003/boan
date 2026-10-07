@@ -120,7 +120,7 @@ func (a *ClientController) mySubscriptions(c *gin.Context) {
 	user := session.GetLoginUser(c)
 	var rows []service.ClientWithAttachments
 	var err error
-	if user != nil && user.Role == model.RoleCustomer {
+	if user != nil && (user.Role == model.RoleCustomer || (user.ClientID != nil && *user.ClientID > 0)) {
 		id := 0
 		if user.ClientID != nil {
 			id = *user.ClientID
@@ -215,8 +215,12 @@ func (a *ClientController) mySubscriptions(c *gin.Context) {
 			item.Up = row.Traffic.Up
 			item.Down = row.Traffic.Down
 			item.Used = row.Traffic.Up + row.Traffic.Down
-			item.Total = row.Traffic.Total
-			item.ExpiryTime = row.Traffic.ExpiryTime
+			if row.Traffic.Total != 0 {
+				item.Total = row.Traffic.Total
+			}
+			if row.Traffic.ExpiryTime != 0 {
+				item.ExpiryTime = row.Traffic.ExpiryTime
+			}
 			item.Enabled = row.Enable && row.Traffic.Enable
 			if item.Total > 0 {
 				remaining := max(0, item.Total-item.Used)

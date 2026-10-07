@@ -945,3 +945,13 @@ func (r *Remote) FetchClientIpsByGuid(ctx context.Context) (map[string]map[strin
 	}
 	return out, nil
 }
+
+// FetchClientActivity requests only this node's local records; node-sync callers never fan out.
+func (r *Remote) FetchClientActivity(ctx context.Context, email string, hours int, scope string) (json.RawMessage, error) {
+	q := url.Values{"hours": {strconv.Itoa(hours)}, "scope": {scope}, "localOnly": {"1"}}
+	e, err := r.do(ctx, http.MethodGet, "panel/api/clients/activity/"+url.PathEscape(email)+"?"+q.Encode(), nil)
+	if err != nil {
+		return nil, err
+	}
+	return e.Obj, nil
+}

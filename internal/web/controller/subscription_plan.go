@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -205,9 +206,10 @@ func loadPlan(id int) (planInput, error) {
 // the plan without creating another account or changing its subscription URL.
 func (a *SubscriptionPlanController) subscribe(c *gin.Context) {
 	var req struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-		PlanID   int    `json:"planId"`
+		Username    string `json:"username"`
+		Password    string `json:"password"`
+		PlanID      int    `json:"planId"`
+		AccountOnly bool   `json:"accountOnly"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		jsonObj(c, nil, err)
@@ -221,6 +223,22 @@ func (a *SubscriptionPlanController) subscribe(c *gin.Context) {
 	planMutationMu.Lock()
 	defer planMutationMu.Unlock()
 	var p planInput
+	if req.PlanID == 0 && !req.AccountOnly {
+		var setting model.Setting
+		err := database.GetDB().Where("key = ?", "defaultSubscriptionPlanId").First(&setting).Error
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			jsonObj(c, nil, err)
+			return
+		}
+		if err == nil && setting.Value != "" {
+			id, parseErr := strconv.Atoi(setting.Value)
+			if parseErr != nil || id <= 0 {
+				jsonObj(c, nil, errors.New("默认套餐配置无效，请联系管理员"))
+				return
+			}
+			req.PlanID = id
+		}
+	}
 	if req.PlanID != 0 {
 		var err error
 		p, err = loadPlan(req.PlanID)

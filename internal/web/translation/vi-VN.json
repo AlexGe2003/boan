@@ -135,7 +135,8 @@
     "pinSidebar": "Ghim thanh bên",
     "unpinSidebar": "Bỏ ghim thanh bên",
     "subFormats": "Sub Formats",
-    "mySubscriptions": "My subscriptions"
+    "mySubscriptions": "My subscriptions",
+    "nodePlans": "Node plans"
   },
   "pages": {
     "login": {
@@ -1523,6 +1524,10 @@
       "calendarJalalian": "Jalalian (شمسی)",
       "ipLimitAllowlist": "Danh sách cho phép của giới hạn IP",
       "ipLimitAllowlistDesc": "Các địa chỉ và mạng mà giới hạn IP không bao giờ tính và không bao giờ chặn, để một địa chỉ dùng chung của văn phòng hoặc trường học không dùng hết giới hạn của người dùng. IPs/CIDRs cách nhau bằng dấu phẩy.",
+      "allowMainlandAccess": "Allow mainland China access",
+      "allowMainlandAccessDesc": "Allow mainland China IPs to open the administrator and user websites. Takes effect after saving. Turning this off blocks these pages from mainland networks; subscriptions and node connections are unaffected.",
+      "regionAllowed": "Allowed",
+      "regionBlocked": "Blocked",
       "websiteGeoBlockEnable": "Block website visitors by region",
       "websiteGeoBlockEnableDesc": "Block visitors from the configured regions on both administrator and user websites (403). Default regions: mainland China, Hong Kong, Macau and Taiwan. Configure regions and trusted proxies with x-ui entry. Subscription URLs and node connections remain available. Uses local geoip.dat.",
       "subBalancers": {
@@ -1700,7 +1705,17 @@
       "discordNotifyTimeDesc": "Tần suất bot Discord gửi báo cáo định kỳ. Chọn một khoảng thời gian có sẵn, hoặc chọn Tùy chỉnh để nhập biểu thức crontab.",
       "discordNotifyBackup": "Sao lưu Cơ sở dữ liệu",
       "discordNotifyBackupDesc": "Bao gồm tệp sao lưu cơ sở dữ liệu với thông báo báo cáo.",
-      "discordEventBusNotifyDesc": "Chọn những sự kiện nào sẽ kích hoạt thông báo qua Discord"
+      "discordEventBusNotifyDesc": "Chọn những sự kiện nào sẽ kích hoạt thông báo qua Discord",
+      "allowedWebsiteRegions": "Allowed website regions",
+      "allowedWebsiteRegionsDesc": "Select regions allowed to open the admin and user websites. Unselected regions are blocked. Select all to allow all four regions; clear to block all four. Save to apply immediately. Subscriptions and node connections are unaffected; other regions keep their current rules.",
+      "noWebsiteRegionsAllowed": "All four regions blocked",
+      "selectAllWebsiteRegions": "Select all",
+      "websiteRegions": {
+        "CN": "Mainland China",
+        "HK": "Hong Kong",
+        "TW": "Taiwan",
+        "MO": "Macao"
+      }
     },
     "xray": {
       "importRules": "Nhập quy tắc",
@@ -2659,6 +2674,29 @@
     "operations": "Service management",
     "infrastructure": "Nodes and networking",
     "system": "System configuration",
-    "runtime": "System status"
+    "runtime": "System status",
+    "advancedNetwork": "Advanced network"
+  },
+  "networkGuide": {
+    "nodes": {
+      "title": "Node management",
+      "hint": "Manage server nodes, connection status, and node settings."
+    },
+    "inbounds": {
+      "title": "Inbound management",
+      "hint": "Configure client protocols and ports, then include nodes in plans for users."
+    },
+    "hosts": {
+      "title": "Subscription node display",
+      "hint": "Configure node names, addresses, and connection settings shown in subscriptions."
+    },
+    "outbound": {
+      "title": "Outbound management",
+      "hint": "Configure how traffic leaves the server and select outbounds through routing rules."
+    },
+    "routing": {
+      "title": "Routing rules",
+      "hint": "Match traffic by domain, IP, or protocol and choose direct, proxy, or blocked connections. Rules are matched in order."
+    }
   }
 }

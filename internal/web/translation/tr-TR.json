@@ -135,7 +135,8 @@
     "pinSidebar": "Kenar çubuğunu sabitle",
     "unpinSidebar": "Kenar çubuğu sabitlemesini kaldır",
     "subFormats": "Abonelik Formatları",
-    "mySubscriptions": "My subscriptions"
+    "mySubscriptions": "My subscriptions",
+    "nodePlans": "Node plans"
   },
   "pages": {
     "login": {
@@ -1523,6 +1524,10 @@
       "calendarJalalian": "Jalalian (Güneş)",
       "ipLimitAllowlist": "IP limiti izin listesi",
       "ipLimitAllowlistDesc": "IP limitinin asla saymadığı ve engellemediği adresler ve ağlar; böylece ortak bir ofis veya kampüs adresi kullanıcının limitini tüketmez. IP'ler/CIDR'ler (virgülle ayrılmış).",
+      "allowMainlandAccess": "Allow mainland China access",
+      "allowMainlandAccessDesc": "Allow mainland China IPs to open the administrator and user websites. Takes effect after saving. Turning this off blocks these pages from mainland networks; subscriptions and node connections are unaffected.",
+      "regionAllowed": "Allowed",
+      "regionBlocked": "Blocked",
       "websiteGeoBlockEnable": "Block website visitors by region",
       "websiteGeoBlockEnableDesc": "Block visitors from the configured regions on both administrator and user websites (403). Default regions: mainland China, Hong Kong, Macau and Taiwan. Configure regions and trusted proxies with x-ui entry. Subscription URLs and node connections remain available. Uses local geoip.dat.",
       "subBalancers": {
@@ -1700,7 +1705,17 @@
       "discordNotifyTimeDesc": "Discord botunun periyodik raporları gönderme sıklığı. Hazır bir aralık seçin veya bir crontab ifadesi girmek için Özel'i seçin.",
       "discordNotifyBackup": "Veritabanı Yedeği",
       "discordNotifyBackupDesc": "Bir rapor ile birlikte veritabanı yedek dosyasını gönderir.",
-      "discordEventBusNotifyDesc": "Hangi olayların Discord bildirimi tetikleyeceğini seçin"
+      "discordEventBusNotifyDesc": "Hangi olayların Discord bildirimi tetikleyeceğini seçin",
+      "allowedWebsiteRegions": "Allowed website regions",
+      "allowedWebsiteRegionsDesc": "Select regions allowed to open the admin and user websites. Unselected regions are blocked. Select all to allow all four regions; clear to block all four. Save to apply immediately. Subscriptions and node connections are unaffected; other regions keep their current rules.",
+      "noWebsiteRegionsAllowed": "All four regions blocked",
+      "selectAllWebsiteRegions": "Select all",
+      "websiteRegions": {
+        "CN": "Mainland China",
+        "HK": "Hong Kong",
+        "TW": "Taiwan",
+        "MO": "Macao"
+      }
     },
     "xray": {
       "save": "Kaydet",
@@ -2659,6 +2674,29 @@
     "operations": "Service management",
     "infrastructure": "Nodes and networking",
     "system": "System configuration",
-    "runtime": "System status"
+    "runtime": "System status",
+    "advancedNetwork": "Advanced network"
+  },
+  "networkGuide": {
+    "nodes": {
+      "title": "Node management",
+      "hint": "Manage server nodes, connection status, and node settings."
+    },
+    "inbounds": {
+      "title": "Inbound management",
+      "hint": "Configure client protocols and ports, then include nodes in plans for users."
+    },
+    "hosts": {
+      "title": "Subscription node display",
+      "hint": "Configure node names, addresses, and connection settings shown in subscriptions."
+    },
+    "outbound": {
+      "title": "Outbound management",
+      "hint": "Configure how traffic leaves the server and select outbounds through routing rules."
+    },
+    "routing": {
+      "title": "Routing rules",
+      "hint": "Match traffic by domain, IP, or protocol and choose direct, proxy, or blocked connections. Rules are matched in order."
+    }
   }
 }

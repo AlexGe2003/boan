@@ -1,3 +1,4 @@
+import ClientVisitsButton from '@/pages/nodes/ClientVisitsButton';
 import { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation, useSearchParams } from 'react-router';
@@ -95,6 +96,7 @@ import { emptyFilters, activeFilterCount } from './filters';
 import type { ClientFilters } from './filters';
 import './ClientsPage.css';
 import ClientAccountModal from './ClientAccountModal';
+import SubscriberModal from '../plans/SubscriberModal';
 import { usePanelRole } from '@/api/queries/usePanelRole';
 
 const FILTER_STATE_KEY = 'clientsFilterState';
@@ -319,6 +321,9 @@ function sortValueFor(column: string | null, order: 'ascend' | 'descend' | null)
 
 export default function ClientsPage() {
   const panelRole = usePanelRole();
+  const [accountScope, setAccountScope] = useState<"accounts" | "unlinked" | "all">("accounts");
+  const [subscriberOpen, setSubscriberOpen] = useState(false);
+  const [planEmails, setPlanEmails] = useState<string[] | null>(null);
   const [accountEmail, setAccountEmail] = useState<string | null>(null);
   const { t } = useTranslation();
   const { isDark, isUltra, antdThemeConfig } = useTheme();
@@ -493,6 +498,7 @@ export default function ClientsPage() {
     // soon as the real size arrives.
     if (resolvedPageSize === null) return;
     setQuery({
+      accountScope,
       page: currentPage,
       pageSize: tablePageSize,
       search: debouncedSearch,
@@ -512,6 +518,7 @@ export default function ClientsPage() {
     });
   }, [
     setQuery,
+    accountScope,
     resolvedPageSize,
     currentPage,
     tablePageSize,
@@ -667,6 +674,10 @@ export default function ClientsPage() {
   const [exportingClients, setExportingClients] = useState(false);
 
   function onAdd() {
+    if (panelRole === 'admin') {
+      setSubscriberOpen(true);
+      return;
+    }
     setFormMode('add');
     setEditingClient(null);
     setEditingAttachedIds([]);
@@ -1053,7 +1064,7 @@ export default function ClientsPage() {
         width: 220,
         render: (_v, record) => (
           <div className="email-cell">
-            <span className="email">{record.email}</span>
+            <span className="email">{record.loginUsername || record.email}</span>
             {record.subId && (
               <span className="sub" title={record.subId}>
                 {record.subId}
@@ -1249,7 +1260,18 @@ export default function ClientsPage() {
                 <Row gutter={[isMobile ? 8 : 16, isMobile ? 8 : 12]}>
                   <Col span={24}>
                     <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
-                      {t('pages.clients.managementIntro')}
+                      默认显示已开通登录账号的用户；未开通账号的订阅记录可切换查看。
+                      <Select
+                        aria-label="用户记录范围"
+                        style={{ marginLeft: 12, minWidth: 170 }}
+                        value={accountScope}
+                        onChange={(value) => { setAccountScope(value); setCurrentPage(1); setSelectedRowKeys([]); }}
+                        options={[
+                          { value: 'accounts', label: '已开通账号' },
+                          { value: 'unlinked', label: '未开通账号的订阅' },
+                          { value: 'all', label: '全部订阅记录' },
+                        ]}
+                      />
                     </Typography.Paragraph>
                   </Col>
                   <Col span={24}>
@@ -1257,7 +1279,7 @@ export default function ClientsPage() {
                       <Row gutter={[16, 12]}>
                         <Col xs={12} sm={8} md={4}>
                           <SummaryStat
-                            title="用户"
+                            title={accountScope === 'accounts' ? '登录用户' : '订阅记录'}
                             value={summary.total}
                             prefix={<TeamOutlined />}
                             onSelect={() => selectBucket(null)}
@@ -1322,6 +1344,7 @@ export default function ClientsPage() {
                       hoverable
                       title={
                         <div className="card-toolbar">
+                          <ClientVisitsButton />
                           {panelRole === 'admin' && (
                             <>
                               <Button
@@ -1347,9 +1370,9 @@ export default function ClientsPage() {
                               type="primary"
                               icon={<PlusOutlined />}
                               onClick={onAdd}
-                              aria-label={t('pages.clients.addClients')}
+                              aria-label={panelRole === 'admin' ? '新增用户' : t('pages.clients.addClients')}
                             >
-                              {!isMobile && t('pages.clients.addClients')}
+                              {!isMobile && (panelRole === 'admin' ? '新增用户' : t('pages.clients.addClients'))}
                             </Button>
                           ) : (
                             <Tag
@@ -1468,6 +1491,11 @@ export default function ClientsPage() {
                               {!isMobile && t('more')}
                             </Button>
                           </Dropdown>
+                          {panelRole === 'admin' && selectedRowKeys.length > 0 && (
+                            <Button onClick={() => setPlanEmails(selectedRowKeys.map(String))}>
+                              分配套餐
+                            </Button>
+                          )}
                           {selectedRowKeys.length > 0 && (
                             <Button
                               danger
@@ -1725,7 +1753,7 @@ export default function ClientsPage() {
                                     ) : (
                                       <Badge status={bucketBadgeStatus(bucket)} />
                                     )}
-                                    <span className="tag-name">{row.email}</span>
+                                    <span className="tag-name">{row.loginUsername || row.email}</span>
                                     {bucket === 'depleted' && (
                                       <Tag color="red" className="status-tag">
                                         {t('depleted')}
@@ -1874,6 +1902,15 @@ export default function ClientsPage() {
             />
           )}
         </LazyMount>
+        {subscriberOpen && (
+          <SubscriberModal
+            onClose={() => setSubscriberOpen(false)}
+            onSaved={() => { setAccountScope('accounts'); void refresh(); }}
+          />
+        )}
+        {planEmails && (
+          <SubscriberModal emails={planEmails} onClose={() => setPlanEmails(null)} onSaved={() => void refresh()} />
+        )}
         <ClientAccountModal
           key={accountEmail ?? 'closed'}
           email={accountEmail}

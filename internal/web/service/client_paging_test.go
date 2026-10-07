@@ -635,3 +635,61 @@ func TestListPagedEmptyPanel(t *testing.T) {
 		t.Fatal("groups = nil, want an empty list so the filter drawer renders")
 	}
 }
+
+func TestListPagedAccountScopes(t *testing.T) {
+	svc, inboundSvc, settingSvc := setupPagingServices(t)
+	db := database.GetDB()
+	for _, email := range []string{"personal-record", "customer", "node-owner"} {
+		rec := model.ClientRecord{Email: email, Enable: true}
+		if err := db.Create(&rec).Error; err != nil {
+			t.Fatal(err)
+		}
+		if email != "node-owner" {
+			name, role := "customer", model.RoleCustomer
+			if email == "personal-record" {
+				name, role = "ant_ge", model.RoleAdmin
+			}
+			if err := db.Create(&model.User{Username: name, Role: role, ClientID: &rec.Id}).Error; err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	for scope, want := range map[string]int{"accounts": 2, "unlinked": 1, "all": 3} {
+		resp, err := svc.ListPaged(inboundSvc, settingSvc, ClientPageParams{AccountScope: scope, PageSize: 1})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if resp.Total != want || resp.Filtered != want || resp.Summary.Total != want || resp.Summary.Active != want || len(resp.Items) != 1 {
+			t.Fatalf("%s: %+v", scope, resp)
+		}
+	}
+	resp, err := svc.ListPaged(inboundSvc, settingSvc, ClientPageParams{AccountScope: "accounts", Search: "ant_ge"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.Filtered != 1 || resp.Total != 2 || len(resp.Items) != 1 || resp.Items[0].Email != "personal-record" || resp.Items[0].LoginUsername != "ant_ge" {
+		t.Fatalf("login search: %+v", resp)
+	}
+}
+
+func TestAccountScopeOnlineCount(t *testing.T) {
+	setupPagingServices(t)
+	db := database.GetDB()
+	for _, email := range []string{"linked", "node-owner"} {
+		rec := model.ClientRecord{Email: email, Enable: true}
+		if err := db.Create(&rec).Error; err != nil {
+			t.Fatal(err)
+		}
+		if email == "linked" {
+			if err := db.Create(&model.User{Username: "login", Role: model.RoleCustomer, ClientID: &rec.Id}).Error; err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	q := newClientQuery(db, time.Now().UnixMilli(), 0, 0)
+	q.accountScope = "accounts"
+	emails, count, err := q.onlineEmails([]string{"linked", "node-owner"})
+	if err != nil || count != 1 || len(emails) != 1 || emails[0] != "linked" {
+		t.Fatalf("online scope: %v %d %v", emails, count, err)
+	}
+}

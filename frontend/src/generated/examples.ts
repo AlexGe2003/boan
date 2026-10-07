@@ -10,9 +10,17 @@ export const EXAMPLES: Record<string, unknown> = {
     "host": "",
     "lastSeen": 0
   },
+  "ActivitySource": {
+    "connections": 0,
+    "name": "",
+    "nodeId": 0,
+    "sampled": false,
+    "status": ""
+  },
   "ActivityVisit": {
     "category": "",
     "host": "",
+    "nodeName": "",
     "time": 0
   },
   "AllSetting": {
@@ -163,7 +171,8 @@ export const EXAMPLES: Record<string, unknown> = {
     "webKeyFile": "",
     "webListen": "",
     "webPort": 1,
-    "websiteGeoBlockEnable": false
+    "websiteGeoBlockEnable": false,
+    "websiteGeoBlockRegions": ""
   },
   "AllSettingView": {
     "datepicker": "",
@@ -321,7 +330,8 @@ export const EXAMPLES: Record<string, unknown> = {
     "webKeyFile": "",
     "webListen": "",
     "webPort": 1,
-    "websiteGeoBlockEnable": false
+    "websiteGeoBlockEnable": false,
+    "websiteGeoBlockRegions": ""
   },
   "AmneziaWGLogs": {
     "events": [
@@ -418,16 +428,28 @@ export const EXAMPLES: Record<string, unknown> = {
       {
         "category": "",
         "host": "",
+        "nodeName": "",
         "time": 0
       }
     ],
     "sampled": false,
     "since": 0,
+    "sources": [
+      {
+        "connections": 0,
+        "name": "",
+        "nodeId": 0,
+        "sampled": false,
+        "status": ""
+      }
+    ],
     "status": "",
+    "usage": null,
     "visits": [
       {
         "category": "",
         "host": "",
+        "nodeName": "",
         "time": 0
       }
     ]
@@ -458,6 +480,7 @@ export const EXAMPLES: Record<string, unknown> = {
         ],
         "limitHwid": 0,
         "limitIp": 0,
+        "loginUsername": "",
         "reset": 0,
         "resetDay": 0,
         "resetMax": 0,
@@ -537,6 +560,7 @@ export const EXAMPLES: Record<string, unknown> = {
     ],
     "limitHwid": 0,
     "limitIp": 0,
+    "loginUsername": "",
     "reset": 0,
     "resetDay": 0,
     "resetMax": 0,
@@ -554,6 +578,9 @@ export const EXAMPLES: Record<string, unknown> = {
     "inboundId": 1,
     "lastOnline": 1735680000000,
     "lastSubFetch": 1735680000000,
+    "rawDown": 0,
+    "rawKnown": false,
+    "rawUp": 0,
     "reset": 0,
     "resetCount": 0,
     "resetDay": 0,
@@ -578,6 +605,31 @@ export const EXAMPLES: Record<string, unknown> = {
     ],
     "onlineCount": 1,
     "total": 2000
+  },
+  "DestinationUsage": {
+    "down": 0,
+    "overflow": false,
+    "partial": false,
+    "rows": [
+      {
+        "category": "",
+        "down": 0,
+        "host": "",
+        "lastSeen": 0,
+        "up": 0
+      }
+    ],
+    "since": 0,
+    "status": "",
+    "up": 0,
+    "updatedAt": 0
+  },
+  "DestinationUsageRow": {
+    "category": "",
+    "down": 0,
+    "host": "",
+    "lastSeen": 0,
+    "up": 0
   },
   "FallbackParentInfo": {
     "masterId": 0,
@@ -751,6 +803,9 @@ export const EXAMPLES: Record<string, unknown> = {
         "inboundId": 1,
         "lastOnline": 1735680000000,
         "lastSubFetch": 1735680000000,
+        "rawDown": 0,
+        "rawKnown": false,
+        "rawUp": 0,
         "reset": 0,
         "resetCount": 0,
         "resetDay": 0,

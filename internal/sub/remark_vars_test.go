@@ -11,6 +11,57 @@ import (
 
 const gb = int64(1024 * 1024 * 1024)
 
+func TestSubscriptionStatusFallsBackToConfiguredLimits(t *testing.T) {
+	for _, source := range []string{"inbound", "request-cache"} {
+		t.Run(source, func(t *testing.T) {
+			client := model.Client{Email: "test", SubID: "test", TotalGB: 10 * gb, ExpiryTime: 1893499200000}
+			stats := xray.ClientTraffic{Email: client.Email, Down: 3 * gb}
+			ib := &model.Inbound{Remark: "HK"}
+			s := &SubService{remarkTemplate: "{{INBOUND}}|{{SUBSCRIPTION_STATUS}}", subscriptionBody: true}
+			if source == "inbound" {
+				ib.ClientStats = []xray.ClientTraffic{stats}
+			} else {
+				s.statsByEmail = map[string]xray.ClientTraffic{client.Email: stats}
+			}
+			want := "HK|剩余 7.00GB · 到期 2030-01-01"
+			if got := s.genTemplatedRemark(ib, client, "", "tcp"); got != want {
+				t.Fatalf("got %q; want %q", got, want)
+			}
+			if source == "inbound" && ib.ClientStats[0].Total != 0 {
+				t.Fatal("rendering mutated the original traffic record")
+			}
+		})
+	}
+}
+
+func TestSubscriptionStatusRemark(t *testing.T) {
+	cases := []struct {
+		name  string
+		stats xray.ClientTraffic
+		want  string
+	}{
+		{"unlimited", xray.ClientTraffic{}, "香港 HK|剩余 不限量 · 到期 长期有效"},
+		{"limited", xray.ClientTraffic{Total: 10 * gb, Up: gb, Down: 2 * gb, ExpiryTime: 1893499200000}, "香港 HK|剩余 7.00GB · 到期 2030-01-01"},
+		{"depleted", xray.ClientTraffic{Total: gb, Down: 2 * gb, ExpiryTime: -3 * 86400000}, "香港 HK|剩余 0.00B · 到期 首次使用后 3 天"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			ib := &model.Inbound{Remark: "香港 HK", ClientStats: []xray.ClientTraffic{}}
+			stats := tc.stats
+			stats.Email = "test"
+			ib.ClientStats = []xray.ClientTraffic{stats}
+			s := &SubService{remarkTemplate: "{{INBOUND}}|{{SUBSCRIPTION_STATUS}}", subscriptionBody: true}
+			client := model.Client{Email: "test", SubID: "test"}
+			if got := s.genTemplatedRemark(ib, client, "", "tcp"); got != tc.want {
+				t.Fatalf("first = %q, want %q", got, tc.want)
+			}
+			if got := s.genTemplatedRemark(ib, client, "", "tcp"); got != "香港 HK" {
+				t.Fatalf("second = %q", got)
+			}
+		})
+	}
+}
+
 // expandCtx builds a remarkContext from explicit pieces for token tests.
 func expandCtx(client model.Client, stats xray.ClientTraffic, inbound *model.Inbound) remarkContext {
 	return remarkContext{client: client, stats: stats, inbound: inbound}

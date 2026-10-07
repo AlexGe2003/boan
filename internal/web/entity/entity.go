@@ -19,18 +19,19 @@ type Msg struct {
 }
 
 type AllSetting struct {
-	WebListen             string `json:"webListen" form:"webListen"`
-	WebDomain             string `json:"webDomain" form:"webDomain"`
-	WebPort               int    `json:"webPort" form:"webPort" validate:"gte=1,lte=65535"`
-	WebCertFile           string `json:"webCertFile" form:"webCertFile"`
-	WebKeyFile            string `json:"webKeyFile" form:"webKeyFile"`
-	WebBasePath           string `json:"webBasePath" form:"webBasePath"`
-	SessionMaxAge         int    `json:"sessionMaxAge" form:"sessionMaxAge" validate:"gte=1,lte=525600"`
-	TrustedProxyCIDRs     string `json:"trustedProxyCIDRs" form:"trustedProxyCIDRs"`
-	RealityScanCandidates string `json:"realityScanCandidates" form:"realityScanCandidates"`
-	IpLimitAllowlist      string `json:"ipLimitAllowlist" form:"ipLimitAllowlist"`
-	WebsiteGeoBlockEnable bool   `json:"websiteGeoBlockEnable" form:"websiteGeoBlockEnable"`
-	PanelOutbound         string `json:"panelOutbound" form:"panelOutbound"`
+	WebListen              string `json:"webListen" form:"webListen"`
+	WebDomain              string `json:"webDomain" form:"webDomain"`
+	WebPort                int    `json:"webPort" form:"webPort" validate:"gte=1,lte=65535"`
+	WebCertFile            string `json:"webCertFile" form:"webCertFile"`
+	WebKeyFile             string `json:"webKeyFile" form:"webKeyFile"`
+	WebBasePath            string `json:"webBasePath" form:"webBasePath"`
+	SessionMaxAge          int    `json:"sessionMaxAge" form:"sessionMaxAge" validate:"gte=1,lte=525600"`
+	TrustedProxyCIDRs      string `json:"trustedProxyCIDRs" form:"trustedProxyCIDRs"`
+	RealityScanCandidates  string `json:"realityScanCandidates" form:"realityScanCandidates"`
+	IpLimitAllowlist       string `json:"ipLimitAllowlist" form:"ipLimitAllowlist"`
+	WebsiteGeoBlockRegions string `json:"websiteGeoBlockRegions" form:"websiteGeoBlockRegions"`
+	WebsiteGeoBlockEnable  bool   `json:"websiteGeoBlockEnable" form:"websiteGeoBlockEnable"`
+	PanelOutbound          string `json:"panelOutbound" form:"panelOutbound"`
 
 	PageSize                   int    `json:"pageSize" form:"pageSize" validate:"gte=0,lte=1000"`
 	ExpireDiff                 int    `json:"expireDiff" form:"expireDiff" validate:"gte=0"`

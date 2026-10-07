@@ -24,6 +24,7 @@ export const ClientTrafficSchema = z.object({
 export const ClientRecordSchema = z
   .object({
     id: z.number().optional(),
+    loginUsername: z.string().optional(),
     email: z.string(),
     subId: z.string().optional(),
     uuid: z.string().optional(),

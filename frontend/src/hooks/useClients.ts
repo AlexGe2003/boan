@@ -60,6 +60,7 @@ interface SubSettings {
 }
 
 export interface ClientQueryParams {
+  accountScope?: "accounts" | "unlinked" | "all";
   page: number;
   pageSize: number;
   search?: string;
@@ -118,6 +119,7 @@ function buildQS(p: ClientQueryParams): string {
   const sp = new URLSearchParams();
   sp.set('page', String(p.page || 1));
   sp.set('pageSize', String(p.pageSize || DEFAULT_QUERY.pageSize));
+  if (p.accountScope) sp.set('accountScope', p.accountScope);
   if (p.search) sp.set('search', p.search);
   if (p.filter) sp.set('filter', p.filter);
   if (p.protocol) sp.set('protocol', p.protocol);
@@ -186,6 +188,7 @@ export function useClients(options: UseClientsOptions = {}) {
     setQueryState((prev) => {
       if (
         prev &&
+        prev.accountScope === next.accountScope &&
         prev.page === next.page &&
         prev.pageSize === next.pageSize &&
         (prev.search ?? '') === (next.search ?? '') &&

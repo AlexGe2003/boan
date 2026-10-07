@@ -12,8 +12,10 @@ import (
 )
 
 func (a *ClientController) activity(c *gin.Context) {
+	scopeValue, _ := c.Get("api_token_scope")
+	localOnly := scopeValue == model.ApiScopeNodeSync
 	u := session.GetLoginUser(c)
-	if u == nil || !u.IsAdmin() {
+	if !localOnly && (u == nil || !u.IsAdmin()) {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
@@ -36,6 +38,20 @@ func (a *ClientController) activity(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	result, err := a.clientService.Activity(client.Email, hours, scope)
+	if localOnly || c.Query("localOnly") == "1" {
+		result, err := a.clientService.Activity(client.Email, hours, scope)
+		jsonObj(c, result, err)
+		return
+	}
+	nodeID := -1
+	if c.Query("nodeId") != "" {
+		var err error
+		nodeID, err = strconv.Atoi(c.Query("nodeId"))
+		if err != nil || nodeID < -1 {
+			jsonObj(c, nil, errors.New("无效节点"))
+			return
+		}
+	}
+	result, err := a.clientService.FleetActivity(c.Request.Context(), client.Email, hours, scope, nodeID)
 	jsonObj(c, result, err)
 }

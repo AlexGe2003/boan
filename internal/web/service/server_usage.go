@@ -11,12 +11,20 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
 
 func recordServerUsage(tx *gorm.DB, nodeID int, email string, up, down int64) error {
 	up, down = max(up, 0), max(down, 0)
 	if up == 0 && down == 0 {
 		return nil
+	}
+	if err := tx.Model(&xray.ClientTraffic{}).Where("email = ?", email).Updates(map[string]any{
+		"raw_up":    gorm.Expr(database.ClampedAddExpr("raw_up"), up),
+		"raw_down":  gorm.Expr(database.ClampedAddExpr("raw_down"), down),
+		"raw_known": true,
+	}).Error; err != nil {
+		return err
 	}
 	now := time.Now().UnixMilli()
 	return tx.Clauses(clause.OnConflict{

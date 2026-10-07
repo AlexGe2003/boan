@@ -195,6 +195,18 @@ func remarkVarValue(token string, ctx remarkContext) string {
 	st := ctx.stats
 	used := st.Up + st.Down
 	switch token {
+	case "SUBSCRIPTION_STATUS":
+		remaining := "不限量"
+		if st.Total > 0 {
+			remaining = common.FormatTraffic(max64(st.Total-used, 0))
+		}
+		expires := "长期有效"
+		if st.ExpiryTime > 0 {
+			expires = expireDateLabel(st.ExpiryTime)
+		} else if st.ExpiryTime < 0 {
+			expires = fmt.Sprintf("首次使用后 %d 天", (-st.ExpiryTime+86399999)/86400000)
+		}
+		return "剩余 " + remaining + " · 到期 " + expires
 	case "EMAIL", "USERNAME":
 		return c.Email
 	case "INBOUND":
@@ -483,7 +495,7 @@ func isJalaliLeap(y int) bool {
 // so expiry/total/status tokens still resolve on links that have no counters yet.
 func (s *SubService) statsForClient(inbound *model.Inbound, client model.Client) xray.ClientTraffic {
 	if stats, ok := s.findClientStats(inbound, client.Email); ok {
-		return stats
+		return withConfiguredClientLimits(stats, client)
 	}
 	// client_traffics.email is globally unique, so a client shared across several
 	// inbounds of one subscription has a single traffic row owned by exactly one
@@ -491,20 +503,31 @@ func (s *SubService) statsForClient(inbound *model.Inbound, client model.Client)
 	// the per-request map built from all the subscription's inbounds so
 	// {{TRAFFIC_*}} reflect real usage instead of the full quota (#5443).
 	if stats, ok := s.statsByEmail[client.Email]; ok {
-		return stats
+		return withConfiguredClientLimits(stats, client)
 	}
 	// Both in-memory paths key off client_traffics.inbound_id, which goes stale
 	// when an inbound is deleted and recreated, orphaning the row from every
 	// loaded inbound. Fall back to a direct lookup by the globally-unique email
 	// so usage still resolves for clients predating that recreation (#5567).
 	if stats, ok := s.statsByEmailFromDB(client.Email); ok {
-		return stats
+		return withConfiguredClientLimits(stats, client)
 	}
 	return xray.ClientTraffic{
 		Enable:     client.Enable,
 		ExpiryTime: client.ExpiryTime,
 		Total:      client.TotalGB,
 	}
+}
+
+// Node snapshots may omit limits; use the same fallback as subscription headers.
+func withConfiguredClientLimits(stats xray.ClientTraffic, client model.Client) xray.ClientTraffic {
+	if stats.Total == 0 {
+		stats.Total = client.TotalGB
+	}
+	if stats.ExpiryTime == 0 {
+		stats.ExpiryTime = client.ExpiryTime
+	}
+	return stats
 }
 
 // lookupClient resolves the full client (TgID, SubID, comment, …) for an email,
@@ -518,7 +541,8 @@ func (s *SubService) lookupClient(inbound *model.Inbound, email string) model.Cl
 }
 
 var usageInfoTokens = map[string]bool{
-	"TRAFFIC_USED": true, "TRAFFIC_LEFT": true, "TRAFFIC_TOTAL": true,
+	"SUBSCRIPTION_STATUS": true,
+	"TRAFFIC_USED":        true, "TRAFFIC_LEFT": true, "TRAFFIC_TOTAL": true,
 	"TRAFFIC_USED_BYTES": true, "TRAFFIC_LEFT_BYTES": true, "TRAFFIC_TOTAL_BYTES": true,
 	"UP": true, "DOWN": true, "DAYS_LEFT": true, "EXPIRE_DATE": true, "EXPIRE_UNIX": true,
 	"STATUS": true, "STATUS_EMOJI": true, "USAGE_PERCENTAGE": true, "TIME_LEFT": true,

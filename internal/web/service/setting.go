@@ -1492,11 +1492,19 @@ type SecretClears struct {
 }
 
 func (s *SettingService) UpdateAllSetting(allSetting *entity.AllSetting, clears SecretClears) error {
-	if allSetting.WebsiteGeoBlockEnable {
+	if allSetting.WebsiteGeoBlockRegions == "" {
 		regions, err := s.GetWebsiteGeoBlockRegions()
 		if err != nil {
 			return err
 		}
+		allSetting.WebsiteGeoBlockRegions = regions
+	}
+	regions, err := geoblock.NormalizeRegions(allSetting.WebsiteGeoBlockRegions)
+	if err != nil {
+		return err
+	}
+	allSetting.WebsiteGeoBlockRegions = regions
+	if allSetting.WebsiteGeoBlockEnable {
 		if err := (&geoblock.Matcher{}).LoadRegions(xray.GetGeoipPath(), regions); err != nil {
 			return fmt.Errorf("cannot enable website region block: %w", err)
 		}

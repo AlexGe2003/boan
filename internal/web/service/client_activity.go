@@ -27,8 +27,19 @@ type ActivityVisit struct {
 	Host     string `json:"host"`
 	Category string `json:"category"`
 	Time     int64  `json:"time"`
+	NodeName string `json:"nodeName,omitempty"`
 }
+type ActivitySource struct {
+	NodeID      int    `json:"nodeId"`
+	Name        string `json:"name"`
+	Status      string `json:"status"`
+	Connections int    `json:"connections"`
+	Sampled     bool   `json:"sampled"`
+}
+
 type ClientActivity struct {
+	Usage        *DestinationUsage     `json:"usage,omitempty"`
+	Sources      []ActivitySource      `json:"sources,omitempty"`
 	Status       string                `json:"status"`
 	Sampled      bool                  `json:"sampled"`
 	Demo         bool                  `json:"demo"`
@@ -205,6 +216,7 @@ func readClientActivity(path, email string, hours int, now time.Time, scopes ...
 		}
 	}
 	if len(r.Destinations) > 50 {
+		r.Sampled = true
 		r.Destinations = r.Destinations[:50]
 	}
 	return r, nil
@@ -217,5 +229,7 @@ func (s *ClientService) Activity(email string, hours int, scopes ...string) (Cli
 		result.Status = "unavailable"
 		return result, nil
 	}
-	return readClientActivity(path, email, hours, time.Now(), scopes...)
+	result, err := readClientActivity(path, email, hours, time.Now(), scopes...)
+	result.Usage = readDestinationUsage(os.Getenv("BOAN_DESTINATION_USAGE_FILE"), email, time.Now())
+	return result, err
 }

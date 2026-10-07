@@ -119,3 +119,22 @@ func TestActivityScopeFiltersBeforeLimits(t *testing.T) {
 		}
 	}
 }
+
+func TestActivityFleetMerge(t *testing.T) {
+	now := time.Now()
+	parts := []activityPart{
+		{source: ActivitySource{NodeID: 0, Name: "local"}, data: ClientActivity{Status: "ready", Connections: 2, Destinations: []ActivityDestination{{Host: "example.com", Count: 2, LastSeen: 10}}, Categories: []ActivityCategory{{Name: "other", Count: 2}}, Visits: []ActivityVisit{{Host: "example.com", Time: 10}}}},
+		{source: ActivitySource{NodeID: 1, Name: "remote"}, data: ClientActivity{Status: "ready", Connections: 3, Sampled: true, Destinations: []ActivityDestination{{Host: "example.com", Count: 3, LastSeen: 20}}, Categories: []ActivityCategory{{Name: "other", Count: 3}}, Visits: []ActivityVisit{{Host: "example.com", Time: 20}}}},
+		{source: ActivitySource{NodeID: 2, Name: "offline"}, data: ClientActivity{Status: "unavailable"}},
+	}
+	got := mergeActivity(parts, 24, now)
+	if got.Connections != 5 || len(got.Destinations) != 1 || got.Destinations[0].Count != 5 || got.Categories[0].Count != 5 {
+		t.Fatalf("bad totals: %+v", got)
+	}
+	if len(got.Sources) != 3 || got.Sources[2].Status != "unavailable" || !got.Sampled {
+		t.Fatalf("missing coverage: %+v", got)
+	}
+	if got.Visits[0].NodeName != "remote" || got.Visits[1].NodeName != "local" {
+		t.Fatal(got.Visits)
+	}
+}

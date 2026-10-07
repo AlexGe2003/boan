@@ -31,3 +31,16 @@ export function useClientOptions(enabled = true) {
         .sort((a, b) => a.localeCompare(b)),
   });
 }
+
+export function useClientVisitOptions(enabled = true) {
+  return useQuery({
+    queryKey: keys.clients.all(),
+    queryFn: fetchClients,
+    enabled,
+    staleTime: 30_000,
+    select: (clients) => clients
+      .filter((client) => client.email.trim())
+      .map((client) => ({ value: client.email, label: client.loginUsername || client.email }))
+      .sort((a, b) => a.label.localeCompare(b.label)),
+  });
+}

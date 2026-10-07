@@ -159,6 +159,41 @@ func TestSubscriptionPlanAccountAndReapply(t *testing.T) {
 	if retryCount != 1 {
 		t.Fatal("retry duplicated account")
 	}
+
+	if err := db.Create(&model.Setting{Key: "defaultSubscriptionPlanId", Value: fmt.Sprint(p.ID)}).Error; err != nil {
+		t.Fatal(err)
+	}
+	request("subscribe", `{"username":"default-plan-customer","password":"secure-password"}`, true)
+	defaultUser, err := users.CheckUser("default-plan-customer", "secure-password", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var defaultAssignment model.SubscriptionAssignment
+	if err := db.First(&defaultAssignment, "client_id = ?", *defaultUser.ClientID).Error; err != nil || defaultAssignment.PlanID != p.ID {
+		t.Fatalf("default plan not applied: %+v %v", defaultAssignment, err)
+	}
+	request("subscribe", `{"username":"account-only-default","password":"secure-password","accountOnly":true}`, true)
+	accountFirst, err := users.CheckUser("account-only-default", "secure-password", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var assignments int64
+	db.Model(&model.SubscriptionAssignment{}).Where("client_id = ?", *accountFirst.ClientID).Count(&assignments)
+	if assignments != 0 {
+		t.Fatal("account-only creation assigned the default plan")
+	}
+	request("apply", fmt.Sprintf(`{"emails":["account-only-default"],"planId":%d}`, p.ID), true)
+	var assigned model.SubscriptionAssignment
+	if err := db.First(&assigned, "client_id = ?", *accountFirst.ClientID).Error; err != nil || assigned.PlanID != p.ID {
+		t.Fatalf("later plan assignment failed: %+v %v", assigned, err)
+	}
+	db.Model(&p.SubscriptionPlan).Update("enabled", false)
+	request("subscribe", `{"username":"disabled-default-customer","password":"secure-password"}`, false)
+	var rejected int64
+	db.Model(&model.User{}).Where("username = ?", "disabled-default-customer").Count(&rejected)
+	if rejected != 0 {
+		t.Fatal("disabled default left an unconfigured account")
+	}
 	customer := roleClient(t, engine, u.Id)
 	for _, path := range []string{"", "/save", "/apply", "/subscribe"} {
 		method := http.MethodPost

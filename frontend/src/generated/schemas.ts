@@ -39,12 +39,42 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "ActivitySource": {
+    "properties": {
+      "connections": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "nodeId": {
+        "type": "integer"
+      },
+      "sampled": {
+        "type": "boolean"
+      },
+      "status": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "connections",
+      "name",
+      "nodeId",
+      "sampled",
+      "status"
+    ],
+    "type": "object"
+  },
   "ActivityVisit": {
     "properties": {
       "category": {
         "type": "string"
       },
       "host": {
+        "type": "string"
+      },
+      "nodeName": {
         "type": "string"
       },
       "time": {
@@ -540,6 +570,9 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "websiteGeoBlockEnable": {
         "type": "boolean"
+      },
+      "websiteGeoBlockRegions": {
+        "type": "string"
       }
     },
     "required": [
@@ -690,7 +723,8 @@ export const SCHEMAS: Record<string, unknown> = {
       "webKeyFile",
       "webListen",
       "webPort",
-      "websiteGeoBlockEnable"
+      "websiteGeoBlockEnable",
+      "websiteGeoBlockRegions"
     ],
     "type": "object"
   },
@@ -1199,6 +1233,9 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "websiteGeoBlockEnable": {
         "type": "boolean"
+      },
+      "websiteGeoBlockRegions": {
+        "type": "string"
       }
     },
     "required": [
@@ -1357,7 +1394,8 @@ export const SCHEMAS: Record<string, unknown> = {
       "webKeyFile",
       "webListen",
       "webPort",
-      "websiteGeoBlockEnable"
+      "websiteGeoBlockEnable",
+      "websiteGeoBlockRegions"
     ],
     "type": "object"
   },
@@ -1677,8 +1715,22 @@ export const SCHEMAS: Record<string, unknown> = {
         "format": "int64",
         "type": "integer"
       },
+      "sources": {
+        "items": {
+          "$ref": "#/components/schemas/ActivitySource"
+        },
+        "type": "array"
+      },
       "status": {
         "type": "string"
+      },
+      "usage": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DestinationUsage"
+          }
+        ],
+        "nullable": true
       },
       "visits": {
         "items": {
@@ -1971,6 +2023,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": 0,
         "type": "integer"
       },
+      "loginUsername": {
+        "type": "string"
+      },
       "reset": {
         "example": 0,
         "type": "integer"
@@ -2062,6 +2117,18 @@ export const SCHEMAS: Record<string, unknown> = {
         "format": "int64",
         "type": "integer"
       },
+      "rawDown": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "rawKnown": {
+        "type": "boolean"
+      },
+      "rawUp": {
+        "description": "Raw counters are lifetime wire bytes, independent of quota resets.",
+        "format": "int64",
+        "type": "integer"
+      },
       "reset": {
         "example": 0,
         "type": "integer"
@@ -2109,6 +2176,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "inboundId",
       "lastOnline",
       "lastSubFetch",
+      "rawDown",
+      "rawKnown",
+      "rawUp",
       "reset",
       "resetCount",
       "resetDay",
@@ -2191,6 +2261,82 @@ export const SCHEMAS: Record<string, unknown> = {
       "online",
       "onlineCount",
       "total"
+    ],
+    "type": "object"
+  },
+  "DestinationUsage": {
+    "properties": {
+      "down": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "overflow": {
+        "type": "boolean"
+      },
+      "partial": {
+        "type": "boolean"
+      },
+      "rows": {
+        "items": {
+          "$ref": "#/components/schemas/DestinationUsageRow"
+        },
+        "type": "array"
+      },
+      "since": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "status": {
+        "type": "string"
+      },
+      "up": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "updatedAt": {
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "down",
+      "overflow",
+      "partial",
+      "rows",
+      "since",
+      "status",
+      "up",
+      "updatedAt"
+    ],
+    "type": "object"
+  },
+  "DestinationUsageRow": {
+    "properties": {
+      "category": {
+        "type": "string"
+      },
+      "down": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "host": {
+        "type": "string"
+      },
+      "lastSeen": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "up": {
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "category",
+      "down",
+      "host",
+      "lastSeen",
+      "up"
     ],
     "type": "object"
   },

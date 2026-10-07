@@ -32,7 +32,9 @@ export default function SubscriberModal({
     try {
       const result = await postPlan<{ created?: boolean; email?: string }>(
         assigning ? 'apply' : 'subscribe',
-        assigning ? { planId: v.planId, emails } : { username: v.username, password: v.password },
+        assigning
+          ? { planId: v.planId, emails }
+          : { username: v.username, password: v.password, accountOnly: true },
       );
       onSaved();
       if (!result.success) {
@@ -64,7 +66,7 @@ export default function SubscriberModal({
       <Typography.Paragraph>
         {assigning
           ? `将套餐应用到选中的 ${emails.length} 个用户，统一设置节点、额度和使用限制。`
-          : '默认账号与密码为 user / user，可在创建前修改。账号需要唯一；创建后选择用户并分配套餐。'}
+          : '先创建登录账号。创建后选中用户，再分配套餐或配置节点。'}
       </Typography.Paragraph>
       {assigning && (
         <Alert
@@ -79,7 +81,7 @@ export default function SubscriberModal({
         <Alert type="info" title="请先在“订阅套餐”页面创建并启用套餐。" />
       )}
       <FormProvider {...form}>
-        <Form layout="vertical" disabled={saving}>
+        <Form layout="vertical" disabled={saving} onFinish={() => void form.handleSubmit(save)()}>
           {!assigning && (
             <>
               <FormField name="username" label="登录账号">

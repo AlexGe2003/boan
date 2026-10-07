@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from "react";
+import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import {
   Alert,
   Button,
@@ -17,28 +18,81 @@ import {
   Table,
   Tag,
   Typography,
-} from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
-import { HttpUtil } from '@/utils';
-import { ClientActivitySchema } from '@/generated/zod';
-import './ClientActivity.css';
+} from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
+import { HttpUtil } from "@/utils";
+import { ClientActivitySchema, ActivityVisitSchema } from "@/generated/zod";
+import "./ClientActivity.css";
+
+const UsageSchema = z.object({
+  status: z.string(),
+  since: z.number(),
+  updatedAt: z.number(),
+  overflow: z.boolean(),
+  partial: z.boolean(),
+  up: z.number(),
+  down: z.number(),
+  rows: z.array(
+    z.object({
+      host: z.string(),
+      category: z.string(),
+      up: z.number(),
+      down: z.number(),
+      lastSeen: z.number(),
+    }),
+  ),
+});
+const bytes = (n: number) =>
+  n >= 1024 ** 3
+    ? `${(n / 1024 ** 3).toFixed(2)} GB`
+    : n >= 1024 ** 2
+      ? `${(n / 1024 ** 2).toFixed(2)} MB`
+      : n >= 1024
+        ? `${(n / 1024).toFixed(2)} KB`
+        : `${n} B`;
+const ActivitySchema = ClientActivitySchema.extend({
+  usage: UsageSchema.optional(),
+  sources: z
+    .array(
+      z.object({
+        nodeId: z.number(),
+        name: z.string(),
+        status: z.string(),
+        connections: z.number(),
+        sampled: z.boolean(),
+      }),
+    )
+    .optional(),
+  visits: ActivityVisitSchema.extend({
+    nodeName: z.string().optional(),
+  }).array(),
+});
 
 const date = (time: number) => new Date(time).toLocaleString();
 
 export default function ClientActivity({ email }: { email: string }) {
-  const [scope, setScope] = useState('web');
-  const [search, setSearch] = useState('');
+  const [nodeId, setNodeId] = useState(-1);
+  const [nodeOptions, setNodeOptions] = useState<
+    { label: string; value: number }[]
+  >([]);
+  const [scope, setScope] = useState("web");
+  const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>();
   const [hours, setHours] = useState(24);
   const [live, setLive] = useState(false);
   const query = useQuery({
-    queryKey: ['client-activity', email, hours, scope],
+    queryKey: ["client-activity", email, hours, scope, nodeId],
     queryFn: async () => {
       const result = await HttpUtil.get(
-        `/panel/api/clients/activity/${encodeURIComponent(email)}?hours=${hours}&scope=${scope}`,
+        `/panel/api/clients/activity/${encodeURIComponent(email)}?hours=${hours}&scope=${scope}&nodeId=${nodeId}`,
       );
-      if (!result.success) throw new Error(result.msg || '访问记录加载失败');
-      return ClientActivitySchema.parse(result.obj);
+      if (!result.success) throw new Error(result.msg || "访问记录加载失败");
+      const data = ActivitySchema.parse(result.obj);
+      if (nodeId === -1)
+        setNodeOptions(
+          (data.sources || []).map((s) => ({ label: s.name, value: s.nodeId })),
+        );
+      return data;
     },
     refetchInterval: live ? 15_000 : false,
     staleTime: 10_000,
@@ -52,18 +106,44 @@ export default function ClientActivity({ email }: { email: string }) {
   return (
     <div className="client-activity">
       <Typography.Text strong>当前用户：{email}</Typography.Text>
+      <Select
+        aria-label="选择统计节点"
+        value={nodeId}
+        onChange={setNodeId}
+        style={{ minWidth: 220 }}
+        options={[{ label: "全部节点", value: -1 }, ...nodeOptions]}
+      />
+      {data?.sources && (
+        <Space wrap>
+          {data.sources.map((s) => (
+            <Tag
+              key={s.nodeId}
+              color={s.status === "ready" ? "green" : "orange"}
+            >
+              {s.name}：
+              {s.status === "ready"
+                ? `${s.connections} 次连接`
+                : s.status === "disabled"
+                  ? "日志未开启"
+                  : "暂不可读取"}
+            </Tag>
+          ))}
+        </Space>
+      )}
       <div className="activity-toolbar">
         <Segmented
           aria-label="统计时间范围"
           value={hours}
           onChange={(v) => setHours(Number(v))}
           options={[
-            { label: '最近 1 小时', value: 1 },
-            { label: '最近 24 小时', value: 24 },
+            { label: "最近 1 小时", value: 1 },
+            { label: "最近 24 小时", value: 24 },
           ]}
         />
         <Space wrap>
-          <Button onClick={() => setLive(!live)}>{live ? '停止自动刷新' : '每 15 秒刷新'}</Button>
+          <Button onClick={() => setLive(!live)}>
+            {live ? "停止自动刷新" : "每 15 秒刷新"}
+          </Button>
           <Button
             icon={<ReloadOutlined />}
             loading={query.isFetching}
@@ -81,19 +161,101 @@ export default function ClientActivity({ email }: { email: string }) {
           setCategory(undefined);
         }}
         options={[
-          { label: '网站域名', value: 'web' },
-          { label: 'DNS / IP 连接', value: 'network' },
-          { label: '全部记录', value: 'all' },
+          { label: "网站域名", value: "web" },
+          { label: "DNS / IP 连接", value: "network" },
+          { label: "全部记录", value: "all" },
         ]}
       />
+      {data?.usage && (
+        <Card title="目标流量 · 自启用起累计">
+          <Typography.Paragraph type="secondary">
+            按实际代理转发字节统计，未乘套餐倍率；不随访问记录的 1/24
+            小时时间范围切换。无法识别域名的流量归到
+            IP，同一网站的不同域名分别统计。
+          </Typography.Paragraph>
+          {data.usage.status !== "ready" && (
+            <Alert
+              type="warning"
+              title={
+                data.usage.status === "stale"
+                  ? "采集数据暂未更新"
+                  : "目标流量采集尚不可用"
+              }
+            />
+          )}
+          {data.usage.partial && (
+            <Alert
+              type="warning"
+              title="部分节点数据缺失或过期，当前不是完整总量"
+            />
+          )}
+          {data.usage.overflow && (
+            <Alert
+              type="info"
+              title="目标数量达到上限，新增目标流量合并到“其他目标”"
+            />
+          )}
+          <Space wrap>
+            <Statistic title="上传" value={bytes(data.usage.up)} />
+            <Statistic title="下载" value={bytes(data.usage.down)} />
+            <Statistic
+              title="合计"
+              value={bytes(data.usage.up + data.usage.down)}
+            />
+          </Space>
+          {!!data.usage.since && (
+            <Typography.Paragraph type="secondary">
+              开始：{date(data.usage.since)} · 数据更新：
+              {date(data.usage.updatedAt)}
+            </Typography.Paragraph>
+          )}
+          <Table
+            rowKey="host"
+            size="small"
+            dataSource={data.usage.rows.filter(matches)}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: false,
+              hideOnSinglePage: true,
+            }}
+            scroll={{ x: 650 }}
+            columns={[
+              { title: "域名 / IP", dataIndex: "host" },
+              { title: "分类", dataIndex: "category" },
+              {
+                title: "上传",
+                dataIndex: "up",
+                render: bytes,
+                sorter: (a, b) => a.up - b.up,
+              },
+              {
+                title: "下载",
+                dataIndex: "down",
+                render: bytes,
+                sorter: (a, b) => a.down - b.down,
+              },
+              {
+                title: "合计",
+                render: (_, r) => bytes(r.up + r.down),
+                sorter: (a, b) => a.up + a.down - (b.up + b.down),
+              },
+            ]}
+          />
+        </Card>
+      )}
       <Typography.Paragraph type="secondary">
-        默认仅统计网站域名，DNS 和纯 IP 连接单独查看。分类根据域名推测，连接次数不等于浏览次数。
-        仅统计本机开启日志后保留的连接；远程节点暂未接入。
+        默认仅统计网站域名，DNS 和纯 IP
+        连接单独查看。分类根据域名推测，连接次数不等于浏览次数。
+        汇总所选节点开启日志后保留的连接。域名连接次数不等于浏览次数；累计字节数见上方“目标流量”，各节点用量见“服务器流量”。
       </Typography.Paragraph>
       <Alert
         type="info"
         showIcon
-        title={scope === 'web' ? '没有域名的连接不会计入网站统计' : 'IP 地址不等于访问的网站'}
+        title={
+          scope === "web"
+            ? "没有域名的连接不会计入网站统计"
+            : "IP 地址不等于访问的网站"
+        }
         description="1.1.1.1 等公共解析地址归入 DNS 服务。日志只有 IP 时无法可靠判断网站；可检查对应入站的域名嗅探（HTTP / TLS / QUIC）及客户端 DNS 设置，历史记录无法补全域名。"
       />
       {query.isLoading && <Skeleton active paragraph={{ rows: 5 }} />}
@@ -112,21 +274,25 @@ export default function ClientActivity({ email }: { email: string }) {
           description="当前为本地演示日志，用于预览网站与分类统计。"
         />
       )}
-      {data && data.status !== 'ready' && (
+      {data && data.status !== "ready" && (
         <Alert
           type="warning"
-          title={data.status === 'disabled' ? '尚未开启访问日志' : '访问日志暂不可读取'}
+          title={
+            data.status === "disabled"
+              ? "尚未开启访问日志"
+              : "访问日志暂不可读取"
+          }
           description="先在代理核心设置中开启访问日志，再让该用户连接节点。新连接会显示在这里，开启前的历史无法补回。"
         />
       )}
       {data?.sampled && (
         <Alert
           type="warning"
-          title="仅统计日志末尾 8 MB"
-          description="当前结果为有界样本，不代表所选时段的完整访问量。"
+          title="当前结果包含截取或排名限制"
+          description="每个节点最多读取日志末尾 8 MB，并限制目标排行条数；结果不代表所选时段的完整访问量。"
         />
       )}
-      {data?.status === 'ready' && (
+      {data?.status === "ready" && (
         <>
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={8}>
@@ -136,14 +302,24 @@ export default function ClientActivity({ email }: { email: string }) {
             </Col>
             <Col xs={24} sm={8}>
               <Card>
-                <Statistic title="最近 2 分钟访问目标" value={data.recent.length} />
-                <Typography.Text type="secondary">不代表连接仍在持续</Typography.Text>
+                <Statistic
+                  title="最近 2 分钟访问目标"
+                  value={data.recent.length}
+                />
+                <Typography.Text type="secondary">
+                  不代表连接仍在持续
+                </Typography.Text>
               </Card>
             </Col>
             <Col xs={24} sm={8}>
               <Card>
-                <Statistic title="当前范围分类数" value={data.categories.length} />
-                <Typography.Text type="secondary">更新于 {date(data.generatedAt)}</Typography.Text>
+                <Statistic
+                  title="当前范围分类数"
+                  value={data.categories.length}
+                />
+                <Typography.Text type="secondary">
+                  更新于 {date(data.generatedAt)}
+                </Typography.Text>
               </Card>
             </Col>
           </Row>
@@ -154,7 +330,9 @@ export default function ClientActivity({ email }: { email: string }) {
                   <div key={v.host}>
                     <strong dir="ltr">{v.host}</strong>
                     <Tag>{v.category}</Tag>
-                    <Typography.Text type="secondary">{date(v.time)}</Typography.Text>
+                    <Typography.Text type="secondary">
+                      {date(v.time)}
+                    </Typography.Text>
                   </div>
                 ))}
               </div>
@@ -177,12 +355,19 @@ export default function ClientActivity({ email }: { email: string }) {
                       </div>
                       <Progress
                         showInfo={false}
-                        percent={data.connections ? (c.count / data.connections) * 100 : 0}
+                        percent={
+                          data.connections
+                            ? (c.count / data.connections) * 100
+                            : 0
+                        }
                       />
                     </div>
                   ))
                 ) : (
-                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="该时段暂无可分类记录" />
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="该时段暂无可分类记录"
+                  />
                 )}
               </Card>
             </Col>
@@ -216,24 +401,32 @@ export default function ClientActivity({ email }: { email: string }) {
                   locale={{
                     emptyText:
                       search || category
-                        ? '没有匹配的访问目标'
-                        : '该时段没有此类记录，可切换目标类型查看',
+                        ? "没有匹配的访问目标"
+                        : "该时段没有此类记录，可切换目标类型查看",
                   }}
                   scroll={{ x: 520 }}
-                  pagination={{ pageSize: 8, showSizeChanger: false, hideOnSinglePage: true }}
+                  pagination={{
+                    pageSize: 8,
+                    showSizeChanger: false,
+                    hideOnSinglePage: true,
+                  }}
                   columns={[
                     {
-                      title: '域名 / IP',
-                      dataIndex: 'host',
+                      title: "域名 / IP",
+                      dataIndex: "host",
                       render: (v: string) => <span dir="ltr">{v}</span>,
                     },
                     {
-                      title: '分类',
-                      dataIndex: 'category',
+                      title: "分类",
+                      dataIndex: "category",
                       render: (value: string) => <Tag>{value}</Tag>,
                     },
-                    { title: '连接次数', dataIndex: 'count', sorter: (a, b) => a.count - b.count },
-                    { title: '最近访问', dataIndex: 'lastSeen', render: date },
+                    {
+                      title: "连接次数",
+                      dataIndex: "count",
+                      sorter: (a, b) => a.count - b.count,
+                    },
+                    { title: "最近访问", dataIndex: "lastSeen", render: date },
                   ]}
                 />
               </Card>
@@ -248,17 +441,22 @@ export default function ClientActivity({ email }: { email: string }) {
               size="small"
               dataSource={data.visits.filter(matches)}
               scroll={{ x: 520 }}
-              pagination={{ pageSize: 8, showSizeChanger: false, hideOnSinglePage: true }}
+              pagination={{
+                pageSize: 8,
+                showSizeChanger: false,
+                hideOnSinglePage: true,
+              }}
               columns={[
-                { title: '时间', dataIndex: 'time', render: date },
+                { title: "时间", dataIndex: "time", render: date },
+                { title: "节点", dataIndex: "nodeName" },
                 {
-                  title: '域名 / IP',
-                  dataIndex: 'host',
+                  title: "域名 / IP",
+                  dataIndex: "host",
                   render: (v: string) => <span dir="ltr">{v}</span>,
                 },
                 {
-                  title: '分类',
-                  dataIndex: 'category',
+                  title: "分类",
+                  dataIndex: "category",
                   render: (value: string) => <Tag>{value}</Tag>,
                 },
               ]}

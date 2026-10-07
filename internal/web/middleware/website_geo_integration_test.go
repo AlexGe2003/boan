@@ -83,6 +83,35 @@ func TestWebsiteGeoBlockLiveSwitchAndForwarding(t *testing.T) {
 	run("127.0.0.1:123", "1.2.3.4", "/login", 403)
 	run("127.0.0.1:123", "9.1.2.3", "/login", 204)
 	run("127.0.0.1:123", "", "/login", 403)
+	if err = svc.ConfigureWebsiteGeoBlock(nil, "CN,MO,TW", nil); err != nil {
+		t.Fatal(err)
+	}
+	run("127.0.0.1:123", "2.2.3.4", "/login", 204)
+	for _, ip := range []string{"1.2.3.4", "3.2.3.4", "4.2.3.4"} {
+		run("127.0.0.1:123", ip, "/login", 403)
+	}
+	all, err := svc.GetAllSetting()
+	if err != nil {
+		t.Fatal(err)
+	}
+	all.WebsiteGeoBlockRegions = "MO,TW"
+	if err = svc.UpdateAllSetting(all, service.SecretClears{}); err != nil {
+		t.Fatal(err)
+	}
+	run("127.0.0.1:123", "1.2.3.4", "/login", 204)
+	run("127.0.0.1:123", "3.2.3.4", "/login", 403)
+	all.WebsiteGeoBlockRegions = ""
+	if err = svc.UpdateAllSetting(all, service.SecretClears{}); err != nil {
+		t.Fatal(err)
+	}
+	if regions, err := svc.GetWebsiteGeoBlockRegions(); err != nil || regions != "MO,TW" {
+		t.Fatalf("legacy save changed regions: %s %v", regions, err)
+	}
+	all.WebsiteGeoBlockRegions = "TYPO"
+	if err = svc.UpdateAllSetting(all, service.SecretClears{}); err == nil {
+		t.Fatal("accepted invalid region")
+	}
+	run("127.0.0.1:123", "1.2.3.4", "/login", 204)
 	if err = os.Remove(geoPath); err != nil {
 		t.Fatal(err)
 	}

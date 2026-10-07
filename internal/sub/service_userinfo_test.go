@@ -53,4 +53,8 @@ func TestAggregateTrafficByEmails_FallsBackToClientLimits(t *testing.T) {
 	if agg.ExpiryTime != expiry {
 		t.Errorf("expiry = %d, want %d (fallback to clients table)", agg.ExpiryTime, expiry)
 	}
+	stats := s.statsForClient(&model.Inbound{}, model.Client{Email: email, TotalGB: totalBytes, ExpiryTime: expiry})
+	if stats.Total != agg.Total || stats.ExpiryTime != agg.ExpiryTime || stats.Up != agg.Up || stats.Down != agg.Down {
+		t.Fatalf("DB-backed remark stats %+v differ from subscription header %+v", stats, agg)
+	}
 }

@@ -3,28 +3,20 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Alert,
   Button,
-  Empty,
   Input,
-  Segmented,
   Space,
   Spin,
   Table,
   Tag,
-  Tooltip,
   Typography,
-  message,
 } from 'antd';
 import {
   SearchOutlined,
   ReloadOutlined,
-  CopyOutlined,
   GlobalOutlined,
   CheckCircleOutlined,
-  AppstoreOutlined,
-  BarsOutlined,
-  ThunderboltOutlined,
 } from '@ant-design/icons';
-import { ClipboardManager, HttpUtil } from '@/utils';
+import { HttpUtil } from '@/utils';
 import './NodeStatus.css';
 
 interface Node {
@@ -120,8 +112,6 @@ function getProtocolTag(protocol: string) {
 
 export default function NodeStatus() {
   const [search, setSearch] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
-  const [toast, contextHolder] = message.useMessage();
 
   const query = useQuery({
     queryKey: ['customer-node-status'],
@@ -152,14 +142,8 @@ export default function NodeStatus() {
     return { total, enabled, disabled: total - enabled };
   }, [query.data]);
 
-  const handleCopy = async (text: string) => {
-    if (await ClipboardManager.copyText(text)) toast.success('节点名称已复制');
-    else toast.error('复制失败，请重试');
-  };
-
   return (
     <div className="node-status-container">
-      {contextHolder}
       <div className="node-status-header">
         <div className="node-status-title-group">
           <Typography.Title level={3} className="node-status-title">
@@ -223,14 +207,6 @@ export default function NodeStatus() {
           <span className="node-status-count">
             {query.data ? `${filteredNodes.length} / ${stats.total} 个节点` : ''}
           </span>
-          <Segmented
-            value={viewMode}
-            onChange={(v) => setViewMode(v as 'grid' | 'table')}
-            options={[
-              { value: 'grid', icon: <AppstoreOutlined />, label: '卡片视图' },
-              { value: 'table', icon: <BarsOutlined />, label: '列表视图' },
-            ]}
-          />
         </div>
       </div>
 
@@ -238,53 +214,7 @@ export default function NodeStatus() {
         <div style={{ padding: 48, textAlign: 'center' }}>
           <Spin description="正在获取节点…" />
         </div>
-      ) : query.isError && !query.data ? null : viewMode === 'grid' ? (
-        filteredNodes.length === 0 ? (
-          <Empty description={search.trim() ? '没有符合筛选条件的节点' : '尚未分配节点，请联系管理员'} />
-        ) : (
-          <div className="node-status-grid">
-            {filteredNodes.map((item) => {
-              const reg = parseRegion(item.name);
-              const isEnabled = item.status === '已启用';
-              return (
-                <div className="node-card-item" key={item.id}>
-                  <div className="node-card-top">
-                    <span className="node-card-region">
-                      <span className="node-card-flag">{reg.flag}</span>
-                      {reg.name}
-                    </span>
-                    {getProtocolTag(item.protocol)}
-                  </div>
-                  <div className="node-card-name" title={item.name}>
-                    <ThunderboltOutlined style={{ color: 'var(--ant-color-primary, #1e5eff)' }} />
-                    <span className="node-card-name-text">{item.name}</span>
-                    <Tooltip title="复制节点名称">
-                      <Button
-                        type="text"
-                        size="small"
-                        aria-label="复制节点名称"
-                        icon={<CopyOutlined />}
-                        onClick={() => void handleCopy(item.name)}
-                      />
-                    </Tooltip>
-                  </div>
-                  <div className="node-card-bottom">
-                    <div className="node-card-status">
-                      <span className={`node-pulse-dot ${isEnabled ? 'online' : 'offline'}`} />
-                      <span style={{ color: isEnabled ? '#52c41a' : 'var(--ant-color-text-secondary)' }}>
-                        {isEnabled ? '已启用' : item.status || '未启用'}
-                      </span>
-                    </div>
-                    <Tag variant="filled" style={{ margin: 0, fontSize: 11, color: 'var(--ant-color-text-tertiary)' }}>
-                      #{item.id}
-                    </Tag>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )
-      ) : (
+      ) : query.isError && !query.data ? null : (
         <Table<Node>
           className="node-status-table"
           size="middle"
@@ -309,15 +239,6 @@ export default function NodeStatus() {
                         {reg.name} 节点
                       </Typography.Text>
                     </div>
-                    <Tooltip title="复制节点名称">
-                      <Button
-                        type="text"
-                        size="small"
-                        aria-label="复制节点名称"
-                        icon={<CopyOutlined />}
-                        onClick={() => void handleCopy(name)}
-                      />
-                    </Tooltip>
                   </div>
                 );
               },

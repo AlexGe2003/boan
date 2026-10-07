@@ -182,7 +182,6 @@ export default function MySubscriptionsPage() {
                   return (
                     <section className="customer-card detail-card" key={item.email}>
                       <h2>我的服务</h2>
-                      <p>用户账号：{item.email}</p>
                       <Alert
                         type="info"
                         showIcon
@@ -205,113 +204,48 @@ export default function MySubscriptionsPage() {
                 return (
                   <div key={item.email}>
                     {section === 'home' && (
-                      <>
-                        <div className="dashboard-quick-actions">
-                          <div
-                            className="dashboard-action-card"
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => navigate('subscription')}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') navigate('subscription');
-                            }}
-                          >
-                            <div className="dashboard-action-info">
-                              <div className="dashboard-action-icon">
-                                <LinkOutlined />
-                              </div>
-                              <div className="dashboard-action-text">
-                                <strong>我的订阅配置</strong>
-                                <span>支持一键导入 Shadowrocket / Clash / v2rayN 等客户端</span>
-                              </div>
+                      <div className="dashboard-overview">
+                        <section className="customer-card dashboard-service">
+                          <h2>服务概览 <Tag color={available ? 'green' : 'red'}>{status}</Tag></h2>
+                          <dl className="dashboard-service-fields">
+                            <div><dt>有效期</dt><dd>{expiry(item.expiryTime)}</dd></div>
+                            <div><dt>流量额度</dt><dd>{item.total > 0 ? bytes(item.total) : '不限量'}</dd></div>
+                          </dl>
+                          {item.total > 0 && (
+                            <div className="dashboard-quota">
+                              <Progress aria-label="剩余流量比例" percent={Math.max(0, Math.min(100, (item.total - item.used) / item.total * 100))} showInfo={false} strokeColor={depleted ? '#ef6565' : '#2bc66c'} />
+                              <span>剩余 {bytes(Math.max(0, item.total - item.used))}</span>
                             </div>
-                            <Button type="primary" size="middle">
-                              获取订阅
-                            </Button>
-                          </div>
-
-                          <div
-                            className="dashboard-action-card"
-                            role="button"
-                            tabIndex={0}
-                            onClick={() => navigate('nodes')}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') navigate('nodes');
-                            }}
-                          >
-                            <div className="dashboard-action-info">
-                              <div className="dashboard-action-icon">
-                                <ClusterOutlined />
-                              </div>
-                              <div className="dashboard-action-text">
-                                <strong>节点线路状态</strong>
-                                <span>实时查看可用地区节点与协议详情</span>
-                              </div>
-                            </div>
-                            <Button size="middle">
-                              查看节点
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div className="customer-stats">
-                          <section className="customer-card quota-card">
-                            <h2>
-                              我的服务 <Tag color={available ? 'green' : 'red'}>{status}</Tag>
-                            </h2>
-                            <h3>{item.planName || '管理员配置的订阅'}</h3>
-                            <p className="quota-expiry">{expiry(item.expiryTime)}</p>
-                            <Progress
-                              aria-label="剩余流量比例"
-                              percent={
-                                item.total > 0
-                                  ? Math.max(
-                                      0,
-                                      Math.min(
-                                        100,
-                                        ((item.remaining ?? Math.max(0, item.total - item.used)) /
-                                          item.total) *
-                                          100,
-                                      ),
-                                    )
-                                  : 100
-                              }
-                              showInfo={false}
-                              strokeColor={depleted ? '#ef6565' : '#2bc66c'}
-                            />
-                            <strong className="quota-summary">
-                              剩余 {item.remaining === null ? '不限量' : bytes(item.remaining)}{' '}
-                              <span>/ 总计 {item.total > 0 ? bytes(item.total) : '不限量'}</span>
-                            </strong>
+                          )}
+                        </section>
+                        <section className="customer-card dashboard-traffic">
+                          <h2>流量使用情况</h2>
+                          <dl className="dashboard-traffic-fields">
+                            <div className="dashboard-total"><dt>累计使用</dt><dd>{bytes(item.used)}</dd></div>
+                            <div><dt><ArrowUpOutlined /> 上传</dt><dd>{bytes(item.up || 0)}</dd></div>
+                            <div><dt><ArrowDownOutlined /> 下载</dt><dd>{bytes(item.down || 0)}</dd></div>
+                          </dl>
+                        </section>
+                        <div className="dashboard-links">
+                          <section className="customer-card dashboard-link">
+                            <LinkOutlined className="dashboard-link-icon" />
+                            <div><h2>我的订阅</h2><p>导入客户端或复制订阅链接</p></div>
+                            <Button type="primary" onClick={() => navigate('subscription')}>获取订阅</Button>
                           </section>
-                          <section className="customer-card">
-                            <h2>流量使用</h2>
-                            <dl className="traffic-list">
-                              <div>
-                                <dt>
-                                  <ArrowUpOutlined className="up" /> 上行流量
-                                </dt>
-                                <dd>{bytes(item.up || 0)}</dd>
-                              </div>
-                              <div>
-                                <dt>
-                                  <ArrowDownOutlined className="down" /> 下行流量
-                                </dt>
-                                <dd>{bytes(item.down || 0)}</dd>
-                              </div>
-                              <div>
-                                <dt>
-                                  <span className="total-mark" /> 总计使用
-                                </dt>
-                                <dd>{bytes(item.used)}</dd>
-                              </div>
-                            </dl>
+                          <section className="customer-card dashboard-link">
+                            <ClusterOutlined className="dashboard-link-icon" />
+                            <div><h2>节点状态</h2><p>查看已分配节点与配置状态</p></div>
+                            <Button onClick={() => navigate('nodes')}>查看节点</Button>
                           </section>
                         </div>
-                      </>
+                      </div>
                     )}
                     {section === 'subscription' && (
                       <section className="customer-card detail-card subscription-design-card">
+                        <dl className="dashboard-service-fields subscription-quota-summary">
+                          <div><dt>剩余流量</dt><dd>{item.total > 0 ? bytes(Math.max(0, item.total - item.used)) : '不限量'}</dd></div>
+                          <div><dt>到期日期</dt><dd>{expiry(item.expiryTime)}</dd></div>
+                        </dl>
                         {item.url ? (
                           <SubscriptionDevicePicker url={item.url} clashUrl={item.clashUrl} />
                         ) : (

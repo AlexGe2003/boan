@@ -102,101 +102,6 @@
   color: var(--ant-color-text-secondary, #687080);
 }
 
-/* Card Grid View */
-.node-status-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: 16px;
-}
-
-.node-card-item {
-  background: var(--ant-color-bg-container, #fff);
-  border: 1px solid var(--ant-color-border-secondary, #e8ebef);
-  border-radius: 12px;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), border-color 0.2s ease;
-}
-
-.node-card-item:hover {
-  border-color: var(--ant-color-primary, #1e5eff);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
-
-.node-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.node-card-region {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ant-color-text-secondary, #687080);
-}
-
-.node-card-flag {
-  font-size: 22px;
-  line-height: 1;
-}
-
-.node-card-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ant-color-text, #202735);
-  min-height: 24px;
-}
-
-.node-card-name-text {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.node-card-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid var(--ant-color-border-secondary, #e8ebef);
-  padding-top: 12px;
-  margin-top: auto;
-}
-
-.node-card-status {
-  display: flex;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.node-pulse-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 8px;
-}
-
-.node-pulse-dot.online {
-  background: #52c41a;
-  box-shadow: 0 0 8px rgba(82, 196, 26, 0.7);
-}
-
-.node-pulse-dot.offline {
-  background: #8c97ad;
-}
-
 /* Table View */
 .node-status-container .ant-table-wrapper {
   overflow-x: auto;
@@ -240,11 +145,6 @@
   line-height: 1;
 }
 
-.node-list-name .ant-btn {
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
 /* Dark mode theme variables */
 .customer-app .node-status-container {
   --ant-color-bg-container: var(--customer-card-bg);
@@ -275,8 +175,5 @@
   }
   .node-status-updated {
     font-size: 12px;
-  }
-  .node-status-grid {
-    grid-template-columns: 1fr;
   }
 }

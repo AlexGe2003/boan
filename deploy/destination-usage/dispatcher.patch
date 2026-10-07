@@ -1,0 +1,23 @@
+--- a/app/dispatcher/default.go
++++ b/app/dispatcher/default.go
+@@ -131,11 +131,12 @@
+ 
+ // Start implements common.Runnable.
+ func (*DefaultDispatcher) Start() error {
++	startDestinationUsage()
+ 	return nil
+ }
+ 
+ // Close implements common.Closable.
+-func (*DefaultDispatcher) Close() error { return nil }
++func (*DefaultDispatcher) Close() error { flushDestinationUsage(); return nil }
+ 
+ func (d *DefaultDispatcher) getLink(ctx context.Context) (*transport.Link, *transport.Link) {
+ 	opt := pipe.OptionsFromContext(ctx)
+@@ -501,5 +502,6 @@
+ 		log.Record(accessMessage)
+ 	}
+ 
++	wrapDestinationUsage(ctx, link, destination)
+ 	handler.Dispatch(ctx, link)
+ }

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mhsanaei/3x-ui/v3/internal/config"
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
@@ -132,6 +133,10 @@ func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTr
 		return nil
 	}
 
+	rate, err := config.LocalTrafficRate()
+	if err != nil {
+		return err
+	}
 	emails := make([]string, 0, len(traffics))
 	for _, traffic := range traffics {
 		emails = append(emails, traffic.Email)
@@ -181,14 +186,22 @@ func (s *InboundService) addClientTraffic(tx *gorm.DB, traffics []*xray.ClientTr
 		if !ok || (t.Up == 0 && t.Down == 0) {
 			continue
 		}
+		up, upRem, scaleErr := scaleQuotaBytes(t.Up, rate, ct.QuotaUpRemainder)
+		if scaleErr != nil {
+			return scaleErr
+		}
+		down, downRem, scaleErr := scaleQuotaBytes(t.Down, rate, ct.QuotaDownRemainder)
+		if scaleErr != nil {
+			return scaleErr
+		}
 		if err = tx.Exec(
 			fmt.Sprintf(
-				`UPDATE client_traffics SET up = %s, down = %s, last_online = %s WHERE email = ?`,
+				`UPDATE client_traffics SET up = %s, down = %s, last_online = %s, quota_up_remainder = ?, quota_down_remainder = ? WHERE email = ?`,
 				database.ClampedAddExpr("up"),
 				database.ClampedAddExpr("down"),
 				database.GreatestExpr("last_online", "?"),
 			),
-			t.Up, t.Down, now, ct.Email,
+			up, down, now, upRem, downRem, ct.Email,
 		).Error; err != nil {
 			logger.Warning("AddClientTraffic update data ", err)
 			continue

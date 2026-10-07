@@ -18,6 +18,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { catTabLabel } from './catTabLabel';
 import { sanitizePath } from './uriPath';
 import SecretInput from './SecretInput';
+import MainlandAccessSetting from './MainlandAccessSetting';
 
 interface ApiMsg<T = unknown> {
   success?: boolean;
@@ -291,16 +292,7 @@ export default function GeneralTab({ allSetting, updateSetting }: GeneralTabProp
                 />
               </SettingListItem>
 
-              <SettingListItem
-                paddings="small"
-                title={t('pages.settings.websiteGeoBlockEnable')}
-                description={t('pages.settings.websiteGeoBlockEnableDesc')}
-              >
-                <Switch
-                  checked={allSetting.websiteGeoBlockEnable}
-                  onChange={(checked) => updateSetting({ websiteGeoBlockEnable: checked })}
-                />
-              </SettingListItem>
+              <MainlandAccessSetting setting={allSetting} onChange={updateSetting} />
 
               <SettingListItem
                 paddings="small"

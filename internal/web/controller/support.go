@@ -50,7 +50,7 @@ func customerNodes(c *gin.Context) {
 		jsonObj(c, rows, nil)
 		return
 	}
-	err := database.GetDB().Table("inbounds ib").Select("ib.id, ib.remark AS name, ib.protocol, ib.enable AS enabled, ib.expiry_time, ib.total, ib.up, ib.down").Joins("JOIN client_inbounds ci ON ci.inbound_id=ib.id").Where("ci.client_id = ?", *u.ClientID).Order("ib.id").Scan(&rows).Error
+	err := database.GetDB().Table("inbounds ib").Select("ib.id, ib.remark AS name, ib.protocol, ib.enable AS enabled, ib.expiry_time, ib.total, ib.up, ib.down").Joins("JOIN client_inbounds ci ON ci.inbound_id=ib.id").Where("ci.client_id = ?", *u.ClientID).Order("ib.sub_sort_index ASC, ib.id ASC").Scan(&rows).Error
 	type node struct {
 		ID       int    `json:"id"`
 		Name     string `json:"name"`

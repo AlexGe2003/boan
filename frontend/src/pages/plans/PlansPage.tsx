@@ -1,3 +1,4 @@
+import { useHostsQuery } from '@/api/queries/useHostsQuery';
 import zhCN from 'antd/locale/zh_CN';
 import { useState } from 'react';
 import { FormProvider, useFieldArray } from 'react-hook-form';
@@ -72,6 +73,24 @@ export default function PlansPage() {
   );
   const groups = useNodeGroups();
   const inbounds = useInboundOptions();
+  const hostQuery = useHostsQuery();
+  function lineNames(id: number) {
+    const inbound = inbounds.data?.find((item) => item.id === id);
+    const name = inbound?.remark || inbound?.tag || `入站 ${id}`;
+    const hosts = hostQuery.hosts
+      .filter((host) => host.inboundIds.includes(id) && !host.isDisabled && !host.isHidden)
+      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+    return hosts.length
+      ? hosts.map((host) => `${name} · ${host.remark || host.hosts.join(' / ')}`)
+      : [name];
+  }
+  function planLines(plan: SubscriptionPlan) {
+    const ids = new Set([
+      ...plan.inboundIds,
+      ...(groups.data || []).filter((group) => plan.nodeGroupIds.includes(group.id)).flatMap((group) => group.inboundIds),
+    ]);
+    return [...ids].flatMap(lineNames);
+  }
   const [editing, setEditing] = useState<SubscriptionPlan | null | undefined>();
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState<number>();
@@ -133,9 +152,9 @@ export default function PlansPage() {
             <div className="plans-heading">
               <div>
                 <span className="plans-eyebrow">服务管理</span>
-                <Typography.Title level={2}>订阅套餐</Typography.Title>
+                <Typography.Title level={2}>节点套餐</Typography.Title>
                 <Typography.Paragraph type="secondary">
-                  配置流量、节点权限与购买周期，管理用户可选择的服务。
+                  把节点组合成套餐，设置流量与有效期，再到用户管理中分配给已创建的账号。
                 </Typography.Paragraph>
               </div>
               <Button type="primary" icon={<PlusOutlined />} onClick={() => open(null)}>
@@ -240,6 +259,18 @@ export default function PlansPage() {
                         </dd>
                       </div>
                     </dl>
+                    <div className="admin-plan-lines">
+                      <Typography.Text strong>包含线路</Typography.Text>
+                      {hostQuery.fetchError || inbounds.isError || groups.isError ? (
+                        <Typography.Paragraph type="danger">线路名称加载失败，请刷新重试。</Typography.Paragraph>
+                      ) : !hostQuery.fetched || inbounds.isLoading || groups.isLoading ? (
+                        <Typography.Paragraph type="secondary">正在加载线路…</Typography.Paragraph>
+                      ) : (
+                        <ul style={{ paddingInlineStart: 20, marginBlock: 8 }}>
+                          {planLines(row).map((name, index) => <li key={`${index}-${name}`}>{name}</li>)}
+                        </ul>
+                      )}
+                    </div>
                     <div className="admin-plan-pricing">
                       <span className="admin-plan-section-label">购买周期</span>
                       {row.prices.length ? (
@@ -367,15 +398,15 @@ export default function PlansPage() {
             </FormField>
             <FormField
               name="inboundIds"
-              label="直接选择入站（兼容旧套餐）"
-              extra="与分组资源合并去重。仅选择分组即可。"
+              label="套餐节点"
+              extra="选择此套餐包含的节点；也可选择上方节点分组，两者会合并去重。"
             >
               <Select
                 mode="multiple"
                 optionFilterProp="label"
                 options={inbounds.data?.map((ib) => ({
                   value: ib.id,
-                  label: `${ib.remark || ib.tag || `入站 ${ib.id}`} · ${ib.protocol} · ${ib.nodeId ? `节点 ${ib.nodeId}` : '本机'}`,
+                  label: `${lineNames(ib.id).join('；')} · ${ib.protocol}`,
                 }))}
               />
             </FormField>

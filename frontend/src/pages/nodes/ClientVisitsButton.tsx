@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from 'react';
 import { Alert, Button, Empty, Modal, Select, Spin } from 'antd';
 import { usePanelRole } from '@/api/queries/usePanelRole';
-import { useClientOptions } from '@/api/queries/useClientOptions';
+import { useClientVisitOptions } from '@/api/queries/useClientOptions';
 
 const ClientActivity = lazy(() => import('../clients/ClientActivity'));
 
@@ -9,14 +9,14 @@ export default function ClientVisitsButton() {
   const role = usePanelRole();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState<string>();
-  const clients = useClientOptions(open && role === 'admin');
+  const clients = useClientVisitOptions(open && role === 'admin');
   if (role !== 'admin') return null;
   return (
     <>
-      <Button onClick={() => setOpen(true)}>用户访问记录</Button>
+      <Button onClick={() => setOpen(true)}>用户访问网站</Button>
       <Modal
         open={open}
-        title="用户访问记录 · 本机网站与分类"
+        title="用户访问网站 · 全部节点"
         width={1120}
         styles={{ body: { maxHeight: '75vh', overflowY: 'auto', paddingRight: 4 } }}
         footer={null}
@@ -38,7 +38,8 @@ export default function ClientVisitsButton() {
             value={email}
             onChange={setEmail}
             loading={clients.isFetching}
-            options={(clients.data || []).map((value) => ({ value, label: value }))}
+            options={clients.data || []}
+            optionFilterProp="label"
           />
         )}
         {open && email ? (

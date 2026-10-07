@@ -208,6 +208,7 @@ export default function AppSidebar() {
       },
       { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
       { key: '/clients', icon: 'team', title: t('menu.clients') },
+      { key: '/plans', icon: 'groups', title: t('menu.nodePlans') },
       { key: '/my-subscriptions', icon: 'team', title: t('menu.mySubscriptions') },
       { key: '/node-monitor', icon: 'cluster', title: t('nodeMonitor.title') },
       { key: '/node-groups', icon: 'cluster', title: '节点分组' },
@@ -228,7 +229,6 @@ export default function AppSidebar() {
     () =>
       tabs.filter(
         (tab) =>
-          !(access.role === 'admin' && tab.key === '/my-subscriptions') &&
           visibleNavKeys(access.role, [tab.key], access.pages).includes(tab.key),
       ),
     [tabs, access.role, access.pages],

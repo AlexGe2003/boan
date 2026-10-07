@@ -12,7 +12,7 @@ const mockNodes = [
   { id: 3, name: '🇺🇸 美国 洛杉矶 01', protocol: 'trojan', status: '已停用' },
 ];
 
-it('renders node status summary statistics and cards', async () => {
+it('renders node status summary statistics and list', async () => {
   vi.spyOn(HttpUtil, 'get').mockResolvedValue(new Msg(true, 'ok', mockNodes));
 
   renderWithProviders(<NodeStatus />);
@@ -39,15 +39,17 @@ it('filters nodes by search term', async () => {
   expect(screen.queryByText('🇯🇵 日本 东京 BGP 01')).toBeNull();
 });
 
-it('switches between grid and table view', async () => {
+it('shows the node list without view switching', async () => {
   vi.spyOn(HttpUtil, 'get').mockResolvedValue(new Msg(true, 'ok', mockNodes));
 
   renderWithProviders(<NodeStatus />);
 
   await screen.findByText('🇭🇰 香港 CN2 专线 01');
 
-  const tableButton = screen.getByText('列表视图');
-  fireEvent.click(tableButton);
+  expect(screen.queryByText('卡片视图')).toBeNull();
+  expect(screen.queryByText('列表视图')).toBeNull();
+  expect(screen.getByRole('table')).toBeTruthy();
+  expect(screen.queryByRole('button', { name: '复制节点名称' })).toBeNull();
 
   expect(screen.getAllByText('地区 / 节点').length).toBeGreaterThan(0);
   expect(screen.getAllByText('传输协议').length).toBeGreaterThan(0);

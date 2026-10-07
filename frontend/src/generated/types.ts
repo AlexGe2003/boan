@@ -19,9 +19,18 @@ export interface ActivityDestination {
   lastSeen: number;
 }
 
+export interface ActivitySource {
+  connections: number;
+  name: string;
+  nodeId: number;
+  sampled: boolean;
+  status: string;
+}
+
 export interface ActivityVisit {
   category: string;
   host: string;
+  nodeName?: string;
   time: number;
 }
 
@@ -174,6 +183,7 @@ export interface AllSetting {
   webListen: string;
   webPort: number;
   websiteGeoBlockEnable: boolean;
+  websiteGeoBlockRegions: string;
 }
 
 export interface AllSettingView {
@@ -333,6 +343,7 @@ export interface AllSettingView {
   webListen: string;
   webPort: number;
   websiteGeoBlockEnable: boolean;
+  websiteGeoBlockRegions: string;
 }
 
 export interface AmneziaWGLogs {
@@ -404,7 +415,9 @@ export interface ClientActivity {
   recent: ActivityVisit[];
   sampled: boolean;
   since: number;
+  sources?: ActivitySource[];
   status: string;
+  usage?: DestinationUsage | null;
   visits: ActivityVisit[];
 }
 
@@ -474,6 +487,7 @@ export interface ClientSlim {
   inboundIds: number[];
   limitHwid: number;
   limitIp: number;
+  loginUsername?: string;
   reset: number;
   resetDay: number;
   resetMax: number;
@@ -492,6 +506,9 @@ export interface ClientTraffic {
   inboundId: number;
   lastOnline: number;
   lastSubFetch: number;
+  rawDown: number;
+  rawKnown: boolean;
+  rawUp: number;
   reset: number;
   resetCount: number;
   resetDay: number;
@@ -513,6 +530,25 @@ export interface ClientsSummary {
   online: string[];
   onlineCount: number;
   total: number;
+}
+
+export interface DestinationUsage {
+  down: number;
+  overflow: boolean;
+  partial: boolean;
+  rows: DestinationUsageRow[];
+  since: number;
+  status: string;
+  up: number;
+  updatedAt: number;
+}
+
+export interface DestinationUsageRow {
+  category: string;
+  down: number;
+  host: string;
+  lastSeen: number;
+  up: number;
 }
 
 export interface FallbackParentInfo {

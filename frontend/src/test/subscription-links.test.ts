@@ -18,6 +18,7 @@ describe('subscription client links', () => {
     expect(link.startsWith('shadowrocket://add/sub://')).toBe(true);
     const encoded = link.split('sub://')[1].split('?')[0];
     expect(atob(encoded)).toBe(address);
+    expect(new URLSearchParams(link.split('?')[1]).get('remark')).toBe('status.huckge.com');
     expect(new URL(address).searchParams.get('flag')).toBe('shadowrocket');
     expect(new URL(address).searchParams.get('y')).toBe('2');
   });
@@ -31,7 +32,7 @@ describe('subscription client links', () => {
     expect(address).toBe(raw);
     expect(link.protocol).toBe('v2rayng:');
     expect(link.searchParams.get('url')).toBe(raw);
-    expect(link.searchParams.get('name')).toBe('我的订阅');
+    expect(link.searchParams.get('name')).toBe('status.huckge.com');
   });
   it('copies the raw subscription for v2rayN without inventing an import scheme', () => {
     expect(subscriptionAddress('v2rayn', raw, clash, 'https://example.com')).toBe(raw);

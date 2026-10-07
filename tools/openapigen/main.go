@@ -106,7 +106,7 @@ func run(root, outDir string) error {
 				"ClientsSummary",
 				"InboundTrafficSummary",
 				"LogEntry",
-				"ClientActivity", "ActivityDestination", "ActivityCategory", "ActivityVisit",
+				"ClientActivity", "ActivityDestination", "ActivityCategory", "ActivityVisit", "ActivitySource", "DestinationUsage", "DestinationUsageRow",
 				"ServerUsageReport", "ServerUsageSummary", "ServerUsageUser", "ServerUsageBillingRequest", "ServerUsageControlRequest",
 				"NodeGroupBuyItem", "NodeGroupBuyReport",
 				"NewUUIDResponse",

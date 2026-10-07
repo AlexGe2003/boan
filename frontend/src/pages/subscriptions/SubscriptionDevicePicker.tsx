@@ -18,6 +18,7 @@ import v2raynIcon from '@/assets/clients/v2rayn.png';
 import v2rayngIcon from '@/assets/clients/v2rayng.png';
 import clashMiIcon from '@/assets/clients/clash-mi.png';
 import { subscriptionAddress, subscriptionImportLink, type SubscriptionClient } from './subscription-links';
+import SubscriptionRouting from './SubscriptionRouting';
 
 type Device = 'ios' | 'android' | 'windows' | 'macos';
 
@@ -214,27 +215,36 @@ export default function SubscriptionDevicePicker({ url, clashUrl }: { url: strin
           ? '提示：v2rayN 用户请点击「复制订阅链接」，在软件内「订阅分组」->「订阅分组设置」中添加并更新。'
           : client === 'universal'
             ? '提示：通用订阅支持大部分兼容客户端，请复制链接后导入到对应工具。'
-            : `提示：点击「一键导入到客户端」将直接唤起 ${selected.name} 并配置节点规则；或点击复制链接手动导入。`}
+            : `提示：点击「一键导入到客户端」将唤起 ${selected.name} 导入订阅；或点击复制链接手动导入。`}
         <br />
         🔒 订阅链接包含个人密钥，请勿泄漏或分享给他人。
       </p>
 
+      <SubscriptionRouting client={client} />
+
       <Modal
         open={showQr}
         onCancel={() => setShowQr(false)}
-        footer={null}
+        footer={<Button icon={<CopyOutlined />} loading={copying} onClick={() => void copy()}>复制订阅链接</Button>}
         centered
-        title="扫码导入订阅"
+        title={`${selected.name} 订阅二维码`}
         width={340}
       >
         <div style={{ textAlign: 'center', padding: '20px 0 10px' }}>
           <QRCode
             value={getAddress()}
-            size={220}
-            style={{ margin: '0 auto 16px', background: '#fff', padding: 12, borderRadius: 12 }}
+            size={240}
+            color="#000000"
+            bgColor="#ffffff"
+            marginSize={4}
+            errorLevel="M"
+            bordered={false}
+            style={{ margin: '0 auto 16px', padding: 0, borderRadius: 8 }}
           />
           <p style={{ margin: 0, fontSize: 13, color: 'var(--customer-text-muted)' }}>
-            请使用手机客户端（Shadowrocket / v2rayNG 等）扫码导入
+            {client === 'clash-verge' || client === 'v2rayn'
+              ? '手机扫码前，请关闭弹窗并选择手机系统及对应客户端，再生成二维码。'
+              : `请使用 ${selected.name} 内的扫码功能添加订阅。`}
           </p>
         </div>
       </Modal>

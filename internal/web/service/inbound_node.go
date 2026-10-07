@@ -581,6 +581,7 @@ func (s *InboundService) setRemoteTrafficLocked(nodeID int, snap *runtime.Traffi
 	// the reset clamp re-add a lower sibling as fresh traffic (#5274).
 	snapEmailsAll := make(map[string]struct{})
 	nodeEmailTotals := make(map[string]nodeTrafficCounter)
+	nodeWireTotals := make(map[string]xray.ClientTraffic)
 	for _, snapIb := range snap.Inbounds {
 		if snapIb == nil {
 			continue
@@ -596,6 +597,14 @@ func (s *InboundService) setRemoteTrafficLocked(nodeID int, snap *runtime.Traffi
 				cur.Down = snapIb.ClientStats[i].Down
 			}
 			nodeEmailTotals[email] = cur
+			wire := nodeWireTotals[email]
+			cs := snapIb.ClientStats[i]
+			if cs.RawKnown {
+				wire.RawKnown = true
+				wire.RawUp = max(wire.RawUp, cs.RawUp)
+				wire.RawDown = max(wire.RawDown, cs.RawDown)
+			}
+			nodeWireTotals[email] = wire
 		}
 	}
 
@@ -976,6 +985,9 @@ func (s *InboundService) setRemoteTrafficLocked(nodeID int, snap *runtime.Traffi
 					return false, err
 				}
 				nodeBaselines[cs.Email] = nodeTrafficCounter{Up: canon.Up, Down: canon.Down}
+				if _, _, err := remoteWireDelta(tx, nodeID, cs.Email, nodeWireTotals[cs.Email], 0, 0, true); err != nil {
+					return false, err
+				}
 				continue
 			}
 
@@ -1091,6 +1103,10 @@ func (s *InboundService) setRemoteTrafficLocked(nodeID int, snap *runtime.Traffi
 				usageUp, usageDown := deltaUp, deltaDown
 				if renewed {
 					usageUp, usageDown = canon.Up, canon.Down
+				}
+				usageUp, usageDown, err := remoteWireDelta(tx, nodeID, cs.Email, nodeWireTotals[cs.Email], usageUp, usageDown, !seen)
+				if err != nil {
+					return false, err
 				}
 				if err := recordServerUsage(tx, nodeID, cs.Email, usageUp, usageDown); err != nil {
 					return false, err

@@ -1,3 +1,4 @@
+import ClientVisitsButton from '@/pages/nodes/ClientVisitsButton';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
@@ -13,7 +14,7 @@ export default function AdminOverview() {
   const { t } = useTranslation();
   const users = useQuery({
     queryKey: ['admin-overview', 'users'],
-    queryFn: () => businessGet('clients/list/paged', summarySchema, { page: 1, pageSize: 1 }),
+    queryFn: () => businessGet('clients/list/paged', summarySchema, { page: 1, pageSize: 1, accountScope: 'accounts' }),
     staleTime: 30_000,
   });
   const queries = [users];
@@ -40,6 +41,7 @@ export default function AdminOverview() {
           <p>{t('adminOverview.subtitle')}</p>
         </div>
         <div className="admin-overview-actions">
+          <ClientVisitsButton />
           <Button
             icon={<ReloadOutlined />}
             loading={busy}
