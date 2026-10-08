@@ -1,3 +1,4 @@
+import ResetSubscriptionButton from '../subscriptions/ResetSubscriptionButton';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Popover, Space, Tag, Tooltip } from 'antd';
@@ -21,6 +22,7 @@ interface ClientRowActionsProps {
   onResetTraffic: (email: string) => void;
   onEdit: (email: string) => void;
   onAccount?: (email: string) => void;
+  onSubscriptionReset?: () => void | Promise<void>;
   onDelete: (email: string) => void;
 }
 
@@ -36,11 +38,15 @@ export const ClientRowActions = memo(function ClientRowActions({
   onResetTraffic,
   onEdit,
   onAccount,
+  onSubscriptionReset,
   onDelete,
 }: ClientRowActionsProps) {
   const { t } = useTranslation();
   return (
     <Space size={4}>
+      {onSubscriptionReset && (
+        <ResetSubscriptionButton email={email} onReset={onSubscriptionReset} />
+      )}
       {onAccount && (
         <Button size="small" type="link" onClick={() => onAccount(email)}>
           登录账号

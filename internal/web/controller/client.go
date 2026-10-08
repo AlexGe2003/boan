@@ -56,6 +56,8 @@ func (a *ClientController) initRouter(g *gin.RouterGroup) {
 	g.Use(a.guardClientEmail)
 	g.GET("/list", a.list)
 	g.GET("/mySubscriptions", a.mySubscriptions)
+	g.POST("/resetMySubscription", a.resetMySubscription)
+	g.POST("/resetSubscription/:email", a.resetSubscription)
 	g.GET("/account/:email", a.clientAccount)
 	g.POST("/account/:email", a.clientAccount)
 	g.GET("/list/paged", a.listPaged)
@@ -942,4 +944,37 @@ func (a *ClientController) bulkResetTraffic(c *gin.Context) {
 	jsonObj(c, gin.H{"affected": affected}, nil)
 	a.xrayService.SetToNeedRestart()
 	notifyClientsChanged()
+}
+
+func (a *ClientController) resetMySubscription(c *gin.Context) {
+	user := session.GetLoginUser(c)
+	if user == nil || user.ClientID == nil || *user.ClientID <= 0 {
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	a.rotateSubscription(c, *user.ClientID)
+}
+
+func (a *ClientController) resetSubscription(c *gin.Context) {
+	user := session.GetLoginUser(c)
+	if user == nil || !user.IsAdmin() {
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	rec, err := a.clientService.GetRecordByEmail(nil, c.Param("email"))
+	if err != nil {
+		jsonObj(c, nil, err)
+		return
+	}
+	a.rotateSubscription(c, rec.Id)
+}
+
+func (a *ClientController) rotateSubscription(c *gin.Context, id int) {
+	token, err := a.clientService.ResetSubscription(id)
+	if err != nil {
+		jsonObj(c, nil, err)
+		return
+	}
+	notifyClientsChanged()
+	jsonObj(c, gin.H{"subId": token}, nil)
 }

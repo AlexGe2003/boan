@@ -5746,6 +5746,77 @@
         }
       }
     },
+    "/panel/api/clients/resetMySubscription": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Rotate the signed-in account’s linked subscription token. Ignores caller-supplied client identifiers. Preserves usage, expiry, proxy credentials and device bindings; returns {subId}. Shared legacy tokens must be separated first.",
+        "operationId": "post_panel_api_clients_resetMySubscription",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/resetSubscription/{email}": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Admin only. Rotate a client subscription token; returns {subId}. Old subscription URLs stop serving this client. Already imported proxy credentials remain valid. Preserves usage, expiry and device bindings; shared legacy tokens are rejected.",
+        "operationId": "post_panel_api_clients_resetSubscription_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/panel/api/nodes/usage": {
       "get": {
         "tags": [

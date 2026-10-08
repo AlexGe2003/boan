@@ -226,6 +226,16 @@ export const sections: readonly Section[] = [
         summary: 'Read own subscription quota, expiry and links.',
       },
       {
+        method: 'POST',
+        path: '/panel/api/clients/resetMySubscription',
+        summary: 'Rotate the signed-in account’s linked subscription token. Ignores caller-supplied client identifiers. Preserves usage, expiry, proxy credentials and device bindings; returns {subId}. Shared legacy tokens must be separated first.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/clients/resetSubscription/:email',
+        summary: 'Admin only. Rotate a client subscription token; returns {subId}. Old subscription URLs stop serving this client. Already imported proxy credentials remain valid. Preserves usage, expiry and device bindings; shared legacy tokens are rejected.',
+      },
+      {
         method: 'GET',
         path: '/panel/api/nodes/usage',
         summary:

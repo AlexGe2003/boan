@@ -1,3 +1,4 @@
+import ResetSubscriptionButton from './ResetSubscriptionButton';
 import NodeStatus from '@/pages/support/NodeStatus';
 import SubscriptionDevicePicker from './SubscriptionDevicePicker';
 import zhCN from 'antd/locale/zh_CN';
@@ -247,7 +248,10 @@ export default function MySubscriptionsPage() {
                           <div><dt>到期日期</dt><dd>{expiry(item.expiryTime)}</dd></div>
                         </dl>
                         {item.url ? (
-                          <SubscriptionDevicePicker url={item.url} clashUrl={item.clashUrl} />
+                          <>
+                            <SubscriptionDevicePicker key={item.url} url={item.url} clashUrl={item.clashUrl} />
+                            {access.roleKey === 'customer' && <ResetSubscriptionButton />}
+                          </>
                         ) : (
                           <Alert type="info" title="订阅尚未配置，请联系管理员。" />
                         )}

@@ -41,6 +41,10 @@ func (a *APIController) enforceRole(c *gin.Context) {
 			c.Next()
 			return
 		}
+		if c.Request.Method == http.MethodPost && rel == "/clients/resetMySubscription" {
+			c.Next()
+			return
+		}
 		if c.Request.Method == http.MethodGet && (rel == "/clients/mySubscriptions" || rel == "/setting/session") {
 			c.Next()
 			return
@@ -68,7 +72,7 @@ func routePageAllowed(rel string, pages []string) bool {
 		return hasAnyPage(pages, "/inbounds", "/clients", "/hosts")
 	case strings.HasPrefix(rel, "/inbounds/"):
 		page = "/inbounds"
-	case rel == "/clients/mySubscriptions":
+	case rel == "/clients/mySubscriptions" || rel == "/clients/resetMySubscription":
 		page = "/my-subscriptions"
 	case strings.HasPrefix(rel, "/clients/"):
 		page = "/clients"
@@ -99,7 +103,7 @@ func hasAnyPage(pages []string, options ...string) bool {
 }
 
 func roleAllows(method, rel string) bool {
-	if strings.HasPrefix(rel, "/clients/account/") {
+	if strings.HasPrefix(rel, "/clients/account/") || rel == "/clients/resetSubscription/:email" {
 		return false
 	}
 	switch {

@@ -1,3 +1,4 @@
+import ResetSubscriptionButton from '../subscriptions/ResetSubscriptionButton';
 import ClientVisitsButton from '@/pages/nodes/ClientVisitsButton';
 import { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -1001,7 +1002,7 @@ export default function ClientsPage() {
       {
         title: t('pages.clients.actions'),
         key: 'actions',
-        width: 260,
+        width: panelRole === 'admin' ? 380 : 260,
         render: (_v, record) => (
           <ClientRowActions
             email={record.email}
@@ -1009,6 +1010,7 @@ export default function ClientsPage() {
             onShowInfo={onShowInfo}
             onResetTraffic={onResetTraffic}
             onEdit={onEdit}
+            onSubscriptionReset={panelRole === 'admin' ? refresh : undefined}
             onAccount={panelRole === 'admin' ? setAccountEmail : undefined}
             onDelete={onDelete}
           />
@@ -1167,6 +1169,7 @@ export default function ClientsPage() {
     [
       t,
       panelRole,
+      refresh,
       togglingEmail,
       clientBucket,
       isOnline,
@@ -1765,6 +1768,9 @@ export default function ClientsPage() {
                                       </Tag>
                                     )}
                                     <div className="card-actions">
+                                      {panelRole === 'admin' && (
+                                        <ResetSubscriptionButton email={row.email} onReset={refresh} />
+                                      )}
                                       <Tooltip title={t('pages.clients.clientInfo')}>
                                         <InfoCircleOutlined
                                           className="row-action-trigger"
