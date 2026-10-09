@@ -57,7 +57,7 @@ export default function SubscriberModal({
           setConflict(result.obj);
           form.setError('username', { type: 'server', message: result.msg });
         }
-        if (result.obj?.created) onSaved();
+        if (assigning || result.obj?.created) onSaved();
         return;
       }
       onSaved();

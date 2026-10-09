@@ -2,12 +2,15 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import SubscriberModal from '@/pages/plans/SubscriberModal';
 import { postPlan } from '@/pages/plans/api';
-import { renderWithProviders } from './test-utils';
+import { chooseSelectOption, renderWithProviders } from './test-utils';
 
 vi.mock('@/pages/plans/api', () => ({
-  useSubscriptionPlans: () => ({ data: [], isSuccess: true }),
+  useSubscriptionPlans: () => ({
+    data: [{ id: 7, name: 'Standard', enabled: true }],
+    isSuccess: true,
+  }),
   postPlan: vi.fn(),
-  planSummary: () => '',
+  planSummary: () => 'plan summary',
 }));
 
 describe('create login before configuring nodes', () => {
@@ -72,5 +75,23 @@ describe('create login before configuring nodes', () => {
     expect(postPlan).toHaveBeenCalledOnce();
     fireEvent.change(screen.getByLabelText('登录账号'), { target: { value: 'another-user' } });
     expect(screen.queryByRole('button', { name: '在原订阅上开通账号' })).toBeNull();
+  });
+
+  it('refreshes existing users when applying a plan only partially succeeds', async () => {
+    vi.mocked(postPlan).mockResolvedValue({ success: false, msg: '部分节点同步失败', obj: null });
+    const onSaved = vi.fn();
+    const onClose = vi.fn();
+    renderWithProviders(
+      <SubscriberModal emails={['customer-a', 'customer-b']} onSaved={onSaved} onClose={onClose} />,
+    );
+    chooseSelectOption(screen.getByRole('combobox').id, 'Standard — plan summary');
+    fireEvent.click(screen.getByRole('button', { name: '分配套餐' }));
+    await screen.findByText('部分节点同步失败');
+    expect(postPlan).toHaveBeenCalledExactlyOnceWith('apply', {
+      planId: 7,
+      emails: ['customer-a', 'customer-b'],
+    });
+    expect(onSaved).toHaveBeenCalledOnce();
+    expect(onClose).not.toHaveBeenCalled();
   });
 });
