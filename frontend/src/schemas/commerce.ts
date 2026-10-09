@@ -140,16 +140,20 @@ export const SubscriberPasswordSchema = z
   );
 export const SubscriberFormSchema = z
   .object({
-    username: z
-      .string()
-      .trim()
-      .min(1, '请输入登录账号')
-      .max(120)
-      .regex(/^[^\s/\\\p{Cc}]+$/u, '账号不能包含空格或斜线'),
+    username: z.string().trim().max(120),
     password: SubscriberPasswordSchema,
     planId: z.number().int().nonnegative().optional(),
     assigning: z.boolean(),
   })
+  .refine((value) => value.assigning || value.username.length > 0, {
+    path: ['username'],
+    message: '请输入登录账号',
+  })
+  .refine(
+    (value) =>
+      value.assigning || value.username === '' || /^[^\s/\\\p{Cc}]+$/u.test(value.username),
+    { path: ['username'], message: '账号不能包含空格或斜线' },
+  )
   .refine((value) => !value.assigning || (value.planId !== undefined && value.planId > 0), {
     path: ['planId'],
     message: '请选择套餐',
