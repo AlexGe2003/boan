@@ -2,6 +2,10 @@
   margin-bottom: 16px;
 }
 
+.users-page .orphan-accounts {
+  margin-top: 24px;
+}
+
 .users-page-header .ant-typography {
   margin-bottom: 4px;
 }

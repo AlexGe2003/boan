@@ -320,13 +320,19 @@ func (a *SettingController) deletePanelUser(c *gin.Context) {
 		return
 	}
 	var form struct {
-		ReassignTo int `json:"reassignTo"`
+		ReassignTo int  `json:"reassignTo"`
+		OnlyOrphan bool `json:"onlyOrphan"`
 	}
 	if err := c.ShouldBindJSON(&form); err != nil {
 		jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUserError"), err)
 		return
 	}
-	jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUser"), a.userService.DeletePanelUser(id, form.ReassignTo))
+	if form.OnlyOrphan {
+		err = a.userService.DeleteOrphanSubscriber(id, form.ReassignTo)
+	} else {
+		err = a.userService.DeletePanelUser(id, form.ReassignTo)
+	}
+	jsonMsg(c, I18nWeb(c, "pages.settings.toasts.modifyUser"), err)
 }
 
 // updateUser updates the current user's username and password.

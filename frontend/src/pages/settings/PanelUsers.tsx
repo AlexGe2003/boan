@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
-import { Alert, Button, Form, Input, Modal, Select, Table, Typography, message } from 'antd';
+import { Alert, Button, Form, Input, Modal, Select, Table, Tag, Typography, message } from 'antd';
 
 import { HttpUtil } from '@/utils';
 import { usePanelAccess } from '@/api/queries/usePanelRole';
@@ -14,6 +15,7 @@ interface PanelUser {
   username: string;
   role: string;
   inboundCount: number;
+  subscriptionStatus?: 'linked' | 'missing' | 'unbound';
 }
 
 interface CreateValues {
@@ -26,6 +28,8 @@ const JSON_REQUEST = { headers: { 'Content-Type': 'application/json' }, silent: 
 export default function PanelUsers() {
   const { t } = useTranslation();
   const access = usePanelAccess();
+  const [searchParams] = useSearchParams();
+  const orphanTarget = searchParams.get('orphanAccount');
   const role = access.role;
   const queryClient = useQueryClient();
   const [messageApi, contextHolder] = message.useMessage();
@@ -100,7 +104,10 @@ export default function PanelUsers() {
     try {
       const msg = await HttpUtil.post(
         `/panel/api/setting/users/delete/${deleting.id}`,
-        { reassignTo: transferTo ?? 0 },
+        {
+          reassignTo: transferTo ?? 0,
+          ...(deleting.role === 'customer' ? { onlyOrphan: true } : {}),
+        },
         JSON_REQUEST,
       );
       if (!msg.success) throw new Error(msg.msg || 'Could not delete account');
@@ -114,6 +121,13 @@ export default function PanelUsers() {
       setBusyId(null);
     }
   }
+
+  const orphanAccounts = (users.data ?? [])
+    .filter(
+      (item) =>
+        item.role === 'customer' && ['missing', 'unbound'].includes(item.subscriptionStatus ?? ''),
+    )
+    .sort((a, b) => Number(b.username === orphanTarget) - Number(a.username === orphanTarget));
 
   if (role !== 'admin') return null;
 
@@ -173,13 +187,74 @@ export default function PanelUsers() {
           },
         ]}
       />
+      {orphanAccounts.length > 0 && (
+        <section className="orphan-accounts" aria-label="失效订阅账号">
+          <Typography.Title level={4}>失效订阅账号</Typography.Title>
+          <Alert
+            type="warning"
+            showIcon
+            title="登录账号仍存在，但没有有效的订阅绑定"
+            description="这些登录名仍被占用。确认账号不再使用后，可删除失效登录账号，再回到用户管理重新创建；此操作不会删除其他用户的订阅。"
+            style={{ marginBottom: 12 }}
+          />
+          <Table<PanelUser>
+            rowKey="id"
+            size="small"
+            pagination={{ pageSize: 10, hideOnSinglePage: true }}
+            dataSource={orphanAccounts}
+            scroll={{ x: 480 }}
+            columns={[
+              {
+                title: '登录账号',
+                dataIndex: 'username',
+                render: (username: string) => (
+                  <span>
+                    {username}
+                    {username === orphanTarget && <Tag color="blue">当前查找</Tag>}
+                  </span>
+                ),
+              },
+              {
+                title: '订阅状态',
+                render: (_, row) =>
+                  row.subscriptionStatus === 'missing' ? '关联订阅已删除' : '未绑定订阅',
+              },
+              {
+                title: '操作',
+                render: (_, row) => (
+                  <Button
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined aria-hidden />}
+                    onClick={() => {
+                      setDeleting(row);
+                      setTransferTo(undefined);
+                      setDeleteError('');
+                    }}
+                  >
+                    删除失效账号
+                  </Button>
+                ),
+              },
+            ]}
+          />
+        </section>
+      )}
       <LegacyAccountMigration users={users.data ?? []} onSaved={refresh} />
       <Modal
         cancelText="取消"
         open={deleting !== null}
-        title={t('pages.settings.security.deleteConfirm', { username: deleting?.username })}
+        title={
+          deleting?.role === 'customer'
+            ? `删除失效登录账号：${deleting.username}`
+            : t('pages.settings.security.deleteConfirm', { username: deleting?.username })
+        }
         okButtonProps={{ danger: true }}
-        okText={t('pages.settings.security.userDelete')}
+        okText={
+          deleting?.role === 'customer'
+            ? '确认删除失效账号'
+            : t('pages.settings.security.userDelete')
+        }
         confirmLoading={busyId === deleting?.id}
         onCancel={() => {
           setDeleting(null);
@@ -189,7 +264,9 @@ export default function PanelUsers() {
       >
         {deleteError && <Alert type="error" title={deleteError} style={{ marginBottom: 12 }} />}
         <Typography.Paragraph>
-          {t('pages.settings.security.deleteAccountWarning')}
+          {deleting?.role === 'customer'
+            ? '仅删除这个失效登录账号并释放登录名，原登录会话将失效。有效订阅用户和管理员账号不受影响。'
+            : t('pages.settings.security.deleteAccountWarning')}
         </Typography.Paragraph>
         {deleting && deleting.inboundCount > 0 && (
           <>

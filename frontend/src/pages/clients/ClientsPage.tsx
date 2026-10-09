@@ -2,7 +2,7 @@ import ClientActionsMenu from './ClientActionsMenu';
 import ClientVisitsButton from '@/pages/nodes/ClientVisitsButton';
 import { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useLocation, useSearchParams } from 'react-router';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import {
   Badge,
@@ -319,6 +319,7 @@ function sortValueFor(column: string | null, order: 'ascend' | 'descend' | null)
 }
 
 export default function ClientsPage() {
+  const navigate = useNavigate();
   const panelRole = usePanelRole();
   const [accountScope, setAccountScope] = useState<'accounts' | 'unlinked' | 'all'>('accounts');
   const [subscriberOpen, setSubscriberOpen] = useState(false);
@@ -1879,6 +1880,10 @@ export default function ClientsPage() {
             onManageAccount={(email) => {
               setSubscriberOpen(false);
               setAccountEmail(email);
+            }}
+            onManageOrphan={(username) => {
+              setSubscriberOpen(false);
+              navigate(`/settings?orphanAccount=${encodeURIComponent(username)}#administrators`);
             }}
             onSaved={() => {
               setAccountScope('accounts');

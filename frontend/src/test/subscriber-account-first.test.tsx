@@ -94,4 +94,23 @@ describe('create login before configuring nodes', () => {
     expect(onSaved).toHaveBeenCalledOnce();
     expect(onClose).not.toHaveBeenCalled();
   });
+
+  it('locates an orphan login without automatically deleting or resetting it', async () => {
+    vi.mocked(postPlan).mockResolvedValue({
+      success: false,
+      msg: '关联订阅已删除',
+      obj: { conflict: 'orphan_account', username: 'user1', accountExists: true },
+    });
+    const onManageOrphan = vi.fn();
+    renderWithProviders(
+      <SubscriberModal onSaved={vi.fn()} onClose={vi.fn()} onManageOrphan={onManageOrphan} />,
+    );
+    fireEvent.change(screen.getByLabelText('登录账号'), { target: { value: 'user1' } });
+    fireEvent.click(screen.getByRole('button', { name: '创建用户' }));
+    const button = await screen.findByRole('button', { name: '查看失效账号' });
+    expect(onManageOrphan).not.toHaveBeenCalled();
+    fireEvent.click(button);
+    expect(onManageOrphan).toHaveBeenCalledExactlyOnceWith('user1');
+    expect(postPlan).toHaveBeenCalledOnce();
+  });
 });

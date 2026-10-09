@@ -23,12 +23,14 @@ export default function SubscriberModal({
   onSaved,
   onOpenExisting,
   onManageAccount,
+  onManageOrphan,
 }: {
   emails?: string[];
   onClose: () => void;
   onSaved: () => void;
   onOpenExisting?: (email: string) => void;
   onManageAccount?: (email: string) => void;
+  onManageOrphan?: (username: string) => void;
 }) {
   const assigning = !!emails;
   const plans = useSubscriptionPlans(assigning);
@@ -111,6 +113,23 @@ export default function SubscriberModal({
                 <Button onClick={() => onManageAccount(conflict.email!)}>
                   {conflict.accountExists ? '管理原登录账号' : '在原订阅上开通账号'}
                 </Button>
+              )}
+            </Space>
+          }
+          style={{ marginBottom: 16 }}
+        />
+      )}
+      {conflict?.conflict === 'orphan_account' && conflict.username && (
+        <Alert
+          type="warning"
+          title={`失效的登录账号：${conflict.username}`}
+          description={
+            <Space orientation="vertical">
+              <span>
+                该账号仍占用登录名，已从订阅用户列表隐藏。可在设置的“失效订阅账号”中查看和处理。
+              </span>
+              {onManageOrphan && (
+                <Button onClick={() => onManageOrphan(conflict.username!)}>查看失效账号</Button>
               )}
             </Space>
           }

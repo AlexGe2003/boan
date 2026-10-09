@@ -172,16 +172,19 @@ func (s *UserService) UpdateFirstUser(username string, password string) error {
 var ErrLastAdmin = errors.New("cannot remove the last admin")
 
 type PanelUser struct {
-	Id           int    `json:"id"`
-	Username     string `json:"username"`
-	Role         string `json:"role"`
-	InboundCount int64  `json:"inboundCount"`
-	ClientID     *int   `json:"clientId,omitempty"`
+	Id                 int    `json:"id"`
+	Username           string `json:"username"`
+	Role               string `json:"role"`
+	InboundCount       int64  `json:"inboundCount"`
+	ClientID           *int   `json:"clientId,omitempty"`
+	SubscriptionStatus string `json:"subscriptionStatus,omitempty"`
 }
 
 func (s *UserService) ListPanelUsers() ([]PanelUser, error) {
-	var rows []model.User
-	if err := database.GetDB().Order("id ASC").Find(&rows).Error; err != nil {
+	rows := make([]PanelUser, 0)
+	if err := database.GetDB().Model(&model.User{}).
+		Select("users.id, users.username, users.role, users.client_id, CASE WHEN users.role <> 'customer' THEN '' WHEN c.id IS NOT NULL THEN 'linked' WHEN users.client_id IS NULL OR users.client_id = 0 THEN 'unbound' ELSE 'missing' END AS subscription_status").
+		Joins("LEFT JOIN clients c ON c.id = users.client_id").Order("users.id ASC").Scan(&rows).Error; err != nil {
 		return nil, err
 	}
 	var counts []struct {
@@ -196,11 +199,10 @@ func (s *UserService) ListPanelUsers() ([]PanelUser, error) {
 	for _, count := range counts {
 		countByUser[count.UserId] = count.Total
 	}
-	out := make([]PanelUser, 0, len(rows))
-	for _, row := range rows {
-		out = append(out, PanelUser{Id: row.Id, Username: row.Username, Role: row.Role, InboundCount: countByUser[row.Id], ClientID: row.ClientID})
+	for i := range rows {
+		rows[i].InboundCount = countByUser[rows[i].Id]
 	}
-	return out, nil
+	return rows, nil
 }
 
 func (s *UserService) CreatePanelUser(username, password, role string) (*PanelUser, error) {
@@ -266,10 +268,32 @@ func (s *UserService) SetPanelUserRole(id int, role string) error {
 }
 
 func (s *UserService) DeletePanelUser(id, reassignTo int) error {
+	return s.deletePanelUser(id, reassignTo, false)
+}
+
+func (s *UserService) DeleteOrphanSubscriber(id, reassignTo int) error {
+	return s.deletePanelUser(id, reassignTo, true)
+}
+
+func (s *UserService) deletePanelUser(id, reassignTo int, onlyOrphan bool) error {
 	return database.GetDB().Transaction(func(tx *gorm.DB) error {
 		var user model.User
 		if err := tx.First(&user, id).Error; err != nil {
 			return err
+		}
+		if onlyOrphan {
+			if user.Role != model.RoleCustomer {
+				return errors.New("该操作仅适用于失效的订阅登录账号")
+			}
+			if user.ClientID != nil {
+				var linked int64
+				if err := tx.Model(&model.ClientRecord{}).Where("id = ?", *user.ClientID).Count(&linked).Error; err != nil {
+					return err
+				}
+				if linked > 0 {
+					return errors.New("该账号已有有效的订阅绑定，请刷新列表后在用户管理中处理")
+				}
+			}
 		}
 		if user.IsAdmin() {
 			var admins int64
