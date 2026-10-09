@@ -222,18 +222,83 @@ export const sections: readonly Section[] = [
       },
       {
         method: 'GET',
+        path: '/panel/api/clients/devices/:email',
+        summary:
+          'Admin only. Registered HWID devices, live Xray source IPs from assigned nodes, and observed user upload/download bytes with node breakdown and collection timestamps. Traffic is cumulative since collection began, independent of quota resets, billing multipliers and manual corrections; it cannot be attributed to individual devices. Offline nodes retain their last recorded totals. No traffic records means unknown, not zero. Subscription-fetch timestamps and IPs do not establish device online state. IPs are masked before exposure to the panel. Source addresses are deduplicated across nodes; partial/unavailable collection must not be treated as zero online devices.',
+        responseSchema: 'ClientDeviceReport',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/clients/connections/:email',
+        summary:
+          'Admin or node-sync token only. Local Xray online source addresses for one exact client email. Never fans out to other nodes; unsupported or unreachable cores report unavailable. Admin responses mask IPs; node-sync responses retain raw addresses for internal deduplication.',
+        responseSchema: 'ClientConnectionReport',
+      },
+      {
+        method: 'GET',
         path: '/panel/api/clients/mySubscriptions',
         summary: 'Read own subscription quota, expiry and links.',
       },
       {
+        method: 'GET',
+        path: '/panel/api/clients/myUsage',
+        summary: 'Read the signed-in customer’s own observed upload/download history',
+        description:
+          'Customer sessions only; client ownership comes from the session. UTC hourly data is retained for 30 calendar days, with daily rollups or the latest 24 hourly buckets. Recording starts after installation; missing buckets are not estimates. No visited domains are returned. Cumulative observed bytes differ from billable quota usage.',
+        params: [
+          {
+            name: 'resolution',
+            in: 'query',
+            type: 'string',
+            optional: true,
+            defaultValue: 'day',
+            enum: ['day', 'hour'],
+          },
+        ],
+        responseSchema: 'ClientUsageView',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/clients/myConnections',
+        summary: 'Read the signed-in customer’s online source IPs',
+        description:
+          'Customer sessions only. Federated online sources for the session’s linked client, with masked IPs. Source IP count is not a physical device count. Unavailable nodes are explicitly reported; no visited domains are returned.',
+        responseSchema: 'ClientConnectionReport',
+      },
+      {
+        method: 'GET',
+        path: '/panel/api/clients/myDevices',
+        summary: 'List the signed-in customer’s bound devices and available slots',
+        description:
+          'Customer sessions only. Ownership comes from the session’s linked client; IPs are masked. Shared subscriptions require administrator management. Reading this endpoint never binds a device.',
+        responseSchema: 'ClientDeviceSlots',
+      },
+      {
+        method: 'DELETE',
+        path: '/panel/api/clients/myDevices/:id',
+        summary: 'Unbind one of the signed-in customer’s devices',
+        description:
+          'Releases one binding slot. Imported node credentials remain valid; another subscription update may bind the removed device again.',
+        params: [
+          {
+            name: 'id',
+            in: 'path',
+            type: 'integer',
+            desc: 'ID of a device belonging to the signed-in customer.',
+          },
+        ],
+      },
+      {
         method: 'POST',
         path: '/panel/api/clients/resetMySubscription',
-        summary: 'Rotate the signed-in account’s linked subscription token. Ignores caller-supplied client identifiers. Preserves usage, expiry, proxy credentials and device bindings; returns {subId}. Shared legacy tokens must be separated first.',
+        summary:
+          'Rotate the signed-in account’s linked subscription token. Ignores caller-supplied client identifiers. Preserves usage, expiry, proxy credentials and device bindings; returns {subId}. Shared legacy tokens must be separated first.',
       },
       {
         method: 'POST',
         path: '/panel/api/clients/resetSubscription/:email',
-        summary: 'Admin only. Rotate a client subscription token; returns {subId}. Old subscription URLs stop serving this client. Already imported proxy credentials remain valid. Preserves usage, expiry and device bindings; shared legacy tokens are rejected.',
+        summary:
+          'Admin only. Rotate a client subscription token; returns {subId}. Old subscription URLs stop serving this client. Already imported proxy credentials remain valid. Preserves usage, expiry and device bindings; shared legacy tokens are rejected.',
       },
       {
         method: 'GET',

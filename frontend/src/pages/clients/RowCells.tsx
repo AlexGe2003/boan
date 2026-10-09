@@ -1,4 +1,4 @@
-import ResetSubscriptionButton from '../subscriptions/ResetSubscriptionButton';
+import ClientActionsMenu from './ClientActionsMenu';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Popover, Space, Tag, Tooltip } from 'antd';
@@ -44,14 +44,6 @@ export const ClientRowActions = memo(function ClientRowActions({
   const { t } = useTranslation();
   return (
     <Space size={4}>
-      {onSubscriptionReset && (
-        <ResetSubscriptionButton email={email} onReset={onSubscriptionReset} />
-      )}
-      {onAccount && (
-        <Button size="small" type="link" onClick={() => onAccount(email)}>
-          登录账号
-        </Button>
-      )}
       <Tooltip title={t('pages.clients.qrCode')}>
         <Button
           size="small"
@@ -103,6 +95,13 @@ export const ClientRowActions = memo(function ClientRowActions({
           onClick={() => onDelete(email)}
         />
       </Tooltip>
+      {(onAccount || onSubscriptionReset) && (
+        <ClientActionsMenu
+          email={email}
+          onAccount={onAccount}
+          onSubscriptionReset={onSubscriptionReset}
+        />
+      )}
     </Space>
   );
 });

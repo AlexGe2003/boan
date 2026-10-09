@@ -1,0 +1,218 @@
+.customer-usage {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.customer-usage-toolbar,
+.customer-usage-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.customer-usage-toolbar {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.customer-usage-toolbar h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+.customer-usage-toolbar p,
+.customer-usage-note {
+  margin: 0;
+  color: var(--customer-text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.customer-usage-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.customer-usage-totals .customer-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 18px;
+}
+.customer-usage-totals span {
+  color: var(--customer-text-muted);
+  font-size: 12px;
+}
+.customer-usage-totals strong {
+  font-size: clamp(20px, 2vw, 28px);
+  font-variant-numeric: tabular-nums;
+}
+.customer-usage .customer-card {
+  margin: 0;
+}
+.customer-usage-node h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.customer-usage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--customer-text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.customer-usage-legend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 5px;
+}
+.customer-usage-chart {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  height: 180px;
+  max-width: 880px;
+  margin: 24px auto 0;
+  padding-top: 20px;
+}
+.customer-usage-chart::before {
+  position: absolute;
+  content: '';
+  inset: 20px 0 22px;
+  background: repeating-linear-gradient(
+    to top,
+    transparent 0,
+    transparent calc(50% - 1px),
+    var(--customer-border) calc(50% - 1px),
+    var(--customer-border) 50%
+  );
+  pointer-events: none;
+}
+.customer-usage-scale {
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: var(--customer-text-muted);
+  font-size: 10px;
+}
+.customer-usage-slot-item {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+.customer-usage-slot {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  z-index: 1;
+}
+.customer-usage-slot:focus-visible {
+  outline: 2px solid var(--customer-primary);
+  outline-offset: 2px;
+}
+.customer-usage-bar-space {
+  display: flex;
+  align-items: end;
+  flex: 1;
+}
+.customer-usage-bar {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 3px 3px 0 0;
+}
+.customer-usage-upload {
+  background: #29b38c;
+}
+.customer-usage-download {
+  background: #539df6;
+}
+.customer-usage-axis {
+  height: 22px;
+  padding-top: 6px;
+  color: var(--customer-text-muted);
+  font-size: 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+.customer-account-tabs {
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid var(--customer-border);
+  margin-bottom: 20px;
+}
+.customer-account-tabs button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--customer-text-muted);
+  min-height: 44px;
+  padding: 0 14px;
+  cursor: pointer;
+  font: inherit;
+}
+.customer-account-tabs button[aria-current='page'] {
+  color: var(--customer-text);
+  border-bottom-color: var(--customer-primary);
+}
+.customer-account-tabs button:focus-visible {
+  outline: 2px solid var(--customer-primary);
+  outline-offset: 2px;
+}
+.customer-online-sources {
+  padding: 16px 0;
+  border-top: 1px solid var(--customer-border);
+  border-bottom: 1px solid var(--customer-border);
+}
+.customer-online-sources h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.customer-online-sources p {
+  color: var(--customer-text-muted);
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+.customer-source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.customer-source-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.customer-source-list time {
+  margin-left: auto;
+  color: var(--customer-text-muted);
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .customer-usage-totals {
+    grid-template-columns: 1fr;
+  }
+  .customer-usage-chart {
+    gap: 2px;
+    height: 160px;
+  }
+  .customer-account-tabs {
+    gap: 0;
+  }
+  .customer-account-tabs button {
+    padding: 0 12px;
+  }
+}

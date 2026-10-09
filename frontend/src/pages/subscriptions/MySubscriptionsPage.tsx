@@ -1,3 +1,5 @@
+import MyUsage from './MyUsage';
+import MyDevices from './MyDevices';
 import ResetSubscriptionButton from './ResetSubscriptionButton';
 import NodeStatus from '@/pages/support/NodeStatus';
 import SubscriptionDevicePicker from './SubscriptionDevicePicker';
@@ -11,7 +13,10 @@ import {
   ArrowDownOutlined,
   ArrowUpOutlined,
   DashboardOutlined,
+  BarChartOutlined,
+  HistoryOutlined,
   LinkOutlined,
+  LaptopOutlined,
   LogoutOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
@@ -24,6 +29,7 @@ import './UserHome.css';
 interface SubscriptionLink {
   email: string;
   planName?: string;
+  limitHwid: number;
   configured: boolean;
   url: string;
   clashUrl?: string;
@@ -52,24 +58,36 @@ function expiry(value: number) {
   return new Date(value).toLocaleDateString('zh-CN');
 }
 const sections = [
-  { key: 'home', label: '仪表盘', icon: <DashboardOutlined />, group: '基础' },
+  { key: 'home', label: '概览', icon: <DashboardOutlined />, group: '基础' },
   {
     key: 'subscription',
     label: '我的订阅',
     icon: <LinkOutlined />,
     group: '订阅',
   },
+  { key: 'usage', label: '用量', icon: <BarChartOutlined />, group: '订阅' },
+  { key: 'devices', label: '设备', icon: <LaptopOutlined />, group: '订阅' },
+  { key: 'records', label: '记录', icon: <HistoryOutlined />, group: '订阅' },
   { key: 'nodes', label: '节点状态', icon: <ClusterOutlined />, group: '订阅' },
 ];
 export default function MySubscriptionsPage() {
   const { antdThemeConfig, isDark, isUltra } = useTheme();
   const access = usePanelAccess();
   const queryClient = useQueryClient();
-  const nodesFetching = useIsFetching({queryKey: ['customer-node-status', access.userId]});
+  const nodesFetching = useIsFetching({ queryKey: ['customer-node-status', access.userId] });
+  const usageFetching = useIsFetching({ queryKey: ['my-usage', access.userId] });
+  const devicesFetching = useIsFetching({ queryKey: ['my-devices', access.userId] });
+  const connectionsFetching = useIsFetching({ queryKey: ['my-connections', access.userId] });
   const location = useLocation();
   const routeNavigate = useNavigate();
   const hash = location.hash.slice(1);
-  const section = sections.some((item) => item.key === hash) ? hash : 'home';
+  const section = sections.some(
+    (item) =>
+      item.key === hash &&
+      (!['devices', 'usage', 'records'].includes(item.key) || access.roleKey === 'customer'),
+  )
+    ? hash
+    : 'home';
   const [mobileNav, setMobileNav] = useState(false);
   const query = useQuery({
     queryKey: ['clients', 'mySubscriptions', access.userId],
@@ -110,7 +128,6 @@ export default function MySubscriptionsPage() {
               />
             )}
             <aside className={`customer-sidebar ${mobileNav ? 'is-open' : ''}`}>
-
               <nav aria-label="用户导航">
                 {sections.map((item, index) => (
                   <div key={item.key}>
@@ -118,7 +135,7 @@ export default function MySubscriptionsPage() {
                       <p>{item.group}</p>
                     )}
                     <button
-                      aria-current={section === item.key ? "page" : undefined}
+                      aria-current={section === item.key ? 'page' : undefined}
                       className={section === item.key ? 'active' : ''}
                       onClick={() => navigate(item.key)}
                     >
@@ -128,7 +145,6 @@ export default function MySubscriptionsPage() {
                   </div>
                 ))}
               </nav>
-
             </aside>
           </>
         )}
@@ -142,11 +158,31 @@ export default function MySubscriptionsPage() {
                 <Button
                   type="text"
                   aria-label={section === 'nodes' ? '刷新节点状态' : '刷新账户信息'}
-                  loading={section === 'nodes' ? nodesFetching > 0 : query.isFetching}
+                  loading={
+                    section === 'nodes'
+                      ? nodesFetching > 0
+                      : ['usage', 'records'].includes(section)
+                        ? usageFetching > 0
+                        : section === 'devices'
+                          ? devicesFetching + connectionsFetching > 0
+                          : query.isFetching
+                  }
                   icon={<ReloadOutlined />}
                   onClick={() => {
-                    if (section === 'nodes') void queryClient.invalidateQueries({queryKey: ['customer-node-status', access.userId]});
-                    else void query.refetch();
+                    if (section === 'nodes')
+                      void queryClient.invalidateQueries({
+                        queryKey: ['customer-node-status', access.userId],
+                      });
+                    else if (['usage', 'records'].includes(section))
+                      void queryClient.invalidateQueries({ queryKey: ['my-usage', access.userId] });
+                    else if (section === 'devices') {
+                      void queryClient.invalidateQueries({
+                        queryKey: ['my-devices', access.userId],
+                      });
+                      void queryClient.invalidateQueries({
+                        queryKey: ['my-connections', access.userId],
+                      });
+                    } else void query.refetch();
                   }}
                 />
                 <Button
@@ -155,14 +191,31 @@ export default function MySubscriptionsPage() {
                   icon={<LogoutOutlined />}
                   onClick={() => void logout()}
                 />
-
               </>
             }
           />
           <main className="customer-content">
-            {section === 'nodes' && (
-              <NodeStatus />
+            {access.roleKey === 'customer' && (
+              <nav className="customer-account-tabs" aria-label="账户视图">
+                {['home', 'usage', 'devices', 'records'].map((key) => (
+                  <button
+                    key={key}
+                    aria-current={section === key ? 'page' : undefined}
+                    onClick={() => navigate(key)}
+                  >
+                    {sections.find((item) => item.key === key)?.label}
+                  </button>
+                ))}
+              </nav>
             )}
+            {['usage', 'records'].includes(section) && access.roleKey === 'customer' && (
+              <MyUsage userId={access.userId} records={section === 'records'} />
+            )}
+
+            {section === 'devices' && access.roleKey === 'customer' && (
+              <MyDevices userId={access.userId} />
+            )}
+            {section === 'nodes' && <NodeStatus />}
             {['home', 'subscription'].includes(section) && query.isLoading && <Spin />}
             {['home', 'subscription'].includes(section) && query.isError && (
               <Alert
@@ -207,14 +260,30 @@ export default function MySubscriptionsPage() {
                     {section === 'home' && (
                       <div className="dashboard-overview">
                         <section className="customer-card dashboard-service">
-                          <h2>服务概览 <Tag color={available ? 'green' : 'red'}>{status}</Tag></h2>
+                          <h2>
+                            服务概览 <Tag color={available ? 'green' : 'red'}>{status}</Tag>
+                          </h2>
                           <dl className="dashboard-service-fields">
-                            <div><dt>有效期</dt><dd>{expiry(item.expiryTime)}</dd></div>
-                            <div><dt>流量额度</dt><dd>{item.total > 0 ? bytes(item.total) : '不限量'}</dd></div>
+                            <div>
+                              <dt>有效期</dt>
+                              <dd>{expiry(item.expiryTime)}</dd>
+                            </div>
+                            <div>
+                              <dt>流量额度</dt>
+                              <dd>{item.total > 0 ? bytes(item.total) : '不限量'}</dd>
+                            </div>
                           </dl>
                           {item.total > 0 && (
                             <div className="dashboard-quota">
-                              <Progress aria-label="剩余流量比例" percent={Math.max(0, Math.min(100, (item.total - item.used) / item.total * 100))} showInfo={false} strokeColor={depleted ? '#ef6565' : '#2bc66c'} />
+                              <Progress
+                                aria-label="剩余流量比例"
+                                percent={Math.max(
+                                  0,
+                                  Math.min(100, ((item.total - item.used) / item.total) * 100),
+                                )}
+                                showInfo={false}
+                                strokeColor={depleted ? '#ef6565' : '#2bc66c'}
+                              />
                               <span>剩余 {bytes(Math.max(0, item.total - item.used))}</span>
                             </div>
                           )}
@@ -222,20 +291,41 @@ export default function MySubscriptionsPage() {
                         <section className="customer-card dashboard-traffic">
                           <h2>流量使用情况</h2>
                           <dl className="dashboard-traffic-fields">
-                            <div className="dashboard-total"><dt>累计使用</dt><dd>{bytes(item.used)}</dd></div>
-                            <div><dt><ArrowUpOutlined /> 上传</dt><dd>{bytes(item.up || 0)}</dd></div>
-                            <div><dt><ArrowDownOutlined /> 下载</dt><dd>{bytes(item.down || 0)}</dd></div>
+                            <div className="dashboard-total">
+                              <dt>累计使用</dt>
+                              <dd>{bytes(item.used)}</dd>
+                            </div>
+                            <div>
+                              <dt>
+                                <ArrowUpOutlined /> 上传
+                              </dt>
+                              <dd>{bytes(item.up || 0)}</dd>
+                            </div>
+                            <div>
+                              <dt>
+                                <ArrowDownOutlined /> 下载
+                              </dt>
+                              <dd>{bytes(item.down || 0)}</dd>
+                            </div>
                           </dl>
                         </section>
                         <div className="dashboard-links">
                           <section className="customer-card dashboard-link">
                             <LinkOutlined className="dashboard-link-icon" />
-                            <div><h2>我的订阅</h2><p>导入客户端或复制订阅链接</p></div>
-                            <Button type="primary" onClick={() => navigate('subscription')}>获取订阅</Button>
+                            <div>
+                              <h2>我的订阅</h2>
+                              <p>导入客户端或复制订阅链接</p>
+                            </div>
+                            <Button type="primary" onClick={() => navigate('subscription')}>
+                              获取订阅
+                            </Button>
                           </section>
                           <section className="customer-card dashboard-link">
                             <ClusterOutlined className="dashboard-link-icon" />
-                            <div><h2>节点状态</h2><p>查看已分配节点与配置状态</p></div>
+                            <div>
+                              <h2>节点状态</h2>
+                              <p>查看已分配节点与配置状态</p>
+                            </div>
                             <Button onClick={() => navigate('nodes')}>查看节点</Button>
                           </section>
                         </div>
@@ -244,12 +334,27 @@ export default function MySubscriptionsPage() {
                     {section === 'subscription' && (
                       <section className="customer-card detail-card subscription-design-card">
                         <dl className="dashboard-service-fields subscription-quota-summary">
-                          <div><dt>剩余流量</dt><dd>{item.total > 0 ? bytes(Math.max(0, item.total - item.used)) : '不限量'}</dd></div>
-                          <div><dt>到期日期</dt><dd>{expiry(item.expiryTime)}</dd></div>
+                          <div>
+                            <dt>剩余流量</dt>
+                            <dd>
+                              {item.total > 0
+                                ? bytes(Math.max(0, item.total - item.used))
+                                : '不限量'}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>到期日期</dt>
+                            <dd>{expiry(item.expiryTime)}</dd>
+                          </div>
                         </dl>
                         {item.url ? (
                           <>
-                            <SubscriptionDevicePicker key={item.url} url={item.url} clashUrl={item.clashUrl} />
+                            <SubscriptionDevicePicker
+                              key={item.url}
+                              url={item.url}
+                              clashUrl={item.clashUrl}
+                              hwidRequired={item.limitHwid > 0}
+                            />
                             {access.roleKey === 'customer' && <ResetSubscriptionButton />}
                           </>
                         ) : (
@@ -257,11 +362,9 @@ export default function MySubscriptionsPage() {
                         )}
                       </section>
                     )}
-
                   </div>
                 );
               })}
-
           </main>
         </div>
       </div>

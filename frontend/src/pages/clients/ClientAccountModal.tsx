@@ -58,19 +58,21 @@ export default function ClientAccountModal({
   return (
     <Modal
       open={email !== null}
-      title="用户登录账号"
+      title="管理登录账号"
       onCancel={onClose}
       onOk={() => form.submit()}
+      okText={exists ? '保存更改' : '创建账号'}
+      cancelText="取消"
       confirmLoading={saving}
       okButtonProps={{ disabled: loading || account.isError }}
     >
       <Typography.Paragraph>
-        {email}：用户登录后可查看自己的流量、到期时间和订阅。
+        {email}：设置用户门户的登录用户名和密码。用户登录后可查看自己的流量、到期时间和订阅。
       </Typography.Paragraph>
       {account.isError && <Alert type="error" title={String(account.error)} />}
       {error && <Alert type="error" title={error} style={{ marginBottom: 16 }} />}
       <Form form={form} layout="vertical" onFinish={save} disabled={loading || saving}>
-        <Form.Item name="username" label="登录账号" rules={[{ required: true, whitespace: true }]}>
+        <Form.Item name="username" label="用户名" rules={[{ required: true, whitespace: true }]}>
           <Input autoComplete="off" />
         </Form.Item>
         <Form.Item

@@ -74,7 +74,7 @@ func TestSubscriptionPlanAccountAndReapply(t *testing.T) {
 	if assignedCount != 0 {
 		t.Fatal("account received a plan during creation")
 	}
-	obj := request("save", fmt.Sprintf(`{"name":"Standard","inboundIds":[%d],"totalGB":1000000,"durationDays":30,"enabled":true}`, inbound.Id), true)
+	obj := request("save", fmt.Sprintf(`{"name":"Standard","inboundIds":[%d],"totalGB":1000000,"durationDays":30,"limitHwid":3,"enabled":true}`, inbound.Id), true)
 	var p planInput
 	if err := json.Unmarshal(obj, &p); err != nil {
 		t.Fatal(err)
@@ -96,7 +96,7 @@ func TestSubscriptionPlanAccountAndReapply(t *testing.T) {
 	var rec model.ClientRecord
 	db.First(&rec, *u.ClientID)
 	subID, credential, expiry := rec.SubID, rec.UUID, rec.ExpiryTime
-	if subID == "" || credential == "" || expiry <= 0 || rec.TotalGB != 1000000 {
+	if subID == "" || credential == "" || expiry <= 0 || rec.TotalGB != 1000000 || rec.LimitHwid != 3 {
 		t.Fatalf("wrong subscription: %+v", rec)
 	}
 	db.Model(&xray.ClientTraffic{}).Where("email = ?", rec.Email).Updates(map[string]any{"up": 123, "down": 456})

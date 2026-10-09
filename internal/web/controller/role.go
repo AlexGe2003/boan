@@ -33,6 +33,10 @@ func (a *APIController) enforceRole(c *gin.Context) {
 	}
 	rel := relAPIPath(c.FullPath())
 	if user.Role == model.RoleCustomer {
+		if (c.Request.Method == http.MethodGet && (rel == "/clients/myDevices" || rel == "/clients/myUsage" || rel == "/clients/myConnections")) || (c.Request.Method == http.MethodDelete && rel == "/clients/myDevices/:id") {
+			c.Next()
+			return
+		}
 		if (c.Request.Method == http.MethodGet && (rel == "/commerce/plans" || rel == "/commerce/orders")) || (c.Request.Method == http.MethodPost && (rel == "/commerce/orders" || rel == "/commerce/orders/:id/cancel")) {
 			c.Next()
 			return

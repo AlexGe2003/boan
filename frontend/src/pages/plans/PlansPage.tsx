@@ -54,7 +54,7 @@ const defaults: PlanValues = {
   quotaGB: 100,
   durationDays: 30,
   limitIp: 0,
-  limitHwid: 0,
+  limitHwid: 3,
   enabled: true,
   prices: [],
 };
@@ -87,7 +87,9 @@ export default function PlansPage() {
   function planLines(plan: SubscriptionPlan) {
     const ids = new Set([
       ...plan.inboundIds,
-      ...(groups.data || []).filter((group) => plan.nodeGroupIds.includes(group.id)).flatMap((group) => group.inboundIds),
+      ...(groups.data || [])
+        .filter((group) => plan.nodeGroupIds.includes(group.id))
+        .flatMap((group) => group.inboundIds),
     ]);
     return [...ids].flatMap(lineNames);
   }
@@ -262,12 +264,16 @@ export default function PlansPage() {
                     <div className="admin-plan-lines">
                       <Typography.Text strong>包含线路</Typography.Text>
                       {hostQuery.fetchError || inbounds.isError || groups.isError ? (
-                        <Typography.Paragraph type="danger">线路名称加载失败，请刷新重试。</Typography.Paragraph>
+                        <Typography.Paragraph type="danger">
+                          线路名称加载失败，请刷新重试。
+                        </Typography.Paragraph>
                       ) : !hostQuery.fetched || inbounds.isLoading || groups.isLoading ? (
                         <Typography.Paragraph type="secondary">正在加载线路…</Typography.Paragraph>
                       ) : (
                         <ul style={{ paddingInlineStart: 20, marginBlock: 8 }}>
-                          {planLines(row).map((name, index) => <li key={`${index}-${name}`}>{name}</li>)}
+                          {planLines(row).map((name, index) => (
+                            <li key={`${index}-${name}`}>{name}</li>
+                          ))}
                         </ul>
                       )}
                     </div>
@@ -424,7 +430,11 @@ export default function PlansPage() {
             <FormField name="limitIp" label="IP 限制（0 为不限，需启用对应服务端限制）">
               <InputNumber min={0} precision={0} />
             </FormField>
-            <FormField name="limitHwid" label="设备限制（0 为不限，需客户端支持 HWID）">
+            <FormField
+              name="limitHwid"
+              label="设备限制（0 为不限，需客户端支持 HWID）"
+              extra="达到上限后拒绝新设备；用户或管理员解绑后才可重新绑定。降低上限不会自动删除已有设备。"
+            >
               <InputNumber min={0} precision={0} />
             </FormField>
             <FormField name="enabled" label="允许分配与购买" valueProp="checked">

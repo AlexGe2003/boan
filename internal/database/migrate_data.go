@@ -62,6 +62,7 @@ func migrationModels() []any {
 		&model.Host{},
 		&model.NodeClientTraffic{},
 		&model.ServerClientUsage{},
+		&model.ClientUsageHour{},
 		&model.ServerUsageBilling{},
 		&model.ServerUsageControl{},
 		&model.NodeGroupBuyConfig{},

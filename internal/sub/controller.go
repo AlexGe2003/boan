@@ -697,6 +697,7 @@ func (a *SUBController) enforceHwid(c *gin.Context) bool {
 		DeviceOS:    c.GetHeader("X-Device-OS"),
 		OsVersion:   c.GetHeader("X-Ver-OS"),
 		DeviceModel: c.GetHeader("X-Device-Model"),
+		SourceIP:    c.ClientIP(),
 	})
 	if err != nil {
 		writeSubError(c, err)

@@ -1,12 +1,89 @@
 package service
 
 import (
+	"fmt"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
+
+func TestThreeDeviceSlotsRequireExplicitUnbinding(t *testing.T) {
+	initClientHwidTestDB(t)
+	rec := seedHwidClient(t, 3)
+	svc := &ClientService{}
+	for i := 1; i <= 3; i++ {
+		result, err := svc.EnforceHwidForSubID(rec.SubID, HwidRequest{Hwid: fmt.Sprintf("device-%d", i)})
+		if err != nil || !result.Allowed {
+			t.Fatalf("bind device %d: %+v, %v", i, result, err)
+		}
+	}
+	for i := 0; i < 3; i++ {
+		result, err := svc.EnforceHwidForSubID(rec.SubID, HwidRequest{Hwid: "device-4"})
+		if err != nil || result.Allowed || !result.MaxDevicesReached {
+			t.Fatalf("full slots must reject a fourth device: %+v, %v", result, err)
+		}
+	}
+	result, err := svc.EnforceHwidForSubID(rec.SubID, HwidRequest{Hwid: "device-1", SourceIP: "192.0.2.42"})
+	if err != nil || !result.Allowed {
+		t.Fatalf("bound device must still update at capacity: %+v, %v", result, err)
+	}
+	slots, err := svc.DeviceSlots(rec.Email)
+	if err != nil || slots.Registered != 3 || slots.Remaining != 0 || !slots.Full {
+		t.Fatalf("full slot report: %+v, %v", slots, err)
+	}
+	if err := svc.DeleteClientHwid(rec.Email, slots.Devices[0].Id); err != nil {
+		t.Fatal(err)
+	}
+	slots, err = svc.DeviceSlots(rec.Email)
+	if err != nil || slots.Registered != 2 || slots.Remaining != 1 || slots.Full {
+		t.Fatalf("unbinding must free one slot: %+v, %v", slots, err)
+	}
+	result, err = svc.EnforceHwidForSubID(rec.SubID, HwidRequest{Hwid: "device-4"})
+	if err != nil || !result.Allowed || result.Registered != 3 {
+		t.Fatalf("new device after unbind: %+v, %v", result, err)
+	}
+}
+
+func TestConcurrentDeviceBindingsCannotExceedThree(t *testing.T) {
+	initClientHwidTestDB(t)
+	rec := seedHwidClient(t, 3)
+	svc := &ClientService{}
+	var wg sync.WaitGroup
+	results := make(chan HwidGateResult, 12)
+	errors := make(chan error, 12)
+	for i := 0; i < 12; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			result, err := svc.EnforceHwidForSubID(rec.SubID, HwidRequest{Hwid: fmt.Sprintf("concurrent-device-%d", i)})
+			results <- result
+			errors <- err
+		}(i)
+	}
+	wg.Wait()
+	close(results)
+	close(errors)
+	for err := range errors {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	allowed := 0
+	for result := range results {
+		if result.Allowed {
+			allowed++
+		} else if !result.MaxDevicesReached {
+			t.Fatalf("unexpected rejection: %+v", result)
+		}
+	}
+	slots, err := svc.DeviceSlots(rec.Email)
+	if err != nil || allowed != 3 || slots.Registered != 3 {
+		t.Fatalf("concurrent bindings: allowed=%d report=%+v err=%v", allowed, slots, err)
+	}
+}
 
 func initClientHwidTestDB(t *testing.T) {
 	t.Helper()
@@ -160,8 +237,8 @@ func TestClientHwidGateRegistersAndBlocks(t *testing.T) {
 	if err := database.GetDB().Model(&model.ClientHwid{}).Where("sub_id = ?", rec.SubID).Count(&count).Error; err != nil {
 		t.Fatalf("count after trim: %v", err)
 	}
-	if count != 1 {
-		t.Fatalf("lowered limit should trim stored HWIDs to 1, got %d", count)
+	if count != 2 {
+		t.Fatalf("lowered limit must preserve stored HWIDs for manual removal, got %d", count)
 	}
 
 	if err := svc.ClearClientHwids(rec.Email); err != nil {

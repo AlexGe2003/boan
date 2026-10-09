@@ -27,7 +27,7 @@ func recordServerUsage(tx *gorm.DB, nodeID int, email string, up, down int64) er
 		return err
 	}
 	now := time.Now().UnixMilli()
-	return tx.Clauses(clause.OnConflict{
+	if err := tx.Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "node_id"}, {Name: "email"}},
 		DoUpdates: clause.Assignments(map[string]any{
 			"up":         gorm.Expr(database.ClampedAddExpr("server_client_usages.up"), up),
@@ -35,7 +35,10 @@ func recordServerUsage(tx *gorm.DB, nodeID int, email string, up, down int64) er
 			"updated_at": now,
 			"started_at": gorm.Expr("CASE WHEN server_client_usages.started_at = 0 THEN ? ELSE server_client_usages.started_at END", now),
 		}),
-	}).Create(&model.ServerClientUsage{NodeId: nodeID, Email: email, Up: up, Down: down, StartedAt: now, UpdatedAt: now}).Error
+	}).Create(&model.ServerClientUsage{NodeId: nodeID, Email: email, Up: up, Down: down, StartedAt: now, UpdatedAt: now}).Error; err != nil {
+		return err
+	}
+	return recordClientUsageHour(tx, nodeID, email, up, down, time.UnixMilli(now))
 }
 
 type ServerUsageSummary struct {

@@ -33,6 +33,7 @@ import {
 import './ClientInfoModal.css';
 
 const ClientActivity = lazy(() => import('./ClientActivity'));
+const ClientDevices = lazy(() => import('./ClientDevices'));
 const ServerUsage = lazy(() => import('@/pages/nodes/ServerUsage'));
 
 const INBOUND_PROTOCOL_COLORS: Record<string, string> = {
@@ -121,6 +122,7 @@ export default function ClientInfoModal({
   const [ipsLoading, setIpsLoading] = useState(false);
   const [ipsClearing, setIpsClearing] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
+  const [devicesOpen, setDevicesOpen] = useState(false);
   const [serverUsageOpen, setServerUsageOpen] = useState(false);
   const [ipsModalOpen, setIpsModalOpen] = useState(false);
   const {
@@ -148,6 +150,7 @@ export default function ClientInfoModal({
       setClientIps([]);
       setIpsModalOpen(false);
       setActivityOpen(false);
+      setDevicesOpen(false);
       setServerUsageOpen(false);
       resetHwids();
       setHwidsModalOpen(false);
@@ -314,6 +317,9 @@ export default function ClientInfoModal({
           <>
             {admin && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+                <Button onClick={() => setDevicesOpen(true)}>
+                  {t('pages.clients.devices.title')}
+                </Button>
                 <Button onClick={() => setServerUsageOpen(true)}>服务器流量分布</Button>
                 <Button onClick={() => setActivityOpen(true)}>访问概览 · 网站与分类</Button>
               </div>
@@ -927,6 +933,20 @@ export default function ClientInfoModal({
         {open && serverUsageOpen && admin && client && (
           <Suspense fallback={<Spin />}>
             <ServerUsage key={client.email} email={client.email} />
+          </Suspense>
+        )}
+      </Modal>
+      <Modal
+        open={open && devicesOpen && admin}
+        title={`${t('pages.clients.devices.title')} · ${client?.email || ''}`}
+        width={1100}
+        footer={null}
+        onCancel={() => setDevicesOpen(false)}
+        destroyOnHidden
+      >
+        {open && devicesOpen && admin && client && (
+          <Suspense fallback={<Spin />}>
+            <ClientDevices key={client.email} email={client.email} />
           </Suspense>
         )}
       </Modal>

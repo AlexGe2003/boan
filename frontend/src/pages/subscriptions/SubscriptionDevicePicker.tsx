@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Input, Modal, QRCode, Space, Tag, Tooltip, message } from 'antd';
+import { Alert, Button, Input, Modal, QRCode, Space, Tag, Tooltip, message } from 'antd';
 import {
   AndroidOutlined,
   AppleOutlined,
@@ -17,7 +17,11 @@ import clashIcon from '@/assets/clients/clash-verge.png';
 import v2raynIcon from '@/assets/clients/v2rayn.png';
 import v2rayngIcon from '@/assets/clients/v2rayng.png';
 import clashMiIcon from '@/assets/clients/clash-mi.png';
-import { subscriptionAddress, subscriptionImportLink, type SubscriptionClient } from './subscription-links';
+import {
+  subscriptionAddress,
+  subscriptionImportLink,
+  type SubscriptionClient,
+} from './subscription-links';
 import SubscriptionRouting from './SubscriptionRouting';
 
 type Device = 'ios' | 'android' | 'windows' | 'macos';
@@ -40,7 +44,8 @@ const clients: Record<SubscriptionClient, { name: string; detail: string; icon?:
 
 function initialDevice(): Device {
   const ua = navigator.userAgent;
-  if (/iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) return 'ios';
+  if (/iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1))
+    return 'ios';
   if (/Android/i.test(ua)) return 'android';
   if (/Mac/i.test(ua)) return 'macos';
   return 'windows';
@@ -63,15 +68,25 @@ function isRecommended(device: Device, client: SubscriptionClient): boolean {
   return false;
 }
 
-export default function SubscriptionDevicePicker({ url, clashUrl }: { url: string; clashUrl?: string }) {
+export default function SubscriptionDevicePicker({
+  url,
+  clashUrl,
+  hwidRequired = false,
+}: {
+  url: string;
+  clashUrl?: string;
+  hwidRequired?: boolean;
+}) {
   const [device, setDevice] = useState<Device>(initialDevice);
-  const [choice, setChoice] = useState<SubscriptionClient>(() => deviceClients(initialDevice(), !!clashUrl)[0]);
+  const [choice, setChoice] = useState<SubscriptionClient>(
+    () => deviceClients(initialDevice(), !!clashUrl)[0],
+  );
   const [copying, setCopying] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [toast, contextHolder] = message.useMessage();
 
   const available = deviceClients(device, !!clashUrl);
-  const client = available.includes(choice) ? choice : available[0];
+  const client = hwidRequired ? 'universal' : available.includes(choice) ? choice : available[0];
   const selected = clients[client];
 
   const getAddress = () => subscriptionAddress(client, url, clashUrl, window.location.origin);
@@ -106,60 +121,70 @@ export default function SubscriptionDevicePicker({ url, clashUrl }: { url: strin
   return (
     <div className="subscription-device-picker">
       {contextHolder}
-      <h2 className="subscription-step-title">1. 选择您的设备系统</h2>
-      <div className="subscription-device-tabs" role="group" aria-label="选择设备">
-        {devices.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            aria-pressed={device === item.value}
-            onClick={() => {
-              setDevice(item.value);
-              setChoice(deviceClients(item.value, !!clashUrl)[0]);
-            }}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </button>
-        ))}
-      </div>
+      {hwidRequired ? (
+        <Alert
+          type="info"
+          showIcon
+          title="此套餐需要设备绑定"
+          description="请将订阅链接添加到支持 HWID 的客户端，并开启设备标识上报。成功获取订阅后自动绑定设备；未上报设备标识的客户端无法获取订阅。设备满额时，请先在「我的设备」中解绑一台。"
+        />
+      ) : (
+        <>
+          <h2 className="subscription-step-title">1. 选择您的设备系统</h2>
+          <div className="subscription-device-tabs" role="group" aria-label="选择设备">
+            {devices.map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                aria-pressed={device === item.value}
+                onClick={() => {
+                  setDevice(item.value);
+                  setChoice(deviceClients(item.value, !!clashUrl)[0]);
+                }}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
 
-      <h2 className="subscription-step-title">2. 选择配套客户端</h2>
-      <div className="subscription-client-grid" role="group" aria-label="选择应用">
-        {available.map((id) => {
-          const rec = isRecommended(device, id);
-          return (
-            <button
-              className="subscription-client"
-              key={id}
-              type="button"
-              aria-pressed={client === id}
-              onClick={() => setChoice(id)}
-            >
-              {clients[id].icon ? (
-                <img src={clients[id].icon} alt="" width={42} height={42} />
-              ) : (
-                <LinkOutlined className="subscription-generic-icon" />
-              )}
-              <span className="subscription-client-label">
-                <strong>
-                  {clients[id].name}
-                  {rec && (
-                    <Tag color="blue" style={{ marginLeft: 8, fontSize: 11, borderRadius: 4 }}>
-                      推荐
-                    </Tag>
+          <h2 className="subscription-step-title">2. 选择配套客户端</h2>
+          <div className="subscription-client-grid" role="group" aria-label="选择应用">
+            {available.map((id) => {
+              const rec = isRecommended(device, id);
+              return (
+                <button
+                  className="subscription-client"
+                  key={id}
+                  type="button"
+                  aria-pressed={client === id}
+                  onClick={() => setChoice(id)}
+                >
+                  {clients[id].icon ? (
+                    <img src={clients[id].icon} alt="" width={42} height={42} />
+                  ) : (
+                    <LinkOutlined className="subscription-generic-icon" />
                   )}
-                </strong>
-                <small>{clients[id].detail}</small>
-              </span>
-              <span className="subscription-client-check" aria-hidden="true">
-                {client === id && <CheckOutlined />}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
+                  <span className="subscription-client-label">
+                    <strong>
+                      {clients[id].name}
+                      {rec && (
+                        <Tag color="blue" style={{ marginLeft: 8, fontSize: 11, borderRadius: 4 }}>
+                          推荐
+                        </Tag>
+                      )}
+                    </strong>
+                    <small>{clients[id].detail}</small>
+                  </span>
+                  <span className="subscription-client-check" aria-hidden="true">
+                    {client === id && <CheckOutlined />}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
       <div className="subscription-url-row">
         <span className="subscription-url-label">订阅地址</span>
         <Input
@@ -193,15 +218,17 @@ export default function SubscriptionDevicePicker({ url, clashUrl }: { url: strin
       </div>
 
       <div className="subscription-primary-actions">
-        <Button
-          type="primary"
-          size="large"
-          icon={<ExportOutlined />}
-          disabled={client === 'universal' || client === 'v2rayn'}
-          onClick={importSubscription}
-        >
-          一键导入到客户端
-        </Button>
+        {!hwidRequired && (
+          <Button
+            type="primary"
+            size="large"
+            icon={<ExportOutlined />}
+            disabled={client === 'universal' || client === 'v2rayn'}
+            onClick={importSubscription}
+          >
+            一键导入到客户端
+          </Button>
+        )}
         <Button size="large" icon={<CopyOutlined />} loading={copying} onClick={() => void copy()}>
           复制订阅链接
         </Button>
@@ -211,21 +238,26 @@ export default function SubscriptionDevicePicker({ url, clashUrl }: { url: strin
       </div>
 
       <p className="subscription-privacy-note">
-        {client === 'v2rayn'
-          ? '提示：v2rayN 用户请点击「复制订阅链接」，在软件内「订阅分组」->「订阅分组设置」中添加并更新。'
-          : client === 'universal'
-            ? '提示：通用订阅支持大部分兼容客户端，请复制链接后导入到对应工具。'
-            : `提示：点击「一键导入到客户端」将唤起 ${selected.name} 导入订阅；或点击复制链接手动导入。`}
-        <br />
-        🔒 订阅链接包含个人密钥，请勿泄漏或分享给他人。
+        {hwidRequired
+          ? '提示：在支持 HWID 的客户端内导入或扫码；网页读取订阅不会占用设备名额。'
+          : client === 'v2rayn'
+            ? '提示：v2rayN 用户请点击「复制订阅链接」，在软件内「订阅分组」->「订阅分组设置」中添加并更新。'
+            : client === 'universal'
+              ? '提示：通用订阅支持大部分兼容客户端，请复制链接后导入到对应工具。'
+              : `提示：点击「一键导入到客户端」将唤起 ${selected.name} 导入订阅；或点击复制链接手动导入。`}
+        <br />🔒 订阅链接包含个人密钥，请勿泄漏或分享给他人。
       </p>
 
-      <SubscriptionRouting client={client} />
+      {!hwidRequired && <SubscriptionRouting client={client} />}
 
       <Modal
         open={showQr}
         onCancel={() => setShowQr(false)}
-        footer={<Button icon={<CopyOutlined />} loading={copying} onClick={() => void copy()}>复制订阅链接</Button>}
+        footer={
+          <Button icon={<CopyOutlined />} loading={copying} onClick={() => void copy()}>
+            复制订阅链接
+          </Button>
+        }
         centered
         title={`${selected.name} 订阅二维码`}
         width={340}

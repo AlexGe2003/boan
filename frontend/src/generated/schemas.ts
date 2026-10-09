@@ -1753,6 +1753,188 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "ClientConnection": {
+    "properties": {
+      "ip": {
+        "type": "string"
+      },
+      "lastSeen": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "nodeId": {
+        "type": "integer"
+      },
+      "nodeName": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "ip",
+      "lastSeen",
+      "nodeId",
+      "nodeName"
+    ],
+    "type": "object"
+  },
+  "ClientConnectionReport": {
+    "properties": {
+      "connections": {
+        "items": {
+          "$ref": "#/components/schemas/ClientConnection"
+        },
+        "type": "array"
+      },
+      "generatedAt": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "onlineSourceCount": {
+        "type": "integer"
+      },
+      "sources": {
+        "items": {
+          "$ref": "#/components/schemas/ClientConnectionSource"
+        },
+        "type": "array"
+      },
+      "status": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "connections",
+      "generatedAt",
+      "onlineSourceCount",
+      "sources",
+      "status"
+    ],
+    "type": "object"
+  },
+  "ClientConnectionSource": {
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "nodeId": {
+        "type": "integer"
+      },
+      "status": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "nodeId",
+      "status"
+    ],
+    "type": "object"
+  },
+  "ClientDeviceReport": {
+    "properties": {
+      "connections": {
+        "$ref": "#/components/schemas/ClientConnectionReport"
+      },
+      "devices": {
+        "items": {
+          "$ref": "#/components/schemas/ClientHwidInfo"
+        },
+        "type": "array"
+      },
+      "limit": {
+        "type": "integer"
+      },
+      "registered": {
+        "type": "integer"
+      },
+      "traffic": {
+        "$ref": "#/components/schemas/ClientTrafficReport"
+      }
+    },
+    "required": [
+      "connections",
+      "devices",
+      "limit",
+      "registered",
+      "traffic"
+    ],
+    "type": "object"
+  },
+  "ClientDeviceSlots": {
+    "properties": {
+      "devices": {
+        "items": {
+          "$ref": "#/components/schemas/ClientHwidInfo"
+        },
+        "type": "array"
+      },
+      "full": {
+        "type": "boolean"
+      },
+      "limit": {
+        "type": "integer"
+      },
+      "registered": {
+        "type": "integer"
+      },
+      "remaining": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "devices",
+      "full",
+      "limit",
+      "registered",
+      "remaining"
+    ],
+    "type": "object"
+  },
+  "ClientHwidInfo": {
+    "properties": {
+      "deviceModel": {
+        "type": "string"
+      },
+      "deviceOs": {
+        "type": "string"
+      },
+      "fingerprint": {
+        "type": "string"
+      },
+      "firstSeen": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "id": {
+        "type": "integer"
+      },
+      "lastIp": {
+        "type": "string"
+      },
+      "lastSeen": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "osVersion": {
+        "type": "string"
+      },
+      "userAgent": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "deviceModel",
+      "deviceOs",
+      "fingerprint",
+      "firstSeen",
+      "id",
+      "lastIp",
+      "lastSeen",
+      "osVersion",
+      "userAgent"
+    ],
+    "type": "object"
+  },
   "ClientInbound": {
     "properties": {
       "clientId": {
@@ -1774,6 +1956,47 @@ export const SCHEMAS: Record<string, unknown> = {
       "createdAt",
       "flowOverride",
       "inboundId"
+    ],
+    "type": "object"
+  },
+  "ClientNodeTraffic": {
+    "description": "Direction is from the user's perspective: Up is user -\u003e node,\nDown is node -\u003e user. These are observed bytes, independent of quota resets.",
+    "properties": {
+      "down": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "nodeId": {
+        "type": "integer"
+      },
+      "nodeName": {
+        "type": "string"
+      },
+      "startedAt": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "total": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "up": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "updatedAt": {
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "down",
+      "nodeId",
+      "nodeName",
+      "startedAt",
+      "total",
+      "up",
+      "updatedAt"
     ],
     "type": "object"
   },
@@ -2187,6 +2410,102 @@ export const SCHEMAS: Record<string, unknown> = {
       "total",
       "up",
       "uuid"
+    ],
+    "type": "object"
+  },
+  "ClientTrafficReport": {
+    "properties": {
+      "down": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "nodes": {
+        "items": {
+          "$ref": "#/components/schemas/ClientNodeTraffic"
+        },
+        "type": "array"
+      },
+      "recorded": {
+        "type": "boolean"
+      },
+      "startedAt": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "total": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "up": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "updatedAt": {
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "down",
+      "nodes",
+      "recorded",
+      "startedAt",
+      "total",
+      "up",
+      "updatedAt"
+    ],
+    "type": "object"
+  },
+  "ClientUsagePoint": {
+    "properties": {
+      "bucket": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "down": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "nodeId": {
+        "type": "integer"
+      },
+      "up": {
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "bucket",
+      "down",
+      "nodeId",
+      "up"
+    ],
+    "type": "object"
+  },
+  "ClientUsageView": {
+    "properties": {
+      "generatedAt": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "points": {
+        "items": {
+          "$ref": "#/components/schemas/ClientUsagePoint"
+        },
+        "type": "array"
+      },
+      "resolution": {
+        "type": "string"
+      },
+      "traffic": {
+        "$ref": "#/components/schemas/ClientTrafficReport"
+      }
+    },
+    "required": [
+      "generatedAt",
+      "points",
+      "resolution",
+      "traffic"
     ],
     "type": "object"
   },

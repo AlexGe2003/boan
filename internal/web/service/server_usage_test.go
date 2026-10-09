@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"testing"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -50,6 +51,15 @@ func TestServerUsageUsesCommittedDeltasAndSurvivesQuotaReset(t *testing.T) {
 			t.Fatalf("node %d got %d want %d", row.NodeId, row.Used, expected[row.NodeId])
 		}
 	}
+	history, err := (&ClientService{}).UsageHistory("alice", "hour", time.Now())
+	if err != nil || len(history.Points) != 3 {
+		t.Fatalf("committed history: %+v, %v", history, err)
+	}
+	for _, row := range history.Points {
+		if row.Up+row.Down != expected[row.NodeID] {
+			t.Fatalf("history double counted node %d: %+v", row.NodeID, row)
+		}
+	}
 	nodeID := 1
 	ranking, err := (&NodeService{}).Usage("", &nodeID)
 	if err != nil {
@@ -65,6 +75,10 @@ func TestServerUsageUsesCommittedDeltasAndSurvivesQuotaReset(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	history, err = (&ClientService{}).UsageHistory("alice", "hour", time.Now())
+	if err != nil || len(history.Points) != 3 {
+		t.Fatalf("quota reset erased history: %+v, %v", history, err)
+	}
 	if after.Total != 600 {
 		t.Fatalf("quota reset erased analytics: %d", after.Total)
 	}
@@ -74,6 +88,15 @@ func TestServerUsageUsesCommittedDeltasAndSurvivesQuotaReset(t *testing.T) {
 	after, err = (&NodeService{}).Usage("alice", nil)
 	if err != nil {
 		t.Fatal(err)
+	}
+	var historyCount int64
+	db.Model(&model.ClientUsageHour{}).Where("email = ?", "alice").Count(&historyCount)
+	if historyCount != 0 {
+		t.Fatal("deleted user retains usage history")
+	}
+	db.Model(&model.ClientUsageHour{}).Where("email = ?", "bob").Count(&historyCount)
+	if historyCount != 1 {
+		t.Fatal("deletion removed another user's history")
 	}
 	if after.Total != 0 {
 		t.Fatalf("deleted user retains attribution: %d", after.Total)

@@ -53,6 +53,7 @@ import { ClientFormSchema, ClientCreateFormSchema, type ClientFormValues } from 
 import './ClientFormModal.css';
 
 const ClientActivity = lazy(() => import('./ClientActivity'));
+const ClientDevices = lazy(() => import('./ClientDevices'));
 
 const FLOW_OPTIONS = Object.values(TLS_FLOW_CONTROL);
 const VMESS_SECURITY_OPTIONS = ['auto', 'aes-128-gcm', 'chacha20-poly1305'] as const;
@@ -814,7 +815,7 @@ export default function ClientFormModal({
         title={isEdit ? t('pages.clients.editClient') : t('pages.clients.addClient')}
         destroyOnHidden
         className="client-form-modal"
-        width={activeTab === 'activity' ? 1100 : 720}
+        width={activeTab === 'activity' || activeTab === 'devices' ? 1100 : 720}
         zIndex={CLIENT_FORM_MODAL_Z_INDEX}
         style={{ top: 20 }}
         styles={{
@@ -822,7 +823,7 @@ export default function ClientFormModal({
         }}
         onCancel={close}
         footer={
-          activeTab === 'activity' ? (
+          activeTab === 'activity' || activeTab === 'devices' ? (
             <Button onClick={close}>{t('close')}</Button>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1544,6 +1545,16 @@ export default function ClientFormModal({
                 },
                 ...(admin && isEdit && client
                   ? [
+                      {
+                        key: 'devices',
+                        label: t('pages.clients.devices.title'),
+                        children:
+                          open && activeTab === 'devices' ? (
+                            <Suspense fallback={<Spin />}>
+                              <ClientDevices key={client.email} email={client.email} />
+                            </Suspense>
+                          ) : null,
+                      },
                       {
                         key: 'activity',
                         label: '访问记录',

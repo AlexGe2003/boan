@@ -91,6 +91,11 @@ func (a *ServerController) initRouter(g *gin.RouterGroup) {
 func (a *ServerController) startTask() {
 	c := global.GetWebServer().GetCron()
 	_, _ = c.AddFunc("@every 5s", service.LocalCarrierMonitor.Sample)
+	_, _ = c.AddFunc("@every 1h", func() {
+		if err := service.PruneClientUsageHistory(); err != nil {
+			logger.Warning("prune client usage history:", err)
+		}
+	})
 	_, _ = c.AddFunc("@every 2s", func() {
 		status := a.serverService.RefreshStatus()
 		if status == nil {

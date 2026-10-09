@@ -454,11 +454,137 @@ export const EXAMPLES: Record<string, unknown> = {
       }
     ]
   },
+  "ClientConnection": {
+    "ip": "",
+    "lastSeen": 0,
+    "nodeId": 0,
+    "nodeName": ""
+  },
+  "ClientConnectionReport": {
+    "connections": [
+      {
+        "ip": "",
+        "lastSeen": 0,
+        "nodeId": 0,
+        "nodeName": ""
+      }
+    ],
+    "generatedAt": 0,
+    "onlineSourceCount": 0,
+    "sources": [
+      {
+        "name": "",
+        "nodeId": 0,
+        "status": ""
+      }
+    ],
+    "status": ""
+  },
+  "ClientConnectionSource": {
+    "name": "",
+    "nodeId": 0,
+    "status": ""
+  },
+  "ClientDeviceReport": {
+    "connections": {
+      "connections": [
+        {
+          "ip": "",
+          "lastSeen": 0,
+          "nodeId": 0,
+          "nodeName": ""
+        }
+      ],
+      "generatedAt": 0,
+      "onlineSourceCount": 0,
+      "sources": [
+        {
+          "name": "",
+          "nodeId": 0,
+          "status": ""
+        }
+      ],
+      "status": ""
+    },
+    "devices": [
+      {
+        "deviceModel": "",
+        "deviceOs": "",
+        "fingerprint": "",
+        "firstSeen": 0,
+        "id": 0,
+        "lastIp": "",
+        "lastSeen": 0,
+        "osVersion": "",
+        "userAgent": ""
+      }
+    ],
+    "limit": 0,
+    "registered": 0,
+    "traffic": {
+      "down": 0,
+      "nodes": [
+        {
+          "down": 0,
+          "nodeId": 0,
+          "nodeName": "",
+          "startedAt": 0,
+          "total": 0,
+          "up": 0,
+          "updatedAt": 0
+        }
+      ],
+      "recorded": false,
+      "startedAt": 0,
+      "total": 0,
+      "up": 0,
+      "updatedAt": 0
+    }
+  },
+  "ClientDeviceSlots": {
+    "devices": [
+      {
+        "deviceModel": "",
+        "deviceOs": "",
+        "fingerprint": "",
+        "firstSeen": 0,
+        "id": 0,
+        "lastIp": "",
+        "lastSeen": 0,
+        "osVersion": "",
+        "userAgent": ""
+      }
+    ],
+    "full": false,
+    "limit": 0,
+    "registered": 0,
+    "remaining": 0
+  },
+  "ClientHwidInfo": {
+    "deviceModel": "",
+    "deviceOs": "",
+    "fingerprint": "",
+    "firstSeen": 0,
+    "id": 0,
+    "lastIp": "",
+    "lastSeen": 0,
+    "osVersion": "",
+    "userAgent": ""
+  },
   "ClientInbound": {
     "clientId": 0,
     "createdAt": 0,
     "flowOverride": "",
     "inboundId": 0
+  },
+  "ClientNodeTraffic": {
+    "down": 0,
+    "nodeId": 0,
+    "nodeName": "",
+    "startedAt": 0,
+    "total": 0,
+    "up": 0,
+    "updatedAt": 0
   },
   "ClientPageResponse": {
     "filtered": 47,
@@ -589,6 +715,62 @@ export const EXAMPLES: Record<string, unknown> = {
     "total": 10737418240,
     "up": 1048576,
     "uuid": "e18c9a96-71bf-48d4-933f-8b9a46d4290c"
+  },
+  "ClientTrafficReport": {
+    "down": 0,
+    "nodes": [
+      {
+        "down": 0,
+        "nodeId": 0,
+        "nodeName": "",
+        "startedAt": 0,
+        "total": 0,
+        "up": 0,
+        "updatedAt": 0
+      }
+    ],
+    "recorded": false,
+    "startedAt": 0,
+    "total": 0,
+    "up": 0,
+    "updatedAt": 0
+  },
+  "ClientUsagePoint": {
+    "bucket": 0,
+    "down": 0,
+    "nodeId": 0,
+    "up": 0
+  },
+  "ClientUsageView": {
+    "generatedAt": 0,
+    "points": [
+      {
+        "bucket": 0,
+        "down": 0,
+        "nodeId": 0,
+        "up": 0
+      }
+    ],
+    "resolution": "",
+    "traffic": {
+      "down": 0,
+      "nodes": [
+        {
+          "down": 0,
+          "nodeId": 0,
+          "nodeName": "",
+          "startedAt": 0,
+          "total": 0,
+          "up": 0,
+          "updatedAt": 0
+        }
+      ],
+      "recorded": false,
+      "startedAt": 0,
+      "total": 0,
+      "up": 0,
+      "updatedAt": 0
+    }
   },
   "ClientsSummary": {
     "active": 1850,

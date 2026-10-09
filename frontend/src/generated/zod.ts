@@ -446,6 +446,61 @@ export const ClientActivitySchema = z.object({
 });
 export type ClientActivity = z.infer<typeof ClientActivitySchema>;
 
+export const ClientConnectionSchema = z.object({
+  ip: z.string(),
+  lastSeen: z.number().int(),
+  nodeId: z.number().int(),
+  nodeName: z.string(),
+});
+export type ClientConnection = z.infer<typeof ClientConnectionSchema>;
+
+export const ClientConnectionReportSchema = z.object({
+  connections: z.array(z.lazy(() => ClientConnectionSchema)),
+  generatedAt: z.number().int(),
+  onlineSourceCount: z.number().int(),
+  sources: z.array(z.lazy(() => ClientConnectionSourceSchema)),
+  status: z.string(),
+});
+export type ClientConnectionReport = z.infer<typeof ClientConnectionReportSchema>;
+
+export const ClientConnectionSourceSchema = z.object({
+  name: z.string(),
+  nodeId: z.number().int(),
+  status: z.string(),
+});
+export type ClientConnectionSource = z.infer<typeof ClientConnectionSourceSchema>;
+
+export const ClientDeviceReportSchema = z.object({
+  connections: z.lazy(() => ClientConnectionReportSchema),
+  devices: z.array(z.lazy(() => ClientHwidInfoSchema)),
+  limit: z.number().int(),
+  registered: z.number().int(),
+  traffic: z.lazy(() => ClientTrafficReportSchema),
+});
+export type ClientDeviceReport = z.infer<typeof ClientDeviceReportSchema>;
+
+export const ClientDeviceSlotsSchema = z.object({
+  devices: z.array(z.lazy(() => ClientHwidInfoSchema)),
+  full: z.boolean(),
+  limit: z.number().int(),
+  registered: z.number().int(),
+  remaining: z.number().int(),
+});
+export type ClientDeviceSlots = z.infer<typeof ClientDeviceSlotsSchema>;
+
+export const ClientHwidInfoSchema = z.object({
+  deviceModel: z.string(),
+  deviceOs: z.string(),
+  fingerprint: z.string(),
+  firstSeen: z.number().int(),
+  id: z.number().int(),
+  lastIp: z.string(),
+  lastSeen: z.number().int(),
+  osVersion: z.string(),
+  userAgent: z.string(),
+});
+export type ClientHwidInfo = z.infer<typeof ClientHwidInfoSchema>;
+
 export const ClientInboundSchema = z.object({
   clientId: z.number().int(),
   createdAt: z.number().int(),
@@ -453,6 +508,17 @@ export const ClientInboundSchema = z.object({
   inboundId: z.number().int(),
 });
 export type ClientInbound = z.infer<typeof ClientInboundSchema>;
+
+export const ClientNodeTrafficSchema = z.object({
+  down: z.number().int(),
+  nodeId: z.number().int(),
+  nodeName: z.string(),
+  startedAt: z.number().int(),
+  total: z.number().int(),
+  up: z.number().int(),
+  updatedAt: z.number().int(),
+});
+export type ClientNodeTraffic = z.infer<typeof ClientNodeTrafficSchema>;
 
 export const ClientPageResponseSchema = z.object({
   filtered: z.number().int(),
@@ -549,6 +615,33 @@ export const ClientTrafficSchema = z.object({
   uuid: z.string(),
 });
 export type ClientTraffic = z.infer<typeof ClientTrafficSchema>;
+
+export const ClientTrafficReportSchema = z.object({
+  down: z.number().int(),
+  nodes: z.array(z.lazy(() => ClientNodeTrafficSchema)),
+  recorded: z.boolean(),
+  startedAt: z.number().int(),
+  total: z.number().int(),
+  up: z.number().int(),
+  updatedAt: z.number().int(),
+});
+export type ClientTrafficReport = z.infer<typeof ClientTrafficReportSchema>;
+
+export const ClientUsagePointSchema = z.object({
+  bucket: z.number().int(),
+  down: z.number().int(),
+  nodeId: z.number().int(),
+  up: z.number().int(),
+});
+export type ClientUsagePoint = z.infer<typeof ClientUsagePointSchema>;
+
+export const ClientUsageViewSchema = z.object({
+  generatedAt: z.number().int(),
+  points: z.array(z.lazy(() => ClientUsagePointSchema)),
+  resolution: z.string(),
+  traffic: z.lazy(() => ClientTrafficReportSchema),
+});
+export type ClientUsageView = z.infer<typeof ClientUsageViewSchema>;
 
 export const ClientsSummarySchema = z.object({
   active: z.number().int(),

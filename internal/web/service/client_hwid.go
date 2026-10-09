@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"net/netip"
 	"strings"
 	"time"
 
@@ -21,6 +22,7 @@ type HwidRequest struct {
 	DeviceOS    string
 	OsVersion   string
 	DeviceModel string
+	SourceIP    string
 }
 
 type HwidGateResult struct {
@@ -57,6 +59,37 @@ type ClientHwidInfo struct {
 	OsVersion   string `json:"osVersion"`
 	DeviceModel string `json:"deviceModel"`
 	Fingerprint string `json:"fingerprint"`
+	LastIP      string `json:"lastIp"`
+}
+
+type ClientDeviceSlots struct {
+	Devices    []ClientHwidInfo `json:"devices"`
+	Registered int              `json:"registered"`
+	Limit      int              `json:"limit"`
+	Remaining  int              `json:"remaining"`
+	Full       bool             `json:"full"`
+}
+
+func (s *ClientService) DeviceSlots(email string) (ClientDeviceSlots, error) {
+	rec, err := s.GetRecordByEmail(nil, email)
+	if err != nil {
+		return ClientDeviceSlots{}, err
+	}
+	devices, err := s.ListClientHwids(email)
+	if err != nil {
+		return ClientDeviceSlots{}, err
+	}
+	if devices == nil {
+		devices = []ClientHwidInfo{}
+	}
+	limit := rec.LimitHwid
+	if rec.Enable && strings.TrimSpace(rec.SubID) != "" {
+		limit, err = effectiveHwidLimitForSubID(database.GetDB(), rec.SubID)
+		if err != nil {
+			return ClientDeviceSlots{}, err
+		}
+	}
+	return ClientDeviceSlots{Devices: devices, Registered: len(devices), Limit: limit, Remaining: max(limit-len(devices), 0), Full: limit > 0 && len(devices) >= limit}, nil
 }
 
 func hashHwid(raw string) string {
@@ -81,12 +114,17 @@ func trimHwidMeta(s string) string {
 }
 
 func normalizeHwidRequest(req HwidRequest) HwidRequest {
+	sourceIP := ""
+	if ip, err := netip.ParseAddr(strings.TrimSpace(req.SourceIP)); err == nil {
+		sourceIP = ip.Unmap().String()
+	}
 	return HwidRequest{
 		Hwid:        strings.TrimSpace(req.Hwid),
 		UserAgent:   trimHwidMeta(req.UserAgent),
 		DeviceOS:    trimHwidMeta(req.DeviceOS),
 		OsVersion:   trimHwidMeta(req.OsVersion),
 		DeviceModel: trimHwidMeta(req.DeviceModel),
+		SourceIP:    sourceIP,
 	}
 }
 
@@ -130,6 +168,12 @@ func (s *ClientService) EnforceHwidForSubID(subID string, req HwidRequest) (Hwid
 	hwidHash := hashHwid(req.Hwid)
 
 	err = db.Transaction(func(tx *gorm.DB) error {
+		if tx.Dialector.Name() == "postgres" {
+			var records []model.ClientRecord
+			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Select("id").Where("sub_id = ?", subID).Order("id").Find(&records).Error; err != nil {
+				return err
+			}
+		}
 		limit, err := effectiveHwidLimitForSubID(tx, subID)
 		if err != nil {
 			return err
@@ -145,7 +189,7 @@ func (s *ClientService) EnforceHwidForSubID(subID string, req HwidRequest) (Hwid
 		err = tx.Where("sub_id = ? AND hwid_hash = ?", subID, hwidHash).First(&existing).Error
 		if err == nil {
 			if err := tx.Model(&model.ClientHwid{}).Where("id = ?", existing.Id).Updates(map[string]any{
-				"last_seen": now, "user_agent": req.UserAgent, "device_os": req.DeviceOS, "os_version": req.OsVersion, "device_model": req.DeviceModel,
+				"last_seen": now, "user_agent": req.UserAgent, "device_os": req.DeviceOS, "os_version": req.OsVersion, "device_model": req.DeviceModel, "last_ip": req.SourceIP,
 			}).Error; err != nil {
 				return err
 			}
@@ -171,7 +215,7 @@ func (s *ClientService) EnforceHwidForSubID(subID string, req HwidRequest) (Hwid
 			res.LimitReached = true
 			return nil
 		}
-		if err := tx.Create(&model.ClientHwid{SubID: subID, HwidHash: hwidHash, FirstSeen: now, LastSeen: now, UserAgent: req.UserAgent, DeviceOS: req.DeviceOS, OsVersion: req.OsVersion, DeviceModel: req.DeviceModel}).Error; err != nil {
+		if err := tx.Create(&model.ClientHwid{SubID: subID, HwidHash: hwidHash, FirstSeen: now, LastSeen: now, UserAgent: req.UserAgent, DeviceOS: req.DeviceOS, OsVersion: req.OsVersion, DeviceModel: req.DeviceModel, LastIP: req.SourceIP}).Error; err != nil {
 			return err
 		}
 		res.Allowed = true
@@ -188,8 +232,8 @@ func trackUnlimitedHwid(db *gorm.DB, subID string, req HwidRequest) {
 	now := time.Now().UnixMilli()
 	err := db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "sub_id"}, {Name: "hwid_hash"}},
-		DoUpdates: clause.AssignmentColumns([]string{"last_seen", "user_agent", "device_os", "os_version", "device_model"}),
-	}).Create(&model.ClientHwid{SubID: subID, HwidHash: hashHwid(req.Hwid), FirstSeen: now, LastSeen: now, UserAgent: req.UserAgent, DeviceOS: req.DeviceOS, OsVersion: req.OsVersion, DeviceModel: req.DeviceModel}).Error
+		DoUpdates: clause.AssignmentColumns([]string{"last_seen", "user_agent", "device_os", "os_version", "device_model", "last_ip"}),
+	}).Create(&model.ClientHwid{SubID: subID, HwidHash: hashHwid(req.Hwid), FirstSeen: now, LastSeen: now, UserAgent: req.UserAgent, DeviceOS: req.DeviceOS, OsVersion: req.OsVersion, DeviceModel: req.DeviceModel, LastIP: req.SourceIP}).Error
 	if err != nil {
 		logger.Warning("track HWID for unlimited subscription failed:", err)
 	}
@@ -262,6 +306,7 @@ func (s *ClientService) ListClientHwids(email string) ([]ClientHwidInfo, error) 
 			OsVersion:   r.OsVersion,
 			DeviceModel: r.DeviceModel,
 			Fingerprint: shortHwidFingerprint(r.HwidHash),
+			LastIP:      MaskDeviceIP(r.LastIP),
 		})
 	}
 	return out, nil
@@ -314,35 +359,9 @@ func (s *ClientService) setClientLimitHwidByEmail(tx *gorm.DB, email string, lim
 	if err := tx.Model(&model.ClientRecord{}).Where("id = ?", rec.Id).UpdateColumn("limit_hwid", limit).Error; err != nil {
 		return err
 	}
-	subID := strings.TrimSpace(rec.SubID)
-	if subID == "" {
-		return nil
-	}
-	effective, err := effectiveHwidLimitForSubID(tx, subID)
-	if err != nil {
-		return err
-	}
-	return trimClientHwidsForSubID(tx, subID, effective)
-}
-
-func trimClientHwidsForSubID(tx *gorm.DB, subID string, limit int) error {
-	subID = strings.TrimSpace(subID)
-	if subID == "" || limit <= 0 {
-		return nil
-	}
-	var keep []int
-	if err := tx.Model(&model.ClientHwid{}).
-		Where("sub_id = ?", subID).
-		Order("last_seen DESC").
-		Order("id DESC").
-		Limit(limit).
-		Pluck("id", &keep).Error; err != nil {
-		return err
-	}
-	if len(keep) == 0 {
-		return tx.Where("sub_id = ?", subID).Delete(&model.ClientHwid{}).Error
-	}
-	return tx.Where("sub_id = ? AND id NOT IN ?", subID, keep).Delete(&model.ClientHwid{}).Error
+	// A lower limit blocks new registrations; existing bindings are removed only
+	// by an explicit user or administrator action.
+	return nil
 }
 
 func clearClientHwidsBySubIDTx(tx *gorm.DB, subIDs ...string) error {

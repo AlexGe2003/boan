@@ -1,0 +1,111 @@
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+import { Alert, Button, Empty, Popconfirm, Table, Typography } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
+import type { ClientHwidInfo } from '@/generated/zod';
+import { IntlUtil } from '@/utils';
+
+export default function DeviceBindingTable({
+  devices,
+  onUnbind,
+  datepicker = 'gregorian',
+}: {
+  devices: ClientHwidInfo[];
+  onUnbind: (id: number) => Promise<void>;
+  datepicker?: 'gregorian' | 'jalalian';
+}) {
+  const { t } = useTranslation();
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const label = (key: string) => t(`pages.clients.devices.${key}`);
+  const date = (timestamp: number) =>
+    timestamp > 0 ? IntlUtil.formatDate(timestamp, datepicker) : '—';
+  const mutation = useMutation({
+    mutationFn: onUnbind,
+    onMutate: (id) => setDeletingId(id),
+    onSettled: () => setDeletingId(null),
+  });
+  const columns = [
+    {
+      title: label('device'),
+      key: 'device',
+      width: 180,
+      render: (_: unknown, entry: ClientHwidInfo) => (
+        <div>
+          <Typography.Text strong>{entry.deviceModel || label('unnamed')}</Typography.Text>
+          <div style={{ color: 'var(--ant-color-text-secondary)' }}>
+            {[entry.deviceOs, entry.osVersion].filter(Boolean).join(' ') || label('unknown')}
+          </div>
+          <Typography.Text type="secondary" code>
+            {entry.fingerprint}
+          </Typography.Text>
+        </div>
+      ),
+    },
+    {
+      title: label('client'),
+      dataIndex: 'userAgent',
+      key: 'client',
+      width: 180,
+      render: (value: string) => <span style={{ overflowWrap: 'anywhere' }}>{value || '—'}</span>,
+    },
+    { title: label('firstRegistered'), dataIndex: 'firstSeen', width: 175, render: date },
+    { title: label('lastFetch'), dataIndex: 'lastSeen', width: 175, render: date },
+    {
+      title: label('subscriptionIP'),
+      dataIndex: 'lastIp',
+      width: 155,
+      render: (ip: string) => <span style={{ overflowWrap: 'anywhere' }}>{ip || '—'}</span>,
+    },
+    {
+      title: t('pages.clients.actions'),
+      key: 'actions',
+      width: 100,
+      fixed: 'right' as const,
+      render: (_: unknown, entry: ClientHwidInfo) => (
+        <Popconfirm
+          title={label('unbindConfirm')}
+          description={label('unbindNote')}
+          onConfirm={() => mutation.mutate(entry.id)}
+          okButtonProps={{ danger: true }}
+          okText={label('unbind')}
+          cancelText={t('cancel')}
+        >
+          <Button
+            className="device-unbind"
+            size="small"
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            disabled={mutation.isPending}
+            loading={deletingId === entry.id}
+            aria-label={`${label('unbind')} ${entry.deviceModel || entry.fingerprint}`}
+          >
+            {label('unbind')}
+          </Button>
+        </Popconfirm>
+      ),
+    },
+  ];
+  return (
+    <>
+      {mutation.isError && (
+        <Alert type="error" title={label('unbindFailed')} description={mutation.error.message} />
+      )}
+      {mutation.isSuccess && <Alert type="success" title={label('unbound')} showIcon />}
+      <Table<ClientHwidInfo>
+        size="small"
+        rowKey="id"
+        columns={columns}
+        dataSource={devices}
+        pagination={{ pageSize: 10, hideOnSinglePage: true }}
+        scroll={{ x: 965 }}
+        locale={{
+          emptyText: (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={label('noDevices')} />
+          ),
+        }}
+      />
+    </>
+  );
+}

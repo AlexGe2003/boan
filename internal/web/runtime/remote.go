@@ -955,3 +955,11 @@ func (r *Remote) FetchClientActivity(ctx context.Context, email string, hours in
 	}
 	return e.Obj, nil
 }
+
+func (r *Remote) FetchClientConnections(ctx context.Context, email string) (json.RawMessage, error) {
+	e, err := r.do(ctx, http.MethodGet, "panel/api/clients/connections/"+url.PathEscape(email), nil)
+	if err != nil {
+		return nil, err
+	}
+	return e.Obj, nil
+}

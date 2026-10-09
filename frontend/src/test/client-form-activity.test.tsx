@@ -8,11 +8,24 @@ vi.mock('@/pages/clients/ClientActivity', () => ({
   default: ({ email }: { email: string }) => <div>Activity for {email}</div>,
 }));
 
+vi.mock('@/pages/clients/ClientDevices', () => ({
+  default: ({ email }: { email: string }) => <div>Devices for {email}</div>,
+}));
+
 function show(admin: boolean) {
-  return renderWithProviders(<QueryClientProvider client={makeTestQueryClient()}>
-    <ClientFormModal admin={admin} open mode="edit" client={{ email: 'alice', enable: true }}
-      inbounds={[]} save={vi.fn()} onOpenChange={vi.fn()} />
-  </QueryClientProvider>);
+  return renderWithProviders(
+    <QueryClientProvider client={makeTestQueryClient()}>
+      <ClientFormModal
+        admin={admin}
+        open
+        mode="edit"
+        client={{ email: 'alice', enable: true }}
+        inbounds={[]}
+        save={vi.fn()}
+        onOpenChange={vi.fn()}
+      />
+    </QueryClientProvider>,
+  );
 }
 
 it('loads the saved user activity only when the administrator selects its tab', async () => {
@@ -29,4 +42,15 @@ it('loads the saved user activity only when the administrator selects its tab', 
 it('does not expose the activity tab to a non-administrator', () => {
   show(false);
   expect(screen.queryByRole('tab', { name: '访问记录' })).toBeNull();
+  expect(screen.queryByRole('tab', { name: 'Devices and connections' })).toBeNull();
+});
+
+it('opens the administrator device tab without mounting it on the basics tab', async () => {
+  show(true);
+  expect(screen.queryByText('Devices for alice')).toBeNull();
+  fireEvent.click(screen.getByRole('tab', { name: 'Devices and connections' }));
+  await screen.findByText('Devices for alice');
+  expect(screen.queryByRole('button', { name: /^save$/i })).toBeNull();
+  fireEvent.click(screen.getByRole('tab', { name: 'Basics' }));
+  expect(screen.queryByText('Devices for alice')).toBeNull();
 });

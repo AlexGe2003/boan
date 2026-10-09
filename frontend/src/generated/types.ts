@@ -421,11 +421,70 @@ export interface ClientActivity {
   visits: ActivityVisit[];
 }
 
+export interface ClientConnection {
+  ip: string;
+  lastSeen: number;
+  nodeId: number;
+  nodeName: string;
+}
+
+export interface ClientConnectionReport {
+  connections: ClientConnection[];
+  generatedAt: number;
+  onlineSourceCount: number;
+  sources: ClientConnectionSource[];
+  status: string;
+}
+
+export interface ClientConnectionSource {
+  name: string;
+  nodeId: number;
+  status: string;
+}
+
+export interface ClientDeviceReport {
+  connections: ClientConnectionReport;
+  devices: ClientHwidInfo[];
+  limit: number;
+  registered: number;
+  traffic: ClientTrafficReport;
+}
+
+export interface ClientDeviceSlots {
+  devices: ClientHwidInfo[];
+  full: boolean;
+  limit: number;
+  registered: number;
+  remaining: number;
+}
+
+export interface ClientHwidInfo {
+  deviceModel: string;
+  deviceOs: string;
+  fingerprint: string;
+  firstSeen: number;
+  id: number;
+  lastIp: string;
+  lastSeen: number;
+  osVersion: string;
+  userAgent: string;
+}
+
 export interface ClientInbound {
   clientId: number;
   createdAt: number;
   flowOverride: string;
   inboundId: number;
+}
+
+export interface ClientNodeTraffic {
+  down: number;
+  nodeId: number;
+  nodeName: string;
+  startedAt: number;
+  total: number;
+  up: number;
+  updatedAt: number;
 }
 
 export interface ClientPageResponse {
@@ -517,6 +576,30 @@ export interface ClientTraffic {
   total: number;
   up: number;
   uuid: string;
+}
+
+export interface ClientTrafficReport {
+  down: number;
+  nodes: ClientNodeTraffic[];
+  recorded: boolean;
+  startedAt: number;
+  total: number;
+  up: number;
+  updatedAt: number;
+}
+
+export interface ClientUsagePoint {
+  bucket: number;
+  down: number;
+  nodeId: number;
+  up: number;
+}
+
+export interface ClientUsageView {
+  generatedAt: number;
+  points: ClientUsagePoint[];
+  resolution: string;
+  traffic: ClientTrafficReport;
 }
 
 export interface ClientsSummary {

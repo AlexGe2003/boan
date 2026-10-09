@@ -56,6 +56,10 @@ func (a *ClientController) initRouter(g *gin.RouterGroup) {
 	g.Use(a.guardClientEmail)
 	g.GET("/list", a.list)
 	g.GET("/mySubscriptions", a.mySubscriptions)
+	g.GET("/myDevices", a.myDevices)
+	g.GET("/myUsage", a.myUsage)
+	g.GET("/myConnections", a.myConnections)
+	g.DELETE("/myDevices/:id", a.deleteMyDevice)
 	g.POST("/resetMySubscription", a.resetMySubscription)
 	g.POST("/resetSubscription/:email", a.resetSubscription)
 	g.GET("/account/:email", a.clientAccount)
@@ -65,6 +69,8 @@ func (a *ClientController) initRouter(g *gin.RouterGroup) {
 	g.GET("/get/tgId/:tgId", a.getByTgId)
 	g.GET("/traffic/:email", a.getTrafficByEmail)
 	g.GET("/activity/:email", a.activity)
+	g.GET("/devices/:email", a.devices)
+	g.GET("/connections/:email", a.connections)
 	g.GET("/subLinks/:subId", a.guardSubID, a.getSubLinks)
 	g.GET("/links/:email", a.getClientLinks)
 	g.POST("/happLink/:id", a.generateHappLink)
@@ -154,6 +160,7 @@ func (a *ClientController) mySubscriptions(c *gin.Context) {
 	type link struct {
 		Email      string `json:"email"`
 		PlanName   string `json:"planName"`
+		LimitHwid  int    `json:"limitHwid"`
 		Configured bool   `json:"configured"`
 		URL        string `json:"url"`
 		ClashURL   string `json:"clashUrl,omitempty"`
@@ -190,7 +197,7 @@ func (a *ClientController) mySubscriptions(c *gin.Context) {
 			continue
 		}
 		seen[row.Email] = true
-		item := link{Email: row.Email, PlanName: names[row.Id], Total: row.TotalGB, ExpiryTime: row.ExpiryTime, Enabled: row.Enable}
+		item := link{Email: row.Email, PlanName: names[row.Id], LimitHwid: row.LimitHwid, Total: row.TotalGB, ExpiryTime: row.ExpiryTime, Enabled: row.Enable}
 		item.Configured = names[row.Id] != "" || len(row.InboundIds) > 0
 		if !item.Configured {
 			var externalCount int64

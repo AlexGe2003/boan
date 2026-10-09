@@ -93,6 +93,14 @@ export default function ClientHwidListModal({
                 <Typography.Text type="secondary">
                   {t('pages.clients.lastSeen')}: {formatDate(entry.lastSeen)}
                 </Typography.Text>
+                {entry.lastIp && (
+                  <>
+                    <br />
+                    <Typography.Text type="secondary">
+                      {t('pages.clients.devices.subscriptionIP')}: {entry.lastIp}
+                    </Typography.Text>
+                  </>
+                )}
                 {entry.userAgent && (
                   <>
                     <br />

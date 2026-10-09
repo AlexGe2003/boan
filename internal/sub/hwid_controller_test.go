@@ -71,6 +71,25 @@ func initHwidSubRouter(t *testing.T, limit int) (*gin.Engine, string) {
 	return router, subID
 }
 
+func TestSubscriptionHwidRecordsRequestSourceIP(t *testing.T) {
+	router, subID := initHwidSubRouter(t, 0)
+	req := httptest.NewRequest(http.MethodGet, "/sub/"+subID, nil)
+	req.RemoteAddr = "192.0.2.42:1234"
+	req.Header.Set("X-HWID", "device-one")
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatal(rec.Code, rec.Body.String())
+	}
+	var row model.ClientHwid
+	if err := database.GetDB().Where("sub_id = ?", subID).First(&row).Error; err != nil {
+		t.Fatal(err)
+	}
+	if row.LastIP != "192.0.2.42" {
+		t.Fatalf("subscription source IP = %q", row.LastIP)
+	}
+}
+
 func requestSub(t *testing.T, router *gin.Engine, method string, path string, hwid string, accept string) *httptest.ResponseRecorder {
 	t.Helper()
 	req := httptest.NewRequest(method, path, nil)

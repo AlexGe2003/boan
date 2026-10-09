@@ -1,4 +1,4 @@
-import ResetSubscriptionButton from '../subscriptions/ResetSubscriptionButton';
+import ClientActionsMenu from './ClientActionsMenu';
 import ClientVisitsButton from '@/pages/nodes/ClientVisitsButton';
 import { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -36,13 +36,11 @@ import {
   DeleteOutlined,
   DisconnectOutlined,
   DownloadOutlined,
-  EditOutlined,
   FilterOutlined,
   InfoCircleOutlined,
   LinkOutlined,
   MoreOutlined,
   PlusOutlined,
-  QrcodeOutlined,
   RestOutlined,
   RetweetOutlined,
   SearchOutlined,
@@ -322,7 +320,7 @@ function sortValueFor(column: string | null, order: 'ascend' | 'descend' | null)
 
 export default function ClientsPage() {
   const panelRole = usePanelRole();
-  const [accountScope, setAccountScope] = useState<"accounts" | "unlinked" | "all">("accounts");
+  const [accountScope, setAccountScope] = useState<'accounts' | 'unlinked' | 'all'>('accounts');
   const [subscriberOpen, setSubscriberOpen] = useState(false);
   const [planEmails, setPlanEmails] = useState<string[] | null>(null);
   const [accountEmail, setAccountEmail] = useState<string | null>(null);
@@ -1002,7 +1000,7 @@ export default function ClientsPage() {
       {
         title: t('pages.clients.actions'),
         key: 'actions',
-        width: panelRole === 'admin' ? 380 : 260,
+        width: panelRole === 'admin' ? 220 : 190,
         render: (_v, record) => (
           <ClientRowActions
             email={record.email}
@@ -1268,7 +1266,11 @@ export default function ClientsPage() {
                         aria-label="用户记录范围"
                         style={{ marginLeft: 12, minWidth: 170 }}
                         value={accountScope}
-                        onChange={(value) => { setAccountScope(value); setCurrentPage(1); setSelectedRowKeys([]); }}
+                        onChange={(value) => {
+                          setAccountScope(value);
+                          setCurrentPage(1);
+                          setSelectedRowKeys([]);
+                        }}
                         options={[
                           { value: 'accounts', label: '已开通账号' },
                           { value: 'unlinked', label: '未开通账号的订阅' },
@@ -1373,9 +1375,14 @@ export default function ClientsPage() {
                               type="primary"
                               icon={<PlusOutlined />}
                               onClick={onAdd}
-                              aria-label={panelRole === 'admin' ? '新增用户' : t('pages.clients.addClients')}
+                              aria-label={
+                                panelRole === 'admin' ? '新增用户' : t('pages.clients.addClients')
+                              }
                             >
-                              {!isMobile && (panelRole === 'admin' ? '新增用户' : t('pages.clients.addClients'))}
+                              {!isMobile &&
+                                (panelRole === 'admin'
+                                  ? '新增用户'
+                                  : t('pages.clients.addClients'))}
                             </Button>
                           ) : (
                             <Tag
@@ -1756,7 +1763,9 @@ export default function ClientsPage() {
                                     ) : (
                                       <Badge status={bucketBadgeStatus(bucket)} />
                                     )}
-                                    <span className="tag-name">{row.loginUsername || row.email}</span>
+                                    <span className="tag-name">
+                                      {row.loginUsername || row.email}
+                                    </span>
                                     {bucket === 'depleted' && (
                                       <Tag color="red" className="status-tag">
                                         {t('depleted')}
@@ -1768,9 +1777,6 @@ export default function ClientsPage() {
                                       </Tag>
                                     )}
                                     <div className="card-actions">
-                                      {panelRole === 'admin' && (
-                                        <ResetSubscriptionButton email={row.email} onReset={refresh} />
-                                      )}
                                       <Tooltip title={t('pages.clients.clientInfo')}>
                                         <InfoCircleOutlined
                                           className="row-action-trigger"
@@ -1787,69 +1793,19 @@ export default function ClientsPage() {
                                         loading={togglingEmail === row.email}
                                         onChange={(next) => onToggleEnable(row, next)}
                                       />
-                                      <Dropdown
-                                        trigger={['click']}
-                                        placement="bottomRight"
-                                        menu={{
-                                          items: [
-                                            ...(panelRole === 'admin'
-                                              ? [
-                                                  {
-                                                    key: 'account',
-                                                    label: '登录账号',
-                                                    onClick: () => setAccountEmail(row.email),
-                                                  },
-                                                ]
-                                              : []),
-                                            {
-                                              key: 'qr',
-                                              label: (
-                                                <>
-                                                  <QrcodeOutlined /> {t('pages.clients.qrCode')}
-                                                </>
-                                              ),
-                                              onClick: () => onShowQr(row.email),
-                                            },
-                                            {
-                                              key: 'reset',
-                                              label: (
-                                                <>
-                                                  <RetweetOutlined />{' '}
-                                                  {t('pages.inbounds.resetTraffic')}
-                                                </>
-                                              ),
-                                              onClick: () => onResetTraffic(row.email),
-                                            },
-                                            {
-                                              key: 'edit',
-                                              label: (
-                                                <>
-                                                  <EditOutlined /> {t('edit')}
-                                                </>
-                                              ),
-                                              onClick: () => onEdit(row.email),
-                                            },
-                                            {
-                                              key: 'delete',
-                                              danger: true,
-                                              label: (
-                                                <>
-                                                  <DeleteOutlined /> {t('delete')}
-                                                </>
-                                              ),
-                                              onClick: () => onDelete(row.email),
-                                            },
-                                          ],
-                                        }}
-                                      >
-                                        <Button
-                                          type="text"
-                                          size="small"
-                                          className="row-action-trigger"
-                                          icon={<MoreOutlined />}
-                                          aria-label={t('more')}
-                                        />
-                                      </Dropdown>
+                                      <ClientActionsMenu
+                                        email={row.email}
+                                        onAccount={
+                                          panelRole === 'admin' ? setAccountEmail : undefined
+                                        }
+                                        onSubscriptionReset={
+                                          panelRole === 'admin' ? refresh : undefined
+                                        }
+                                        onShowQr={onShowQr}
+                                        onResetTraffic={onResetTraffic}
+                                        onEdit={onEdit}
+                                        onDelete={onDelete}
+                                      />
                                     </div>
                                   </div>
                                   <ClientCardComment comment={row.comment} />
@@ -1911,11 +1867,18 @@ export default function ClientsPage() {
         {subscriberOpen && (
           <SubscriberModal
             onClose={() => setSubscriberOpen(false)}
-            onSaved={() => { setAccountScope('accounts'); void refresh(); }}
+            onSaved={() => {
+              setAccountScope('accounts');
+              void refresh();
+            }}
           />
         )}
         {planEmails && (
-          <SubscriberModal emails={planEmails} onClose={() => setPlanEmails(null)} onSaved={() => void refresh()} />
+          <SubscriberModal
+            emails={planEmails}
+            onClose={() => setPlanEmails(null)}
+            onSaved={() => void refresh()}
+          />
         )}
         <ClientAccountModal
           key={accountEmail ?? 'closed'}
