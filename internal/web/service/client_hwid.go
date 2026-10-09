@@ -51,23 +51,26 @@ const (
 )
 
 type ClientHwidInfo struct {
-	Id          int    `json:"id"`
-	FirstSeen   int64  `json:"firstSeen"`
-	LastSeen    int64  `json:"lastSeen"`
-	UserAgent   string `json:"userAgent"`
-	DeviceOS    string `json:"deviceOs"`
-	OsVersion   string `json:"osVersion"`
-	DeviceModel string `json:"deviceModel"`
-	Fingerprint string `json:"fingerprint"`
-	LastIP      string `json:"lastIp"`
+	ClientName    string `json:"clientName,omitempty"`
+	ClientVersion string `json:"clientVersion,omitempty"`
+	Id            int    `json:"id"`
+	FirstSeen     int64  `json:"firstSeen"`
+	LastSeen      int64  `json:"lastSeen"`
+	UserAgent     string `json:"userAgent"`
+	DeviceOS      string `json:"deviceOs"`
+	OsVersion     string `json:"osVersion"`
+	DeviceModel   string `json:"deviceModel"`
+	Fingerprint   string `json:"fingerprint"`
+	LastIP        string `json:"lastIp"`
 }
 
 type ClientDeviceSlots struct {
-	Devices    []ClientHwidInfo `json:"devices"`
-	Registered int              `json:"registered"`
-	Limit      int              `json:"limit"`
-	Remaining  int              `json:"remaining"`
-	Full       bool             `json:"full"`
+	SubscriptionClient *SubscriptionClientInfo `json:"subscriptionClient,omitempty"`
+	Devices            []ClientHwidInfo        `json:"devices"`
+	Registered         int                     `json:"registered"`
+	Limit              int                     `json:"limit"`
+	Remaining          int                     `json:"remaining"`
+	Full               bool                    `json:"full"`
 }
 
 func (s *ClientService) DeviceSlots(email string) (ClientDeviceSlots, error) {
@@ -82,6 +85,10 @@ func (s *ClientService) DeviceSlots(email string) (ClientDeviceSlots, error) {
 	if devices == nil {
 		devices = []ClientHwidInfo{}
 	}
+	subscriptionClient, err := s.subscriptionClient(rec.Id)
+	if err != nil {
+		return ClientDeviceSlots{}, err
+	}
 	limit := rec.LimitHwid
 	if rec.Enable && strings.TrimSpace(rec.SubID) != "" {
 		limit, err = effectiveHwidLimitForSubID(database.GetDB(), rec.SubID)
@@ -89,7 +96,7 @@ func (s *ClientService) DeviceSlots(email string) (ClientDeviceSlots, error) {
 			return ClientDeviceSlots{}, err
 		}
 	}
-	return ClientDeviceSlots{Devices: devices, Registered: len(devices), Limit: limit, Remaining: max(limit-len(devices), 0), Full: limit > 0 && len(devices) >= limit}, nil
+	return ClientDeviceSlots{SubscriptionClient: subscriptionClient, Devices: devices, Registered: len(devices), Limit: limit, Remaining: max(limit-len(devices), 0), Full: limit > 0 && len(devices) >= limit}, nil
 }
 
 func hashHwid(raw string) string {
@@ -297,7 +304,9 @@ func (s *ClientService) ListClientHwids(email string) ([]ClientHwidInfo, error) 
 	}
 	out := make([]ClientHwidInfo, 0, len(rows))
 	for _, r := range rows {
+		name, version := IdentifySubscriptionClient(r.UserAgent)
 		out = append(out, ClientHwidInfo{
+			ClientName: name, ClientVersion: version,
 			Id:          r.Id,
 			FirstSeen:   r.FirstSeen,
 			LastSeen:    r.LastSeen,

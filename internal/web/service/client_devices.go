@@ -36,11 +36,12 @@ type ClientConnectionReport struct {
 }
 
 type ClientDeviceReport struct {
-	Devices     []ClientHwidInfo       `json:"devices"`
-	Registered  int                    `json:"registered"`
-	Limit       int                    `json:"limit"`
-	Connections ClientConnectionReport `json:"connections"`
-	Traffic     ClientTrafficReport    `json:"traffic"`
+	SubscriptionClient *SubscriptionClientInfo `json:"subscriptionClient,omitempty"`
+	Devices            []ClientHwidInfo        `json:"devices"`
+	Registered         int                     `json:"registered"`
+	Limit              int                     `json:"limit"`
+	Connections        ClientConnectionReport  `json:"connections"`
+	Traffic            ClientTrafficReport     `json:"traffic"`
 }
 
 func emptyClientConnections(now time.Time) ClientConnectionReport {
@@ -207,5 +208,5 @@ func (s *ClientService) Devices(ctx context.Context, email string) (ClientDevice
 	}
 	connections, err := s.FleetClientConnections(ctx, email)
 	maskDeviceConnections(&connections)
-	return ClientDeviceReport{Devices: slots.Devices, Registered: slots.Registered, Limit: slots.Limit, Connections: connections, Traffic: traffic}, err
+	return ClientDeviceReport{SubscriptionClient: slots.SubscriptionClient, Devices: slots.Devices, Registered: slots.Registered, Limit: slots.Limit, Connections: connections, Traffic: traffic}, err
 }

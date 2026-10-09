@@ -37,6 +37,8 @@ import (
 // so they do not need manual updates.
 func migrationModels() []any {
 	return []any{
+		&model.ClusterState{},
+		&model.ClusterBackup{},
 		&model.User{},
 		&model.PanelRoleDefinition{},
 		&model.SubscriptionPlan{},
@@ -56,6 +58,7 @@ func migrationModels() []any {
 		&model.ClientRecord{},
 		&model.ClientInbound{},
 		&model.ClientHwid{},
+		&model.ClientSubscriptionFetch{},
 		&model.ClientExternalLink{},
 		&model.ClientGroup{},
 		&model.InboundFallback{},

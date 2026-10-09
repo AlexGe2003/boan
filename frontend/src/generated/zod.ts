@@ -475,6 +475,7 @@ export const ClientDeviceReportSchema = z.object({
   devices: z.array(z.lazy(() => ClientHwidInfoSchema)),
   limit: z.number().int(),
   registered: z.number().int(),
+  subscriptionClient: z.lazy(() => SubscriptionClientInfoSchema).nullable().optional(),
   traffic: z.lazy(() => ClientTrafficReportSchema),
 });
 export type ClientDeviceReport = z.infer<typeof ClientDeviceReportSchema>;
@@ -485,10 +486,13 @@ export const ClientDeviceSlotsSchema = z.object({
   limit: z.number().int(),
   registered: z.number().int(),
   remaining: z.number().int(),
+  subscriptionClient: z.lazy(() => SubscriptionClientInfoSchema).nullable().optional(),
 });
 export type ClientDeviceSlots = z.infer<typeof ClientDeviceSlotsSchema>;
 
 export const ClientHwidInfoSchema = z.object({
+  clientName: z.string().optional(),
+  clientVersion: z.string().optional(),
   deviceModel: z.string(),
   deviceOs: z.string(),
   fingerprint: z.string(),
@@ -1356,6 +1360,15 @@ export const SubBalancerSchema = z.object({
   updatedAt: z.number().int(),
 });
 export type SubBalancer = z.infer<typeof SubBalancerSchema>;
+
+export const SubscriptionClientInfoSchema = z.object({
+  lastIp: z.string(),
+  lastSeen: z.number().int(),
+  name: z.string(),
+  userAgent: z.string(),
+  version: z.string(),
+});
+export type SubscriptionClientInfo = z.infer<typeof SubscriptionClientInfoSchema>;
 
 export const SubscriptionPlanSchema = z.object({
   description: z.string(),

@@ -47,6 +47,8 @@ const report: ClientDeviceReport = {
       deviceOs: 'iOS',
       osVersion: '18',
       userAgent: 'Happ/1.0',
+      clientName: 'Happ',
+      clientVersion: '1.0',
       fingerprint: '0123456789ab',
       lastIp: '192.0.*.*',
       firstSeen: 1700000000000,
@@ -203,4 +205,25 @@ it('requests devices only when the administrator opens the device panel', async 
   fireEvent.click(screen.getByRole('button', { name: 'Devices and connections' }));
   await screen.findByText('Alice phone');
   expect(get.mock.calls.filter(([url]) => String(url).includes('/devices/'))).toHaveLength(1);
+});
+
+it('shows the latest subscription software separately from the current connection', async () => {
+  vi.spyOn(HttpUtil, 'get').mockResolvedValue(
+    new Msg(true, '', {
+      ...report,
+      subscriptionClient: {
+        name: 'Clash Verge',
+        version: '2.4.3',
+        userAgent: 'clash-verge/v2.4.3',
+        lastIp: '198.51.*.7',
+        lastSeen: 1700000000002,
+      },
+    }),
+  );
+  show();
+  await screen.findByText('Clash Verge 2.4.3');
+  expect(screen.getByText('Happ 1.0')).toBeTruthy();
+  const connection = screen.getByText('203.0.*.42').closest('tr')!;
+  expect(within(connection).queryByText('Clash Verge 2.4.3')).toBeNull();
+  expect(within(connection).queryByText('Happ 1.0')).toBeNull();
 });

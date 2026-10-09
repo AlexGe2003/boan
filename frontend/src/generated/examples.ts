@@ -508,6 +508,8 @@ export const EXAMPLES: Record<string, unknown> = {
     },
     "devices": [
       {
+        "clientName": "",
+        "clientVersion": "",
         "deviceModel": "",
         "deviceOs": "",
         "fingerprint": "",
@@ -521,6 +523,7 @@ export const EXAMPLES: Record<string, unknown> = {
     ],
     "limit": 0,
     "registered": 0,
+    "subscriptionClient": null,
     "traffic": {
       "down": 0,
       "nodes": [
@@ -544,6 +547,8 @@ export const EXAMPLES: Record<string, unknown> = {
   "ClientDeviceSlots": {
     "devices": [
       {
+        "clientName": "",
+        "clientVersion": "",
         "deviceModel": "",
         "deviceOs": "",
         "fingerprint": "",
@@ -558,9 +563,12 @@ export const EXAMPLES: Record<string, unknown> = {
     "full": false,
     "limit": 0,
     "registered": 0,
-    "remaining": 0
+    "remaining": 0,
+    "subscriptionClient": null
   },
   "ClientHwidInfo": {
+    "clientName": "",
+    "clientVersion": "",
     "deviceModel": "",
     "deviceOs": "",
     "fingerprint": "",
@@ -1584,6 +1592,13 @@ export const EXAMPLES: Record<string, unknown> = {
     "sortOrder": 1,
     "strategy": "random",
     "updatedAt": 1710000000000
+  },
+  "SubscriptionClientInfo": {
+    "lastIp": "",
+    "lastSeen": 0,
+    "name": "",
+    "userAgent": "",
+    "version": ""
   },
   "SubscriptionPlan": {
     "description": "",

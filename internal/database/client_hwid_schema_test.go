@@ -39,6 +39,9 @@ func TestClientHwidSchemaSQLite(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = CloseDB() })
 	assertClientHwidSchema(t, GetDB())
+	if !GetDB().Migrator().HasTable(&model.ClientSubscriptionFetch{}) {
+		t.Fatal("subscription client metadata table missing")
+	}
 }
 
 func TestClientHwidSchemaPostgres(t *testing.T) {

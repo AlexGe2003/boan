@@ -1039,6 +1039,16 @@ type ClientHwid struct {
 
 func (ClientHwid) TableName() string { return "client_hwids" }
 
+// One latest successful subscription download per account; this is not a device.
+type ClientSubscriptionFetch struct {
+	ClientID  int    `json:"-" gorm:"primaryKey;autoIncrement:false;column:client_id"`
+	LastSeen  int64  `json:"-" gorm:"column:last_seen;not null"`
+	UserAgent string `json:"-" gorm:"column:user_agent"`
+	LastIP    string `json:"-" gorm:"column:last_ip"`
+}
+
+func (ClientSubscriptionFetch) TableName() string { return "client_subscription_fetches" }
+
 // ClientExternalLink is a per-client entry surfaced in the client's
 // subscription. Two kinds:
 //   - "link": a single third-party share link (vless://, vmess://, trojan://,

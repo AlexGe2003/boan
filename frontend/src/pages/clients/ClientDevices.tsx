@@ -11,6 +11,7 @@ import {
 import { HttpUtil, IntlUtil, SizeFormatter } from '@/utils';
 import { useDatepicker } from '@/hooks/useDatepicker';
 import DeviceBindingTable from '@/components/clients/DeviceBindingTable';
+import SubscriptionClientSummary from '@/components/clients/SubscriptionClientSummary';
 import './ClientDevices.css';
 
 export default function ClientDevices({ email }: { email: string }) {
@@ -208,6 +209,7 @@ export default function ClientDevices({ email }: { email: string }) {
             title={label('countNote')}
             description={label('identityNote')}
           />
+          <SubscriptionClientSummary client={data.subscriptionClient} datepicker={datepicker} />
           <Typography.Title level={5}>{label('identifiedDevices')}</Typography.Title>
           {data.limit > 0 && data.registered >= data.limit && (
             <Alert type="warning" showIcon title={label('slotsFull')} />

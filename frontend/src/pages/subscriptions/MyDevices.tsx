@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Button, Spin, Typography, Tag } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import DeviceBindingTable from '@/components/clients/DeviceBindingTable';
+import SubscriptionClientSummary from '@/components/clients/SubscriptionClientSummary';
 import { ClientDeviceSlotsSchema, ClientConnectionReportSchema } from '@/generated/zod';
 import { HttpUtil, IntlUtil } from '@/utils';
 import '@/pages/clients/ClientDevices.css';
@@ -125,6 +126,7 @@ export default function MyDevices({ userId }: { userId: number }) {
             </div>
           </div>
           {data.full && <Alert type="warning" showIcon title={label('slotsFull')} />}
+          <SubscriptionClientSummary client={data.subscriptionClient} />
           <Alert type="info" showIcon title={label('bindingNote')} description={label('ipNote')} />
           <DeviceBindingTable devices={data.devices} onUnbind={unbind} />
         </>

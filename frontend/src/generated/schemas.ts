@@ -1847,6 +1847,14 @@ export const SCHEMAS: Record<string, unknown> = {
       "registered": {
         "type": "integer"
       },
+      "subscriptionClient": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SubscriptionClientInfo"
+          }
+        ],
+        "nullable": true
+      },
       "traffic": {
         "$ref": "#/components/schemas/ClientTrafficReport"
       }
@@ -1879,6 +1887,14 @@ export const SCHEMAS: Record<string, unknown> = {
       },
       "remaining": {
         "type": "integer"
+      },
+      "subscriptionClient": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SubscriptionClientInfo"
+          }
+        ],
+        "nullable": true
       }
     },
     "required": [
@@ -1892,6 +1908,12 @@ export const SCHEMAS: Record<string, unknown> = {
   },
   "ClientHwidInfo": {
     "properties": {
+      "clientName": {
+        "type": "string"
+      },
+      "clientVersion": {
+        "type": "string"
+      },
       "deviceModel": {
         "type": "string"
       },
@@ -5494,6 +5516,34 @@ export const SCHEMAS: Record<string, unknown> = {
       "sortOrder",
       "strategy",
       "updatedAt"
+    ],
+    "type": "object"
+  },
+  "SubscriptionClientInfo": {
+    "properties": {
+      "lastIp": {
+        "type": "string"
+      },
+      "lastSeen": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "userAgent": {
+        "type": "string"
+      },
+      "version": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "lastIp",
+      "lastSeen",
+      "name",
+      "userAgent",
+      "version"
     ],
     "type": "object"
   },

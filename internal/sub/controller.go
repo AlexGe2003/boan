@@ -521,6 +521,9 @@ func (a *SUBController) recordSubscriptionFetch(c *gin.Context) {
 	if err := a.subService.RecordSubscriptionFetch(c.Param("subid")); err != nil {
 		logger.Warning("Failed to record subscription fetch:", err)
 	}
+	if err := a.clientService.RecordSubscriptionClient(c.Param("subid"), service.HwidRequest{UserAgent: c.GetHeader("User-Agent"), SourceIP: a.subscriptionSourceIP(c)}); err != nil {
+		logger.Warning("Failed to record subscription client:", err)
+	}
 }
 
 func shouldAutoServeClash(autoDetect, clashEnabled, wantsHTML bool, userAgent string, userAgentRegex *regexp.Regexp) bool {
@@ -697,7 +700,7 @@ func (a *SUBController) enforceHwid(c *gin.Context) bool {
 		DeviceOS:    c.GetHeader("X-Device-OS"),
 		OsVersion:   c.GetHeader("X-Ver-OS"),
 		DeviceModel: c.GetHeader("X-Device-Model"),
-		SourceIP:    c.ClientIP(),
+		SourceIP:    a.subscriptionSourceIP(c),
 	})
 	if err != nil {
 		writeSubError(c, err)

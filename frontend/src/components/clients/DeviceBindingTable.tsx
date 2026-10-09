@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Empty, Popconfirm, Table, Typography } from 'antd';
+import { Alert, Button, Empty, Popconfirm, Table, Tooltip, Typography } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 import type { ClientHwidInfo } from '@/generated/zod';
 import { IntlUtil } from '@/utils';
@@ -43,11 +43,19 @@ export default function DeviceBindingTable({
       ),
     },
     {
-      title: label('client'),
+      title: label('subscriptionClient'),
       dataIndex: 'userAgent',
       key: 'client',
       width: 180,
-      render: (value: string) => <span style={{ overflowWrap: 'anywhere' }}>{value || '—'}</span>,
+      render: (value: string, entry: ClientHwidInfo) => (
+        <Tooltip title={value || undefined}>
+          <span style={{ overflowWrap: 'anywhere' }}>
+            {[entry.clientName || label('unknownClient'), entry.clientVersion]
+              .filter(Boolean)
+              .join(' ')}
+          </span>
+        </Tooltip>
+      ),
     },
     { title: label('firstRegistered'), dataIndex: 'firstSeen', width: 175, render: date },
     { title: label('lastFetch'), dataIndex: 'lastSeen', width: 175, render: date },

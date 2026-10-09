@@ -1931,11 +1931,8 @@ func applyShareRealityParams(stream map[string]any, params map[string]string, cl
 				params["sid"], _ = shortIds[random.Num(len(shortIds))].(string)
 			}
 		}
-		if fpValue, ok := searchKey(realitySettings, "fingerprint"); ok {
-			if fp, ok := fpValue.(string); ok && len(fp) > 0 {
-				params["fp"] = fp
-			}
-		}
+		clientSettings, _ := realitySettings.(map[string]any)
+		params["fp"] = realityClientFingerprint(clientSettings)
 		if pqvValue, ok := searchKey(realitySettings, "mldsa65Verify"); ok {
 			if pqv, ok := pqvValue.(string); ok && len(pqv) > 0 {
 				params["pqv"] = pqv

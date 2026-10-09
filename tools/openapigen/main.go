@@ -120,7 +120,7 @@ func run(root, outDir string) error {
 				"AmneziaWGLogs",
 				"PeerActivity",
 				"HwidSlotStatus",
-				"ClientUsageView", "ClientUsagePoint", "ClientDeviceSlots", "ClientDeviceReport", "ClientConnectionReport", "ClientConnection", "ClientConnectionSource", "ClientHwidInfo", "ClientTrafficReport", "ClientNodeTraffic",
+				"ClientUsageView", "ClientUsagePoint", "ClientDeviceSlots", "ClientDeviceReport", "ClientConnectionReport", "ClientConnection", "ClientConnectionSource", "ClientHwidInfo", "SubscriptionClientInfo", "ClientTrafficReport", "ClientNodeTraffic",
 			),
 		},
 		{

@@ -447,6 +447,7 @@ export interface ClientDeviceReport {
   devices: ClientHwidInfo[];
   limit: number;
   registered: number;
+  subscriptionClient?: SubscriptionClientInfo | null;
   traffic: ClientTrafficReport;
 }
 
@@ -456,9 +457,12 @@ export interface ClientDeviceSlots {
   limit: number;
   registered: number;
   remaining: number;
+  subscriptionClient?: SubscriptionClientInfo | null;
 }
 
 export interface ClientHwidInfo {
+  clientName?: string;
+  clientVersion?: string;
   deviceModel: string;
   deviceOs: string;
   fingerprint: string;
@@ -1264,6 +1268,14 @@ export interface SubBalancer {
   sortOrder: number;
   strategy: string;
   updatedAt: number;
+}
+
+export interface SubscriptionClientInfo {
+  lastIp: string;
+  lastSeen: number;
+  name: string;
+  userAgent: string;
+  version: string;
 }
 
 export interface SubscriptionPlan {

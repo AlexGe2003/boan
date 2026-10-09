@@ -133,3 +133,29 @@ it('directs a limited subscription to HWID import rather than ordinary Clash imp
   );
   expect(screen.getByRole('button', { name: /复制订阅链接/ })).toBeTruthy();
 });
+
+it('shows account subscription software without creating a device slot', async () => {
+  const report = {
+    ...fullSlots(),
+    registered: 0,
+    remaining: 3,
+    full: false,
+    devices: [],
+    subscriptionClient: {
+      name: 'Shadowrocket',
+      version: '2.2.92',
+      userAgent: 'Shadowrocket/2.2.92',
+      lastIp: '198.51.*.7',
+      lastSeen: 1700000000002,
+    },
+  };
+  vi.spyOn(HttpUtil, 'get').mockImplementation(
+    async (url) =>
+      new Msg(true, '', url === '/panel/api/clients/myDevices' ? report : onlineSources()),
+  );
+  show();
+  await screen.findByText('Shadowrocket 2.2.92');
+  expect(screen.getByText('Bound devices').parentElement?.textContent).toContain('0');
+  expect(screen.getByText('Available slots').parentElement?.textContent).toContain('3');
+  expect(screen.queryByText('Phone 1')).toBeNull();
+});

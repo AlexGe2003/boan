@@ -785,7 +785,7 @@ func (s *SubJsonService) realityData(rData map[string]any, clientKey string) map
 
 	rltyData["show"] = false
 	rltyData["publicKey"] = rltyClientSettings["publicKey"]
-	rltyData["fingerprint"] = rltyClientSettings["fingerprint"]
+	rltyData["fingerprint"] = realityClientFingerprint(rltyClientSettings)
 	rltyData["mldsa65Verify"] = rltyClientSettings["mldsa65Verify"]
 
 	seed, _ := rltyClientSettings["spiderX"].(string)

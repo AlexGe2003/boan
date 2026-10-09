@@ -1873,6 +1873,14 @@
           "registered": {
             "type": "integer"
           },
+          "subscriptionClient": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubscriptionClientInfo"
+              }
+            ],
+            "nullable": true
+          },
           "traffic": {
             "$ref": "#/components/schemas/ClientTrafficReport"
           }
@@ -1905,6 +1913,14 @@
           },
           "remaining": {
             "type": "integer"
+          },
+          "subscriptionClient": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubscriptionClientInfo"
+              }
+            ],
+            "nullable": true
           }
         },
         "required": [
@@ -1918,6 +1934,12 @@
       },
       "ClientHwidInfo": {
         "properties": {
+          "clientName": {
+            "type": "string"
+          },
+          "clientVersion": {
+            "type": "string"
+          },
           "deviceModel": {
             "type": "string"
           },
@@ -5523,6 +5545,34 @@
         ],
         "type": "object"
       },
+      "SubscriptionClientInfo": {
+        "properties": {
+          "lastIp": {
+            "type": "string"
+          },
+          "lastSeen": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "userAgent": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "lastIp",
+          "lastSeen",
+          "name",
+          "userAgent",
+          "version"
+        ],
+        "type": "object"
+      },
       "SubscriptionPlan": {
         "description": "SubscriptionPlan is a reusable service template. Applying it preserves each\nsubscriber's credentials and measured traffic.",
         "properties": {
@@ -6097,6 +6147,8 @@
                     },
                     "devices": [
                       {
+                        "clientName": "",
+                        "clientVersion": "",
                         "deviceModel": "",
                         "deviceOs": "",
                         "fingerprint": "",
@@ -6110,6 +6162,7 @@
                     ],
                     "limit": 0,
                     "registered": 0,
+                    "subscriptionClient": null,
                     "traffic": {
                       "down": 0,
                       "nodes": [
@@ -6404,6 +6457,8 @@
                   "obj": {
                     "devices": [
                       {
+                        "clientName": "",
+                        "clientVersion": "",
                         "deviceModel": "",
                         "deviceOs": "",
                         "fingerprint": "",
@@ -6418,7 +6473,8 @@
                     "full": false,
                     "limit": 0,
                     "registered": 0,
-                    "remaining": 0
+                    "remaining": 0,
+                    "subscriptionClient": null
                   }
                 }
               }

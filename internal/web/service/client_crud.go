@@ -898,6 +898,9 @@ func (s *ClientService) Delete(inboundSvc *InboundService, id int, keepTraffic b
 				return err
 			}
 		}
+		if err := tx.Where("client_id = ?", id).Delete(&model.ClientSubscriptionFetch{}).Error; err != nil {
+			return err
+		}
 		return tx.Delete(&model.ClientRecord{}, id).Error
 	}); err != nil {
 		withdrawClientTombstones(existing.Email)
