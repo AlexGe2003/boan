@@ -7,9 +7,11 @@ import { HttpUtil } from '@/utils';
 export default function ClientAccountModal({
   email,
   onClose,
+  onSaved,
 }: {
   email: string | null;
   onClose: () => void;
+  onSaved?: () => void;
 }) {
   const [form] = Form.useForm<{ username: string; password?: string }>();
   const [saving, setSaving] = useState(false);
@@ -33,38 +35,45 @@ export default function ClientAccountModal({
   useEffect(() => {
     if (account.isSuccess)
       form.setFieldsValue({
-        username: account.data?.username || 'user',
+        username: account.data?.username || email || '',
         password: account.data?.username ? '' : 'user',
       });
   }, [account.data, account.isSuccess, email, form]);
   async function save(values: { username: string; password?: string }) {
-    if (!email) return;
+    if (!email || saving) return;
     setSaving(true);
-    const msg = await HttpUtil.post(
-      `/panel/api/clients/account/${encodeURIComponent(email)}`,
-      values,
-      {
-        headers: { 'Content-Type': 'application/json' },
-        silent: true,
-      },
-    );
-    setSaving(false);
-    if (!msg.success) setError(msg.msg);
-    else {
-      await account.refetch();
-      onClose();
+    setError('');
+    try {
+      const msg = await HttpUtil.post(
+        `/panel/api/clients/account/${encodeURIComponent(email)}`,
+        values,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          silent: true,
+        },
+      );
+      if (!msg.success) setError(msg.msg);
+      else {
+        await account.refetch();
+        onSaved?.();
+        onClose();
+      }
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setSaving(false);
     }
   }
   return (
     <Modal
       open={email !== null}
       title="管理登录账号"
-      onCancel={onClose}
+      onCancel={() => !saving && onClose()}
       onOk={() => form.submit()}
       okText={exists ? '保存更改' : '创建账号'}
       cancelText="取消"
       confirmLoading={saving}
-      okButtonProps={{ disabled: loading || account.isError }}
+      okButtonProps={{ disabled: saving || loading || account.isError }}
     >
       <Typography.Paragraph>
         {email}：设置用户门户的登录用户名和密码。用户登录后可查看自己的流量、到期时间和订阅。

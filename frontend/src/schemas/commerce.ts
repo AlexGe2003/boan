@@ -143,7 +143,7 @@ export const SubscriberFormSchema = z
     username: z
       .string()
       .trim()
-      .min(1)
+      .min(1, '请输入登录账号')
       .max(120)
       .regex(/^[^\s/\\\p{Cc}]+$/u, '账号不能包含空格或斜线'),
     password: SubscriberPasswordSchema,
@@ -155,7 +155,7 @@ export const SubscriberFormSchema = z
     message: '请选择套餐',
   });
 export const subscriberDefaults = {
-  username: 'user',
+  username: '',
   password: 'user',
   planId: undefined,
   assigning: false,

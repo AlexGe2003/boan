@@ -222,6 +222,15 @@ func (a *SubscriptionPlanController) subscribe(c *gin.Context) {
 	}
 	planMutationMu.Lock()
 	defer planMutationMu.Unlock()
+	conflict, err := findSubscriberConflict(database.GetDB(), req.Username)
+	if err != nil {
+		jsonObj(c, nil, err)
+		return
+	}
+	if conflict != nil {
+		jsonObj(c, conflict, errors.New(conflict.message()))
+		return
+	}
 	var p planInput
 	if req.PlanID == 0 && !req.AccountOnly {
 		var setting model.Setting
@@ -255,15 +264,19 @@ func (a *SubscriptionPlanController) subscribe(c *gin.Context) {
 	rec := model.ClientRecord{Email: req.Username, SubID: uuid.NewString(), UUID: uuid.NewString(), Enable: true, TrafficReset: "never", TrafficResetDay: 1}
 	err = database.GetDB().Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&rec).Error; err != nil {
-			return errors.New("该用户标识已存在，请在原用户上开通账号或分配套餐")
+			return err
 		}
 		u := model.User{Username: req.Username, Password: hash, Role: model.RoleCustomer, ClientID: &rec.Id}
 		if err := tx.Create(&u).Error; err != nil {
-			return errors.New("该登录账号已存在")
+			return err
 		}
 		return nil
 	})
 	if err != nil {
+		if conflict, lookupErr := findSubscriberConflict(database.GetDB(), req.Username); lookupErr == nil && conflict != nil {
+			jsonObj(c, conflict, errors.New(conflict.message()))
+			return
+		}
 		jsonObj(c, nil, err)
 		return
 	}
@@ -275,6 +288,61 @@ func (a *SubscriptionPlanController) subscribe(c *gin.Context) {
 	}
 	notifyClientsChanged()
 	jsonObj(c, gin.H{"email": rec.Email, "created": true}, err)
+}
+
+type subscriberConflict struct {
+	Kind          string `json:"conflict"`
+	Email         string `json:"email,omitempty"`
+	Username      string `json:"username,omitempty"`
+	AccountExists bool   `json:"accountExists"`
+}
+
+func (s *subscriberConflict) message() string {
+	switch s.Kind {
+	case "subscription_exists":
+		return "该订阅标识已存在，尚未开通登录账号；请在原订阅上开通账号"
+	case "orphan_account":
+		return "该登录账号已存在，但关联订阅已删除或未绑定；请在账号管理中处理原账号"
+	default:
+		return "该用户已开通登录账号；请管理原账号或在原用户上分配套餐"
+	}
+}
+
+func findSubscriberConflict(db *gorm.DB, name string) (*subscriberConflict, error) {
+	var rec model.ClientRecord
+	err := db.Where("email = ?", name).First(&rec).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	var user model.User
+	if err == nil {
+		err = db.Where("client_id = ?", rec.Id).First(&user).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &subscriberConflict{Kind: "subscription_exists", Email: rec.Email}, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err = db.Where("username = ?", name).First(&user).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		if user.ClientID == nil {
+			return &subscriberConflict{Kind: "orphan_account", Username: user.Username, AccountExists: true}, nil
+		}
+		err = db.First(&rec, *user.ClientID).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &subscriberConflict{Kind: "orphan_account", Username: user.Username, AccountExists: true}, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &subscriberConflict{Kind: "account_exists", Email: rec.Email, Username: user.Username, AccountExists: true}, nil
 }
 func (a *SubscriptionPlanController) applyOne(email string, p planInput) error {
 	return a.applyWithExpiry(email, p, nil)

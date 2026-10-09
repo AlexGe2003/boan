@@ -6,16 +6,29 @@ import {
   type SubscriberValues,
 } from '@/schemas/commerce';
 import { useState } from 'react';
-import { Alert, Form, Input, Modal, Select, Typography } from 'antd';
+import { Alert, Button, Form, Input, Modal, Select, Space, Typography } from 'antd';
 import { useSubscriptionPlans, postPlan, planSummary } from './api';
+
+interface SubscriberResult {
+  created?: boolean;
+  email?: string;
+  conflict?: 'subscription_exists' | 'account_exists' | 'orphan_account';
+  username?: string;
+  accountExists?: boolean;
+}
+
 export default function SubscriberModal({
   emails,
   onClose,
   onSaved,
+  onOpenExisting,
+  onManageAccount,
 }: {
   emails?: string[];
   onClose: () => void;
   onSaved: () => void;
+  onOpenExisting?: (email: string) => void;
+  onManageAccount?: (email: string) => void;
 }) {
   const assigning = !!emails;
   const plans = useSubscriptionPlans(assigning);
@@ -24,23 +37,30 @@ export default function SubscriberModal({
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [conflict, setConflict] = useState<SubscriberResult | null>(null);
 
   async function save(v: SubscriberValues) {
     if (saving) return;
     setSaving(true);
     setError('');
+    setConflict(null);
     try {
-      const result = await postPlan<{ created?: boolean; email?: string }>(
+      const result = await postPlan<SubscriberResult>(
         assigning ? 'apply' : 'subscribe',
         assigning
           ? { planId: v.planId, emails }
           : { username: v.username, password: v.password, accountOnly: true },
       );
-      onSaved();
       if (!result.success) {
         setError(result.msg);
+        if (result.obj?.conflict) {
+          setConflict(result.obj);
+          form.setError('username', { type: 'server', message: result.msg });
+        }
+        if (result.obj?.created) onSaved();
         return;
       }
+      onSaved();
       onClose();
     } catch (e) {
       setError(String(e));
@@ -75,7 +95,28 @@ export default function SubscriberModal({
           style={{ marginBottom: 16 }}
         />
       )}
-      {error && <Alert type="error" title={error} style={{ marginBottom: 16 }} />}
+      {error && !conflict && <Alert type="error" title={error} style={{ marginBottom: 16 }} />}
+      {conflict?.email && (
+        <Alert
+          type="info"
+          title={`原订阅：${conflict.email}${conflict.username ? ` · 登录账号：${conflict.username}` : ''}`}
+          description={
+            <Space wrap>
+              {onOpenExisting && (
+                <Button onClick={() => onOpenExisting(conflict.email!)}>
+                  查看原用户并分配套餐
+                </Button>
+              )}
+              {onManageAccount && (
+                <Button onClick={() => onManageAccount(conflict.email!)}>
+                  {conflict.accountExists ? '管理原登录账号' : '在原订阅上开通账号'}
+                </Button>
+              )}
+            </Space>
+          }
+          style={{ marginBottom: 16 }}
+        />
+      )}
       {assigning && plans.isError && <Alert type="error" title={String(plans.error)} />}
       {assigning && plans.isSuccess && !plans.data.some((p) => p.enabled) && (
         <Alert type="info" title="请先在“订阅套餐”页面创建并启用套餐。" />
@@ -84,8 +125,15 @@ export default function SubscriberModal({
         <Form layout="vertical" disabled={saving} onFinish={() => void form.handleSubmit(save)()}>
           {!assigning && (
             <>
-              <FormField name="username" label="登录账号">
-                <Input autoComplete="off" maxLength={120} />
+              <FormField
+                name="username"
+                label="登录账号"
+                onAfterChange={() => {
+                  setConflict(null);
+                  setError('');
+                }}
+              >
+                <Input autoComplete="off" maxLength={120} placeholder="请输入新的登录账号" />
               </FormField>
               <FormField name="password" label="登录密码">
                 <Input.Password autoComplete="new-password" />

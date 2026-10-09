@@ -1867,6 +1867,19 @@ export default function ClientsPage() {
         {subscriberOpen && (
           <SubscriberModal
             onClose={() => setSubscriberOpen(false)}
+            onOpenExisting={(email) => {
+              setSubscriberOpen(false);
+              setAccountScope('all');
+              setFilters(emptyFilters());
+              setSearchKey(email);
+              setDebouncedSearch(email);
+              setCurrentPage(1);
+              setSelectedRowKeys([]);
+            }}
+            onManageAccount={(email) => {
+              setSubscriberOpen(false);
+              setAccountEmail(email);
+            }}
             onSaved={() => {
               setAccountScope('accounts');
               void refresh();
@@ -1884,6 +1897,10 @@ export default function ClientsPage() {
           key={accountEmail ?? 'closed'}
           email={accountEmail}
           onClose={() => setAccountEmail(null)}
+          onSaved={() => {
+            setAccountScope('accounts');
+            void refresh();
+          }}
         />
         <LazyMount when={formOpen}>
           <ClientFormModal
