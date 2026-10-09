@@ -17,7 +17,7 @@ export default function ClientDevices({ email }: { email: string }) {
   const { t } = useTranslation();
   const cache = useQueryClient();
   const { datepicker } = useDatepicker();
-  const [live, setLive] = useState(false);
+  const [live, setLive] = useState(true);
   const label = (key: string) => t(`pages.clients.devices.${key}`);
   const date = (timestamp: number) =>
     timestamp > 0 ? IntlUtil.formatDate(timestamp, datepicker) : '—';
@@ -54,6 +54,11 @@ export default function ClientDevices({ email }: { email: string }) {
     await cache.invalidateQueries({ queryKey: ['client-devices', email] });
   };
   const connectionColumns = [
+    {
+      title: label('connectionUser'),
+      key: 'user',
+      render: () => <span className="client-devices-wrap">{email}</span>,
+    },
     {
       title: label('sourceIP'),
       dataIndex: 'ip',
@@ -134,6 +139,38 @@ export default function ClientDevices({ email }: { email: string }) {
               <Typography.Text type="secondary">{label('notDeviceCount')}</Typography.Text>
             </div>
           </div>
+          <Typography.Title level={5}>{label('onlineConnections')}</Typography.Title>
+          <Typography.Text type="secondary">{label('connectionIPNote')}</Typography.Text>
+          {status !== 'ready' && (
+            <Alert
+              type="warning"
+              showIcon
+              title={status === 'partial' ? label('partial') : label('unavailable')}
+              description={label('unavailableNote')}
+            />
+          )}
+          <Space wrap>
+            {data.connections.sources.map((source) => (
+              <Tag key={source.nodeId} color={source.status === 'ready' ? 'green' : 'orange'}>
+                {source.name} ·{' '}
+                {source.status === 'ready' ? label('collected') : label('notCollected')}
+              </Tag>
+            ))}
+          </Space>
+          <Table<ClientConnection>
+            size="small"
+            rowKey={(entry, index) => `${entry.nodeId}:${index}`}
+            columns={connectionColumns}
+            dataSource={data.connections.connections}
+            pagination={{ pageSize: 10, hideOnSinglePage: true }}
+            scroll={{ x: 950 }}
+            locale={{
+              emptyText: status === 'ready' ? label('noOnlineSources') : label('unknown'),
+            }}
+          />
+          <Typography.Text type="secondary">
+            {label('collectedAt')}: {date(data.connections.generatedAt)}
+          </Typography.Text>
           <Typography.Title level={5}>{label('trafficTitle')}</Typography.Title>
           <Typography.Text type="secondary">{label('trafficNote')}</Typography.Text>
           <div className="client-devices-summary client-devices-traffic-summary">
@@ -177,37 +214,6 @@ export default function ClientDevices({ email }: { email: string }) {
           )}
           <Typography.Text type="secondary">{label('ipNote')}</Typography.Text>
           <DeviceBindingTable devices={data.devices} onUnbind={unbind} datepicker={datepicker} />
-          <Typography.Title level={5}>{label('onlineConnections')}</Typography.Title>
-          {status !== 'ready' && (
-            <Alert
-              type="warning"
-              showIcon
-              title={status === 'partial' ? label('partial') : label('unavailable')}
-              description={label('unavailableNote')}
-            />
-          )}
-          <Space wrap>
-            {data.connections.sources.map((source) => (
-              <Tag key={source.nodeId} color={source.status === 'ready' ? 'green' : 'orange'}>
-                {source.name} ·{' '}
-                {source.status === 'ready' ? label('collected') : label('notCollected')}
-              </Tag>
-            ))}
-          </Space>
-          <Table<ClientConnection>
-            size="small"
-            rowKey={(entry, index) => `${entry.nodeId}:${index}`}
-            columns={connectionColumns}
-            dataSource={data.connections.connections}
-            pagination={{ pageSize: 10, hideOnSinglePage: true }}
-            scroll={{ x: 700 }}
-            locale={{
-              emptyText: status === 'ready' ? label('noOnlineSources') : label('unknown'),
-            }}
-          />
-          <Typography.Text type="secondary">
-            {label('collectedAt')}: {date(data.connections.generatedAt)}
-          </Typography.Text>
         </>
       )}
     </section>

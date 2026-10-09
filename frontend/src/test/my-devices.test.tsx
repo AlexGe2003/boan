@@ -72,9 +72,12 @@ it('shows full slots, confirms an unbind and refreshes the released slot', async
     screen.getByText('All device slots are occupied. Unbind a device before adding another.'),
   ).toBeTruthy();
   expect(screen.getAllByText('192.0.*.*')).toHaveLength(3);
-  await screen.findByText('203.0.*.*');
+  const connection = (await screen.findByText('Source IP (masked): 203.0.*.*')).closest('li')!;
+  expect(within(connection).getByText('Current account')).toBeTruthy();
+  expect(within(connection).getByText('Node: 主节点')).toBeTruthy();
+  expect(within(connection).queryByText('Phone 1')).toBeNull();
   expect(post.mock.calls.some(([url]) => String(url).includes('/setting/'))).toBe(false);
-  expect(screen.getByRole('heading', { name: '在线来源 IP · 1 个' })).toBeTruthy();
+  expect(screen.getByRole('heading', { name: 'Online source IPs · 1 个' })).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Unbind Phone 1' }));
   expect(remove).not.toHaveBeenCalled();
   const first = await screen.findByRole('tooltip');

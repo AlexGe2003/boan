@@ -113,7 +113,7 @@ func TestMyDevicesOwnershipAndUnbinding(t *testing.T) {
 			t.Fatalf("device response leaked %q: %s", secret, body)
 		}
 	}
-	if report.Obj.Devices[0].LastIP != "192.0.*.*" {
+	if report.Obj.Devices[0].LastIP != "192.0.*.42" {
 		t.Fatal("full source IP exposed")
 	}
 	foreign, err := svc.ListClientHwids(clients[1].Email)

@@ -58,7 +58,7 @@ const report: ClientDeviceReport = {
     generatedAt: 1700000000002,
     onlineSourceCount: 1,
     sources: [{ nodeId: 1, name: 'HK', status: 'ready' }],
-    connections: [{ ip: '192.0.2.1', nodeId: 1, nodeName: 'HK', lastSeen: 1700000000002 }],
+    connections: [{ ip: '203.0.*.42', nodeId: 1, nodeName: 'HK', lastSeen: 1700000000002 }],
   },
 };
 
@@ -79,7 +79,18 @@ it('keeps device identity separate from source addresses even when they share an
   });
   expect(screen.getByText('192.0.*.*')).toBeTruthy();
   expect(screen.getByText('Alice phone').closest('tr')?.textContent).not.toContain('Online');
+  const connection = screen.getByText('203.0.*.42').closest('tr')!;
+  expect(within(connection).getByText('alice@example.com')).toBeTruthy();
+  expect(within(connection).getByText('HK')).toBeTruthy();
+  expect(within(connection).queryByText('Alice phone')).toBeNull();
   expect(screen.getByText('Online · device unidentified')).toBeTruthy();
+  expect(
+    screen.getByRole('switch', { name: 'Refresh every 15 seconds' }).getAttribute('aria-checked'),
+  ).toBe('true');
+  const headings = screen.getAllByRole('heading').map((heading) => heading.textContent);
+  expect(headings.indexOf('Online connections')).toBeLessThan(
+    headings.indexOf('Identified devices'),
+  );
   expect(screen.getByText('Source IPs are not a device count')).toBeTruthy();
 });
 

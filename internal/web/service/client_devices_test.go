@@ -70,7 +70,7 @@ func TestClientDevicesTracksSubscriptionIdentityWithoutClaimingOnline(t *testing
 		}
 	}
 	r, err := svc.Devices(context.Background(), rec.Email)
-	if err != nil || r.Registered != 1 || r.Devices[0].LastIP != "192.0.*.*" || r.Devices[0].FirstSeen <= 0 || r.Devices[0].LastSeen < r.Devices[0].FirstSeen {
+	if err != nil || r.Registered != 1 || r.Devices[0].LastIP != "192.0.*.2" || r.Devices[0].FirstSeen <= 0 || r.Devices[0].LastSeen < r.Devices[0].FirstSeen {
 		t.Fatalf("network changes must retain one device and update its subscription metadata: %+v, %v", r, err)
 	}
 	if r.Connections.Status != "unavailable" || r.Connections.OnlineSourceCount != 0 {

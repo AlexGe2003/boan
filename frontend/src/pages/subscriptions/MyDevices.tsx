@@ -4,7 +4,7 @@ import { Alert, Button, Spin, Typography, Tag } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import DeviceBindingTable from '@/components/clients/DeviceBindingTable';
 import { ClientDeviceSlotsSchema, ClientConnectionReportSchema } from '@/generated/zod';
-import { HttpUtil } from '@/utils';
+import { HttpUtil, IntlUtil } from '@/utils';
 import '@/pages/clients/ClientDevices.css';
 import './CustomerUsage.css';
 
@@ -63,12 +63,12 @@ export default function MyDevices({ userId }: { userId: number }) {
       </div>
       <section className="customer-online-sources">
         <h3>
-          在线来源 IP ·{' '}
+          {label('onlineSources')} ·{' '}
           {connections.data && !connections.isError && connections.data.status !== 'unavailable'
             ? `${connections.data.status === 'partial' ? '至少 ' : ''}${connections.data.onlineSourceCount} 个`
             : '未知'}
         </h3>
-        <p>来源 IP 不等于设备数量，不能据此识别某一台绑定设备。IP 已脱敏。</p>
+        <p>{label('connectionIPNote')}</p>
         {connections.isPending && <Spin size="small" />}
         {(connections.isError ||
           (connections.data?.status !== 'ready' && !connections.isPending)) && (
@@ -79,12 +79,16 @@ export default function MyDevices({ userId }: { userId: number }) {
             {connections.data.connections.map((entry, index) => (
               <li key={`${entry.nodeId}:${index}`}>
                 <Tag color="green">在线</Tag>
-                <span>{entry.ip}</span>
-                <span>{entry.nodeName}</span>
+                <span>{label('currentAccount')}</span>
+                <span>
+                  {label('sourceIP')}: {entry.ip}
+                </span>
+                <span>
+                  {label('node')}: {entry.nodeName}
+                </span>
                 <time>
-                  {entry.lastSeen > 0
-                    ? new Date(entry.lastSeen).toLocaleString('zh-CN')
-                    : '时间未知'}
+                  {label('lastActivity')}:{' '}
+                  {entry.lastSeen > 0 ? IntlUtil.formatDate(entry.lastSeen) : label('unknown')}
                 </time>
               </li>
             ))}
@@ -93,6 +97,11 @@ export default function MyDevices({ userId }: { userId: number }) {
         {!connections.isError &&
           connections.data?.status === 'ready' &&
           connections.data.connections.length === 0 && <p>暂无在线来源</p>}
+        {!connections.isError && connections.data && (
+          <p>
+            {label('collectedAt')}: {IntlUtil.formatDate(connections.data.generatedAt)}
+          </p>
+        )}
       </section>
       {query.isPending && <Spin aria-label={label('loading')} />}
       {query.isError && (
