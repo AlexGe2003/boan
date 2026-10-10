@@ -1815,6 +1815,14 @@
             "format": "int64",
             "type": "integer"
           },
+          "lastConnection": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ClientConnection"
+              }
+            ],
+            "nullable": true
+          },
           "onlineSourceCount": {
             "type": "integer"
           },
@@ -6145,6 +6153,7 @@
                         }
                       ],
                       "generatedAt": 0,
+                      "lastConnection": null,
                       "onlineSourceCount": 0,
                       "sources": [
                         {
@@ -6250,6 +6259,7 @@
                       }
                     ],
                     "generatedAt": 0,
+                    "lastConnection": null,
                     "onlineSourceCount": 0,
                     "sources": [
                       {
@@ -6419,6 +6429,7 @@
                       }
                     ],
                     "generatedAt": 0,
+                    "lastConnection": null,
                     "onlineSourceCount": 0,
                     "sources": [
                       {

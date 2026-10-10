@@ -431,6 +431,7 @@ export interface ClientConnection {
 export interface ClientConnectionReport {
   connections: ClientConnection[];
   generatedAt: number;
+  lastConnection?: ClientConnection | null;
   onlineSourceCount: number;
   sources: ClientConnectionSource[];
   status: string;

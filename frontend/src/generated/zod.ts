@@ -457,6 +457,7 @@ export type ClientConnection = z.infer<typeof ClientConnectionSchema>;
 export const ClientConnectionReportSchema = z.object({
   connections: z.array(z.lazy(() => ClientConnectionSchema)),
   generatedAt: z.number().int(),
+  lastConnection: z.lazy(() => ClientConnectionSchema).nullable().optional(),
   onlineSourceCount: z.number().int(),
   sources: z.array(z.lazy(() => ClientConnectionSourceSchema)),
   status: z.string(),

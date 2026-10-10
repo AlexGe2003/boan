@@ -934,6 +934,8 @@ type Client struct {
 }
 
 type ClientRecord struct {
+	LastConnection                    string `json:"-" gorm:"type:text;default:''"`
+	LastConnectionAt                  int64  `json:"-" gorm:"default:0"`
 	SubscriptionAuthorizationRequired bool   `json:"-" gorm:"not null;default:false"`
 	Id                                int    `json:"id" gorm:"primaryKey;autoIncrement"`
 	Email                             string `json:"email" gorm:"uniqueIndex;not null"`

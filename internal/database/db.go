@@ -134,6 +134,9 @@ func migrateClientAuthorizationColumn() error {
 }
 
 func initModels() error {
+	if err := migrateClientLastConnectionColumns(); err != nil {
+		return err
+	}
 	if err := migrateClientAuthorizationColumn(); err != nil {
 		return err
 	}
@@ -222,6 +225,20 @@ func initModels() error {
 		if err := resyncPostgresSequences(db, models); err != nil {
 			log.Printf("Error resyncing postgres sequences: %v", err)
 			return err
+		}
+	}
+	return nil
+}
+
+func migrateClientLastConnectionColumns() error {
+	if !db.Migrator().HasTable(&model.ClientRecord{}) {
+		return nil
+	}
+	for _, field := range []string{"LastConnection", "LastConnectionAt"} {
+		if !db.Migrator().HasColumn(&model.ClientRecord{}, field) {
+			if err := db.Migrator().AddColumn(&model.ClientRecord{}, field); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

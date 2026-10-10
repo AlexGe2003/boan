@@ -28,6 +28,7 @@ type ClientConnectionSource struct {
 }
 
 type ClientConnectionReport struct {
+	LastConnection    *ClientConnection        `json:"lastConnection,omitempty"`
 	Status            string                   `json:"status"`
 	GeneratedAt       int64                    `json:"generatedAt"`
 	OnlineSourceCount int                      `json:"onlineSourceCount"`
@@ -141,7 +142,22 @@ func (s *ClientService) FleetClientConnections(ctx context.Context, email string
 		parts[0] = clientConnectionPart{source: ClientConnectionSource{Name: "本机"}, data: s.LocalClientConnections(email)}
 	}
 	wg.Wait()
-	return mergeClientConnections(parts, time.Now()), nil
+	report := mergeClientConnections(parts, time.Now())
+	if len(report.Connections) > 0 {
+		entry := report.Connections[0]
+		if err := recordLastClientConnection(db, email, ClientConnection{NodeID: entry.NodeID, NodeName: entry.NodeName}, []model.ClientIpEntry{{IP: entry.IP, Timestamp: entry.LastSeen / 1000}}); err != nil {
+			return report, err
+		}
+	}
+	var client model.ClientRecord
+	if err := db.Select("last_connection").Where("email = ?", email).First(&client).Error; err != nil {
+		return report, err
+	}
+	var last ClientConnection
+	if client.LastConnection != "" && json.Unmarshal([]byte(client.LastConnection), &last) == nil && last.LastSeen > 0 {
+		report.LastConnection = &last
+	}
+	return report, nil
 }
 
 func mergeClientConnections(parts []clientConnectionPart, now time.Time) ClientConnectionReport {

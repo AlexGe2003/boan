@@ -470,6 +470,7 @@ export const EXAMPLES: Record<string, unknown> = {
       }
     ],
     "generatedAt": 0,
+    "lastConnection": null,
     "onlineSourceCount": 0,
     "sources": [
       {
@@ -496,6 +497,7 @@ export const EXAMPLES: Record<string, unknown> = {
         }
       ],
       "generatedAt": 0,
+      "lastConnection": null,
       "onlineSourceCount": 0,
       "sources": [
         {

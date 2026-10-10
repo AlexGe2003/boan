@@ -47,6 +47,70 @@ function show() {
   );
 }
 
+it('retains the last observed node while offline and labels traffic as account totals', async () => {
+  vi.spyOn(HttpUtil, 'get').mockImplementation(async (url) => {
+    if (url === '/panel/api/clients/myDevices')
+      return new Msg(true, '', { ...fullSlots(), onlineIpLimit: 3 });
+    if (url === '/panel/api/clients/myUsage?resolution=day')
+      return new Msg(true, '', {
+        resolution: 'day',
+        generatedAt: 1700000000000,
+        points: [],
+        traffic: {
+          recorded: true,
+          up: 1024,
+          down: 2048,
+          total: 3072,
+          startedAt: 1700000000000,
+          updatedAt: 1700000000000,
+          nodes: [
+            {
+              nodeId: 1,
+              nodeName: 'US01',
+              up: 1024,
+              down: 2048,
+              total: 3072,
+              startedAt: 1700000000000,
+              updatedAt: 1700000000000,
+            },
+          ],
+        },
+      });
+    return new Msg(true, '', {
+      ...onlineSources(),
+      onlineSourceCount: 0,
+      connections: [],
+      lastConnection: { nodeId: 2, nodeName: 'JP', ip: '192.0.*.42', lastSeen: 1700000000000 },
+    });
+  });
+  show();
+  await screen.findByText('JP');
+  expect(screen.getByText('No active connections')).toBeTruthy();
+  expect(screen.getByText('Last observed')).toBeTruthy();
+  const traffic = (await screen.findByRole('heading', { name: 'Account traffic' })).closest(
+    'section',
+  )!;
+  expect(within(traffic).getByText('US01')).toBeTruthy();
+  expect(within(traffic).getByText('3.00 KB')).toBeTruthy();
+  expect(within(traffic).getByText(/Per-device usage is unavailable/)).toBeTruthy();
+  expect(within(traffic).queryByText('JP')).toBeNull();
+});
+
+it('shows missing traffic as unknown rather than zero', async () => {
+  vi.spyOn(HttpUtil, 'get').mockImplementation(async (url) => {
+    if (String(url).includes('myUsage')) return new Msg(false, 'Unavailable', null);
+    return new Msg(
+      true,
+      '',
+      url === '/panel/api/clients/myDevices' ? fullSlots() : onlineSources(),
+    );
+  });
+  show();
+  await screen.findByText('Traffic data is temporarily unavailable. Refresh shortly.');
+  const traffic = screen.getByRole('heading', { name: 'Account traffic' }).closest('section')!;
+  expect(within(traffic).queryByText('0 B')).toBeNull();
+});
+
 it('shows full slots, confirms an unbind and refreshes the released slot', async () => {
   let report = fullSlots();
   const post = vi.spyOn(HttpUtil, 'post');

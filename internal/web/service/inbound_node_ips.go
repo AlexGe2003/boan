@@ -53,6 +53,10 @@ func upsertNodeClientIps(guid string, perEmail map[string][]model.ClientIpEntry)
 		return nil
 	}
 	db := database.GetDB()
+	source, known, err := clientConnectionNode(guid)
+	if err != nil {
+		return err
+	}
 	cutoff := time.Now().Unix() - clientIpStaleAfterSeconds
 
 	var existing []model.NodeClientIp
@@ -107,6 +111,12 @@ func upsertNodeClientIps(guid string, perEmail map[string][]model.ClientIpEntry)
 		}).Create(&row).Error; err != nil {
 			tx.Rollback()
 			return err
+		}
+		if known {
+			if err := recordLastClientConnection(tx, email, source, incoming); err != nil {
+				tx.Rollback()
+				return err
+			}
 		}
 	}
 	return tx.Commit().Error

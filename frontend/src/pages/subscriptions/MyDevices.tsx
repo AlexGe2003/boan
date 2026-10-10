@@ -12,8 +12,12 @@ import {
 } from '@ant-design/icons';
 import DeviceBindingTable from '@/components/clients/DeviceBindingTable';
 import SubscriptionClientSummary from '@/components/clients/SubscriptionClientSummary';
-import { ClientDeviceSlotsSchema, ClientConnectionReportSchema } from '@/generated/zod';
-import { HttpUtil } from '@/utils';
+import {
+  ClientDeviceSlotsSchema,
+  ClientConnectionReportSchema,
+  ClientUsageViewSchema,
+} from '@/generated/zod';
+import { HttpUtil, IntlUtil, SizeFormatter } from '@/utils';
 import '@/pages/clients/ClientDevices.css';
 import './CustomerUsage.css';
 import './MyDevices.css';
@@ -55,6 +59,20 @@ export default function MyDevices({
     retry: false,
   });
   const data = query.isError ? undefined : query.data;
+  const usage = useQuery({
+    queryKey: ['my-usage', userId, 'day'],
+    enabled: userId > 0,
+    queryFn: async () => {
+      const result = await HttpUtil.get('/panel/api/clients/myUsage?resolution=day', undefined, {
+        silent: true,
+      });
+      if (!result.success) throw new Error(result.msg || label('loadFailed'));
+      return ClientUsageViewSchema.parse(result.obj);
+    },
+    refetchInterval: 30_000,
+    retry: false,
+  });
+  const traffic = usage.isError ? undefined : usage.data?.traffic;
   const unbind = async (id: number) => {
     const result = await HttpUtil.delete(`/panel/api/clients/myDevices/${id}`, {
       silent: true,
@@ -63,6 +81,7 @@ export default function MyDevices({
     await cache.invalidateQueries({ queryKey: ['my-devices', userId] });
   };
   const report = connections.isError ? undefined : connections.data;
+  const lastConnection = report?.connections[0] ?? report?.lastConnection;
   const sourceCount =
     report &&
     (report.status === 'ready' || (report.status === 'partial' && report.onlineSourceCount > 0))
@@ -78,10 +97,11 @@ export default function MyDevices({
         <p className="device-muted">{label('connectionAutoRefresh')}</p>
         <Button
           icon={<ReloadOutlined />}
-          loading={query.isFetching || connections.isFetching}
+          loading={query.isFetching || connections.isFetching || usage.isFetching}
           onClick={() => {
             void query.refetch();
             void connections.refetch();
+            void usage.refetch();
           }}
         >
           {t('refresh')}
@@ -242,6 +262,11 @@ export default function MyDevices({
                     <span>
                       <ClusterOutlined /> {label('node')}: {entry.nodeName}
                     </span>
+                    {entry.lastSeen > 0 && (
+                      <span>
+                        {label('lastActivity')}: {IntlUtil.formatDate(entry.lastSeen)}
+                      </span>
+                    )}
                   </div>
                 </div>
               </li>
@@ -257,6 +282,78 @@ export default function MyDevices({
               <Button onClick={onSubscription}>{label('goToSubscription')}</Button>
             )}
           </div>
+        )}
+      </section>
+      {lastConnection && !hasOnlineConnections && (
+        <section className="device-panel device-recent-connection">
+          <div className="device-eyebrow">
+            <ClusterOutlined /> {label('recentConnection')}
+          </div>
+          <div className="device-source-title">
+            <strong>{lastConnection.nodeName}</strong>
+            <Tag>{label('lastObserved')}</Tag>
+          </div>
+          <div className="device-source-meta">
+            <span>
+              {label('sourceIP')}: {lastConnection.ip}
+            </span>
+            <span>
+              {label('lastActivity')}: {IntlUtil.formatDate(lastConnection.lastSeen)}
+            </span>
+          </div>
+          <p className="device-muted">{label('recentConnectionHint')}</p>
+        </section>
+      )}
+      <section className="device-panel device-account-traffic">
+        <div className="device-section-heading">
+          <div>
+            <h3>{label('accountTraffic')}</h3>
+            <p className="device-muted">{label('accountTrafficHint')}</p>
+          </div>
+        </div>
+        {usage.isPending ? (
+          <Skeleton active title={false} paragraph={{ rows: 2 }} />
+        ) : usage.isError ? (
+          <Alert type="warning" title={label('trafficUnavailable')} />
+        ) : !traffic?.recorded ? (
+          <p className="device-muted">{label('noTraffic')}</p>
+        ) : (
+          <>
+            <div className="device-traffic-totals">
+              {(['total', 'up', 'down'] as const).map((direction, index) => (
+                <div key={direction}>
+                  <span>{label(['trafficTotal', 'outbound', 'inbound'][index])}</span>
+                  <strong>{SizeFormatter.sizeFormat(traffic[direction])}</strong>
+                </div>
+              ))}
+            </div>
+            <ul className="device-traffic-nodes">
+              {traffic.nodes.map((node) => (
+                <li key={node.nodeId}>
+                  <strong>
+                    {node.nodeId === 0
+                      ? label('localNode')
+                      : node.nodeName ||
+                        t('pages.clients.devices.nodeFallback', { id: node.nodeId })}
+                  </strong>
+                  <span>
+                    {label('trafficTotal')}: {SizeFormatter.sizeFormat(node.total)}
+                  </span>
+                  <span>
+                    {label('outbound')}: {SizeFormatter.sizeFormat(node.up)}
+                  </span>
+                  <span>
+                    {label('inbound')}: {SizeFormatter.sizeFormat(node.down)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {traffic.updatedAt > 0 && (
+              <p className="device-muted">
+                {label('trafficUpdated')}: {IntlUtil.formatDate(traffic.updatedAt)}
+              </p>
+            )}
+          </>
         )}
       </section>
       <details className="device-rules">

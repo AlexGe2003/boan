@@ -1789,6 +1789,14 @@ export const SCHEMAS: Record<string, unknown> = {
         "format": "int64",
         "type": "integer"
       },
+      "lastConnection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientConnection"
+          }
+        ],
+        "nullable": true
+      },
       "onlineSourceCount": {
         "type": "integer"
       },
