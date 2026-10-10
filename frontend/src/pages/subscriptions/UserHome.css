@@ -1,4 +1,5 @@
-.customer-app {
+.customer-app,
+.customer-nav-drawer {
   --customer-bg: var(--panel-bg);
   --customer-sidebar-bg: var(--panel-sidebar);
   --customer-card-bg: var(--panel-card);
@@ -10,6 +11,8 @@
   --customer-nav-active-bg: var(--panel-activeBg);
   --customer-nav-active-text: var(--panel-activeText);
   --customer-nav-hover-bg: var(--panel-hoverBg);
+}
+.customer-app {
   min-height: 100dvh;
   display: flex;
   color: var(--customer-text);
@@ -34,7 +37,7 @@
   outline-offset: 3px;
 }
 .customer-sidebar {
-  width: 224px;
+  width: 240px;
   flex: none;
   position: sticky;
   top: 0;
@@ -66,9 +69,9 @@
 .customer-nav-drawer nav button {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
-  min-height: 54px;
+  min-height: 48px;
   border: 0;
   border-radius: 8px;
   padding: 12px 20px;
@@ -106,7 +109,7 @@
   gap: 16px;
   max-width: 1360px;
   margin: auto;
-  padding: 40px 44px 28px;
+  padding: 32px 40px 28px;
 }
 .customer-header h1 {
   font-size: 28px;
@@ -127,18 +130,22 @@
 .customer-content {
   max-width: 1360px;
   margin: auto;
-  padding: 0 44px 48px;
+  padding: 0 40px 48px;
   min-width: 0;
 }
 .customer-card {
-  background: transparent;
-  border: 0;
-  padding: 0;
+  background: var(--customer-card-bg);
+  border: 1px solid var(--customer-border);
+  border-radius: 16px;
+  padding: 24px;
   margin: 0;
   min-width: 0;
 }
 .customer-card h2 {
   color: var(--customer-text);
+  margin: 0 0 20px;
+  font-size: 18px;
+  font-weight: 600;
 }
 .customer-bottom-nav {
   display: none;
@@ -169,20 +176,22 @@
 .dashboard-overview {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: 36px;
+  gap: 20px;
 }
 .dashboard-service {
+  display: flex;
+  flex-direction: column;
   grid-row: span 2;
-  padding: 28px 32px;
+  padding: 28px;
   border: 1px solid var(--customer-border);
-  border-radius: 12px;
+  border-radius: 16px;
 }
 .dashboard-service h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0 0 32px;
-  font-size: 22px;
+  margin: 0 0 24px;
+  font-size: 18px;
 }
 .dashboard-quota-label {
   color: var(--customer-text-muted);
@@ -204,14 +213,16 @@
   font-size: 13px;
   color: var(--customer-text-muted);
   margin-top: 12px;
+  margin-bottom: 32px;
 }
 .dashboard-subscribe {
   width: 100%;
-  margin-top: 32px;
+  flex-shrink: 0;
+  margin-top: auto;
   height: 48px;
 }
 .dashboard-traffic {
-  padding: 24px 0;
+  padding: 24px;
 }
 .dashboard-traffic h2 {
   font-size: 18px;
@@ -245,12 +256,16 @@
 .dashboard-links {
   display: flex;
   flex-direction: column;
+  padding: 0 24px;
+  background: var(--customer-card-bg);
+  border: 1px solid var(--customer-border);
+  border-radius: 16px;
 }
 .dashboard-link {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 22px 0;
+  padding: 18px 0;
   background: transparent;
   border: 0;
   border-top: 1px solid var(--customer-border);
@@ -258,6 +273,9 @@
   color: var(--customer-text);
   text-align: left;
   cursor: pointer;
+}
+.dashboard-link:first-child {
+  border-top: 0;
 }
 .dashboard-link:hover {
   color: var(--customer-nav-active-text);
@@ -283,10 +301,10 @@
 .subscription-quota-summary {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  margin: 0 0 32px;
-  padding: 24px 28px;
+  margin: 0 0 24px;
+  padding: 24px;
   border: 1px solid var(--customer-border);
-  border-radius: 10px;
+  border-radius: 16px;
   background: var(--customer-card-bg);
 }
 .subscription-quota-summary > div + div {
@@ -307,7 +325,7 @@
 .subscription-workspace {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
-  gap: 32px;
+  gap: 24px;
 }
 .subscription-device-picker {
   min-width: 0;
@@ -322,10 +340,10 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 .subscription-device-tabs button {
-  min-height: 80px;
+  min-height: 76px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -546,7 +564,7 @@
   margin-top: 14px;
 }
 .customer-app .subscription-client-summary {
-  padding: 22px 0;
+  padding: 18px 0;
   border: 0;
   border-top: 1px solid var(--customer-border);
   border-radius: 0;
@@ -555,17 +573,17 @@
   margin: 0;
 }
 .customer-app .node-status-stats {
-  background: transparent;
-  border-width: 0 0 1px;
-  border-radius: 0;
+  background: var(--customer-card-bg);
+  border: 1px solid var(--customer-border);
+  border-radius: 16px;
   padding: 24px 0;
 }
-.customer-app .node-stat-card:first-child {
-  padding-left: 0;
-}
+
 .customer-app .node-status-table {
-  background: transparent;
-  border: 0;
+  background: var(--customer-card-bg);
+  border: 1px solid var(--customer-border);
+  border-radius: 16px;
+  overflow: hidden;
 }
 .customer-app .node-list-name {
   min-width: 0;
@@ -705,11 +723,8 @@
     padding: 24px 20px calc(100px + env(safe-area-inset-bottom));
   }
   .subscription-quota-summary {
-    padding: 0 0 24px;
-    margin-bottom: 24px;
-    border-width: 0 0 1px;
-    background: transparent;
-    border-radius: 0;
+    padding: 20px;
+    margin-bottom: 20px;
   }
   .subscription-quota-summary > div + div {
     padding-left: 20px;
@@ -805,10 +820,10 @@
     width: 240px;
   }
   .customer-sidebar nav button {
-    font-size: 16px;
+    font-size: 14px;
   }
   .customer-header h1 {
-    font-size: 32px;
+    font-size: 28px;
   }
   .customer-header p {
     font-size: 16px;
@@ -818,7 +833,7 @@
   }
   .subscription-step-title,
   .subscription-management h2 {
-    font-size: 24px;
+    font-size: 18px;
   }
   .subscription-primary-actions .ant-btn {
     font-size: 15px;
@@ -879,15 +894,15 @@
     grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(0, 1fr));
   }
   .subscription-primary-actions .ant-btn {
-    height: 52px;
+    height: 44px;
   }
   .subscription-management p,
   .subscription-management small {
     font-size: 14px;
   }
   .subscription-device-tabs button {
-    min-height: 90px;
-    font-size: 16px;
+    min-height: 76px;
+    font-size: 14px;
   }
   .subscription-client-label strong {
     font-size: 16px;
@@ -902,4 +917,84 @@
   gap: 12px;
   padding: 12px 0;
   border-bottom: 1px solid var(--customer-border);
+}
+
+.customer-subscription {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.customer-subscription .subscription-workspace {
+  padding: 28px;
+  border: 1px solid var(--customer-border);
+  border-radius: 16px;
+  background: var(--customer-card-bg);
+  align-items: start;
+}
+.dashboard-plan-name {
+  margin: -8px 0 24px;
+  color: var(--customer-text-muted);
+  font-size: 13px;
+}
+.customer-content > div + div {
+  margin-top: 24px;
+}
+.customer-content .ant-empty {
+  margin: 0;
+  padding: 40px 16px;
+}
+.customer-content .ant-alert {
+  border-radius: 12px;
+}
+.customer-content .ant-table-cell {
+  font-variant-numeric: tabular-nums;
+}
+.customer-content .ant-table-tbody > tr:last-child > td {
+  border-bottom: 0;
+}
+.customer-content .ant-table-wrapper {
+  min-width: 0;
+}
+.customer-nav-drawer .ant-drawer-body {
+  background: var(--customer-sidebar-bg);
+}
+.customer-bottom-nav button {
+  border-radius: 8px;
+}
+@media (max-width: 900px) {
+  .customer-card {
+    padding: 22px;
+  }
+  .dashboard-overview {
+    gap: 16px;
+  }
+  .customer-subscription {
+    padding: 0;
+  }
+  .customer-subscription .subscription-workspace {
+    padding: 24px;
+  }
+}
+@media (max-width: 600px) {
+  .customer-content {
+    padding-inline: 16px;
+  }
+  .customer-card {
+    padding: 20px;
+  }
+  .customer-subscription {
+    padding: 0;
+  }
+  .customer-subscription .subscription-workspace {
+    padding: 20px;
+  }
+  .dashboard-service {
+    padding: 24px;
+  }
+  .dashboard-links {
+    padding-inline: 20px;
+  }
+  .customer-content .ant-table-wrapper {
+    overflow-x: auto;
+  }
 }

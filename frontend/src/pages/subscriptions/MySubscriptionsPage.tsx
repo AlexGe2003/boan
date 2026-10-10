@@ -288,6 +288,7 @@ export default function MySubscriptionsPage() {
                           <h2>
                             服务概览 <Tag color={available ? 'green' : 'red'}>{status}</Tag>
                           </h2>
+                          <p className="dashboard-plan-name">{item.planName || item.email}</p>
                           <p className="dashboard-quota-label">剩余流量</p>
                           <strong className="dashboard-quota-value">
                             {item.total > 0 ? bytes(Math.max(0, item.total - item.used)) : '不限量'}
@@ -363,7 +364,7 @@ export default function MySubscriptionsPage() {
                       </div>
                     )}
                     {section === 'subscription' && (
-                      <section className="customer-card detail-card subscription-design-card">
+                      <section className="customer-card detail-card subscription-design-card customer-subscription">
                         <dl className="dashboard-service-fields subscription-quota-summary">
                           <div>
                             <dt>剩余流量</dt>
