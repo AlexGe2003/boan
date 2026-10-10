@@ -14,7 +14,7 @@
   border-right: 1px solid var(--panel-border);
   transition: width 0.2s cubic-bezier(0.2, 0, 0, 1), min-width 0.2s cubic-bezier(0.2, 0, 0, 1), max-width 0.2s cubic-bezier(0.2, 0, 0, 1), flex-basis 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
   will-change: width;
-  contain: layout paint;
+  contain: layout;
 }
 
 .ant-sidebar:not(.sidebar-pinned) > .ant-layout-sider:not(.ant-layout-sider-collapsed) {
@@ -35,8 +35,8 @@ body.dark .ant-sidebar:not(.sidebar-pinned) > .ant-layout-sider:not(.ant-layout-
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 100px;
-  padding: 0 20px;
+  height: 64px;
+  padding: 0 16px;
   border-bottom: 1px solid var(--ant-color-border-secondary);
   user-select: none;
   white-space: nowrap;
@@ -367,7 +367,7 @@ body.dark .ant-drawer-body .drawer-menu .ant-menu-item-group-list {
 }
 
 .sider-brand {
-  height: 100px;
+  height: 64px;
   box-sizing: border-box;
 }
 .sidebar-brand-name {
@@ -381,12 +381,29 @@ body.dark .ant-drawer-body .drawer-menu .ant-menu-item-group-list {
   font-size: 25px;
 }
 .sider-brand {
-  padding: 0 20px;
+  padding: 0 16px;
 }
 .drawer-header {
   height: 64px;
   min-height: 64px;
   box-sizing: border-box;
+}
+
+.sidebar-brand-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px;
+  color: inherit;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.sidebar-brand-btn:hover {
+  transform: scale(1.08);
+  opacity: 0.85;
 }
 
 .ant-layout-sider-collapsed .sider-brand {
@@ -441,6 +458,15 @@ body.dark .ant-drawer-body .drawer-menu .ant-menu-item-group-list {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+.ant-layout-sider-collapsed .sider-nav .ant-menu-title-content,
+.ant-layout-sider-collapsed .sider-utility .ant-menu-title-content {
+  display: none !important;
+}
+
+.ant-layout-sider-collapsed .sider-nav .ant-menu-submenu-arrow {
+  display: none !important;
 }
 
 .ant-layout-sider-collapsed .sider-nav .ant-menu-item .anticon,

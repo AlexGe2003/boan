@@ -179,6 +179,7 @@ export default function AppSidebar() {
     [pinned],
   );
   const rootRef = useRef<HTMLDivElement>(null);
+  const suppressHoverRef = useRef(false);
 
   const updateHovered = useCallback((value: boolean) => {
     hoveredAcrossRemounts = value;
@@ -190,6 +191,7 @@ export default function AppSidebar() {
     saveSidebarPinned(next);
     setPinned(next);
     if (!next) {
+      suppressHoverRef.current = true;
       updateHovered(false);
     }
   }, [pinned, updateHovered]);
@@ -197,7 +199,7 @@ export default function AppSidebar() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const el = rootRef.current;
-      if (el) updateHovered(el.matches(':hover'));
+      if (el && !suppressHoverRef.current) updateHovered(el.matches(':hover'));
     }, 150);
     return () => window.clearTimeout(timer);
   }, [updateHovered]);
@@ -323,23 +325,23 @@ export default function AppSidebar() {
       items.map((tab) => {
         const Icon = iconByName[tab.icon];
         if (tab.key === '/settings') {
-          return { key: tab.key, icon: <Icon />, label: tab.title, children: settingsChildren };
+          return { key: tab.key, icon: <Icon />, label: tab.title, title: tab.title, children: settingsChildren };
         }
         if (tab.key === '/xray') {
-          return { key: tab.key, icon: <Icon />, label: tab.title, children: xrayChildren };
+          return { key: tab.key, icon: <Icon />, label: tab.title, title: tab.title, children: xrayChildren };
         }
-        return { key: tab.key, icon: <Icon />, label: tab.title, title: '' };
+        return { key: tab.key, icon: <Icon />, label: tab.title, title: tab.title };
       }),
     [settingsChildren, xrayChildren],
   );
 
   const groupedNavItems = useMemo<MenuProps['items']>(() => {
-    if (access.role !== 'admin') return toMenuItems(navItems);
+    if (access.role !== 'admin' || railCollapsed) return toMenuItems(navItems);
     const sections = [
       {
         name: 'operations',
         label: t('adminOverview.operations'),
-        keys: ['/', '/clients', '/plans', '/orders', '/support', '/groups'],
+        keys: ['/', '/clients', '/plans', '/announcements', '/orders', '/support', '/groups'],
       },
       {
         name: 'infrastructure',
@@ -365,7 +367,7 @@ export default function AppSidebar() {
         section.keys.flatMap((key) => navItems.filter((item) => item.key === key)),
       ),
     }));
-  }, [access.role, navItems, toMenuItems, t]);
+  }, [access.role, railCollapsed, navItems, toMenuItems, t]);
 
   const openLink = useCallback(
     async (key: string) => {
@@ -408,10 +410,12 @@ export default function AppSidebar() {
       className={`ant-sidebar${pinned ? ' sidebar-pinned' : ''}`}
       style={railStyle}
       onMouseEnter={(event) => {
+        if (suppressHoverRef.current) return;
         if (!(event.target instanceof Element && event.target.closest('.panel-topbar')))
           updateHovered(true);
       }}
       onMouseLeave={(event) => {
+        suppressHoverRef.current = false;
         const related = event.relatedTarget;
         if (
           related instanceof Element &&
@@ -429,7 +433,16 @@ export default function AppSidebar() {
         collapsed={railCollapsed}
       >
         <div className="sider-brand">
-          <CloudServerOutlined className="sidebar-brand-icon" aria-hidden="true" />
+          <Tooltip title={railCollapsed ? (pinned ? t('menu.unpinSidebar') : t('menu.pinSidebar')) : undefined} placement="right">
+            <button
+              type="button"
+              className="sidebar-brand-btn"
+              onClick={railCollapsed ? togglePinned : undefined}
+              aria-label={t('adminOverview.admin')}
+            >
+              <CloudServerOutlined className="sidebar-brand-icon" aria-hidden="true" />
+            </button>
+          </Tooltip>
           {!railCollapsed && (
             <strong className="sidebar-brand-name">{t('adminOverview.admin')}</strong>
           )}
