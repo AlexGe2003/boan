@@ -1,6 +1,8 @@
 import NetworkPageIntro from '@/components/NetworkPageIntro';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import zhCN from 'antd/locale/zh_CN';
+import enUS from 'antd/locale/en_US';
 import { useQuery } from '@tanstack/react-query';
 import {
   Alert,
@@ -70,7 +72,8 @@ function UpdateChannelChoice({ onChange }: { onChange: (dev: boolean) => void })
 }
 
 export default function NodesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const antdLocale = i18n.language === 'en-US' ? enUS : zhCN;
   const { isDark, isUltra, antdThemeConfig } = useTheme();
   const { isMobile } = useMediaQuery();
   const [modal, modalContextHolder] = Modal.useModal();
@@ -284,7 +287,7 @@ export default function NodesPage() {
   }, [isDark, isUltra]);
 
   return (
-    <ConfigProvider theme={antdThemeConfig}>
+    <ConfigProvider theme={antdThemeConfig} locale={antdLocale}>
       {messageContextHolder}
       {modalContextHolder}
       <Layout className={pageClass}>

@@ -924,6 +924,17 @@ export class LanguageManager {
   static getLanguage(scope: LanguageScope = 'panel'): string {
     const cookieName = languageCookieNames[scope];
     const stored = CookieManager.getCookie(cookieName);
+    if (scope === 'panel') {
+      const explicit = CookieManager.getCookie('lang_explicit') === '1';
+      if (explicit && LanguageManager.isSupportLanguage(stored)) {
+        return stored;
+      }
+      if (stored === 'zh-CN') {
+        return stored;
+      }
+      CookieManager.setCookie(cookieName, 'zh-CN', 365);
+      return 'zh-CN';
+    }
     if (LanguageManager.isSupportLanguage(stored)) return stored;
     const legacy =
       scope === 'subscription' ? CookieManager.getCookie(languageCookieNames.panel) : '';
@@ -935,8 +946,9 @@ export class LanguageManager {
 
   static setLanguage(language: string, scope: LanguageScope = 'panel'): void {
     if (!LanguageManager.isSupportLanguage(language)) {
-      language = 'en-US';
+      language = 'zh-CN';
     }
+    if (scope === 'panel') CookieManager.setCookie('lang_explicit', '1', 365);
     CookieManager.setCookie(languageCookieNames[scope], language, 365);
     window.location.reload();
   }

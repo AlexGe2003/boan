@@ -74,3 +74,20 @@ describe('subscription language scope', () => {
     expect(getLanguage).not.toHaveBeenCalled();
   });
 });
+
+it('defaults the panel to Chinese while preserving an explicit English choice', async () => {
+  const utils = await import('@/utils');
+  const cookies = new Map<string, string>([['lang', 'en-US']]);
+  vi.spyOn(utils.CookieManager, 'getCookie').mockImplementation((name) => cookies.get(name) ?? '');
+  vi.spyOn(utils.CookieManager, 'setCookie').mockImplementation((name, value) => {
+    cookies.set(name, value);
+  });
+  try {
+    expect(utils.LanguageManager.getLanguage()).toBe('zh-CN');
+    cookies.set('lang', 'en-US');
+    cookies.set('lang_explicit', '1');
+    expect(utils.LanguageManager.getLanguage()).toBe('en-US');
+  } finally {
+    vi.restoreAllMocks();
+  }
+});

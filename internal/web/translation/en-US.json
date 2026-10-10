@@ -170,7 +170,8 @@
     "pinSidebar": "Pin sidebar",
     "unpinSidebar": "Unpin sidebar",
     "subFormats": "Sub Formats",
-    "nodePlans": "Node plans"
+    "nodePlans": "Node plans",
+    "nodeGroups": "Node Groups"
   },
   "subscriptions": {},
   "pages": {
@@ -1838,6 +1839,7 @@
       "subHappSubInfoColorDesc": "Color theme style for the announcement banner.",
       "subHappSubInfoButtonText": "Banner Button Text",
       "subHappSubInfoButtonTextDesc": "Button label displayed inside the announcement banner (max 25 characters).",
+      "subHappSupportChannelPlaceholder": "e.g. Support Channel / Group",
       "subHappSubInfoButtonLink": "Banner Button Link",
       "subHappSubInfoButtonLinkDesc": "Target URL opened when the user clicks the banner action button.",
       "subHappSubExpire": "Expired Subscription Banner",
@@ -2453,6 +2455,11 @@
       },
       "defaultOutbound": "Default Outbound",
       "defaultOutboundDesc": "Traffic that does not match any routing rule uses this outbound (Xray uses the first outbound in the list)."
+    },
+    "apiDocs": {
+      "panelApi": "3X-UI Panel API",
+      "websocketEvents": "WebSocket Events",
+      "websocketDesc": "After the cookie-authenticated GET /ws upgrade, every server message uses { type, payload, time }. The time value is Unix milliseconds."
     }
   },
   "tgbot": {
@@ -2760,10 +2767,25 @@
     "runtime": "System status"
   },
   "networkGuide": {
-    "nodes": {},
-    "inbounds": {},
-    "hosts": {},
-    "outbound": {},
-    "routing": {}
+    "nodes": {
+      "title": "Node Server Management",
+      "hint": "Configure and monitor edge node servers and cluster status."
+    },
+    "inbounds": {
+      "title": "Inbound Management",
+      "hint": "Configure core inbound proxy protocol rules and port listening services."
+    },
+    "hosts": {
+      "title": "Host Routing & Certificates",
+      "hint": "Manage domain mappings, certificate configurations, and custom routing rules."
+    },
+    "outbound": {
+      "title": "Outbound Rules",
+      "hint": "Configure core outbound proxy protocols and node forwarding rules."
+    },
+    "routing": {
+      "title": "Routing Policies",
+      "hint": "Define routing rulesets, traffic balancing, and domain strategy."
+    }
   }
 }

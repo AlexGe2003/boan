@@ -1,6 +1,8 @@
 import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, ConfigProvider, Layout, Modal, Result, Spin, message } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
+import enUS from 'antd/locale/en_US';
 import {
   CopyOutlined,
   CloudDownloadOutlined,
@@ -44,7 +46,8 @@ const VersionModal = lazy(() => import('./VersionModal'));
 import './IndexPage.css';
 
 export default function IndexPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const antdLocale = i18n.language === 'en-US' ? enUS : zhCN;
   const panelRole = usePanelRole();
   const [showRuntime, setShowRuntime] = useState(false);
   const { isDark, isUltra, antdThemeConfig } = useTheme();
@@ -169,7 +172,7 @@ export default function IndexPage() {
   }, [status, t]);
 
   return (
-    <ConfigProvider theme={antdThemeConfig}>
+    <ConfigProvider theme={antdThemeConfig} locale={antdLocale}>
       {messageContextHolder}
       <Layout className={pageClass}>
         <AppSidebar />

@@ -4,6 +4,8 @@ import { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import zhCN from 'antd/locale/zh_CN';
+import enUS from 'antd/locale/en_US';
 import {
   Badge,
   Button,
@@ -325,7 +327,8 @@ export default function ClientsPage() {
   const [subscriberOpen, setSubscriberOpen] = useState(false);
   const [planEmails, setPlanEmails] = useState<string[] | null>(null);
   const [accountEmail, setAccountEmail] = useState<string | null>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const antdLocale = i18n.language === 'en-US' ? enUS : zhCN;
   const { isDark, isUltra, antdThemeConfig } = useTheme();
   const { datepicker } = useDatepicker();
   const { isMobile } = useMediaQuery();
@@ -1236,7 +1239,7 @@ export default function ClientsPage() {
   }
 
   return (
-    <ConfigProvider theme={antdThemeConfig}>
+    <ConfigProvider theme={antdThemeConfig} locale={antdLocale}>
       {messageContextHolder}
       {modalContextHolder}
       <Layout className={pageClass}>

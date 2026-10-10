@@ -68,7 +68,7 @@ test('returns to the compact rail after unpinning', () => {
   expect(localStorage.getItem('sidebar-pinned')).toBe('false');
 });
 
-test('expands an unpinned sidebar without moving the header or content', () => {
+test('reserves the expanded sidebar width so it cannot cover the header or content', () => {
   localStorage.setItem('sidebar-pinned', 'false');
   const view = renderSidebar();
   const root = view.container.querySelector('.ant-sidebar')!;
@@ -76,7 +76,7 @@ test('expands an unpinned sidebar without moving the header or content', () => {
 
   fireEvent.mouseEnter(root);
   expect(sidebar.classList.contains('ant-layout-sider-collapsed')).toBe(false);
-  expect(root.getAttribute('style')).toContain('--sider-rail: 72px');
+  expect(root.getAttribute('style')).toContain('--sider-rail: 240px');
 
   fireEvent.mouseLeave(root);
   expect(sidebar.classList.contains('ant-layout-sider-collapsed')).toBe(true);

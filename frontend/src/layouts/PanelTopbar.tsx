@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, theme } from 'antd';
-import { MenuOutlined } from '@ant-design/icons';
+import { Button, Tooltip, theme } from 'antd';
+import { GlobalOutlined, MenuOutlined } from '@ant-design/icons';
 import { useTheme } from '@/hooks/useTheme';
+import { LanguageManager } from '@/utils';
 import './PanelTopbar.css';
 
 export default function PanelTopbar({
@@ -18,7 +19,7 @@ export default function PanelTopbar({
   actions: ReactNode;
   fixed?: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { token } = theme.useToken();
   const { antdThemeConfig } = useTheme();
   return (
@@ -40,6 +41,16 @@ export default function PanelTopbar({
       <h1>{title}</h1>
       <div className="panel-topbar-actions">
         <span className="panel-identity">{identity}</span>
+        <Tooltip title={i18n.language === 'en-US' ? '切换为简体中文' : 'Switch to English'}>
+          <Button
+            type="text"
+            icon={<GlobalOutlined />}
+            aria-label="切换语言"
+            onClick={() =>
+              LanguageManager.setLanguage(i18n.language === 'en-US' ? 'zh-CN' : 'en-US')
+            }
+          />
+        </Tooltip>
         {actions}
       </div>
     </header>

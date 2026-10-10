@@ -1,5 +1,8 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import zhCN from 'antd/locale/zh_CN';
+import enUS from 'antd/locale/en_US';
 import {
   Alert,
   Button,
@@ -49,6 +52,8 @@ const share = (value: number) => (
 
 export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?: number }) {
   const { antdThemeConfig } = useTheme();
+  const { i18n } = useTranslation();
+  const antdLocale = i18n.language === 'en-US' ? enUS : zhCN;
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState<number | undefined>(email ? undefined : (nodeId ?? -1));
   const [includedNodes, setIncludedNodes] = useState<number[]>([]);
@@ -164,7 +169,7 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
     });
 
   return (
-    <ConfigProvider theme={antdThemeConfig}>
+    <ConfigProvider theme={antdThemeConfig} locale={antdLocale}>
       <div className="server-usage">
         <div className="server-usage-toolbar">
           {email && !userView && (

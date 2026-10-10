@@ -170,7 +170,8 @@
     "pinSidebar": "固定侧边栏",
     "unpinSidebar": "取消固定侧边栏",
     "subFormats": "订阅格式",
-    "nodePlans": "节点套餐"
+    "nodePlans": "节点套餐",
+    "nodeGroups": "节点分组"
   },
   "subscriptions": {},
   "pages": {
@@ -1720,6 +1721,7 @@
       "subHappSubInfoColorDesc": "横幅主题颜色：blue (默认蓝色)、green (绿色)、red (红色警告)。",
       "subHappSubInfoButtonText": "横幅按钮文字",
       "subHappSubInfoButtonTextDesc": "通知横幅内的操作按钮标题（最多 25 字符）。",
+      "subHappSupportChannelPlaceholder": "例如：支持频道 / 客服群组",
       "subHappSubInfoButtonLink": "横幅按钮链接",
       "subHappSubInfoButtonLinkDesc": "点击横幅按钮时打开的目标网址或 DeepLink。",
       "subHappSubExpire": "订阅到期提醒横幅",
@@ -2453,6 +2455,11 @@
         "badTag": "无效的标签",
         "badVlessRoute": "请输入 0 到 65535 之间的单个数字"
       }
+    },
+    "apiDocs": {
+      "panelApi": "3X-UI 面板 API",
+      "websocketEvents": "WebSocket 实时事件",
+      "websocketDesc": "通过 Cookie 身份认证建立 GET /ws 升级连接后，服务器推送的所有消息格式均为 { type, payload, time }。其中 time 为 Unix 毫秒时间戳。"
     }
   },
   "tgbot": {
@@ -2760,10 +2767,25 @@
     "runtime": "系统运行"
   },
   "networkGuide": {
-    "nodes": {},
-    "inbounds": {},
-    "hosts": {},
-    "outbound": {},
-    "routing": {}
+    "nodes": {
+      "title": "节点服务器管理",
+      "hint": "配置并监控边缘节点服务器与多节点集群运行状态。"
+    },
+    "inbounds": {
+      "title": "入站管理",
+      "hint": "配置核心入站代理协议规则与端口监听服务。"
+    },
+    "hosts": {
+      "title": "域名路由与证书",
+      "hint": "管理域名映射、证书申请配置与个性化分流规则。"
+    },
+    "outbound": {
+      "title": "出站分流规则",
+      "hint": "配置核心出站代理协议与节点转发策略。"
+    },
+    "routing": {
+      "title": "路由策略分流",
+      "hint": "定义路由规则集、分流机制与域名解析策略。"
+    }
   }
 }

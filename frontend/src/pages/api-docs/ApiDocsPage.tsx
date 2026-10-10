@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Col, ConfigProvider, Layout, Row, Tabs, Typography } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
+import enUS from 'antd/locale/en_US';
 import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
 
@@ -71,7 +73,8 @@ const sectionTabsPlugin = {
 
 export default function ApiDocsPage() {
   const { isDark, isUltra, antdThemeConfig } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const antdLocale = i18n.language === 'en-US' ? enUS : zhCN;
 
   const pageClass = useMemo(() => {
     const classes = ['api-docs-page'];
@@ -81,7 +84,7 @@ export default function ApiDocsPage() {
   }, [isDark, isUltra]);
 
   return (
-    <ConfigProvider theme={antdThemeConfig}>
+    <ConfigProvider theme={antdThemeConfig} locale={antdLocale}>
       <Layout className={pageClass}>
         <AppSidebar />
 
@@ -91,7 +94,7 @@ export default function ApiDocsPage() {
               items={[
                 {
                   key: 'panel-api',
-                  label: '3X-UI Panel API',
+                  label: t('pages.apiDocs.panelApi', { defaultValue: '3X-UI 面板 API' }),
                   children: (
                     <div className="docs-wrapper" role="region" aria-label={t('menu.apiDocs')}>
                       <SwaggerUI
@@ -107,15 +110,14 @@ export default function ApiDocsPage() {
                 },
                 {
                   key: 'websocket-events',
-                  label: 'WebSocket events',
+                  label: t('pages.apiDocs.websocketEvents', { defaultValue: 'WebSocket 实时事件' }),
                   children: (
                     <section className="websocket-events">
                       <Typography.Paragraph>
-                        After the cookie-authenticated{' '}
-                        <Typography.Text code>GET /ws</Typography.Text> upgrade, every server
-                        message uses{' '}
-                        <Typography.Text code>{'{ type, payload, time }'}</Typography.Text>. The
-                        time value is Unix milliseconds.
+                        {t('pages.apiDocs.websocketDesc', {
+                          defaultValue:
+                            '通过 Cookie 身份认证建立 GET /ws 升级连接后，服务器推送的所有消息格式均为 { type, payload, time }。其中 time 为 Unix 毫秒时间戳。',
+                        })}
                       </Typography.Paragraph>
                       <Row gutter={[12, 12]}>
                         {websocketEvents.map((event) => (

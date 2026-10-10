@@ -3,13 +3,13 @@ import { initReactI18next } from 'react-i18next';
 
 import { LanguageManager } from '@/utils';
 import type { LanguageScope } from '@/utils';
-import enUS from '../../../internal/web/translation/en-US.json';
+import zhCN from '../../../internal/web/translation/zh-CN.json';
 
-const FALLBACK = 'en-US';
+const FALLBACK = 'zh-CN';
 
 const lazyModules = import.meta.glob([
   '../../../internal/web/translation/*.json',
-  '!../../../internal/web/translation/en-US.json',
+  '!../../../internal/web/translation/zh-CN.json',
 ]);
 
 function moduleKeyFor(code: string): string {
@@ -28,7 +28,7 @@ export async function readyI18n(scope: LanguageScope = 'panel') {
   await i18next.use(initReactI18next).init({
     lng: active,
     fallbackLng: FALLBACK,
-    resources: { [FALLBACK]: { translation: enUS } },
+    resources: { [FALLBACK]: { translation: zhCN } },
     interpolation: { escapeValue: false, prefix: '{', suffix: '}' },
     returnNull: false,
   });

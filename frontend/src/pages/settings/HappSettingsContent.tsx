@@ -242,7 +242,9 @@ export default function HappSettingsContent({
                   <Input
                     value={allSetting.subHappSubInfoButtonText}
                     maxLength={25}
-                    placeholder="Support Channel"
+                    placeholder={t('pages.settings.subHappSupportChannelPlaceholder', {
+                      defaultValue: '例如：支持频道 / 客服群组',
+                    })}
                     onChange={(e) => updateSetting({ subHappSubInfoButtonText: e.target.value })}
                   />
                 </SettingListItem>

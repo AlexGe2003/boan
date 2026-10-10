@@ -39,7 +39,7 @@ import {
 
 import { useQueryClient } from '@tanstack/react-query';
 import PanelTopbar from './PanelTopbar';
-import { HttpUtil } from '@/utils';
+import { HttpUtil, LanguageManager } from '@/utils';
 import { formatPanelVersion } from '@/lib/panel-version';
 import { pauseAnimationsUntilLeave, useTheme } from '@/hooks/useTheme';
 import { useAllSettings } from '@/api/queries/useAllSettings';
@@ -151,7 +151,7 @@ function saveSidebarPinned(pinned: boolean) {
 }
 
 export default function AppSidebar() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const { isDark, isUltra, toggleTheme, toggleUltra } = useTheme();
   const { open: openCommandPalette } = useCommandPalette();
@@ -175,8 +175,8 @@ export default function AppSidebar() {
   }, []);
   const railCollapsed = !hovered && !pinned;
   const railStyle = useMemo(
-    () => ({ '--sider-rail': `${pinned ? SIDER_WIDTH : RAIL_WIDTH}px` }) as CSSProperties,
-    [pinned],
+    () => ({ '--sider-rail': `${railCollapsed ? RAIL_WIDTH : SIDER_WIDTH}px` }) as CSSProperties,
+    [railCollapsed],
   );
   const rootRef = useRef<HTMLDivElement>(null);
   const suppressHoverRef = useRef(false);
@@ -220,7 +220,11 @@ export default function AppSidebar() {
       { key: '/announcements', icon: 'announcement', title: t('menu.announcements') },
       { key: '/my-subscriptions', icon: 'team', title: t('menu.mySubscriptions') },
       { key: '/node-monitor', icon: 'cluster', title: t('nodeMonitor.title') },
-      { key: '/node-groups', icon: 'cluster', title: '节点分组' },
+      {
+        key: '/node-groups',
+        icon: 'cluster',
+        title: t('menu.nodeGroups', { defaultValue: '节点分组' }),
+      },
       { key: '/groups', icon: 'groups', title: t('menu.groups') },
       { key: '/nodes', icon: 'cluster', title: t('menu.nodes') },
       { key: '/hosts', icon: 'hosts', title: t('menu.hosts') },
@@ -474,6 +478,17 @@ export default function AppSidebar() {
                 onClick={togglePinned}
               >
                 {pinned ? <PushpinFilled /> : <PushpinOutlined />}
+              </button>
+              <button
+                type="button"
+                className="sidebar-pin"
+                aria-label="语言切换"
+                title={i18n.language === 'en-US' ? '切换为简体中文' : 'Switch to English'}
+                onClick={() =>
+                  LanguageManager.setLanguage(i18n.language === 'en-US' ? 'zh-CN' : 'en-US')
+                }
+              >
+                <GlobalOutlined />
               </button>
               <ThemeCycleButton
                 id="theme-cycle"

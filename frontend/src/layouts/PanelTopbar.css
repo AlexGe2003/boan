@@ -34,6 +34,7 @@
   position: fixed;
   left: var(--sider-rail, 240px);
   right: 0;
+  transition: left 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 .ant-sidebar + .ant-layout {
   padding-top: 100px;

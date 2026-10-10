@@ -1,6 +1,8 @@
 import NetworkPageIntro from '@/components/NetworkPageIntro';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import zhCN from 'antd/locale/zh_CN';
+import enUS from 'antd/locale/en_US';
 import {
   Button,
   Card,
@@ -28,7 +30,8 @@ import HostList, { sortHosts } from './HostList';
 import HostFormModal from './HostFormModal';
 
 export default function HostsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const antdLocale = i18n.language === 'en-US' ? enUS : zhCN;
   const { isDark, isUltra, antdThemeConfig } = useTheme();
   const { isMobile } = useMediaQuery();
   const [modal, modalContextHolder] = Modal.useModal();
@@ -145,7 +148,7 @@ export default function HostsPage() {
   }, [isDark, isUltra]);
 
   return (
-    <ConfigProvider theme={antdThemeConfig}>
+    <ConfigProvider theme={antdThemeConfig} locale={antdLocale}>
       {messageContextHolder}
       {modalContextHolder}
       <Layout className={pageClass}>

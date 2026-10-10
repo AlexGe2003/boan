@@ -3,6 +3,9 @@
   width: var(--sider-rail, 72px);
   position: relative;
   z-index: 210;
+  transition:
+    width 0.2s cubic-bezier(0.2, 0, 0, 1),
+    flex-basis 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .ant-sidebar > .ant-layout-sider {
