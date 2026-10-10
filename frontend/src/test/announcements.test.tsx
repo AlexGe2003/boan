@@ -1,3 +1,4 @@
+import AnnouncementsAdminPage from '@/pages/announcements/AnnouncementsAdminPage';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { MemoryRouter } from 'react-router';
@@ -138,3 +139,27 @@ test('ignores malformed stored announcement read state', async () => {
   );
   expect(await screen.findByRole('dialog')).toBeTruthy();
 });
+
+test('keeps announcement management inside the admin shell with a single refresh action', async () => {
+  const queryClient = makeTestQueryClient();
+  queryClient.setQueryData(['session', 'access'], {
+    userId: 7,
+    role: 'admin',
+    roleKey: 'admin',
+    pages: [],
+  });
+  vi.spyOn(HttpUtil, 'get').mockImplementation(
+    async (url) => new Msg(true, '', url.includes('/announcements') ? mockAnnouncements : []),
+  );
+  const view = renderWithProviders(
+    <MemoryRouter initialEntries={['/announcements']}>
+      <AnnouncementsAdminPage />
+    </MemoryRouter>,
+    { queryClient },
+  );
+  await screen.findByText('网络维护通知');
+  expect(view.container.querySelector('.ant-sidebar')).not.toBeNull();
+  expect(screen.getByRole('main').contains(screen.getByText('系统公告管理'))).toBe(true);
+  expect(screen.queryByRole('button', { name: '刷新页面数据' })).toBeNull();
+  expect(screen.getAllByRole('button', { name: /刷新/ })).toHaveLength(1);
+}, 15000);

@@ -65,7 +65,10 @@ function formatGeckoPacketSize(min: number, max: number): string {
   return `${min}-${max}`;
 }
 
-function splitGeckoPacketSize(value: unknown): { min: number | null; max: number | null } {
+function splitGeckoPacketSize(value: unknown): {
+  min: number | null;
+  max: number | null;
+} {
   const str = typeof value === 'string' ? value.trim() : String(value ?? '').trim();
   const [minRaw = '', maxRaw = ''] = str.split('-', 2);
   const min = /^\d+$/.test(minRaw) ? Number(minRaw) : null;
@@ -242,6 +245,7 @@ export default function FinalMaskForm({
   form,
   showAll = false,
 }: FinalMaskFormProps) {
+  const { t } = useTranslation();
   const base = asPath(name);
 
   // Migrate legacy TCP mask shapes once on mount so configs saved before
@@ -277,7 +281,10 @@ export default function FinalMaskForm({
   const showTcp = showAll || (!isWireguard && TCP_NETWORKS.includes(network));
   const showUdp = showAll || isHysteria || isWireguard || network === 'kcp';
   const showQuic = showAll || isHysteria || network === 'xhttp';
-  const quicParams = Form.useWatch([...base, 'quicParams'], { form, preserve: true });
+  const quicParams = Form.useWatch([...base, 'quicParams'], {
+    form,
+    preserve: true,
+  });
   const hasQuicParams = quicParams != null;
 
   if (!showTcp && !showUdp && !showQuic) return null;
@@ -296,7 +303,7 @@ export default function FinalMaskForm({
       )}
       {showQuic && (
         <>
-          <Form.Item label="QUIC Params">
+          <Form.Item label={t('pages.settings.quicParams')}>
             <Switch
               checked={hasQuicParams}
               onChange={(v) => {
@@ -317,14 +324,17 @@ function TcpMasksList({ base, form }: { base: (string | number)[]; form: FormIns
     <Form.List name={[...base, 'tcp']}>
       {(fields, { add, remove }) => (
         <>
-          <Form.Item label="TCP Masks">
+          <Form.Item label={t('pages.settings.tcpMasks')}>
             <Button
               type="primary"
               size="small"
               icon={<PlusOutlined />}
               aria-label={t('add')}
               onClick={() =>
-                add({ type: 'fragment', settings: defaultTcpMaskSettings('fragment') })
+                add({
+                  type: 'fragment',
+                  settings: defaultTcpMaskSettings('fragment'),
+                })
               }
             />
           </Form.Item>
@@ -825,7 +835,7 @@ function UdpMasksList({
     <Form.List name={[...base, 'udp']}>
       {(fields, { add, remove }) => (
         <>
-          <Form.Item label="UDP Masks">
+          <Form.Item label={t('pages.settings.udpMasks')}>
             <Button
               type="primary"
               size="small"
@@ -1431,9 +1441,10 @@ function ItemEditor({
 
 function QuicParamsForm({ base, form }: { base: (string | number)[]; form: FormInstance }) {
   const congestion = Form.useWatch([...base, 'congestion'], form) as string | undefined;
-  const udpHop = Form.useWatch([...base, 'udpHop'], { form, preserve: true }) as
-    | Record<string, unknown>
-    | undefined;
+  const udpHop = Form.useWatch([...base, 'udpHop'], {
+    form,
+    preserve: true,
+  }) as Record<string, unknown> | undefined;
   const hasUdpHop = udpHop != null;
 
   return (

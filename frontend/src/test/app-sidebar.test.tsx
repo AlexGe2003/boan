@@ -100,3 +100,18 @@ test('opens with the full navigation for a new preference', () => {
     '--sider-rail: 240px',
   );
 });
+
+test.each([
+  ['/settings#security', 'Authentication'],
+  ['/xray#dns', 'DNS'],
+  ['/orders', 'Orders'],
+  ['/support', 'Support'],
+  ['/users', 'Panel users'],
+])('shows the correct header for %s', (route, title) => {
+  renderWithProviders(
+    <MemoryRouter initialEntries={[route]}>
+      <AppSidebar />
+    </MemoryRouter>,
+  );
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(title);
+});

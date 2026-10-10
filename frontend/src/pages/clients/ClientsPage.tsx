@@ -1195,6 +1195,10 @@ export default function ClientsPage() {
   };
 
   const rowSelection = {
+    getTitleCheckboxProps: () => ({ 'aria-label': t('pages.clients.selectAll') }),
+    getCheckboxProps: (record: ClientRecord) => ({
+      'aria-label': t('pages.clients.selectClient', { name: record.email }),
+    }),
     selectedRowKeys,
     onChange: (keys: React.Key[]) => setSelectedRowKeys(keys as string[]),
   };

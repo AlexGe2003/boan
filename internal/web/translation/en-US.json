@@ -30,7 +30,23 @@
     "carrierMonitoring": "Carrier monitoring",
     "probeNotConfigured": "Probe not configured",
     "offlineMetrics": "Live metrics are unavailable while this node is offline",
-    "lastHeartbeatShort": "Heartbeat {time}"
+    "lastHeartbeatShort": "Heartbeat {time}",
+    "speed": "Current speed",
+    "totalTraffic": "Total traffic",
+    "uptime": "Uptime",
+    "carrierCheck": "Carrier check",
+    "latency": "Latency",
+    "packetLoss": "Packet loss",
+    "preview": "Preview data",
+    "autoRefresh": "Auto refresh",
+    "totalNodes": "Total nodes",
+    "offlineNodes": "Offline nodes",
+    "needsAttention": "Needs attention",
+    "searchNodes": "Search nodes",
+    "uptimeHours": "Online {count} hours",
+    "filterStatus": "Filter status",
+    "clearFilters": "Clear filters",
+    "noMatches": "No matching nodes"
   },
   "username": "Username",
   "password": "Password",
@@ -1089,7 +1105,8 @@
         "nodeFallback": "Node #{id}",
         "noTraffic": "No traffic has been recorded yet. Usage is unknown.",
         "trafficNote": "Upload: user → node. Download: node → user. These are cumulative recorded bytes since collection began, independent of subscription resets, billing multipliers and manual corrections. Statistics are per account and node, not per device. Offline nodes show their last recorded totals; older usage before collection is not included."
-      }
+      },
+      "selectClient": "Select {name}"
     },
     "groups": {
       "name": "Name",
@@ -1951,7 +1968,10 @@
         "HK": "Hong Kong",
         "TW": "Taiwan",
         "MO": "Macao"
-      }
+      },
+      "tcpMasks": "TCP masks",
+      "udpMasks": "UDP masks",
+      "quicParams": "QUIC parameters"
     },
     "xray": {
       "save": "Save",
@@ -2454,7 +2474,15 @@
         "poolSize": "Pool Size"
       },
       "defaultOutbound": "Default Outbound",
-      "defaultOutboundDesc": "Traffic that does not match any routing rule uses this outbound (Xray uses the first outbound in the list)."
+      "defaultOutboundDesc": "Traffic that does not match any routing rule uses this outbound (Xray uses the first outbound in the list).",
+      "privateIPs": "Private IPs",
+      "logLevels": {
+        "none": "Disabled",
+        "debug": "Debug",
+        "info": "Info",
+        "warning": "Warning",
+        "error": "Error"
+      }
     },
     "apiDocs": {
       "panelApi": "3X-UI Panel API",
@@ -2764,14 +2792,12 @@
     "operations": "Service management",
     "infrastructure": "Nodes and networking",
     "system": "System configuration",
-    "runtime": "System status",
     "nodes": "Edge Nodes",
     "nodesDetail": "{online} online / {offline} offline",
     "inbounds": "Proxy Inbounds",
     "inboundsDetail": "{count} active inbounds",
     "xrayCore": "Xray Core",
     "quickOps": "Core Status & Quick Ops",
-    "xrayActions": "Core Actions",
     "restartCore": "Restart Core",
     "stopCore": "Stop Core",
     "viewConfig": "Core Config",
@@ -2781,7 +2807,6 @@
     "panelUpdate": "Panel Update",
     "perfHistory": "Perf History",
     "xrayMetrics": "Xray Metrics",
-    "resources": "System Resource Utilization",
     "cpuUsage": "CPU Load",
     "memUsage": "Memory Usage",
     "diskUsage": "Disk Usage",
@@ -2812,5 +2837,10 @@
       "title": "Routing Policies",
       "hint": "Define routing rulesets, traffic balancing, and domain strategy."
     }
+  },
+  "business": {
+    "orders": "Orders",
+    "support": "Support",
+    "panelUsers": "Panel users"
   }
 }

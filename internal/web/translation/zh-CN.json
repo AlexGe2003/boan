@@ -30,7 +30,23 @@
     "carrierMonitoring": "运营商探测",
     "probeNotConfigured": "尚未配置探针",
     "offlineMetrics": "节点离线，实时指标暂不可用",
-    "lastHeartbeatShort": "心跳 {time}"
+    "lastHeartbeatShort": "心跳 {time}",
+    "speed": "实时速率",
+    "totalTraffic": "累计流量",
+    "uptime": "运行时长",
+    "carrierCheck": "运营商检测",
+    "latency": "延迟",
+    "packetLoss": "丢包率",
+    "preview": "预览数据",
+    "autoRefresh": "自动更新",
+    "totalNodes": "全部节点",
+    "offlineNodes": "离线节点",
+    "needsAttention": "需要关注",
+    "searchNodes": "搜索节点",
+    "uptimeHours": "在线 {count} 小时",
+    "filterStatus": "筛选状态",
+    "clearFilters": "清除筛选",
+    "noMatches": "没有匹配的节点"
   },
   "username": "用户名",
   "password": "密码",
@@ -1089,7 +1105,8 @@
         "nodeFallback": "节点 #{id}",
         "noTraffic": "尚无流量采集记录，使用量未知。",
         "trafficNote": "出站：用户 → 节点；入站：节点 → 用户。展示自开始采集以来的累计流量，不受套餐重置、计费倍数或手动修正影响。按账号和节点统计，无法分摊到单台设备；离线节点显示最后记录值，采集开始前的历史流量不计入。"
-      }
+      },
+      "selectClient": "选择 {name}"
     },
     "groups": {
       "name": "名称",
@@ -1292,13 +1309,13 @@
       "telegramBotEnable": "启用 Telegram 机器人",
       "telegramBotEnableDesc": "启用 Telegram 机器人功能",
       "telegramToken": "Telegram Token",
-      "telegramTokenDesc": "从 '{'@'}BotFather' 获取的 Telegram 机器人令牌",
+      "telegramTokenDesc": "从 @BotFather 获取的 Telegram 机器人令牌",
       "telegramProxy": "SOCKS 代理",
       "telegramProxyDesc": "启用 SOCKS5 代理连接到 Telegram（根据指南调整设置）",
       "telegramAPIServer": "Telegram API 服务器",
       "telegramAPIServerDesc": "要使用的 Telegram API 服务器。留空以使用默认服务器。",
       "telegramChatId": "管理员聊天 ID",
-      "telegramChatIdDesc": "Telegram 管理员聊天 ID (多个以逗号分隔)（可通过 {'@'}userinfobot 获取，或在机器人中使用 '/id' 命令获取）",
+      "telegramChatIdDesc": "Telegram 管理员聊天 ID (多个以逗号分隔)（可通过 @userinfobot 获取，或在机器人中使用 '/id' 命令获取）",
       "telegramNotifyTime": "通知时间",
       "telegramNotifyTimeDesc": "Telegram 机器人发送周期性报告的频率。选择预设间隔，或选择“自定义”以输入 crontab 表达式。",
       "notifyTime": {
@@ -1402,7 +1419,7 @@
       "subEncryptDesc": "订阅服务返回的内容将采用 Base64 编码",
       "subURI": "反向代理 URI",
       "subURIDesc": "用于订阅链接和二维码的完整基础 URL(scheme://域名[:端口]/路径/)，会替代监听域名/监听端口使用。当订阅通过反向代理访问，或使用与上面不同的域名/端口访问时，请设置此项。",
-      "externalTrafficInformEnable": "外部交通通知",
+      "externalTrafficInformEnable": "外部流量通知",
       "externalTrafficInformEnableDesc": "每次流量更新时通知外部 API。",
       "externalTrafficInformURI": "外部流量通知 URI",
       "externalTrafficInformURIDesc": "流量更新将发送到此 URI",
@@ -1419,24 +1436,24 @@
       "realityScanCandidatesDesc": "逗号分隔的 host:port 目标（或 CIDR），作为“查找目标”在搜索框为空时的默认列表。可按常用目标自定义。",
       "ldap": {
         "enable": "启用 LDAP 同步",
-        "host": "LDAP host",
+        "host": "LDAP 服务器地址",
         "port": "LDAP 端口",
         "useTls": "使用 TLS (LDAPS)",
         "skipTlsVerify": "跳过 TLS 证书验证",
         "skipTlsVerifyDesc": "不安全 — 禁用服务器证书验证。仅用于内部/不受信任的 CA。",
-        "bindDn": "Bind DN",
+        "bindDn": "绑定 DN",
         "passwordConfigured": "已配置;留空以保留当前密码。",
         "passwordUnconfigured": "未配置。",
         "passwordPlaceholder": "已配置 - 输入新值以替换",
-        "baseDn": "Base DN",
+        "baseDn": "查询根 DN",
         "userFilter": "用户筛选",
-        "userAttr": "用户属性 (username/email)",
-        "vlessField": "VLESS flag 属性",
-        "flagField": "通用 flag 属性 (可选)",
-        "flagFieldDesc": "如设置,将覆盖 VLESS flag — 如 shadowInactive。",
-        "truthyValues": "Truthy 值",
+        "userAttr": "用户属性 (用户名 / 邮箱)",
+        "vlessField": "VLESS 标志 属性",
+        "flagField": "通用 标志 属性 (可选)",
+        "flagFieldDesc": "如设置,将覆盖 VLESS 标志 — 如 shadowInactive。",
+        "truthyValues": "启用 值",
         "truthyValuesDesc": "逗号分隔;默认: true,1,yes,on",
-        "invertFlag": "反转 flag",
+        "invertFlag": "反转 标志",
         "invertFlagDesc": "当属性表示已禁用时启用 (如 shadowInactive)。",
         "syncSchedule": "同步计划",
         "syncScheduleDesc": "类 cron 字符串,如 @every 1m",
@@ -1637,8 +1654,8 @@
       },
       "secretClear": "清除",
       "secretClearUndo": "撤销清除",
-      "calendarGregorian": "Gregorian (Standard)",
-      "calendarJalalian": "Jalalian (شمسی)",
+      "calendarGregorian": "公历（标准）",
+      "calendarJalalian": "波斯历",
       "ipLimitAllowlist": "IP 限制白名单",
       "ipLimitAllowlistDesc": "IP 限制永远不会计入也不会封禁的地址和网段，避免办公室或校园的共享地址耗尽客户端的限额。IP/CIDR(逗号分隔)。",
       "allowMainlandAccess": "允许中国大陆访问",
@@ -1833,7 +1850,10 @@
         "HK": "香港",
         "TW": "台湾",
         "MO": "澳门"
-      }
+      },
+      "tcpMasks": "TCP 掩码",
+      "udpMasks": "UDP 掩码",
+      "quicParams": "QUIC 参数"
     },
     "xray": {
       "importRules": "导入规则",
@@ -2336,7 +2356,15 @@
         "poolSize": "池大小"
       },
       "defaultOutbound": "默认出站",
-      "defaultOutboundDesc": "未匹配任何路由规则的流量走此出站（列表中的第一个出站）。"
+      "defaultOutboundDesc": "未匹配任何路由规则的流量走此出站（列表中的第一个出站）。",
+      "privateIPs": "私有 IP 地址",
+      "logLevels": {
+        "none": "关闭日志",
+        "debug": "调试",
+        "info": "信息",
+        "warning": "警告",
+        "error": "错误"
+      }
     },
     "hosts": {
       "addHost": "添加主机",
@@ -2764,14 +2792,12 @@
     "operations": "服务管理",
     "infrastructure": "节点与网络",
     "system": "系统配置",
-    "runtime": "系统运行",
     "nodes": "边缘节点",
     "nodesDetail": "在线 {online} / 离线 {offline}",
     "inbounds": "代理入站",
     "inboundsDetail": "监听中入站 {count} 个",
     "xrayCore": "Xray 核心",
     "quickOps": "核心状态与快捷运维",
-    "xrayActions": "核心操作",
     "restartCore": "重启核心",
     "stopCore": "停止核心",
     "viewConfig": "核心配置",
@@ -2781,7 +2807,6 @@
     "panelUpdate": "面板更新",
     "perfHistory": "性能历史",
     "xrayMetrics": "Xray 指标",
-    "resources": "系统资源负载",
     "cpuUsage": "CPU 负荷",
     "memUsage": "内存占用",
     "diskUsage": "磁盘占用",
@@ -2812,5 +2837,10 @@
       "title": "路由策略分流",
       "hint": "定义路由规则集、分流机制与域名解析策略。"
     }
+  },
+  "business": {
+    "orders": "订单管理",
+    "support": "工单管理",
+    "panelUsers": "面板用户"
   }
 }

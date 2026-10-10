@@ -392,7 +392,10 @@ export default function BasicsTab({
               <Select
                 value={(log.loglevel as string) || 'warning'}
                 style={{ width: '100%' }}
-                options={LOG_LEVELS.map((s) => ({ value: s, label: s }))}
+                options={LOG_LEVELS.map((s) => ({
+                  value: s,
+                  label: t(`pages.xray.logLevels.${s}`),
+                }))}
                 onChange={(v) =>
                   mutate((tt) => {
                     if (tt.log) tt.log.loglevel = v;
@@ -409,7 +412,10 @@ export default function BasicsTab({
               <Select
                 value={(log.access as string) || ''}
                 style={{ width: '100%' }}
-                options={ACCESS_LOG.map((s) => ({ value: s, label: s }))}
+                options={ACCESS_LOG.map((s) => ({
+                  value: s,
+                  label: s === 'none' ? t('pages.xray.logLevels.none') : s,
+                }))}
                 onChange={(v) =>
                   mutate((tt) => {
                     if (tt.log) tt.log.access = v;
@@ -428,7 +434,10 @@ export default function BasicsTab({
                 style={{ width: '100%' }}
                 options={[
                   { value: '', label: t('empty') },
-                  ...ERROR_LOG.map((s) => ({ value: s, label: s })),
+                  ...ERROR_LOG.map((s) => ({
+                    value: s,
+                    label: s === 'none' ? t('pages.xray.logLevels.none') : s,
+                  })),
                 ]}
                 onChange={(v) =>
                   mutate((tt) => {

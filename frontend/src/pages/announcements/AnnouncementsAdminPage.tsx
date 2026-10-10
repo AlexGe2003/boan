@@ -1,5 +1,12 @@
+import { useTranslation } from 'react-i18next';
+import zhCN from 'antd/locale/zh_CN';
+import enUS from 'antd/locale/en_US';
+import { useTheme } from '@/hooks/useTheme';
+import AppSidebar from '@/layouts/AppSidebar';
 import { useState } from 'react';
 import {
+  Layout,
+  ConfigProvider,
   Table,
   Button,
   Card,
@@ -33,6 +40,8 @@ import AnnouncementModal from '../subscriptions/AnnouncementModal';
 const { Text } = Typography;
 
 export default function AnnouncementsAdminPage() {
+  const { i18n } = useTranslation();
+  const { isDark, isUltra, antdThemeConfig } = useTheme();
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
   const [modalOpen, setModalOpen] = useState(false);
@@ -101,10 +110,14 @@ export default function AnnouncementsAdminPage() {
     val: boolean,
   ) => {
     try {
-      const res = await HttpUtil.put(`/panel/api/announcements/${item.id}`, { [field]: val });
+      const res = await HttpUtil.put(`/panel/api/announcements/${item.id}`, {
+        [field]: val,
+      });
       if (res.success) {
         message.success('设置已更新');
-        void queryClient.invalidateQueries({ queryKey: ['admin-announcements'] });
+        void queryClient.invalidateQueries({
+          queryKey: ['admin-announcements'],
+        });
         void queryClient.invalidateQueries({ queryKey: ['announcements'] });
       } else {
         message.error(res.msg || '更新失败');
@@ -151,14 +164,14 @@ export default function AnnouncementsAdminPage() {
       render: (_: unknown, record: Announcement) => {
         const tagProps = getAnnouncementTagProps(record.tag);
         return (
-          <Space direction="vertical" size={2}>
+          <Space orientation="vertical" size={2}>
             <Space wrap>
               {record.pinned && (
-                <Tag color="red" icon={<PushpinFilled />} bordered={false}>
+                <Tag color="red" icon={<PushpinFilled />} variant="filled">
                   置顶
                 </Tag>
               )}
-              <Tag color={tagProps.color} bordered={false}>
+              <Tag color={tagProps.color} variant="filled">
                 {tagProps.label}
               </Tag>
               <Text strong>{record.title}</Text>
@@ -260,125 +273,133 @@ export default function AnnouncementsAdminPage() {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <Card
-        bordered={false}
-        title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <NotificationOutlined style={{ fontSize: 18, color: '#1677ff' }} />
-            <span>系统公告管理</span>
-          </div>
-        }
-        extra={
-          <Space>
-            <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={isLoading}>
-              刷新
-            </Button>
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
-              发布新公告
-            </Button>
-          </Space>
-        }
+    <ConfigProvider theme={antdThemeConfig} locale={i18n.language.startsWith('zh') ? zhCN : enUS}>
+      <Layout
+        className={`settings-page business-page${isDark ? ' is-dark' : ''}${isUltra ? ' is-ultra' : ''}`}
       >
-        <Table
-          rowKey="id"
-          columns={columns}
-          dataSource={announcements}
-          loading={isLoading}
-          pagination={{ pageSize: 10, showSizeChanger: true }}
-        />
-      </Card>
-
-      {/* Create / Edit Modal */}
-      <Modal
-        title={editingItem ? '编辑公告' : '发布新公告'}
-        open={modalOpen}
-        onCancel={() => {
-          setModalOpen(false);
-          setEditingItem(null);
-        }}
-        onOk={() => form.submit()}
-        confirmLoading={saveMutation.isPending}
-        destroyOnClose
-        width={600}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={(values) => saveMutation.mutate(values)}
-          style={{ marginTop: 16 }}
+        <AppSidebar />
+        <Layout className="content-shell">
+          <Layout.Content id="content-layout" className="content-area">
+            <Card
+              variant="borderless"
+              title={
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <NotificationOutlined style={{ fontSize: 18, color: '#1677ff' }} />
+                  <span>系统公告管理</span>
+                </div>
+              }
+              extra={
+                <Space>
+                  <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={isLoading}>
+                    刷新
+                  </Button>
+                  <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
+                    发布新公告
+                  </Button>
+                </Space>
+              }
+            >
+              <Table
+                rowKey="id"
+                columns={columns}
+                dataSource={announcements}
+                loading={isLoading}
+                pagination={{ pageSize: 10, showSizeChanger: true }}
+              />
+            </Card>
+          </Layout.Content>
+        </Layout>
+        {/* Create / Edit Modal */}
+        <Modal
+          title={editingItem ? '编辑公告' : '发布新公告'}
+          open={modalOpen}
+          onCancel={() => {
+            setModalOpen(false);
+            setEditingItem(null);
+          }}
+          onOk={() => form.submit()}
+          confirmLoading={saveMutation.isPending}
+          destroyOnHidden
+          width={600}
         >
-          <Form.Item
-            name="title"
-            label="公告标题"
-            rules={[{ required: true, message: '请输入公告标题' }]}
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={(values) => saveMutation.mutate(values)}
+            style={{ marginTop: 16 }}
           >
-            <Input placeholder="例如：关于节点定期网络维护升级公告" maxLength={100} showCount />
-          </Form.Item>
-
-          <Form.Item name="tag" label="分类标签" rules={[{ required: true }]}>
-            <Select
-              options={[
-                { value: 'notice', label: '系统通知（蓝色）' },
-                { value: 'maintenance', label: '维护更新（橙色）' },
-                { value: 'feature', label: '功能更新（绿色）' },
-                { value: 'urgent', label: '重要警报（红色）' },
-              ]}
-            />
-          </Form.Item>
-
-          <div style={{ display: 'flex', gap: 24, marginBottom: 16 }}>
             <Form.Item
-              name="popup"
-              label="首次弹窗提醒"
-              valuePropName="checked"
-              extra="开启后，用户进入用户中心时会自动弹窗提醒该公告"
-              style={{ flex: 1, margin: 0 }}
+              name="title"
+              label="公告标题"
+              rules={[{ required: true, message: '请输入公告标题' }]}
             >
-              <Switch checkedChildren="开启" unCheckedChildren="关闭" />
+              <Input placeholder="例如：关于节点定期网络维护升级公告" maxLength={100} showCount />
             </Form.Item>
 
-            <Form.Item
-              name="pinned"
-              label="置顶显示"
-              valuePropName="checked"
-              extra="开启后将在列表中置顶展示"
-              style={{ flex: 1, margin: 0 }}
-            >
-              <Switch checkedChildren="置顶" unCheckedChildren="普通" />
+            <Form.Item name="tag" label="分类标签" rules={[{ required: true }]}>
+              <Select
+                options={[
+                  { value: 'notice', label: '系统通知（蓝色）' },
+                  { value: 'maintenance', label: '维护更新（橙色）' },
+                  { value: 'feature', label: '功能更新（绿色）' },
+                  { value: 'urgent', label: '重要警报（红色）' },
+                ]}
+              />
             </Form.Item>
 
+            <div style={{ display: 'flex', gap: 24, marginBottom: 16 }}>
+              <Form.Item
+                name="popup"
+                label="首次弹窗提醒"
+                valuePropName="checked"
+                extra="开启后，用户进入用户中心时会自动弹窗提醒该公告"
+                style={{ flex: 1, margin: 0 }}
+              >
+                <Switch checkedChildren="开启" unCheckedChildren="关闭" />
+              </Form.Item>
+
+              <Form.Item
+                name="pinned"
+                label="置顶显示"
+                valuePropName="checked"
+                extra="开启后将在列表中置顶展示"
+                style={{ flex: 1, margin: 0 }}
+              >
+                <Switch checkedChildren="置顶" unCheckedChildren="普通" />
+              </Form.Item>
+
+              <Form.Item
+                name="enabled"
+                label="是否启用"
+                valuePropName="checked"
+                extra="关闭后对普通用户隐藏"
+                style={{ flex: 1, margin: 0 }}
+              >
+                <Switch checkedChildren="启用" unCheckedChildren="隐藏" />
+              </Form.Item>
+            </div>
+
             <Form.Item
-              name="enabled"
-              label="是否启用"
-              valuePropName="checked"
-              extra="关闭后对普通用户隐藏"
-              style={{ flex: 1, margin: 0 }}
+              name="content"
+              label="公告内容"
+              rules={[{ required: true, message: '请输入公告内容' }]}
             >
-              <Switch checkedChildren="启用" unCheckedChildren="隐藏" />
+              <Input.TextArea
+                rows={8}
+                placeholder="请输入公告正文，支持换行与段落格式..."
+                showCount
+              />
             </Form.Item>
-          </div>
+          </Form>
+        </Modal>
 
-          <Form.Item
-            name="content"
-            label="公告内容"
-            rules={[{ required: true, message: '请输入公告内容' }]}
-          >
-            <Input.TextArea
-              rows={8}
-              placeholder="请输入公告正文，支持换行与段落格式..."
-              showCount
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/* User Perspective Preview Modal */}
-      <AnnouncementModal
-        open={!!previewItem}
-        announcement={previewItem}
-        onAcknowledge={() => setPreviewItem(null)}
-      />
-    </div>
+        {/* User Perspective Preview Modal */}
+        <AnnouncementModal
+          open={!!previewItem}
+          announcement={previewItem}
+          onAcknowledge={() => setPreviewItem(null)}
+        />
+      </Layout>
+    </ConfigProvider>
   );
 }

@@ -175,7 +175,10 @@ export default function AppSidebar() {
   }, []);
   const railCollapsed = !hovered && !pinned;
   const railStyle = useMemo(
-    () => ({ '--sider-rail': `${railCollapsed ? RAIL_WIDTH : SIDER_WIDTH}px` }) as CSSProperties,
+    () =>
+      ({
+        '--sider-rail': `${railCollapsed ? RAIL_WIDTH : SIDER_WIDTH}px`,
+      }) as CSSProperties,
     [railCollapsed],
   );
   const rootRef = useRef<HTMLDivElement>(null);
@@ -217,8 +220,16 @@ export default function AppSidebar() {
       { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/plans', icon: 'groups', title: t('menu.nodePlans') },
-      { key: '/announcements', icon: 'announcement', title: t('menu.announcements') },
-      { key: '/my-subscriptions', icon: 'team', title: t('menu.mySubscriptions') },
+      {
+        key: '/announcements',
+        icon: 'announcement',
+        title: t('menu.announcements'),
+      },
+      {
+        key: '/my-subscriptions',
+        icon: 'team',
+        title: t('menu.mySubscriptions'),
+      },
       { key: '/node-monitor', icon: 'cluster', title: t('nodeMonitor.title') },
       {
         key: '/node-groups',
@@ -263,7 +274,11 @@ export default function AppSidebar() {
         icon: <MessageOutlined />,
         label: t('pages.settings.TGBotSettings'),
       },
-      { key: '/settings#email', icon: <MailOutlined />, label: t('pages.settings.emailSettings') },
+      {
+        key: '/settings#email',
+        icon: <MailOutlined />,
+        label: t('pages.settings.emailSettings'),
+      },
       {
         key: '/settings#discord',
         icon: <DiscordOutlined />,
@@ -300,10 +315,22 @@ export default function AppSidebar() {
 
   const xrayChildren = useMemo<NonNullable<MenuProps['items']>>(
     () => [
-      { key: '/xray#basic', icon: <SettingOutlined />, label: t('pages.xray.basicTemplate') },
-      { key: '/xray#balancer', icon: <ClusterOutlined />, label: t('pages.xray.Balancers') },
+      {
+        key: '/xray#basic',
+        icon: <SettingOutlined />,
+        label: t('pages.xray.basicTemplate'),
+      },
+      {
+        key: '/xray#balancer',
+        icon: <ClusterOutlined />,
+        label: t('pages.xray.Balancers'),
+      },
       { key: '/xray#dns', icon: <DatabaseOutlined />, label: 'DNS' },
-      { key: '/xray#advanced', icon: <CodeOutlined />, label: t('pages.xray.advancedTemplate') },
+      {
+        key: '/xray#advanced',
+        icon: <CodeOutlined />,
+        label: t('pages.xray.advancedTemplate'),
+      },
     ],
     [t],
   );
@@ -317,6 +344,27 @@ export default function AppSidebar() {
       : pathname === ''
         ? '/'
         : pathname;
+
+  const childTitle = [...settingsChildren, ...xrayChildren].find(
+    (item) => item && 'key' in item && item.key === selectedKey,
+  );
+  const hiddenTitles: Record<string, string> = {
+    '/orders': t('business.orders'),
+    '/support': t('business.support'),
+    '/users': t('business.panelUsers'),
+  };
+  const pageTitle =
+    (childTitle && 'label' in childTitle && typeof childTitle.label === 'string'
+      ? childTitle.label
+      : undefined) ||
+    navItems.find((item) => item.key === pathname)?.title ||
+    hiddenTitles[pathname] ||
+    t('menu.dashboard');
+  const hasPageRefresh =
+    access.role === 'admin' &&
+    ['/', '/node-monitor', '/node-groups', '/orders', '/support', '/announcements'].includes(
+      pathname,
+    );
 
   const openSubmenu = settingsActive ? '/settings' : xrayActive ? '/xray' : null;
   const [openKeys, setOpenKeys] = useState<string[]>(() => (openSubmenu ? [openSubmenu] : []));
@@ -346,7 +394,12 @@ export default function AppSidebar() {
             children: xrayChildren,
           };
         }
-        return { key: tab.key, icon: <Icon />, label: tab.title, title: tab.title };
+        return {
+          key: tab.key,
+          icon: <Icon />,
+          label: tab.title,
+          title: tab.title,
+        };
       }),
     [settingsChildren, xrayChildren],
   );
@@ -637,17 +690,19 @@ export default function AppSidebar() {
 
       <PanelTopbar
         fixed
-        title={navItems.find((item) => item.key === selectedKey)?.title || t('menu.dashboard')}
+        title={pageTitle}
         identity={access.role === 'admin' ? '管理员' : '用户'}
         onMenu={() => setDrawerOpen(true)}
         actions={
           <>
-            <Button
-              type="text"
-              aria-label="刷新页面数据"
-              icon={<ReloadOutlined />}
-              onClick={() => void queryClient.refetchQueries({ type: 'active' })}
-            />
+            {!hasPageRefresh && (
+              <Button
+                type="text"
+                aria-label="刷新页面数据"
+                icon={<ReloadOutlined />}
+                onClick={() => void queryClient.refetchQueries({ type: 'active' })}
+              />
+            )}
             <Button
               type="text"
               aria-label={t('logout')}

@@ -107,7 +107,10 @@ export default function RoutingBasic({ templateSettings, setTemplateSettings }: 
             mode="tags"
             value={blockedIPs}
             style={{ width: '100%' }}
-            options={IPS_OPTIONS}
+            options={IPS_OPTIONS.map((option) => ({
+              ...option,
+              label: option.value === 'geoip:private' ? t('pages.xray.privateIPs') : option.label,
+            }))}
             onChange={(v) => mutate((tt) => ruleSetter(tt, 'blocked', 'ip', v))}
           />
         }
@@ -142,7 +145,10 @@ export default function RoutingBasic({ templateSettings, setTemplateSettings }: 
             mode="tags"
             value={directIPs}
             style={{ width: '100%' }}
-            options={IPS_OPTIONS}
+            options={IPS_OPTIONS.map((option) => ({
+              ...option,
+              label: option.value === 'geoip:private' ? t('pages.xray.privateIPs') : option.label,
+            }))}
             onChange={(v) =>
               mutate((tt) => {
                 ruleSetter(tt, 'direct', 'ip', v);
