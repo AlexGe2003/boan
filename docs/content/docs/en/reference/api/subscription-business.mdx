@@ -59,17 +59,26 @@ _openapi:
       title: Unbind one of the signed-in customer’s devices
       url: '#unbind-one-of-the-signed-in-customers-devices'
     - depth: 2
-      title: Rotate the signed-in account’s linked subscription token. Ignores
-        caller-supplied client identifiers. Preserves usage, expiry, proxy
-        credentials and device bindings; returns {subId}. Shared legacy tokens
+      title: Rotate the signed-in account’s subscription token. Optional JSON
+        {resetConnections:true} also rotates VLESS/VMess UUIDs and Trojan
+        passwords across assigned nodes and revokes subscription grants.
+        Existing long-lived connections may continue until closed. Unsupported
+        protocols reject atomically. Ignores supplied client identifiers.
+        Preserves account benefits and usage; returns {subId,connectionsReset}.
+        Failed node synchronization is reported after persisted rotation;
+        refresh the subscription and contact the administrator. Shared tokens
         must be separated first.
-      url: '#rotate-the-signed-in-accounts-linked-subscription-token-ignores-caller-supplied-client-identifiers-preserves-usage-expiry-proxy-credentials-and-device-bindings-returns-subid-shared-legacy-tokens-must-be-separated-first'
+      url: '#rotate-the-signed-in-accounts-subscription-token-optional-json-resetconnectionstrue-also-rotates-vlessvmess-uuids-and-trojan-passwords-across-assigned-nodes-and-revokes-subscription-grants-existing-long-lived-connections-may-continue-until-closed-unsupported-protocols-reject-atomically-ignores-supplied-client-identifiers-preserves-account-benefits-and-usage-returns-subidconnectionsreset-failed-node-synchronization-is-reported-after-persisted-rotation-refresh-the-subscription-and-contact-the-administrator-shared-tokens-must-be-separated-first'
     - depth: 2
-      title: Admin only. Rotate a client subscription token; returns {subId}. Old
-        subscription URLs stop serving this client. Already imported proxy
-        credentials remain valid. Preserves usage, expiry and device bindings;
-        shared legacy tokens are rejected.
-      url: '#admin-only-rotate-a-client-subscription-token-returns-subid-old-subscription-urls-stop-serving-this-client-already-imported-proxy-credentials-remain-valid-preserves-usage-expiry-and-device-bindings-shared-legacy-tokens-are-rejected'
+      title: Admin only. Rotate a client subscription token; optional JSON
+        {resetConnections:true} also rotates VLESS/VMess UUIDs and Trojan
+        passwords across assigned nodes and revokes subscription grants. Returns
+        {subId,connectionsReset}. With default token-only reset, imported node
+        credentials remain valid. Preserves usage and account benefits. Existing
+        long-lived connections may continue until closed. Failed node
+        synchronization is reported after persisted rotation. Shared tokens and
+        unsupported protocols are rejected before changing credentials.
+      url: '#admin-only-rotate-a-client-subscription-token-optional-json-resetconnectionstrue-also-rotates-vlessvmess-uuids-and-trojan-passwords-across-assigned-nodes-and-revokes-subscription-grants-returns-subidconnectionsreset-with-default-token-only-reset-imported-node-credentials-remain-valid-preserves-usage-and-account-benefits-existing-long-lived-connections-may-continue-until-closed-failed-node-synchronization-is-reported-after-persisted-rotation-shared-tokens-and-unsupported-protocols-are-rejected-before-changing-credentials'
     - depth: 2
       title: Admin only. Observed lifetime client byte counters, manual corrections
         and budget status by directly connected node. Adjusted usage drives
@@ -228,16 +237,26 @@ _openapi:
         id: issue-or-rotate-a-customer-subscription-authorization
       - content: Unbind one of the signed-in customer’s devices
         id: unbind-one-of-the-signed-in-customers-devices
-      - content: Rotate the signed-in account’s linked subscription token. Ignores
-          caller-supplied client identifiers. Preserves usage, expiry, proxy
-          credentials and device bindings; returns {subId}. Shared legacy tokens
-          must be separated first.
-        id: rotate-the-signed-in-accounts-linked-subscription-token-ignores-caller-supplied-client-identifiers-preserves-usage-expiry-proxy-credentials-and-device-bindings-returns-subid-shared-legacy-tokens-must-be-separated-first
-      - content: Admin only. Rotate a client subscription token; returns {subId}. Old
-          subscription URLs stop serving this client. Already imported proxy
-          credentials remain valid. Preserves usage, expiry and device bindings;
-          shared legacy tokens are rejected.
-        id: admin-only-rotate-a-client-subscription-token-returns-subid-old-subscription-urls-stop-serving-this-client-already-imported-proxy-credentials-remain-valid-preserves-usage-expiry-and-device-bindings-shared-legacy-tokens-are-rejected
+      - content: Rotate the signed-in account’s subscription token. Optional JSON
+          {resetConnections:true} also rotates VLESS/VMess UUIDs and Trojan
+          passwords across assigned nodes and revokes subscription grants.
+          Existing long-lived connections may continue until closed. Unsupported
+          protocols reject atomically. Ignores supplied client identifiers.
+          Preserves account benefits and usage; returns
+          {subId,connectionsReset}. Failed node synchronization is reported
+          after persisted rotation; refresh the subscription and contact the
+          administrator. Shared tokens must be separated first.
+        id: rotate-the-signed-in-accounts-subscription-token-optional-json-resetconnectionstrue-also-rotates-vlessvmess-uuids-and-trojan-passwords-across-assigned-nodes-and-revokes-subscription-grants-existing-long-lived-connections-may-continue-until-closed-unsupported-protocols-reject-atomically-ignores-supplied-client-identifiers-preserves-account-benefits-and-usage-returns-subidconnectionsreset-failed-node-synchronization-is-reported-after-persisted-rotation-refresh-the-subscription-and-contact-the-administrator-shared-tokens-must-be-separated-first
+      - content: Admin only. Rotate a client subscription token; optional JSON
+          {resetConnections:true} also rotates VLESS/VMess UUIDs and Trojan
+          passwords across assigned nodes and revokes subscription grants.
+          Returns {subId,connectionsReset}. With default token-only reset,
+          imported node credentials remain valid. Preserves usage and account
+          benefits. Existing long-lived connections may continue until closed.
+          Failed node synchronization is reported after persisted rotation.
+          Shared tokens and unsupported protocols are rejected before changing
+          credentials.
+        id: admin-only-rotate-a-client-subscription-token-optional-json-resetconnectionstrue-also-rotates-vlessvmess-uuids-and-trojan-passwords-across-assigned-nodes-and-revokes-subscription-grants-returns-subidconnectionsreset-with-default-token-only-reset-imported-node-credentials-remain-valid-preserves-usage-and-account-benefits-existing-long-lived-connections-may-continue-until-closed-failed-node-synchronization-is-reported-after-persisted-rotation-shared-tokens-and-unsupported-protocols-are-rejected-before-changing-credentials
       - content: Admin only. Observed lifetime client byte counters, manual corrections
           and budget status by directly connected node. Adjusted usage drives
           estimates and shares; raw uploaded/downloaded bytes remain intact.

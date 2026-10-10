@@ -69,3 +69,24 @@ func TestLastConnectionRejectsInvalidAndFutureSources(t *testing.T) {
 		t.Fatalf("invalid observation saved: %+v", stored)
 	}
 }
+
+func TestLastConnectionUsesLatestRemoteNodeWithSharedGuid(t *testing.T) {
+	initClientHwidTestDB(t)
+	client := seedHwidClient(t, 0)
+	db := database.GetDB()
+	nodes := []model.Node{{Id: 1, Name: "US01", Guid: "shared", Enable: true}, {Id: 2, Name: "JP", Guid: "shared", Enable: true}}
+	now := time.Now().Unix() - 2
+	for i := range nodes {
+		seedNodeRow(t, db, &nodes[i])
+	}
+	for i := range nodes {
+		entries := map[string]map[string][]model.ClientIpEntry{"shared": {client.Email: {{IP: "192.0.2.42", Timestamp: now - int64(1-i)*10}}}}
+		if err := (&InboundService{}).MergeClientIpsByGuid(&nodes[i], entries); err != nil {
+			t.Fatal(err)
+		}
+	}
+	report, err := (&ClientService{}).FleetClientConnections(context.Background(), client.Email)
+	if err != nil || report.LastConnection == nil || report.LastConnection.NodeID != 2 || report.LastConnection.NodeName != "JP" || report.LastConnection.LastSeen != now*1000 {
+		t.Fatalf("latest node attribution lost with shared GUIDs: %+v, %v", report.LastConnection, err)
+	}
+}

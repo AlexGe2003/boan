@@ -95,3 +95,24 @@ it('preserves the customer reset button and its own subscription endpoint', asyn
   );
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 });
+
+it('requires confirmation before rotating credentials for all devices', async () => {
+  show(<ResetSubscriptionButton resetConnections />);
+  fireEvent.click(screen.getByRole('button', { name: 'Reset connection credentials' }));
+  let dialog = await screen.findByRole('dialog');
+  expect(within(dialog).getByText(/All devices must import the new subscription/)).toBeTruthy();
+  expect(within(dialog).getByText(/existing long-lived connections may continue/)).toBeTruthy();
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  expect(HttpUtil.post).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: 'Reset connection credentials' }));
+  dialog = await screen.findByRole('dialog');
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
+  await waitFor(() =>
+    expect(HttpUtil.post).toHaveBeenCalledExactlyOnceWith(
+      '/panel/api/clients/resetMySubscription',
+      { resetConnections: true },
+      { silent: true },
+    ),
+  );
+});

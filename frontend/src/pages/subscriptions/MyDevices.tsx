@@ -7,11 +7,10 @@ import {
   GlobalOutlined,
   SafetyCertificateOutlined,
   ClusterOutlined,
-  AppstoreOutlined,
   RightOutlined,
 } from '@ant-design/icons';
 import DeviceBindingTable from '@/components/clients/DeviceBindingTable';
-import SubscriptionClientSummary from '@/components/clients/SubscriptionClientSummary';
+import ResetSubscriptionButton from './ResetSubscriptionButton';
 import {
   ClientDeviceSlotsSchema,
   ClientConnectionReportSchema,
@@ -156,29 +155,6 @@ export default function MyDevices({
                   {t('pages.clients.devices.simultaneousSources', { count: ipLimit })}
                 </p>
               </section>
-              <section className="device-panel device-client-panel">
-                <div className="device-eyebrow">
-                  <AppstoreOutlined /> {label('clientSoftware')}
-                </div>
-                {hasOnlineConnections ? (
-                  <>
-                    <SubscriptionClientSummary client={data.subscriptionClient} customerView />
-                    <p className="device-muted">{label('clientSoftwareHint')}</p>
-                  </>
-                ) : (
-                  <div className="device-client-empty">
-                    <LaptopOutlined />
-                    <strong>
-                      {label(sourceCount === null ? 'waitingForConnections' : 'noConnectedDevices')}
-                    </strong>
-                  </div>
-                )}
-                {hasOnlineConnections && !data.subscriptionClient?.name && onSubscription && (
-                  <Button type="link" onClick={onSubscription}>
-                    {label('goToSubscription')} <RightOutlined />
-                  </Button>
-                )}
-              </section>
             </div>
           ) : (
             <>
@@ -214,9 +190,6 @@ export default function MyDevices({
               )}
             </>
           )}
-          {ipLimit === 0 && hasOnlineConnections && (
-            <SubscriptionClientSummary client={data.subscriptionClient} customerView />
-          )}
           {(data.onlineIpLimit ?? 0) === 0 && data.limit > 0 && (
             <p className="customer-device-note">
               授权名额不等于真实设备数量；撤销授权只阻止后续订阅获取，已导入节点可能继续连接。
@@ -247,28 +220,23 @@ export default function MyDevices({
           <ul className="device-connection-list">
             {report.connections.map((entry, index) => (
               <li key={`${entry.nodeId}:${index}`}>
-                <div className="device-source-icon">
-                  <GlobalOutlined />
-                </div>
-                <div className="device-source-content">
-                  <div className="device-source-title">
-                    <strong>
-                      {label('sourceIP')}: {entry.ip}
-                    </strong>
-                    <Tag color="green">{label('online')}</Tag>
-                  </div>
-                  <div className="device-source-meta">
-                    <span>{label('currentAccount')}</span>
-                    <span>
-                      <ClusterOutlined /> {label('node')}: {entry.nodeName}
-                    </span>
-                    {entry.lastSeen > 0 && (
-                      <span>
-                        {label('lastActivity')}: {IntlUtil.formatDate(entry.lastSeen)}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                <span className="device-online-dot" role="img" aria-label={label('online')} />
+                <strong
+                  className="device-source-ip"
+                  aria-label={`${label('sourceIP')}: ${entry.ip}`}
+                >
+                  {entry.ip}
+                </strong>
+                <span
+                  className="device-source-node"
+                  title={
+                    entry.lastSeen > 0
+                      ? `${label('lastActivity')}: ${IntlUtil.formatDate(entry.lastSeen)}`
+                      : undefined
+                  }
+                >
+                  {entry.nodeName}
+                </span>
               </li>
             ))}
           </ul>
@@ -371,6 +339,15 @@ export default function MyDevices({
           <p>订阅客户端根据最近的订阅请求识别，不代表当前连接的软件。</p>
         </div>
       </details>
+      <section className="device-panel">
+        <div className="device-section-heading">
+          <div>
+            <h3>{label('resetAccess')}</h3>
+            <p className="device-muted">{label('resetAccessHint')}</p>
+          </div>
+          <ResetSubscriptionButton resetConnections />
+        </div>
+      </section>
     </section>
   );
 }

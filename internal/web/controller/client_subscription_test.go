@@ -89,4 +89,18 @@ func TestResetSubscriptionPermissions(t *testing.T) {
 	if untouched.SubID == other.SubID {
 		t.Fatal("admin reset did not rotate token")
 	}
+	otherToken := untouched.SubID
+	reset(customer, "/panel/api/clients/resetMySubscription", `{"resetConnections":true,"email":"other","clientId":999}`)
+	if err := db.First(&got, own.Id).Error; err != nil {
+		t.Fatal(err)
+	}
+	if got.UUID == own.UUID || got.TotalGB != own.TotalGB || got.ExpiryTime != own.ExpiryTime {
+		t.Fatal("own credentials were not reset or benefits changed")
+	}
+	if err := db.First(&untouched, other.Id).Error; err != nil {
+		t.Fatal(err)
+	}
+	if untouched.SubID != otherToken || untouched.UUID != other.UUID {
+		t.Fatal("credential reset changed another account")
+	}
 }

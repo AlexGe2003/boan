@@ -136,9 +136,9 @@ it('shows full slots, confirms an unbind and refreshes the released slot', async
     screen.getByText('All device slots are occupied. Unbind a device before adding another.'),
   ).toBeTruthy();
   expect(screen.getAllByText('192.0.*.*')).toHaveLength(3);
-  const connection = (await screen.findByText('Source IP (masked): 203.0.*.*')).closest('li')!;
-  expect(within(connection).getByText('Current account')).toBeTruthy();
-  expect(within(connection).getByText('Node: 主节点')).toBeTruthy();
+  const connection = (await screen.findByText('203.0.*.*')).closest('li')!;
+  expect(within(connection).getByRole('img', { name: 'Online' })).toBeTruthy();
+  expect(within(connection).getByText('主节点')).toBeTruthy();
   expect(within(connection).queryByText('Phone 1')).toBeNull();
   expect(post.mock.calls.some(([url]) => String(url).includes('/setting/'))).toBe(false);
   expect(screen.getByRole('heading', { name: 'Online connections' })).toBeTruthy();
@@ -204,7 +204,7 @@ it('offers platform-specific subscription formats without exposing hardware deta
   expect(address()).toBe('https://example.com/clash/private');
 });
 
-it('shows account subscription software without creating a device slot', async () => {
+it('shows a compact source row without subscription software or a device slot', async () => {
   const report = {
     ...fullSlots(),
     registered: 0,
@@ -224,7 +224,9 @@ it('shows account subscription software without creating a device slot', async (
       new Msg(true, '', url === '/panel/api/clients/myDevices' ? report : onlineSources()),
   );
   show();
-  await screen.findByText('Shadowrocket');
+  const row = (await screen.findByText('203.0.*.*')).closest('li')!;
+  expect(within(row).getByText('主节点')).toBeTruthy();
+  expect(screen.queryByText('Shadowrocket')).toBeNull();
   expect(screen.getByText('Bound devices').parentElement?.textContent).toContain('0');
   expect(screen.getByText('Available slots').parentElement?.textContent).toContain('3');
   expect(screen.queryByText('Phone 1')).toBeNull();
@@ -282,7 +284,7 @@ it('hides historical software when no devices are connected', async () => {
       ),
   );
   show();
-  await screen.findByText('No devices connected');
+  await screen.findByText('No active connections');
   expect(screen.queryByText('Shadowrocket')).toBeNull();
   expect(await screen.findByText('No active connections')).toBeTruthy();
   expect(screen.queryByText(/Shadowrocket 2/)).toBeNull();

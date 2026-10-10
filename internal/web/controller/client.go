@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -978,11 +979,24 @@ func (a *ClientController) resetSubscription(c *gin.Context) {
 }
 
 func (a *ClientController) rotateSubscription(c *gin.Context, id int) {
-	token, err := a.clientService.ResetSubscription(id)
+	var input struct {
+		ResetConnections bool `json:"resetConnections"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil && !errors.Is(err, io.EOF) {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	var token string
+	var err error
+	if input.ResetConnections {
+		token, err = a.clientService.ResetConnectionAccess(id)
+	} else {
+		token, err = a.clientService.ResetSubscription(id)
+	}
 	if err != nil {
 		jsonObj(c, nil, err)
 		return
 	}
 	notifyClientsChanged()
-	jsonObj(c, gin.H{"subId": token}, nil)
+	jsonObj(c, gin.H{"subId": token, "connectionsReset": input.ResetConnections}, nil)
 }
