@@ -4,7 +4,7 @@ Briefing for the issue analyst in `.github/workflows/claude-issue-analyst.yml`.
 It exists so these facts live in ONE place next to the code instead of being
 restated in the prompt, where they went stale silently. (Pull-request review is
 separate: the reviewer in `.github/workflows/claude-pr-review.yml` is briefed by
-its own prompt, `CLAUDE.md` and `REVIEW.md`, not this.)
+its own prompt, `CLAUDE.md` and `docs/development/REVIEW.md`, not this.)
 
 `CLAUDE.md`, `frontend/CLAUDE.md` and `docs/architecture.md` outrank this file.
 Where they disagree with it, they win and this file is the thing to fix.
@@ -20,7 +20,7 @@ question it already answers.
 - It runs Xray-core as a managed child process (`internal/xray/process.go`) and
   imports `github.com/xtls/xray-core` for config types and the gRPC
   stats/handler/router API. The release the panel BUNDLES is pinned in
-  `DockerInit.sh`; the version it COMPILES against is pinned in `go.mod`, and
+  `deploy/docker/DockerInit.sh`; the version it COMPILES against is pinned in `go.mod`, and
   the two are not always the same.
 - MTProto inbounds run a SECOND managed child, the `mtg-multi` binary (a
   multi-secret mtg fork, panel-side code in `internal/mtproto/`), one process
@@ -55,7 +55,7 @@ question it already answers.
 | master/sub-node over mTLS | `internal/web/runtime/` |
 | i18n | `internal/web/locale/`, `internal/web/translation/` |
 | UI source | `frontend/src/` |
-| install / upgrade | `install.sh`, `x-ui.sh`, `DockerInit.sh` |
+| install / upgrade | `install.sh`, `x-ui.sh`, `deploy/docker/DockerInit.sh` |
 
 ## Hard rules a change must respect
 

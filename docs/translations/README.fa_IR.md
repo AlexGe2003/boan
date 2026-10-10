@@ -1,9 +1,9 @@
-[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
+[English](/README.md) | [فارسی](/docs/translations/README.fa_IR.md) | [العربية](/docs/translations/README.ar_EG.md) | [中文](/docs/translations/README.zh_CN.md) | [Español](/docs/translations/README.es_ES.md) | [Русский](/docs/translations/README.ru_RU.md) | [Türkçe](/docs/translations/README.tr_TR.md)
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./media/3x-ui-dark.png">
-    <img alt="3x-ui" src="./media/3x-ui-light.png">
+    <source media="(prefers-color-scheme: dark)" srcset="../../media/3x-ui-dark.png">
+    <img alt="3x-ui" src="../../media/3x-ui-light.png">
   </picture>
 </p>
 
@@ -36,7 +36,7 @@
 - **آمار ترافیک** — به‌ازای هر اینباند، هر کلاینت و هر اوتباند، همراه با کنترل بازنشانی (reset).
 - **پشتیبانی از چند نود** — مدیریت و مقیاس‌دهی روی چندین سرور از یک پنل واحد، از جمله کلون‌کردن اینباندها روی نودهای دیگر.
 - **اوتباند و مسیریابی** — WARP، NordVPN، PIA، قوانین مسیریابی سفارشی، متعادل‌کننده‌های بار (load balancer) با فال‌بک بین متعادل‌کننده‌ها و زنجیره‌کردن پراکسی اوتباند. دسته‌بندی‌های geosite و geoip همراه‌شده مستقیماً از ویرایشگر قوانین قابل مرور هستند.
-- **سرور سابسکریپشن داخلی** — خروجی raw، JSON و Clash که بر پایه‌ی User-Agent کلاینت به‌صورت خودکار انتخاب می‌شود، به‌همراه [قالب‌های صفحه‌ی سفارشی](docs/custom-subscription-templates.md).
+- **سرور سابسکریپشن داخلی** — خروجی raw، JSON و Clash که بر پایه‌ی User-Agent کلاینت به‌صورت خودکار انتخاب می‌شود، به‌همراه [قالب‌های صفحه‌ی سفارشی](../../docs/custom-subscription-templates.md).
 - **ربات‌های تلگرام و دیسکورد** برای نظارت و مدیریت از راه دور.
 - **‏RESTful API** با توکن‌های محدودشده (scoped) و دارای انقضای اختیاری، به‌همراه مرجع API درون‌پنل.
 - **پنل قابل نصب (PWA)** — 3X-UI را به دسکتاپ یا صفحه‌ی اصلی گوشی خود سنجاق کنید.
@@ -50,23 +50,23 @@
 <summary>برای باز شدن کلیک کنید</summary>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/01-overview-dark.png">
-  <img alt="Overview" src="./media/01-overview-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/01-overview-dark.png">
+  <img alt="Overview" src="../../media/01-overview-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/02-add-inbound-dark.png">
-  <img alt="Inbounds" src="./media/02-add-inbound-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/02-add-inbound-dark.png">
+  <img alt="Inbounds" src="../../media/02-add-inbound-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/03-add-client-dark.png">
-  <img alt="Add client" src="./media/03-add-client-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/03-add-client-dark.png">
+  <img alt="Add client" src="../../media/03-add-client-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/05-add-nodes-dark.png">
-  <img alt="Configs" src="./media/05-add-nodes-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/05-add-nodes-dark.png">
+  <img alt="Configs" src="../../media/05-add-nodes-light.png">
 </picture>
 
 </details>
@@ -100,10 +100,10 @@ bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.
 نصب‌کننده به‌صورت **غیرتعاملی** نیز برای cloud-init اجرا می‌شود.
 ‏`XUI_NONINTERACTIVE=1` را تنظیم کنید (یا بدون TTY از طریق pipe اجرا کنید) تا نصب به‌صورت سرتاسری و بدون
 هیچ پرسشی انجام شود، اطلاعات ورود تصادفی تولید کرده و آن‌ها را در
-`/etc/x-ui/install-result.env` می‌نویسد. برای موارد زیر به [`deploy/`](deploy/) مراجعه کنید:
+`/etc/x-ui/install-result.env` می‌نویسد. برای موارد زیر به [`deploy/`](../../deploy/) مراجعه کنید:
 
-- [user-data مربوط به Cloud-init](deploy/cloud-init/) — نصب بدون نظارت روی هر ابری (Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle)
-- [یادداشت‌های Hetzner Cloud](deploy/marketplace/hetzner/) — استقرار مبتنی بر cloud-init روی Hetzner
+- [user-data مربوط به Cloud-init](../../deploy/cloud-init/) — نصب بدون نظارت روی هر ابری (Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle)
+- [یادداشت‌های Hetzner Cloud](../../deploy/marketplace/hetzner/) — استقرار مبتنی بر cloud-init روی Hetzner
 
 ## پلتفرم‌های پشتیبانی‌شده
 
@@ -183,7 +183,7 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 
 ## مشارکت
 
-از مشارکت‌ها استقبال می‌شود. لطفاً پیش از باز کردن issue یا pull request، [راهنمای مشارکت](/CONTRIBUTING.md) را مطالعه کنید.
+از مشارکت‌ها استقبال می‌شود. لطفاً پیش از باز کردن issue یا pull request، [راهنمای مشارکت](/.github/CONTRIBUTING.md) را مطالعه کنید.
 
 ## تشکر ویژه از
 
@@ -206,12 +206,12 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 **اگر این پروژه برای شما مفید است، می‌توانید به آن یک**:star2: بدهید
 
 <a href="https://www.buymeacoffee.com/MHSanaei" target="_blank">
-<img src="./media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
+<img src="../../media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
 </a>
 
 </br>
 <a href="https://nowpayments.io/donation/hsanaei" target="_blank" rel="noreferrer noopener">
-   <img src="./media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
+   <img src="../../media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
 </a>
 
 ## تاریخچه ستاره‌ها

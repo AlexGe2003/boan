@@ -13,7 +13,7 @@ import (
 
 const (
 	analystContextPath = ".github/claude/issue-analyst-context.md"
-	reviewPath         = "REVIEW.md"
+	reviewPath         = "docs/development/REVIEW.md"
 	ciWorkflowPath     = ".github/workflows/ci.yml"
 )
 

@@ -1,4 +1,13 @@
-[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
+[English](/README.md) | [فارسی](/docs/translations/README.fa_IR.md) | [العربية](/docs/translations/README.ar_EG.md) | [中文](/docs/translations/README.zh_CN.md) | [Español](/docs/translations/README.es_ES.md) | [Русский](/docs/translations/README.ru_RU.md) | [Türkçe](/docs/translations/README.tr_TR.md)
+
+## Repository navigation
+
+- [中文说明](docs/translations/README.zh_CN.md) · [其他语言](docs/translations/)
+- [客户界面代码](frontend/src/pages/subscriptions/) · [后端代码](internal/)
+- [部署脚本](deploy/) · [Docker 辅助脚本](deploy/docker/)
+- [开发指南](.github/CONTRIBUTING.md) · [开发记录](docs/development/)
+
+
 
 <p align="center">
   <picture>
@@ -183,7 +192,7 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 
 ## Contributing
 
-Contributions are welcome. Please read the [Contributing Guide](/CONTRIBUTING.md) before opening an issue or pull request.
+Contributions are welcome. Please read the [Contributing Guide](/.github/CONTRIBUTING.md) before opening an issue or pull request.
 
 ## A Special Thanks to
 

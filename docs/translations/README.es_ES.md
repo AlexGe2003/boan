@@ -1,9 +1,9 @@
-[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
+[English](/README.md) | [فارسی](/docs/translations/README.fa_IR.md) | [العربية](/docs/translations/README.ar_EG.md) | [中文](/docs/translations/README.zh_CN.md) | [Español](/docs/translations/README.es_ES.md) | [Русский](/docs/translations/README.ru_RU.md) | [Türkçe](/docs/translations/README.tr_TR.md)
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./media/3x-ui-dark.png">
-    <img alt="3x-ui" src="./media/3x-ui-light.png">
+    <source media="(prefers-color-scheme: dark)" srcset="../../media/3x-ui-dark.png">
+    <img alt="3x-ui" src="../../media/3x-ui-light.png">
   </picture>
 </p>
 
@@ -36,7 +36,7 @@ Construido como un fork mejorado del proyecto X-UI original, 3X-UI añade un sop
 - **Estadísticas de tráfico** — por entrada, por cliente y por salida, con controles de reinicio.
 - **Soporte multinodo** — gestiona y escala a través de varios servidores desde un único panel, incluida la clonación de entradas en otros nodos.
 - **Salida y enrutamiento** — WARP, NordVPN, PIA, reglas de enrutamiento personalizadas, balanceadores de carga con conmutación por error entre balanceadores y encadenamiento de proxy de salida. Las categorías geosite y geoip incluidas se pueden explorar directamente desde el editor de reglas.
-- **Servidor de suscripción integrado** — salida raw, JSON y Clash, seleccionada automáticamente según el User-Agent del cliente, además de [plantillas de página personalizables](docs/custom-subscription-templates.md).
+- **Servidor de suscripción integrado** — salida raw, JSON y Clash, seleccionada automáticamente según el User-Agent del cliente, además de [plantillas de página personalizables](../../docs/custom-subscription-templates.md).
 - **Bots de Telegram y Discord** para monitorización y gestión remotas.
 - **API RESTful** con tokens de alcance limitado y caducidad opcional, y una referencia de la API dentro del panel.
 - **Panel instalable (PWA)** — ancla 3X-UI al escritorio o a la pantalla de inicio del móvil.
@@ -50,23 +50,23 @@ Construido como un fork mejorado del proyecto X-UI original, 3X-UI añade un sop
 <summary>Haz clic para expandir</summary>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/01-overview-dark.png">
-  <img alt="Overview" src="./media/01-overview-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/01-overview-dark.png">
+  <img alt="Overview" src="../../media/01-overview-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/02-add-inbound-dark.png">
-  <img alt="Inbounds" src="./media/02-add-inbound-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/02-add-inbound-dark.png">
+  <img alt="Inbounds" src="../../media/02-add-inbound-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/03-add-client-dark.png">
-  <img alt="Add client" src="./media/03-add-client-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/03-add-client-dark.png">
+  <img alt="Add client" src="../../media/03-add-client-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/05-add-nodes-dark.png">
-  <img alt="Configs" src="./media/05-add-nodes-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/05-add-nodes-dark.png">
+  <img alt="Configs" src="../../media/05-add-nodes-light.png">
 </picture>
 
 </details>
@@ -100,10 +100,10 @@ Para la documentación completa —instalación, configuración, operación y la
 El instalador también se ejecuta de forma **no interactiva** para cloud-init.
 Define `XUI_NONINTERACTIVE=1` (o canalízalo sin TTY) y realizará la instalación de principio a fin sin
 ninguna pregunta, generando credenciales aleatorias y escribiéndolas en
-`/etc/x-ui/install-result.env`. Consulta [`deploy/`](deploy/) para:
+`/etc/x-ui/install-result.env`. Consulta [`deploy/`](../../deploy/) para:
 
-- [User-data de cloud-init](deploy/cloud-init/) — instalación desatendida en cualquier nube (Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle)
-- [Notas de Hetzner Cloud](deploy/marketplace/hetzner/) — despliegue basado en cloud-init en Hetzner
+- [User-data de cloud-init](../../deploy/cloud-init/) — instalación desatendida en cualquier nube (Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle)
+- [Notas de Hetzner Cloud](../../deploy/marketplace/hetzner/) — despliegue basado en cloud-init en Hetzner
 
 ## Plataformas Compatibles
 
@@ -183,7 +183,7 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 
 ## Contribuir
 
-Las contribuciones son bienvenidas. Por favor, lee la [Guía de contribución](/CONTRIBUTING.md) antes de abrir una incidencia (issue) o una solicitud de incorporación (pull request).
+Las contribuciones son bienvenidas. Por favor, lee la [Guía de contribución](/.github/CONTRIBUTING.md) antes de abrir una incidencia (issue) o una solicitud de incorporación (pull request).
 
 ## Un Agradecimiento Especial a
 
@@ -206,12 +206,12 @@ Herramientas e integraciones construidas por la comunidad alrededor de 3x-ui.
 **Si este proyecto te es útil, puedes darle una**:star2:
 
 <a href="https://www.buymeacoffee.com/MHSanaei" target="_blank">
-<img src="./media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
+<img src="../../media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
 </a>
 
 </br>
 <a href="https://nowpayments.io/donation/hsanaei" target="_blank" rel="noreferrer noopener">
-   <img src="./media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
+   <img src="../../media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
 </a>
 
 ## Historial de estrellas

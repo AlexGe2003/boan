@@ -1,9 +1,9 @@
-[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
+[English](/README.md) | [فارسی](/docs/translations/README.fa_IR.md) | [العربية](/docs/translations/README.ar_EG.md) | [中文](/docs/translations/README.zh_CN.md) | [Español](/docs/translations/README.es_ES.md) | [Русский](/docs/translations/README.ru_RU.md) | [Türkçe](/docs/translations/README.tr_TR.md)
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./media/3x-ui-dark.png">
-    <img alt="3x-ui" src="./media/3x-ui-light.png">
+    <source media="(prefers-color-scheme: dark)" srcset="../../media/3x-ui-dark.png">
+    <img alt="3x-ui" src="../../media/3x-ui-light.png">
   </picture>
 </p>
 
@@ -36,7 +36,7 @@
 - **Статистика трафика** — по каждому входящему, по каждому клиенту и по каждому исходящему, с возможностью сброса.
 - **Поддержка нескольких узлов** — управление и масштабирование на несколько серверов из одной панели, включая клонирование входящих на другие узлы.
 - **Исходящие подключения и маршрутизация** — WARP, NordVPN, PIA, пользовательские правила маршрутизации, балансировщики нагрузки с переключением между балансировщиками и цепочки исходящих прокси. Встроенные категории geosite и geoip можно просматривать прямо в редакторе правил.
-- **Встроенный сервер подписок** — вывод в форматах raw, JSON и Clash, выбираемый автоматически по User-Agent клиента, а также [пользовательские шаблоны страниц](docs/custom-subscription-templates.md).
+- **Встроенный сервер подписок** — вывод в форматах raw, JSON и Clash, выбираемый автоматически по User-Agent клиента, а также [пользовательские шаблоны страниц](../../docs/custom-subscription-templates.md).
 - **Telegram- и Discord-боты** для удалённого мониторинга и управления.
 - **RESTful API** с токенами ограниченной области действия и необязательным сроком действия, а также справочником API внутри панели.
 - **Устанавливаемая панель (PWA)** — закрепите 3X-UI на рабочем столе или главном экране телефона.
@@ -50,23 +50,23 @@
 <summary>Нажмите, чтобы развернуть</summary>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/01-overview-dark.png">
-  <img alt="Overview" src="./media/01-overview-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/01-overview-dark.png">
+  <img alt="Overview" src="../../media/01-overview-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/02-add-inbound-dark.png">
-  <img alt="Inbounds" src="./media/02-add-inbound-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/02-add-inbound-dark.png">
+  <img alt="Inbounds" src="../../media/02-add-inbound-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/03-add-client-dark.png">
-  <img alt="Add client" src="./media/03-add-client-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/03-add-client-dark.png">
+  <img alt="Add client" src="../../media/03-add-client-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/05-add-nodes-dark.png">
-  <img alt="Configs" src="./media/05-add-nodes-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/05-add-nodes-dark.png">
+  <img alt="Configs" src="../../media/05-add-nodes-light.png">
 </picture>
 
 </details>
@@ -100,10 +100,10 @@ bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.
 Установщик также работает в **неинтерактивном** режиме для cloud-init.
 Задайте `XUI_NONINTERACTIVE=1` (или передайте по конвейеру без TTY), и установка пройдёт от начала до конца
 без единого запроса: будут сгенерированы случайные учётные данные и записаны в
-`/etc/x-ui/install-result.env`. Смотрите [`deploy/`](deploy/) для:
+`/etc/x-ui/install-result.env`. Смотрите [`deploy/`](../../deploy/) для:
 
-- [Cloud-init user-data](deploy/cloud-init/) — автоматическая установка в любом облаке (Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle)
-- [Заметки по Hetzner Cloud](deploy/marketplace/hetzner/) — развёртывание на Hetzner на базе cloud-init
+- [Cloud-init user-data](../../deploy/cloud-init/) — автоматическая установка в любом облаке (Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle)
+- [Заметки по Hetzner Cloud](../../deploy/marketplace/hetzner/) — развёртывание на Hetzner на базе cloud-init
 
 ## Поддерживаемые платформы
 
@@ -183,7 +183,7 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 
 ## Участие в разработке
 
-Вклад приветствуется. Пожалуйста, прочитайте [руководство по участию](/CONTRIBUTING.md), прежде чем открывать issue или pull request.
+Вклад приветствуется. Пожалуйста, прочитайте [руководство по участию](/.github/CONTRIBUTING.md), прежде чем открывать issue или pull request.
 
 ## Особая благодарность
 
@@ -206,12 +206,12 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 **Если этот проект полезен для вас, вы можете поставить ему**:star2:
 
 <a href="https://www.buymeacoffee.com/MHSanaei" target="_blank">
-<img src="./media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
+<img src="../../media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
 </a>
 
 </br>
 <a href="https://nowpayments.io/donation/hsanaei" target="_blank" rel="noreferrer noopener">
-   <img src="./media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
+   <img src="../../media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
 </a>
 
 ## История звёзд

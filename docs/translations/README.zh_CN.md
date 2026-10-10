@@ -1,9 +1,9 @@
-[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
+[English](/README.md) | [فارسی](/docs/translations/README.fa_IR.md) | [العربية](/docs/translations/README.ar_EG.md) | [中文](/docs/translations/README.zh_CN.md) | [Español](/docs/translations/README.es_ES.md) | [Русский](/docs/translations/README.ru_RU.md) | [Türkçe](/docs/translations/README.tr_TR.md)
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./media/3x-ui-dark.png">
-    <img alt="3x-ui" src="./media/3x-ui-light.png">
+    <source media="(prefers-color-scheme: dark)" srcset="../../media/3x-ui-dark.png">
+    <img alt="3x-ui" src="../../media/3x-ui-light.png">
   </picture>
 </p>
 
@@ -36,7 +36,7 @@
 - **流量统计** — 按入站、按客户端、按出站统计，并支持重置控制。
 - **多节点支持** — 从单一面板管理并扩展到多台服务器，并可将入站克隆到其他节点。
 - **出站与路由** — WARP、NordVPN、PIA、自定义路由规则、支持均衡器间回退的负载均衡器，以及出站代理链。内置的 geosite 与 geoip 分类可直接在规则编辑器中浏览。
-- **内置订阅服务器** — 提供 raw、JSON 和 Clash 输出，可依据客户端 User-Agent 自动选择，并支持[自定义页面模板](docs/custom-subscription-templates.md)。
+- **内置订阅服务器** — 提供 raw、JSON 和 Clash 输出，可依据客户端 User-Agent 自动选择，并支持[自定义页面模板](../../docs/custom-subscription-templates.md)。
 - **Telegram 和 Discord 机器人**，用于远程监控和管理。
 - **RESTful API**，支持带作用域、可设置有效期的令牌，并提供面板内置的 API 参考文档。
 - **可安装面板 (PWA)** — 将 3X-UI 固定到桌面或手机主屏幕。
@@ -50,23 +50,23 @@
 <summary>点击展开</summary>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/01-overview-dark.png">
-  <img alt="Overview" src="./media/01-overview-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/01-overview-dark.png">
+  <img alt="Overview" src="../../media/01-overview-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/02-add-inbound-dark.png">
-  <img alt="Inbounds" src="./media/02-add-inbound-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/02-add-inbound-dark.png">
+  <img alt="Inbounds" src="../../media/02-add-inbound-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/03-add-client-dark.png">
-  <img alt="Add client" src="./media/03-add-client-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/03-add-client-dark.png">
+  <img alt="Add client" src="../../media/03-add-client-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/05-add-nodes-dark.png">
-  <img alt="Configs" src="./media/05-add-nodes-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/05-add-nodes-dark.png">
+  <img alt="Configs" src="../../media/05-add-nodes-light.png">
 </picture>
 
 </details>
@@ -81,7 +81,7 @@ curl -fL https://raw.githubusercontent.com/AlexGe2003/boan/main/deploy/install-s
 bash /tmp/boan-install.sh
 ```
 
-脚本从本仓库构建前后端，拒绝覆盖已有安装。首次网站仅监听本机，随机管理员凭据保存在 `/root/boan-login.txt`。访问方法、开放 HTTPS 和故障排查见[部署说明](docs/deployment.zh-CN.md)。
+脚本从本仓库构建前后端，拒绝覆盖已有安装。首次网站仅监听本机，随机管理员凭据保存在 `/root/boan-login.txt`。访问方法、开放 HTTPS 和故障排查见[部署说明](../../docs/deployment.zh-CN.md)。
 
 当前没有定制版预编译 Release；不要使用原版 3x-ui 的安装或更新命令。源码构建需要下载工具链和依赖，建议准备至少 4 GB 内存及足够磁盘空间；这不是运行时最低配置。
 
@@ -163,7 +163,7 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 
 ## 贡献
 
-欢迎贡献。在提交 issue 或 pull request 之前，请阅读[贡献指南](/CONTRIBUTING.md)。
+欢迎贡献。在提交 issue 或 pull request 之前，请阅读[贡献指南](/.github/CONTRIBUTING.md)。
 
 ## 特别感谢
 
@@ -186,12 +186,12 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 **如果这个项目对您有帮助，您可以给它一个**:star2:
 
 <a href="https://www.buymeacoffee.com/MHSanaei" target="_blank">
-<img src="./media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
+<img src="../../media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
 </a>
 
 </br>
 <a href="https://nowpayments.io/donation/hsanaei" target="_blank" rel="noreferrer noopener">
-   <img src="./media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
+   <img src="../../media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
 </a>
 
 ## 星标历史
@@ -212,4 +212,4 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 
 ### 独立域名与用户网站开关
 
-通过 `x-ui` 中的「域名与节点」「网站访问控制」「SSL 证书」分类（也可运行 `x-ui entry`）配置管理员、用户网站、订阅与节点地址，以及独立 SSL 证书和用户网站开关。参见[配置与恢复说明](docs/entrypoints.zh-CN.md)。
+通过 `x-ui` 中的「域名与节点」「网站访问控制」「SSL 证书」分类（也可运行 `x-ui entry`）配置管理员、用户网站、订阅与节点地址，以及独立 SSL 证书和用户网站开关。参见[配置与恢复说明](../../docs/entrypoints.zh-CN.md)。

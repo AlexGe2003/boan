@@ -58,7 +58,7 @@ PY
     mkdir -p build
     CGO_ENABLED=1 go build -trimpath -ldflags "-s -w -X github.com/mhsanaei/3x-ui/v3/internal/config.buildCommit=${built_commit:0:8}" -o build/x-ui .
     # Reuse the repository's Xray, GeoIP and protocol-runtime packaging.
-    if [[ "${5:-full}" == full ]]; then sh DockerInit.sh "$arch"; fi
+    if [[ "${5:-full}" == full ]]; then sh deploy/docker/DockerInit.sh "$arch"; fi
     build/x-ui entry -h > "$work/entry-help.txt" 2>&1 || [[ $? -eq 1 ]]
     grep -q -- '-block-domestic' "$work/entry-help.txt"
 }

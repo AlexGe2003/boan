@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Operational guide for AI agents working in this repo. Long-form human docs:
-`CONTRIBUTING.md` (setup, testing philosophy) and `frontend/README.md`.
+`.github/CONTRIBUTING.md` (setup, testing philosophy) and `frontend/README.md`.
 Read those before large changes. This file is the short, must-follow version.
 For a deep navigation map (request lifecycle, cron-job table, symptom → file
 index, layering rules), read `docs/architecture.md` on demand — do not guess
@@ -13,7 +13,7 @@ file locations when it can answer in one hop.
   imports `github.com/xtls/xray-core` for config types + gRPC stats/handler/router
   API. MTProto inbounds run a second managed child — the `mtg-multi` binary
   (a multi-secret mtg fork — NOT a Go dependency; its prebuilt release binary is
-  fetched at image/release build time by `DockerInit.sh` + `release.yml`,
+  fetched at image/release build time by `deploy/docker/DockerInit.sh` + `release.yml`,
   panel-side code in `internal/mtproto/`) — outside Xray, one process per inbound
   serving each
   client's FakeTLS secret via the fork's `[secrets]` section (plus per-client

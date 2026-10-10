@@ -288,7 +288,8 @@ node heartbeat every 5s, periodic traffic resets (hourly/daily/weekly/monthly). 
 ├── docs/                     # Markdown docs (this file, custom-subscription-templates.md, …)
 ├── media/                    # README images
 │
-├── Dockerfile / docker-compose.yml / DockerEntrypoint.sh / DockerInit.sh   # Container build/run
+├── Dockerfile / docker-compose.yml                         # Container build/run
+├── deploy/docker/                                          # Container helper scripts
 ├── install.sh / update.sh / x-ui.sh                        # VPS install + management CLI
 ├── x-ui.service.*  / x-ui.rc                               # systemd units (debian/rhel/arch) + rc script
 ├── windows_files/                                          # Windows service support
@@ -580,7 +581,7 @@ npm run build        # gen:api + vite build → outputs to internal/web/dist (th
 **Full local loop:** `cd frontend && npm run build` (refresh embedded `dist/`) → back to repo
 root → `go build ./...` / `go run main.go`.
 
-**Docker:** `docker compose up -d` (uses `Dockerfile` + `DockerEntrypoint.sh`).
+**Docker:** `docker compose up -d` (uses `Dockerfile` + `deploy/docker/DockerEntrypoint.sh`).
 
 **CI** (`.github/workflows/`): `ci.yml` (build/test/lint), `codeql.yml` (security scan),
 `smoke.yml` (smoke tests), `mutation.yml` (mutation testing), `docker.yml` + `release.yml`

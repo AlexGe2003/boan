@@ -158,7 +158,7 @@ jobs:
             LOW - a minor but legitimate issue
 
             THE RUBRIC
-            Read `REVIEW.md` at the repository root before the diff, and follow it:
+            Read `docs/development/REVIEW.md` before the diff, and follow it:
             what is HIGH in this repository, the checks to always run, what not to
             report, the verification bar, the volume cap and the shape of the
             comment. It also settles the one thing a finding never carries: the
@@ -173,7 +173,7 @@ jobs:
             outside it as the pre-merge baseline. Never build, install or execute
             anything from `pr-head/`. This job holds a write-scoped token, and
             running pull-request code with it is the workflow vulnerability
-            `REVIEW.md` calls blocking.
+            `docs/development/REVIEW.md` calls blocking.
 
             CI IS THE BUILD
             You cannot build or test here, but CI already ran on the head. Read
@@ -187,7 +187,7 @@ jobs:
             Trigger: ${{ github.event_name }} / ${{ github.event.action }}. On an
             `@claude review`, review in full even when an earlier comment of yours
             exists, focusing on the commits since the head it names, and apply the
-            rounds rule in `REVIEW.md`: after the first review of a pull request,
+            rounds rule in `docs/development/REVIEW.md`: after the first review of a pull request,
             MEDIUM and above only.
 
             THE COMMENT
@@ -197,7 +197,7 @@ jobs:
             `gh pr comment ${{ env.PR }} --repo ${{ env.REPO }}`. The summary opens
             with the tally, carries the line
             `Reviewed head: ${{ steps.pinned-sha.outputs.sha }}`, and ends with the
-            coverage list `REVIEW.md` asks for, whether or not you found anything.
+            coverage list `docs/development/REVIEW.md` asks for, whether or not you found anything.
       - name: Upload the run transcript
         if: always()
         env:

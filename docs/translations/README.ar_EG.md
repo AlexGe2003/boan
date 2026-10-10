@@ -1,9 +1,9 @@
-[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) | [Türkçe](/README.tr_TR.md)
+[English](/README.md) | [فارسی](/docs/translations/README.fa_IR.md) | [العربية](/docs/translations/README.ar_EG.md) | [中文](/docs/translations/README.zh_CN.md) | [Español](/docs/translations/README.es_ES.md) | [Русский](/docs/translations/README.ru_RU.md) | [Türkçe](/docs/translations/README.tr_TR.md)
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./media/3x-ui-dark.png">
-    <img alt="3x-ui" src="./media/3x-ui-light.png">
+    <source media="(prefers-color-scheme: dark)" srcset="../../media/3x-ui-dark.png">
+    <img alt="3x-ui" src="../../media/3x-ui-light.png">
   </picture>
 </p>
 
@@ -36,7 +36,7 @@
 - **إحصائيات الترافيك** — لكل اتصال وارد، ولكل عميل، ولكل اتصال صادر، مع عناصر تحكم لإعادة التعيين.
 - **دعم العقد المتعددة** — إدارة وتوسيع عبر عدة خوادم من لوحة واحدة، بما في ذلك استنساخ الاتصالات الواردة على عقد أخرى.
 - **الاتصالات الصادرة والتوجيه** — WARP، NordVPN، PIA، قواعد توجيه مخصصة، موازنات تحميل مع تجاوز الفشل بين الموازنات، وتسلسل الوكلاء الصادرة. ويمكن تصفّح فئات geosite و geoip المضمّنة مباشرةً من محرر القواعد.
-- **خادم اشتراك مدمج** — إخراج raw و JSON و Clash يُختار تلقائيًا حسب User-Agent الخاص بالعميل، مع [قوالب صفحات مخصصة](docs/custom-subscription-templates.md).
+- **خادم اشتراك مدمج** — إخراج raw و JSON و Clash يُختار تلقائيًا حسب User-Agent الخاص بالعميل، مع [قوالب صفحات مخصصة](../../docs/custom-subscription-templates.md).
 - **روبوتات تيليجرام وديسكورد** للمراقبة والإدارة عن بُعد.
 - **واجهة RESTful API** مع رموز وصول محدودة النطاق وقابلة لانتهاء الصلاحية، ومرجع API داخل اللوحة.
 - **لوحة قابلة للتثبيت (PWA)** — ثبّت 3X-UI على سطح المكتب أو شاشة هاتفك الرئيسية.
@@ -50,23 +50,23 @@
 <summary>انقر للتوسيع</summary>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/01-overview-dark.png">
-  <img alt="Overview" src="./media/01-overview-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/01-overview-dark.png">
+  <img alt="Overview" src="../../media/01-overview-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/02-add-inbound-dark.png">
-  <img alt="Inbounds" src="./media/02-add-inbound-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/02-add-inbound-dark.png">
+  <img alt="Inbounds" src="../../media/02-add-inbound-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/03-add-client-dark.png">
-  <img alt="Add client" src="./media/03-add-client-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/03-add-client-dark.png">
+  <img alt="Add client" src="../../media/03-add-client-light.png">
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./media/05-add-nodes-dark.png">
-  <img alt="Configs" src="./media/05-add-nodes-light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="../../media/05-add-nodes-dark.png">
+  <img alt="Configs" src="../../media/05-add-nodes-light.png">
 </picture>
 
 </details>
@@ -100,10 +100,10 @@ bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.
 يعمل المثبِّت أيضًا **بشكل غير تفاعلي** لـ cloud-init.
 عيّن `XUI_NONINTERACTIVE=1` (أو مرّره عبر أنبوب دون TTY) وسيتولى التثبيت من البداية إلى النهاية
 دون أي مطالبات، مُنشئًا بيانات اعتماد عشوائية وكاتبًا إياها في
-`/etc/x-ui/install-result.env`. راجع [`deploy/`](deploy/) لـ:
+`/etc/x-ui/install-result.env`. راجع [`deploy/`](../../deploy/) لـ:
 
-- [بيانات مستخدم cloud-init](deploy/cloud-init/) — تثبيت غير تفاعلي على أي سحابة (Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle)
-- [ملاحظات Hetzner Cloud](deploy/marketplace/hetzner/) — نشر يعتمد على cloud-init على Hetzner
+- [بيانات مستخدم cloud-init](../../deploy/cloud-init/) — تثبيت غير تفاعلي على أي سحابة (Hetzner/AWS/DO/Vultr/GCP/Azure/Oracle)
+- [ملاحظات Hetzner Cloud](../../deploy/marketplace/hetzner/) — نشر يعتمد على cloud-init على Hetzner
 
 ## المنصات المدعومة
 
@@ -183,7 +183,7 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 
 ## المساهمة
 
-المساهمات مرحب بها. يرجى قراءة [دليل المساهمة](/CONTRIBUTING.md) قبل فتح مشكلة (issue) أو طلب سحب (pull request).
+المساهمات مرحب بها. يرجى قراءة [دليل المساهمة](/.github/CONTRIBUTING.md) قبل فتح مشكلة (issue) أو طلب سحب (pull request).
 
 ## شكر خاص إلى
 
@@ -206,11 +206,11 @@ English · فارسی · العربية · 中文（简体） · 中文（繁體
 **إذا كان هذا المشروع مفيدًا لك، فقد ترغب في إعطائه**:star2:
 
 <a href="https://www.buymeacoffee.com/MHSanaei" target="_blank">
-<img src="./media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
+<img src="../../media/default-yellow.png" alt="Buy Me A Coffee" style="height: 70px !important;width: 277px !important;" >
 </a>
 </br>
 <a href="https://nowpayments.io/donation/hsanaei" target="_blank" rel="noreferrer noopener">
-   <img src="./media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
+   <img src="../../media/donation-button-black.svg" alt="Crypto donation button by NOWPayments">
 </a>
 
 ## سجل النجوم
