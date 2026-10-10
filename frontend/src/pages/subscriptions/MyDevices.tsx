@@ -1,13 +1,22 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Spin, Typography, Tag } from 'antd';
-import { LaptopOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Alert, Button, Skeleton, Typography, Tag } from 'antd';
+import {
+  LaptopOutlined,
+  ReloadOutlined,
+  GlobalOutlined,
+  SafetyCertificateOutlined,
+  ClusterOutlined,
+  AppstoreOutlined,
+  RightOutlined,
+} from '@ant-design/icons';
 import DeviceBindingTable from '@/components/clients/DeviceBindingTable';
 import SubscriptionClientSummary from '@/components/clients/SubscriptionClientSummary';
 import { ClientDeviceSlotsSchema, ClientConnectionReportSchema } from '@/generated/zod';
 import { HttpUtil, IntlUtil } from '@/utils';
 import '@/pages/clients/ClientDevices.css';
 import './CustomerUsage.css';
+import './MyDevices.css';
 
 export default function MyDevices({
   userId,
@@ -53,10 +62,18 @@ export default function MyDevices({
     if (!result.success) throw new Error(result.msg || label('unbindFailed'));
     await cache.invalidateQueries({ queryKey: ['my-devices', userId] });
   };
+  const report = connections.isError ? undefined : connections.data;
+  const sourceCount = report && report.status !== 'unavailable' ? report.onlineSourceCount : null;
+  const ipLimit = data?.onlineIpLimit ?? 0;
+  const sourceText =
+    sourceCount === null ? '—' : `${report?.status === 'partial' ? '≥ ' : ''}${sourceCount}`;
   return (
-    <section className="customer-card client-devices">
+    <section className="client-devices customer-devices">
       <div className="client-devices-toolbar">
-        <Typography.Title level={4}>{label('myDevices')}</Typography.Title>
+        <div>
+          <Typography.Title level={4}>连接概览</Typography.Title>
+          <p className="device-muted">查看在线来源与订阅客户端</p>
+        </div>
         <Button
           icon={<ReloadOutlined />}
           loading={query.isFetching || connections.isFetching}
@@ -68,19 +85,65 @@ export default function MyDevices({
           {t('refresh')}
         </Button>
       </div>
-      {query.isPending && <Spin aria-label={label('loading')} />}
+      {query.isPending && (
+        <Skeleton active title={false} paragraph={{ rows: 3 }} aria-label={label('loading')} />
+      )}
       {query.isError && (
         <Alert type="error" title={label('loadFailed')} description={query.error.message} />
       )}
       {data && (
         <>
           {(data.onlineIpLimit ?? 0) > 0 ? (
-            <Alert
-              type="info"
-              showIcon
-              title={`同时在线 IP 上限：${data.onlineIpLimit} 个`}
-              description="同一网络下多台设备可能共用一个 IP；切换网络后的旧来源约 2 分钟过期。超限来源会在扫描和同步后被阻止，并暂停约 1 分钟。"
-            />
+            <div className="device-overview-grid">
+              <section className="device-panel device-capacity">
+                <div className="device-eyebrow">
+                  <GlobalOutlined /> 同时在线来源
+                </div>
+                <div className="device-capacity-value">
+                  <strong>{sourceText}</strong>
+                  <span>/ {ipLimit}</span>
+                  <Tag
+                    color={
+                      sourceCount === null || sourceCount === 0
+                        ? undefined
+                        : report?.status === 'partial' || sourceCount > ipLimit
+                          ? 'orange'
+                          : 'green'
+                    }
+                  >
+                    {sourceCount === null
+                      ? '待获取'
+                      : sourceCount === 0
+                        ? '暂无连接'
+                        : sourceCount > ipLimit
+                          ? '超过上限'
+                          : report?.status === 'partial'
+                            ? '数据不完整'
+                            : '连接正常'}
+                  </Tag>
+                </div>
+                <div className="device-capacity-track" aria-hidden="true">
+                  {Array.from({ length: Math.min(ipLimit, 12) }, (_, i) => (
+                    <span
+                      key={i}
+                      className={sourceCount !== null && i < sourceCount ? 'is-used' : undefined}
+                    />
+                  ))}
+                </div>
+                <p className="device-muted">最多 {ipLimit} 个来源 IP 同时使用订阅</p>
+              </section>
+              <section className="device-panel device-client-panel">
+                <div className="device-eyebrow">
+                  <AppstoreOutlined /> 订阅客户端
+                </div>
+                <SubscriptionClientSummary client={data.subscriptionClient} customerView />
+                {!data.subscriptionClient && onSubscription && (
+                  <Button type="link" onClick={onSubscription}>
+                    前往订阅 <RightOutlined />
+                  </Button>
+                )}
+              </section>
+            </div>
           ) : (
             <>
               <div className="client-devices-summary">
@@ -115,7 +178,9 @@ export default function MyDevices({
               )}
             </>
           )}
-          <SubscriptionClientSummary client={data.subscriptionClient} customerView />
+          {ipLimit === 0 && (
+            <SubscriptionClientSummary client={data.subscriptionClient} customerView />
+          )}
           {(data.onlineIpLimit ?? 0) === 0 && data.limit > 0 && (
             <p className="customer-device-note">
               授权名额不等于真实设备数量；撤销授权只阻止后续订阅获取，已导入节点可能继续连接。
@@ -123,48 +188,87 @@ export default function MyDevices({
           )}
         </>
       )}
-      <section className="customer-online-sources">
-        <h3>
-          {label('onlineSources')} ·{' '}
-          {connections.data && !connections.isError && connections.data.status !== 'unavailable'
-            ? `${connections.data.status === 'partial' ? '至少 ' : ''}${connections.data.onlineSourceCount} 个`
-            : '未知'}
-        </h3>
-        <p>节点实际看到的来源地址，与获取订阅的来源地址不同；经过中转时可能显示中转地址。</p>
-        {connections.isPending && <Spin size="small" />}
-        {(connections.isError ||
-          (connections.data?.status !== 'ready' && !connections.isPending)) && (
-          <Alert type="warning" title="在线来源采集不完整" />
+      <section className="device-panel device-connections">
+        <div className="device-section-heading">
+          <div>
+            <h3>
+              {label('onlineSources')} ·{' '}
+              {sourceCount === null
+                ? '未知'
+                : `${report?.status === 'partial' ? '至少 ' : ''}${sourceCount} 个`}
+            </h3>
+            <p className="device-muted">当前账号在各节点上的连接记录</p>
+          </div>
+          {report && (
+            <span className="device-collected">
+              {label('collectedAt')}: {IntlUtil.formatDate(report.generatedAt)}
+            </span>
+          )}
+        </div>
+        {connections.isPending && <Skeleton active title={false} paragraph={{ rows: 2 }} />}
+        {(connections.isError || (report?.status !== 'ready' && !connections.isPending)) && (
+          <Alert
+            type="warning"
+            showIcon
+            title="在线来源采集不完整"
+            description="部分节点暂未返回数据，可稍后刷新重试。"
+          />
         )}
-        {!connections.isError && connections.data && (
-          <ul className="customer-source-list">
-            {connections.data.connections.map((entry, index) => (
+        {report && (
+          <ul className="device-connection-list">
+            {report.connections.map((entry, index) => (
               <li key={`${entry.nodeId}:${index}`}>
-                <Tag color="green">在线</Tag>
-                <span>{label('currentAccount')}</span>
-                <span>
-                  {label('sourceIP')}: {entry.ip}
-                </span>
-                <span>
-                  {label('node')}: {entry.nodeName}
-                </span>
-                <time>
-                  {label('lastActivity')}:{' '}
-                  {entry.lastSeen > 0 ? IntlUtil.formatDate(entry.lastSeen) : label('unknown')}
-                </time>
+                <div className="device-source-icon">
+                  <GlobalOutlined />
+                </div>
+                <div className="device-source-content">
+                  <div className="device-source-title">
+                    <strong>
+                      {label('sourceIP')}: {entry.ip}
+                    </strong>
+                    <Tag color="green">在线</Tag>
+                  </div>
+                  <div className="device-source-meta">
+                    <span>{label('currentAccount')}</span>
+                    <span>
+                      <ClusterOutlined /> {label('node')}: {entry.nodeName}
+                    </span>
+                  </div>
+                </div>
+                <div className="device-source-time">
+                  <span>{label('lastActivity')}</span>
+                  <time>
+                    {entry.lastSeen > 0 ? IntlUtil.formatDate(entry.lastSeen) : label('unknown')}
+                  </time>
+                </div>
               </li>
             ))}
           </ul>
         )}
-        {!connections.isError &&
-          connections.data?.status === 'ready' &&
-          connections.data.connections.length === 0 && <p>暂无在线来源</p>}
-        {!connections.isError && connections.data && (
-          <p>
-            {label('collectedAt')}: {IntlUtil.formatDate(connections.data.generatedAt)}
-          </p>
+        {report?.status === 'ready' && report.connections.length === 0 && (
+          <div className="device-offline-empty">
+            <GlobalOutlined />
+            <h4>暂无在线来源</h4>
+            <p>在客户端连接节点后，在线来源会显示在这里。</p>
+            {onSubscription && <Button onClick={onSubscription}>获取订阅</Button>}
+          </div>
         )}
       </section>
+      <details className="device-rules">
+        <summary>
+          <SafetyCertificateOutlined />
+          <span>连接与限制说明</span>
+          <RightOutlined />
+        </summary>
+        <div>
+          <p>
+            在线来源按 IP 统计，不代表真实设备数量。同一网络下多台设备可能共用一个
+            IP；经过中转时可能显示中转地址。
+          </p>
+          <p>切换网络后，旧来源约 2 分钟过期。超限来源会在扫描和同步后被阻止，并暂停约 1 分钟。</p>
+          <p>订阅客户端根据最近的订阅请求识别，不代表当前连接的软件。</p>
+        </div>
+      </details>
     </section>
   );
 }
