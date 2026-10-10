@@ -5,9 +5,9 @@ type Announcement struct {
 	Title     string `json:"title" gorm:"size:255;not null"`
 	Content   string `json:"content" gorm:"type:text;not null"`
 	Tag       string `json:"tag" gorm:"size:32;default:'notice'"`
-	Popup     bool   `json:"popup" gorm:"default:true"`
+	Popup     bool   `json:"popup"`
 	Pinned    bool   `json:"pinned" gorm:"default:false"`
-	Enabled   bool   `json:"enabled" gorm:"default:true"`
+	Enabled   bool   `json:"enabled"`
 	CreatedAt int64  `json:"createdAt"`
 	UpdatedAt int64  `json:"updatedAt"`
 }

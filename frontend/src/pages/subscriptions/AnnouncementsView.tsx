@@ -1,16 +1,5 @@
 import { useState, useMemo } from 'react';
-import {
-  Card,
-  Tag,
-  Input,
-  Radio,
-  Empty,
-  Button,
-  Badge,
-  Typography,
-  Space,
-  Skeleton,
-} from 'antd';
+import { Card, Tag, Input, Radio, Empty, Button, Badge, Typography, Space, Skeleton } from 'antd';
 import {
   SearchOutlined,
   PushpinFilled,
@@ -59,14 +48,12 @@ export default function AnnouncementsView({
   }, [announcements, readIds]);
 
   return (
-    <div className="announcements-container" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div
+      className="announcements-container"
+      style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+    >
       {/* Top action bar: filters and search */}
-      <Card
-        size="small"
-        bordered={false}
-        className="customer-card"
-        style={{ borderRadius: 12 }}
-      >
+      <Card size="small" bordered={false} className="customer-card" style={{ borderRadius: 12 }}>
         <div
           style={{
             display: 'flex',
@@ -83,20 +70,14 @@ export default function AnnouncementsView({
               buttonStyle="solid"
               size="middle"
             >
-              <Radio.Button value="all">
-                全部 ({announcements.length})
-              </Radio.Button>
+              <Radio.Button value="all">全部 ({announcements.length})</Radio.Button>
               <Radio.Button value="urgent">重要警报</Radio.Button>
               <Radio.Button value="notice">系统公告</Radio.Button>
               <Radio.Button value="maintenance">维护通知</Radio.Button>
               <Radio.Button value="feature">功能更新</Radio.Button>
             </Radio.Group>
             {unreadCount > 0 && (
-              <Button
-                size="small"
-                icon={<CheckCircleOutlined />}
-                onClick={onMarkAllRead}
-              >
+              <Button size="small" icon={<CheckCircleOutlined />} onClick={onMarkAllRead}>
                 全部标为已读 ({unreadCount})
               </Button>
             )}
@@ -137,13 +118,15 @@ export default function AnnouncementsView({
 
       {/* Empty state */}
       {!loading && filteredList.length === 0 && (
-        <Card bordered={false} className="customer-card" style={{ borderRadius: 12, padding: '40px 0' }}>
+        <Card
+          bordered={false}
+          className="customer-card"
+          style={{ borderRadius: 12, padding: '40px 0' }}
+        >
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description={
-              searchKeyword || tagFilter !== 'all'
-                ? '没有找到符合条件的公告'
-                : '暂无系统公告'
+              searchKeyword || tagFilter !== 'all' ? '没有找到符合条件的公告' : '暂无系统公告'
             }
           />
         </Card>
@@ -194,7 +177,9 @@ export default function AnnouncementsView({
                       gap: 8,
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <div
+                      style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}
+                    >
                       {!isRead ? (
                         <Badge dot status="processing" style={{ marginRight: 2 }} />
                       ) : null}

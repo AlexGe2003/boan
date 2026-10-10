@@ -55,7 +55,14 @@ export default function AnnouncementModal({
       open={open}
       onCancel={() => onAcknowledge(announcement.id)}
       footer={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
           {onViewAll ? (
             <Button
               type="link"
@@ -69,7 +76,9 @@ export default function AnnouncementModal({
             >
               查看所有历史公告
             </Button>
-          ) : <span />}
+          ) : (
+            <span />
+          )}
           <Button
             type="primary"
             icon={<CheckOutlined />}
@@ -92,7 +101,8 @@ export default function AnnouncementModal({
               width: 34,
               height: 34,
               borderRadius: 8,
-              background: 'linear-gradient(135deg, rgba(22, 119, 255, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%)',
+              background:
+                'linear-gradient(135deg, rgba(22, 119, 255, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%)',
               color: 'var(--ant-color-primary, #1677ff)',
               fontSize: 18,
             }}

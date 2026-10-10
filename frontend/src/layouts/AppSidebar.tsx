@@ -325,10 +325,22 @@ export default function AppSidebar() {
       items.map((tab) => {
         const Icon = iconByName[tab.icon];
         if (tab.key === '/settings') {
-          return { key: tab.key, icon: <Icon />, label: tab.title, title: tab.title, children: settingsChildren };
+          return {
+            key: tab.key,
+            icon: <Icon />,
+            label: tab.title,
+            title: tab.title,
+            children: settingsChildren,
+          };
         }
         if (tab.key === '/xray') {
-          return { key: tab.key, icon: <Icon />, label: tab.title, title: tab.title, children: xrayChildren };
+          return {
+            key: tab.key,
+            icon: <Icon />,
+            label: tab.title,
+            title: tab.title,
+            children: xrayChildren,
+          };
         }
         return { key: tab.key, icon: <Icon />, label: tab.title, title: tab.title };
       }),
@@ -433,7 +445,12 @@ export default function AppSidebar() {
         collapsed={railCollapsed}
       >
         <div className="sider-brand">
-          <Tooltip title={railCollapsed ? (pinned ? t('menu.unpinSidebar') : t('menu.pinSidebar')) : undefined} placement="right">
+          <Tooltip
+            title={
+              railCollapsed ? (pinned ? t('menu.unpinSidebar') : t('menu.pinSidebar')) : undefined
+            }
+            placement="right"
+          >
             <button
               type="button"
               className="sidebar-brand-btn"

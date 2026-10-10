@@ -55,7 +55,11 @@ export default function SubscriptionRouting({ client }: { client: SubscriptionCl
               <p>{mode.detail}</p>
             </div>
             {shadowrocket && (
-              <Button size="small" href={`shadowrocket://route/${mode.key}`} className="subscription-mode-switch-btn">
+              <Button
+                size="small"
+                href={`shadowrocket://route/${mode.key}`}
+                className="subscription-mode-switch-btn"
+              >
                 切换至此模式
               </Button>
             )}

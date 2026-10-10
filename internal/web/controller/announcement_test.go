@@ -93,3 +93,44 @@ func TestAnnouncementLifecycle(t *testing.T) {
 		t.Fatalf("expected empty list, got %d", len(emptyList))
 	}
 }
+
+func TestAnnouncementCreationRespectsVisibility(t *testing.T) {
+	engine := newRoleTestEngineWithUsers(t, true)
+	admin, err := (&panel.UserService{}).GetFirstAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := roleClient(t, engine, admin.Id)
+	for _, tc := range []struct {
+		name, body     string
+		enabled, popup bool
+	}{
+		{"defaults", `{"title":"Default","content":"Notice"}`, true, true},
+		{"hidden", `{"title":"Draft","content":"Unpublished","enabled":false,"popup":false}`, false, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			r, err := client.do(http.MethodPost, "/panel/api/announcements", tc.body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer r.Body.Close()
+			var result struct {
+				Success bool
+				Obj     model.Announcement
+			}
+			if err := json.NewDecoder(r.Body).Decode(&result); err != nil {
+				t.Fatal(err)
+			}
+			if !result.Success {
+				t.Fatal("announcement creation failed")
+			}
+			var stored model.Announcement
+			if err := database.GetDB().First(&stored, result.Obj.ID).Error; err != nil {
+				t.Fatal(err)
+			}
+			if stored.Enabled != tc.enabled || stored.Popup != tc.popup {
+				t.Fatalf("stored enabled/popup = %v/%v; want %v/%v", stored.Enabled, stored.Popup, tc.enabled, tc.popup)
+			}
+		})
+	}
+}

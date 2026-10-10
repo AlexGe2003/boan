@@ -789,7 +789,8 @@ a.sub-row-title:hover {
 }
 
 @keyframes sub-pulse-breath {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -883,4 +884,3 @@ a.sub-row-title:hover {
   color: var(--ant-color-text-tertiary);
   margin-top: 4px;
 }
-

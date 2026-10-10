@@ -1,8 +1,17 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, test, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, test, vi } from 'vitest';
+import { MemoryRouter } from 'react-router';
 import AnnouncementModal from '@/pages/subscriptions/AnnouncementModal';
 import AnnouncementsView from '@/pages/subscriptions/AnnouncementsView';
 import type { Announcement } from '@/models/announcement';
+import MySubscriptionsPage from '@/pages/subscriptions/MySubscriptionsPage';
+import { HttpUtil, Msg } from '@/utils';
+import { makeTestQueryClient, renderWithProviders } from './test-utils';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  localStorage.clear();
+});
 
 const mockAnnouncements: Announcement[] = [
   {
@@ -81,4 +90,51 @@ describe('AnnouncementsView', () => {
     fireEvent.click(markReadTag);
     expect(handleMarkRead).toHaveBeenCalledWith(2);
   });
+});
+
+test('keeps announcement read status separate when the signed-in account changes', async () => {
+  const queryClient = makeTestQueryClient();
+  const access = { userId: 7, role: 'user', roleKey: 'customer', pages: [] };
+  queryClient.setQueryData(['session', 'access'], access);
+  vi.spyOn(HttpUtil, 'get').mockImplementation(
+    async (url) => new Msg(true, '', url.includes('/announcements') ? mockAnnouncements : []),
+  );
+  localStorage.setItem('boan_read_announcements', '[1,2]');
+  renderWithProviders(
+    <MemoryRouter initialEntries={['/panel/my-subscriptions#announcements']}>
+      <MySubscriptionsPage />
+    </MemoryRouter>,
+    { queryClient },
+  );
+  fireEvent.click(await screen.findByRole('button', { name: /我知道了/ }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  expect(localStorage.getItem('boan_read_announcements:7')).toBe('[1]');
+  expect(screen.getAllByRole('button', { name: '刷新信息' })).toHaveLength(1);
+  expect(screen.queryByTitle('刷新公告')).toBeNull();
+
+  act(() => queryClient.setQueryData(['session', 'access'], { ...access, userId: 8 }));
+  expect(await screen.findByRole('dialog')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: /我知道了/ }));
+  expect(localStorage.getItem('boan_read_announcements:8')).toBe('[1]');
+});
+
+test('ignores malformed stored announcement read state', async () => {
+  const queryClient = makeTestQueryClient();
+  queryClient.setQueryData(['session', 'access'], {
+    userId: 9,
+    role: 'user',
+    roleKey: 'customer',
+    pages: [],
+  });
+  localStorage.setItem('boan_read_announcements:9', '{"unexpected":true}');
+  vi.spyOn(HttpUtil, 'get').mockImplementation(
+    async (url) => new Msg(true, '', url.includes('/announcements') ? mockAnnouncements : []),
+  );
+  renderWithProviders(
+    <MemoryRouter>
+      <MySubscriptionsPage />
+    </MemoryRouter>,
+    { queryClient },
+  );
+  expect(await screen.findByRole('dialog')).toBeTruthy();
 });

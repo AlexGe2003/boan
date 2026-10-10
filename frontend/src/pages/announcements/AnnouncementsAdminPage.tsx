@@ -39,18 +39,25 @@ export default function AnnouncementsAdminPage() {
   const [editingItem, setEditingItem] = useState<Announcement | null>(null);
   const [previewItem, setPreviewItem] = useState<Announcement | null>(null);
 
-  const { data: announcements = [], isLoading, refetch } = useQuery({
+  const {
+    data: announcements = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ['admin-announcements'],
     queryFn: async () => {
       const res = await HttpUtil.get<Announcement[]>('/panel/api/announcements?all=1');
-      return res.success ? (res.obj || []) : [];
+      return res.success ? res.obj || [] : [];
     },
   });
 
   const saveMutation = useMutation({
     mutationFn: async (values: Partial<Announcement>) => {
       if (editingItem) {
-        const res = await HttpUtil.put<Announcement>(`/panel/api/announcements/${editingItem.id}`, values);
+        const res = await HttpUtil.put<Announcement>(
+          `/panel/api/announcements/${editingItem.id}`,
+          values,
+        );
         if (!res.success) throw new Error(res.msg || '更新失败');
         return res;
       } else {
@@ -88,7 +95,11 @@ export default function AnnouncementsAdminPage() {
     },
   });
 
-  const toggleStatus = async (item: Announcement, field: 'enabled' | 'popup' | 'pinned', val: boolean) => {
+  const toggleStatus = async (
+    item: Announcement,
+    field: 'enabled' | 'popup' | 'pinned',
+    val: boolean,
+  ) => {
     try {
       const res = await HttpUtil.put(`/panel/api/announcements/${item.id}`, { [field]: val });
       if (res.success) {
@@ -152,7 +163,11 @@ export default function AnnouncementsAdminPage() {
               </Tag>
               <Text strong>{record.title}</Text>
             </Space>
-            <Text type="secondary" ellipsis={{ tooltip: record.content }} style={{ maxWidth: 360, fontSize: 12 }}>
+            <Text
+              type="secondary"
+              ellipsis={{ tooltip: record.content }}
+              style={{ maxWidth: 360, fontSize: 12 }}
+            >
               {record.content}
             </Text>
           </Space>

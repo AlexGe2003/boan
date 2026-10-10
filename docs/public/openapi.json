@@ -5860,6 +5860,10 @@
       "description": "Administrators manage plans and node groups. Customers can create and cancel their own orders. Amounts are integer CNY cents. Only administrators can confirm offline receipts and retry service delivery. Renewals preserve measured traffic. Failed delivery retains its fixed expiry target for idempotent retries."
     },
     {
+      "name": "Announcements",
+      "description": "System announcements, user notice popups, and maintenance broadcasts."
+    },
+    {
       "name": "Authentication",
       "description": "Two authentication modes are supported. UI sessions use a cookie set by the login endpoint. Programmatic clients (bots, scripts, remote panels) authenticate with a Bearer token taken from Settings → Security → API Token. Both work for every endpoint under /panel/api/*."
     },
@@ -7869,6 +7873,144 @@
         ],
         "summary": "Close an owned ticket.",
         "operationId": "post_panel_api_support_tickets_id_close",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/announcements": {
+      "get": {
+        "tags": [
+          "Announcements"
+        ],
+        "summary": "List system announcements for users and administrators.",
+        "operationId": "get_panel_api_announcements",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Announcements"
+        ],
+        "summary": "Create a new announcement (admin only).",
+        "operationId": "post_panel_api_announcements",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/announcements/{id}": {
+      "put": {
+        "tags": [
+          "Announcements"
+        ],
+        "summary": "Update an existing announcement (admin only).",
+        "operationId": "put_panel_api_announcements_id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Announcements"
+        ],
+        "summary": "Delete an announcement by id (admin only).",
+        "operationId": "delete_panel_api_announcements_id",
         "parameters": [
           {
             "name": "id",

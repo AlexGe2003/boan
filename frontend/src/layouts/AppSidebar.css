@@ -12,17 +12,25 @@
   height: 100dvh;
   align-self: flex-start;
   border-right: 1px solid var(--panel-border);
-  transition: width 0.2s cubic-bezier(0.2, 0, 0, 1), min-width 0.2s cubic-bezier(0.2, 0, 0, 1), max-width 0.2s cubic-bezier(0.2, 0, 0, 1), flex-basis 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
+  transition:
+    width 0.2s cubic-bezier(0.2, 0, 0, 1),
+    min-width 0.2s cubic-bezier(0.2, 0, 0, 1),
+    max-width 0.2s cubic-bezier(0.2, 0, 0, 1),
+    flex-basis 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
   will-change: width;
   contain: layout;
 }
 
 .ant-sidebar:not(.sidebar-pinned) > .ant-layout-sider:not(.ant-layout-sider-collapsed) {
-  box-shadow: 4px 0 20px -2px rgba(0, 0, 0, 0.08), 1px 0 3px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    4px 0 20px -2px rgba(0, 0, 0, 0.08),
+    1px 0 3px rgba(0, 0, 0, 0.04);
 }
 
 body.dark .ant-sidebar:not(.sidebar-pinned) > .ant-layout-sider:not(.ant-layout-sider-collapsed) {
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45), 1px 0 4px rgba(0, 0, 0, 0.25);
+  box-shadow:
+    4px 0 24px rgba(0, 0, 0, 0.45),
+    1px 0 4px rgba(0, 0, 0, 0.25);
 }
 
 .sider-nav .ant-menu-item .anticon,
@@ -399,7 +407,9 @@ body.dark .ant-drawer-body .drawer-menu .ant-menu-item-group-list {
   cursor: pointer;
   border-radius: 8px;
   color: inherit;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
 }
 .sidebar-brand-btn:hover {
   transform: scale(1.08);
@@ -434,7 +444,11 @@ body.dark .ant-drawer-body .drawer-menu .ant-menu-item-group-list {
   border-radius: 8px;
   margin: 4px 12px;
   width: calc(100% - 24px);
-  transition: width 0.2s cubic-bezier(0.2, 0, 0, 1), margin 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s ease, color 0.15s ease !important;
+  transition:
+    width 0.2s cubic-bezier(0.2, 0, 0, 1),
+    margin 0.2s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.15s ease,
+    color 0.15s ease !important;
 }
 
 .ant-layout-sider-collapsed .sider-nav .ant-menu-item-group-title {

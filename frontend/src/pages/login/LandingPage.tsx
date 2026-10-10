@@ -34,7 +34,9 @@ export default function LandingPage() {
           <a className="portal-button" href={login}>
             进入我的首页 <ArrowRightOutlined />
           </a>
-          <span className="landing-hint">面向海外合规业务部署 · 不提供大陆优化线路 · 不支持大陆用户</span>
+          <span className="landing-hint">
+            面向海外合规业务部署 · 不提供大陆优化线路 · 不支持大陆用户
+          </span>
         </div>
       </section>
       <footer className="landing-footer">

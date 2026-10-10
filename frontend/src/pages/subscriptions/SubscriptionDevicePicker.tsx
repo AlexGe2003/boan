@@ -37,8 +37,18 @@ const clients: Record<
   Exclude<SubscriptionClient, 'clash-mi' | 'karing'>,
   { name: string; detail: string; icon?: string; badge?: string }
 > = {
-  shadowrocket: { name: 'Shadowrocket', detail: '小火箭 · 规则分流', icon: shadowrocketIcon, badge: '推荐' },
-  'clash-verge': { name: 'Clash Verge Rev', detail: 'Clash / Mihomo 内核', icon: clashIcon, badge: '推荐' },
+  shadowrocket: {
+    name: 'Shadowrocket',
+    detail: '小火箭 · 规则分流',
+    icon: shadowrocketIcon,
+    badge: '推荐',
+  },
+  'clash-verge': {
+    name: 'Clash Verge Rev',
+    detail: 'Clash / Mihomo 内核',
+    icon: clashIcon,
+    badge: '推荐',
+  },
   v2rayn: { name: 'v2rayN', detail: 'VLESS / Xray 内核', icon: v2raynIcon },
   v2rayng: { name: 'v2rayNG', detail: 'VLESS / Xray 移动端', icon: v2rayngIcon, badge: '推荐' },
   universal: { name: '通用订阅', detail: '复制到兼容客户端' },
@@ -120,7 +130,7 @@ export default function SubscriptionDevicePicker({
   return (
     <div className="subscription-device-picker">
       {contextHolder}
-      
+
       <div className="subscription-section-header">
         <h2 className="subscription-step-title">
           <span className="step-num">1</span>
@@ -225,7 +235,9 @@ export default function SubscriptionDevicePicker({
                     type="text"
                     size="small"
                     aria-label="复制地址"
-                    icon={copied ? <CheckOutlined style={{ color: '#10b981' }} /> : <CopyOutlined />}
+                    icon={
+                      copied ? <CheckOutlined style={{ color: '#10b981' }} /> : <CopyOutlined />
+                    }
                     onClick={() => void copy()}
                   />
                 </Tooltip>
@@ -275,11 +287,16 @@ export default function SubscriptionDevicePicker({
 
         <div className="subscription-import-notice">
           {client === 'v2rayn' ? (
-            <span>💡 提示：v2rayN 用户请点击「复制链接」，在客户端「订阅分组」→「订阅分组设置」中添加并更新。</span>
+            <span>
+              💡 提示：v2rayN
+              用户请点击「复制链接」，在客户端「订阅分组」→「订阅分组设置」中添加并更新。
+            </span>
           ) : client === 'universal' ? (
             <span>💡 提示：通用订阅适用于各种自定义客户端，复制链接并在软件内导入即可。</span>
           ) : (
-            <span>💡 提示：请先在设备上安装对应客户端，再点击「一键导入」，或点击「复制链接」手动粘贴。</span>
+            <span>
+              💡 提示：请先在设备上安装对应客户端，再点击「一键导入」，或点击「复制链接」手动粘贴。
+            </span>
           )}
         </div>
       </div>

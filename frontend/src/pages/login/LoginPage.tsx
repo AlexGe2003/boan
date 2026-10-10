@@ -216,7 +216,10 @@ export default function LoginPage() {
               <GlobalOutlined className="geo-icon" aria-hidden="true" />
               <div className="geo-notice-text">
                 <strong>服务地域与免责声明：</strong>
-                <span>本服务仅面向海外合规用户，<strong>不保证大陆优化</strong>，<strong>不支持中国大陆及中国境内用户</strong>。</span>
+                <span>
+                  本服务仅面向海外合规用户，<strong>不保证大陆优化</strong>，
+                  <strong>不支持中国大陆及中国境内用户</strong>。
+                </span>
               </div>
             </div>
 
@@ -227,7 +230,11 @@ export default function LoginPage() {
                 className="login-alert"
                 title="登录服务连接失败"
                 description={initError}
-                action={<Button size="small" onClick={() => setInitAttempt((v) => v + 1)}>重试连接</Button>}
+                action={
+                  <Button size="small" onClick={() => setInitAttempt((v) => v + 1)}>
+                    重试连接
+                  </Button>
+                }
               />
             )}
 
@@ -452,11 +459,7 @@ export default function LoginPage() {
                 合规使用准则
               </button>
               <span className="footer-link-dot">·</span>
-              <button
-                type="button"
-                className="footer-link-btn"
-                onClick={() => setHelpOpen(true)}
-              >
+              <button type="button" className="footer-link-btn" onClick={() => setHelpOpen(true)}>
                 帮助中心
               </button>
             </div>
@@ -549,13 +552,16 @@ export default function LoginPage() {
           <div className="help-section-item">
             <h4>3. 双重验证码 (2FA) 无法验证？</h4>
             <p>
-              如开启了双重验证，请确保您手机的身份验证器应用（如 Google Authenticator、1Password）时间与网络时间精准同步。若遗失验证密钥，请联系管理员重置 2FA。
+              如开启了双重验证，请确保您手机的身份验证器应用（如 Google
+              Authenticator、1Password）时间与网络时间精准同步。若遗失验证密钥，请联系管理员重置
+              2FA。
             </p>
           </div>
           <div className="help-section-item">
             <h4>4. 登录显示「尝试次数过多」？</h4>
             <p>
-              为了保护账户免受暴力破解，多次输入错误密码后 IP 将被临时拦截。请等待数分钟后重试，或更换网络连接。
+              为了保护账户免受暴力破解，多次输入错误密码后 IP
+              将被临时拦截。请等待数分钟后重试，或更换网络连接。
             </p>
           </div>
         </div>
@@ -607,29 +613,46 @@ export default function LoginPage() {
                 children: (
                   <div className="agreement-tab-content">
                     <div className="agreement-clause highlight">
-                      <Tag color="red" className="agreement-tag">重要限制</Tag>
+                      <Tag color="red" className="agreement-tag">
+                        重要限制
+                      </Tag>
                       <h4>1. 适用对象与服务地域限制</h4>
                       <p>
-                        本平台服务严格限定仅面向海外合法注册实体及海外居民用户提供。我们郑重声明：<strong>本平台不支持中国大陆用户及中国境内用户，不向任何位于中国大陆境内的个人或机构提供网络代理、加速或相关服务</strong>。若您位于中国大陆境内，请勿注册、购买或尝试使用本服务。
+                        本平台服务严格限定仅面向海外合法注册实体及海外居民用户提供。我们郑重声明：
+                        <strong>
+                          本平台不支持中国大陆用户及中国境内用户，不向任何位于中国大陆境内的个人或机构提供网络代理、加速或相关服务
+                        </strong>
+                        。若您位于中国大陆境内，请勿注册、购买或尝试使用本服务。
                       </p>
                     </div>
                     <div className="agreement-clause highlight">
-                      <Tag color="orange" className="agreement-tag">免责声明</Tag>
+                      <Tag color="orange" className="agreement-tag">
+                        免责声明
+                      </Tag>
                       <h4>2. 国际通用网络 · 不保证大陆优化声明</h4>
                       <p>
-                        所有服务器与节点均依托海外标准国际骨干网（Global Internet Transit / BGP）进行路由传输。<strong>运营方明确不保证、不承诺任何针对中国大陆方向的网络路由优化、直连加速（包括但不限于 CN2、AS9929、CMI 等特种直连线路）或延迟保障</strong>。因跨境公网拥堵、国际光缆异常或大陆运营商网络策略调整引发的高延迟、丢包或无法连接，均属于公网不可控常态，运营方不承担质量担保责任，亦不构成退款支持理由。
+                        所有服务器与节点均依托海外标准国际骨干网（Global Internet Transit /
+                        BGP）进行路由传输。
+                        <strong>
+                          运营方明确不保证、不承诺任何针对中国大陆方向的网络路由优化、直连加速（包括但不限于
+                          CN2、AS9929、CMI 等特种直连线路）或延迟保障
+                        </strong>
+                        。因跨境公网拥堵、国际光缆异常或大陆运营商网络策略调整引发的高延迟、丢包或无法连接，均属于公网不可控常态，运营方不承担质量担保责任，亦不构成退款支持理由。
                       </p>
                     </div>
                     <div className="agreement-clause">
                       <h4>3. 账户权责与安全规范</h4>
                       <p>
-                        本账户仅供授权用户本人合法合规使用，严禁转借、倒卖、公开发布或多公网 IP 非法扩散。用户有责任妥善保管登录密码与双因素认证 (2FA) 密钥。因个人原因泄露凭证造成的流量与财产损失由用户自行承担。
+                        本账户仅供授权用户本人合法合规使用，严禁转借、倒卖、公开发布或多公网 IP
+                        非法扩散。用户有责任妥善保管登录密码与双因素认证 (2FA)
+                        密钥。因个人原因泄露凭证造成的流量与财产损失由用户自行承担。
                       </p>
                     </div>
                     <div className="agreement-clause">
                       <h4>4. 合理使用准则（AUP）</h4>
                       <p>
-                        用户承诺恪守当地及服务器所在区域法律法规。严禁利用本网络从事任何网络攻击（如 DDoS、端口扫描、漏洞利用）、垃圾邮件群发、网络欺诈或侵犯第三方合法知识产权之行为。违规者将被立即熔断并注销服务账户。
+                        用户承诺恪守当地及服务器所在区域法律法规。严禁利用本网络从事任何网络攻击（如
+                        DDoS、端口扫描、漏洞利用）、垃圾邮件群发、网络欺诈或侵犯第三方合法知识产权之行为。违规者将被立即熔断并注销服务账户。
                       </p>
                     </div>
                     <div className="agreement-clause">
@@ -647,10 +670,13 @@ export default function LoginPage() {
                 children: (
                   <div className="agreement-tab-content">
                     <div className="agreement-clause highlight">
-                      <Tag color="blue" className="agreement-tag">核心承诺</Tag>
+                      <Tag color="blue" className="agreement-tag">
+                        核心承诺
+                      </Tag>
                       <h4>1. 严格的零活动日志政策（Zero Traffic Logs）</h4>
                       <p>
-                        我们坚决捍卫用户隐私。节点与系统不记录、不解析、不跟踪、亦绝不出售任何用户的网页浏览历史、访问目标域名、请求数据载荷或 DNS 查询明细。
+                        我们坚决捍卫用户隐私。节点与系统不记录、不解析、不跟踪、亦绝不出售任何用户的网页浏览历史、访问目标域名、请求数据载荷或
+                        DNS 查询明细。
                       </p>
                     </div>
                     <div className="agreement-clause">
@@ -662,7 +688,8 @@ export default function LoginPage() {
                     <div className="agreement-clause">
                       <h4>3. 密码与认证安全</h4>
                       <p>
-                        所有用户密码均采用不可逆安全哈希加盐存储；全平台交互强制采用现代 TLS 1.3 传输加密；双因素认证遵循标准 TOTP 算法，全方位杜绝中间人劫持与撞库风险。
+                        所有用户密码均采用不可逆安全哈希加盐存储；全平台交互强制采用现代 TLS 1.3
+                        传输加密；双因素认证遵循标准 TOTP 算法，全方位杜绝中间人劫持与撞库风险。
                       </p>
                     </div>
                     <div className="agreement-clause">
@@ -680,17 +707,23 @@ export default function LoginPage() {
                 children: (
                   <div className="agreement-tab-content">
                     <div className="agreement-clause highlight">
-                      <Tag color="red" className="agreement-tag">合规准则</Tag>
+                      <Tag color="red" className="agreement-tag">
+                        合规准则
+                      </Tag>
                       <h4>1. 地域合规与防范声明</h4>
                       <p>
                         我们严格遵守相关法律法规，明确不支持中国大陆及中国境内用户，绝不为中国大陆境内用户提供规避网络监管、穿透访问等任何违规服务。用户须在完全符合其自身所在地法律法规及合规要求的前提下使用。
                       </p>
                     </div>
                     <div className="agreement-clause highlight">
-                      <Tag color="orange" className="agreement-tag">免责说明</Tag>
+                      <Tag color="orange" className="agreement-tag">
+                        免责说明
+                      </Tag>
                       <h4>2. 大陆网络连通性免责声明</h4>
                       <p>
-                        本服务面向全球公网互联，针对任何指向中国大陆方向发生的特定 IP 阻断、端口重置或不可达，平台不提供针对大陆方向的连通性可用性保证或人工换 IP 保障。
+                        本服务面向全球公网互联，针对任何指向中国大陆方向发生的特定 IP
+                        阻断、端口重置或不可达，平台不提供针对大陆方向的连通性可用性保证或人工换 IP
+                        保障。
                       </p>
                     </div>
                     <div className="agreement-clause">

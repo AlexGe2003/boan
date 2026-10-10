@@ -87,12 +87,16 @@ export default function SubLinksTab({ subUrl, subJsonUrl, subClashUrl, onCopy }:
               <Tooltip title={isCopied ? '已复制！' : t('copy')}>
                 <Button
                   type={isCopied ? 'default' : 'primary'}
-                  icon={isCopied ? <CheckOutlined style={{ color: '#10b981' }} /> : <CopyOutlined />}
+                  icon={
+                    isCopied ? <CheckOutlined style={{ color: '#10b981' }} /> : <CopyOutlined />
+                  }
                   onClick={() => handleCopy(row.kind, row.url)}
                   aria-label={t('copy')}
                   className={isCopied ? 'sub-btn-copied' : ''}
                 >
-                  {isCopied ? <span style={{ color: '#10b981', marginLeft: 4 }}>已复制</span> : null}
+                  {isCopied ? (
+                    <span style={{ color: '#10b981', marginLeft: 4 }}>已复制</span>
+                  ) : null}
                 </Button>
               </Tooltip>
               <SubQrButton value={row.url} label={row.title} onCopy={onCopy} />

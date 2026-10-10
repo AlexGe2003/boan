@@ -122,13 +122,17 @@ export default function SubAppsTab({ apps, initialPlatform, onOpen, onCopy }: Su
                 </Button>
                 <Tooltip title={isCopied ? '已复制！' : t('subscription.copySubscription')}>
                   <Button
-                    icon={isCopied ? <CheckOutlined style={{ color: '#10b981' }} /> : <CopyOutlined />}
+                    icon={
+                      isCopied ? <CheckOutlined style={{ color: '#10b981' }} /> : <CopyOutlined />
+                    }
                     className={isCopied ? 'sub-btn-copied' : ''}
                     aria-label={t('subscription.copySubscription')}
                     size="middle"
                     onClick={() => handleCopy(app)}
                   >
-                    {isCopied ? <span style={{ color: '#10b981', marginLeft: 4 }}>已复制</span> : null}
+                    {isCopied ? (
+                      <span style={{ color: '#10b981', marginLeft: 4 }}>已复制</span>
+                    ) : null}
                   </Button>
                 </Tooltip>
               </Space>
@@ -138,9 +142,7 @@ export default function SubAppsTab({ apps, initialPlatform, onOpen, onCopy }: Su
       </div>
       <div className="sub-apps-help-box">
         <InfoCircleOutlined className="sub-help-icon" />
-        <span>
-          💡 提示：如果点击「一键导入」未自动唤起应用，请先确认手机或电脑已安装对应客户端，或点击右侧复制链接后在客户端内手动添加。
-        </span>
+        <span>{t('subscription.importFallback')}</span>
       </div>
     </div>
   );

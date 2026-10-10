@@ -101,42 +101,48 @@ export default function MySubscriptionsPage() {
     : 'home';
   const [mobileNav, setMobileNav] = useState(false);
 
-  const READ_KEY = 'boan_read_announcements';
-  const [readIds, setReadIds] = useState<number[]>(() => {
+  const readKey = `boan_read_announcements:${access.userId}`;
+  const loadReadIds = (): number[] => {
     try {
-      const raw = localStorage.getItem(READ_KEY);
-      return raw ? JSON.parse(raw) : [];
+      const raw = localStorage.getItem(readKey);
+      const value: unknown = raw ? JSON.parse(raw) : [];
+      return Array.isArray(value) ? value.filter((id): id is number => Number.isInteger(id)) : [];
     } catch {
       return [];
     }
-  });
+  };
+  const [readState, setReadState] = useState(() => ({ key: readKey, ids: loadReadIds() }));
+  if (readState.key !== readKey) setReadState({ key: readKey, ids: loadReadIds() });
+  const readIds = useMemo(
+    () => (readState.key === readKey ? readState.ids : []),
+    [readState, readKey],
+  );
+  const saveReadIds = (ids: number[]) => {
+    setReadState({ key: readKey, ids });
+    try {
+      localStorage.setItem(readKey, JSON.stringify(ids));
+    } catch {
+      // Keep read state for this visit when browser storage is unavailable.
+    }
+  };
 
   const announcementsQuery = useQuery({
     queryKey: ['announcements'],
+    enabled: access.userId > 0,
     queryFn: async () => {
       const res = await HttpUtil.get<Announcement[]>('/panel/api/announcements');
-      return res.success ? (res.obj || []) : [];
+      return res.success ? res.obj || [] : [];
     },
     refetchInterval: 60000,
   });
 
   const markRead = (id: number) => {
-    setReadIds((prev) => {
-      if (prev.includes(id)) return prev;
-      const next = [...prev, id];
-      try {
-        localStorage.setItem(READ_KEY, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
+    if (!readIds.includes(id)) saveReadIds([...readIds, id]);
   };
 
   const markAllRead = () => {
     const allIds = (announcementsQuery.data || []).map((a) => a.id);
-    setReadIds(allIds);
-    try {
-      localStorage.setItem(READ_KEY, JSON.stringify(allIds));
-    } catch {}
+    saveReadIds(allIds);
   };
 
   const unreadCount = useMemo(() => {
@@ -183,8 +189,7 @@ export default function MySubscriptionsPage() {
   const refresh = () => {
     if (section === 'nodes')
       void queryClient.invalidateQueries({ queryKey: ['customer-node-status'] });
-    else if (section === 'announcements')
-      void announcementsQuery.refetch();
+    else if (section === 'announcements') void announcementsQuery.refetch();
     else if (['usage', 'records'].includes(section))
       void queryClient.invalidateQueries({ queryKey: ['my-usage', access.userId] });
     else if (section === 'devices') {
@@ -300,7 +305,6 @@ export default function MySubscriptionsPage() {
               <AnnouncementsView
                 announcements={announcementsQuery.data || []}
                 loading={announcementsQuery.isLoading}
-                onRefresh={() => void announcementsQuery.refetch()}
                 readIds={readIds}
                 onMarkRead={markRead}
                 onMarkAllRead={markAllRead}
@@ -376,10 +380,18 @@ export default function MySubscriptionsPage() {
                               <h2 className="dashboard-service-title">
                                 服务概览
                                 <Tag
-                                  color={available ? 'success' : expired || depleted ? 'error' : 'default'}
+                                  color={
+                                    available
+                                      ? 'success'
+                                      : expired || depleted
+                                        ? 'error'
+                                        : 'default'
+                                  }
                                   className="dashboard-status-tag"
                                 >
-                                  <span className={`status-dot ${available ? 'is-online' : 'is-offline'}`} />
+                                  <span
+                                    className={`status-dot ${available ? 'is-online' : 'is-offline'}`}
+                                  />
                                   {status}
                                 </Tag>
                               </h2>
@@ -393,11 +405,20 @@ export default function MySubscriptionsPage() {
                             <span className="dashboard-quota-label">剩余流量</span>
                             <div className="dashboard-quota-row">
                               <strong className="dashboard-quota-value">
-                                {item.total > 0 ? bytes(Math.max(0, item.total - item.used)) : '不限量'}
+                                {item.total > 0
+                                  ? bytes(Math.max(0, item.total - item.used))
+                                  : '不限量'}
                               </strong>
                               {item.total > 0 && (
                                 <span className="dashboard-quota-percent-tag">
-                                  {Math.max(0, Math.min(100, Math.round(((item.total - item.used) / item.total) * 100)))}% 可用
+                                  {Math.max(
+                                    0,
+                                    Math.min(
+                                      100,
+                                      Math.round(((item.total - item.used) / item.total) * 100),
+                                    ),
+                                  )}
+                                  % 可用
                                 </span>
                               )}
                             </div>
@@ -566,7 +587,9 @@ export default function MySubscriptionsPage() {
                                 </div>
                                 <div className="security-text">
                                   <strong>个人专属安全链接</strong>
-                                  <p>订阅链接包含您的节点配置与密钥，仅限本人使用，请勿分享或公开。</p>
+                                  <p>
+                                    订阅链接包含您的节点配置与密钥，仅限本人使用，请勿分享或公开。
+                                  </p>
                                 </div>
                               </div>
                               {access.roleKey === 'customer' && (
