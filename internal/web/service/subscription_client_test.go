@@ -94,3 +94,35 @@ func TestSubscriptionClientMetadataDeletedWithAccount(t *testing.T) {
 		t.Fatalf("metadata retained after delete: %d, %v", count, err)
 	}
 }
+
+func TestSubscriptionClientLocalRequestsDoNotOverwriteClient(t *testing.T) {
+	initClientHwidTestDB(t)
+	rec := seedHwidClient(t, 0)
+	svc := &ClientService{}
+	for _, source := range []string{"127.0.0.1", "::1", "::ffff:127.0.0.1", "0.0.0.0", "::"} {
+		if err := svc.RecordSubscriptionClient(rec.SubID, HwidRequest{UserAgent: "Shadowrocket/2.2", SourceIP: source}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var count int64
+	if err := database.GetDB().Model(&model.ClientSubscriptionFetch{}).Count(&count).Error; err != nil || count != 0 {
+		t.Fatalf("local requests recorded: %d, %v", count, err)
+	}
+	if err := svc.RecordSubscriptionClient(rec.SubID, HwidRequest{UserAgent: "v2rayNG/1.10", SourceIP: "192.0.2.42"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.RecordSubscriptionClient(rec.SubID, HwidRequest{UserAgent: "Shadowrocket/2.2", SourceIP: "127.0.0.1"}); err != nil {
+		t.Fatal(err)
+	}
+	slots, err := svc.DeviceSlots(rec.Email)
+	if err != nil || slots.SubscriptionClient.Name != "v2rayNG" {
+		t.Fatalf("local request overwrote client: %+v, %v", slots.SubscriptionClient, err)
+	}
+	if err := database.GetDB().Model(&model.ClientSubscriptionFetch{}).Where("client_id = ?", rec.Id).Update("last_ip", "127.0.0.1").Error; err != nil {
+		t.Fatal(err)
+	}
+	slots, err = svc.DeviceSlots(rec.Email)
+	if err != nil || slots.SubscriptionClient != nil {
+		t.Fatalf("old local test metadata exposed: %+v, %v", slots.SubscriptionClient, err)
+	}
+}

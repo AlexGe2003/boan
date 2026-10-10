@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"net/netip"
 	"regexp"
 	"strings"
 	"time"
@@ -52,6 +53,9 @@ func (s *ClientService) RecordSubscriptionClient(subID string, req HwidRequest) 
 		return nil
 	}
 	req = normalizeHwidRequest(req)
+	if ip, err := netip.ParseAddr(req.SourceIP); err == nil && (ip.Unmap().IsLoopback() || ip.IsUnspecified()) {
+		return nil
+	}
 	return database.GetDB().Transaction(func(tx *gorm.DB) error {
 		var clients []model.ClientRecord
 		if err := tx.Select("id").Where("sub_id = ? AND enable = ?", subID, true).Find(&clients).Error; err != nil {
@@ -79,6 +83,9 @@ func (s *ClientService) subscriptionClient(clientID int) (*SubscriptionClientInf
 			return nil, nil
 		}
 		return nil, err
+	}
+	if ip, err := netip.ParseAddr(row.LastIP); err == nil && (ip.Unmap().IsLoopback() || ip.IsUnspecified()) {
+		return nil, nil
 	}
 	name, version := IdentifySubscriptionClient(row.UserAgent)
 	return &SubscriptionClientInfo{Name: name, Version: version, UserAgent: row.UserAgent, LastSeen: row.LastSeen, LastIP: MaskDeviceIP(row.LastIP)}, nil

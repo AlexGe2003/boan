@@ -13,7 +13,7 @@ import {
 import DeviceBindingTable from '@/components/clients/DeviceBindingTable';
 import SubscriptionClientSummary from '@/components/clients/SubscriptionClientSummary';
 import { ClientDeviceSlotsSchema, ClientConnectionReportSchema } from '@/generated/zod';
-import { HttpUtil, IntlUtil } from '@/utils';
+import { HttpUtil } from '@/utils';
 import '@/pages/clients/ClientDevices.css';
 import './CustomerUsage.css';
 import './MyDevices.css';
@@ -63,17 +63,19 @@ export default function MyDevices({
     await cache.invalidateQueries({ queryKey: ['my-devices', userId] });
   };
   const report = connections.isError ? undefined : connections.data;
-  const sourceCount = report && report.status !== 'unavailable' ? report.onlineSourceCount : null;
+  const sourceCount =
+    report &&
+    (report.status === 'ready' || (report.status === 'partial' && report.onlineSourceCount > 0))
+      ? report.onlineSourceCount
+      : null;
   const ipLimit = data?.onlineIpLimit ?? 0;
+  const hasOnlineConnections = sourceCount !== null && sourceCount > 0;
   const sourceText =
     sourceCount === null ? '—' : `${report?.status === 'partial' ? '≥ ' : ''}${sourceCount}`;
   return (
     <section className="client-devices customer-devices">
       <div className="client-devices-toolbar">
-        <div>
-          <Typography.Title level={4}>连接概览</Typography.Title>
-          <p className="device-muted">查看在线来源与订阅客户端</p>
-        </div>
+        <p className="device-muted">{label('connectionAutoRefresh')}</p>
         <Button
           icon={<ReloadOutlined />}
           loading={query.isFetching || connections.isFetching}
@@ -97,7 +99,7 @@ export default function MyDevices({
             <div className="device-overview-grid">
               <section className="device-panel device-capacity">
                 <div className="device-eyebrow">
-                  <GlobalOutlined /> 同时在线来源
+                  <GlobalOutlined /> {label('connectionStatus')}
                 </div>
                 <div className="device-capacity-value">
                   <strong>{sourceText}</strong>
@@ -112,14 +114,14 @@ export default function MyDevices({
                     }
                   >
                     {sourceCount === null
-                      ? '待获取'
+                      ? label('waitingForData')
                       : sourceCount === 0
-                        ? '暂无连接'
+                        ? label('offline')
                         : sourceCount > ipLimit
-                          ? '超过上限'
+                          ? label('overLimit')
                           : report?.status === 'partial'
-                            ? '数据不完整'
-                            : '连接正常'}
+                            ? label('incomplete')
+                            : label('connected')}
                   </Tag>
                 </div>
                 <div className="device-capacity-track" aria-hidden="true">
@@ -130,16 +132,30 @@ export default function MyDevices({
                     />
                   ))}
                 </div>
-                <p className="device-muted">最多 {ipLimit} 个来源 IP 同时使用订阅</p>
+                <p className="device-muted">
+                  {t('pages.clients.devices.simultaneousSources', { count: ipLimit })}
+                </p>
               </section>
               <section className="device-panel device-client-panel">
                 <div className="device-eyebrow">
-                  <AppstoreOutlined /> 订阅客户端
+                  <AppstoreOutlined /> {label('clientSoftware')}
                 </div>
-                <SubscriptionClientSummary client={data.subscriptionClient} customerView />
-                {!data.subscriptionClient && onSubscription && (
+                {hasOnlineConnections ? (
+                  <>
+                    <SubscriptionClientSummary client={data.subscriptionClient} customerView />
+                    <p className="device-muted">{label('clientSoftwareHint')}</p>
+                  </>
+                ) : (
+                  <div className="device-client-empty">
+                    <LaptopOutlined />
+                    <strong>
+                      {label(sourceCount === null ? 'waitingForConnections' : 'noConnectedDevices')}
+                    </strong>
+                  </div>
+                )}
+                {hasOnlineConnections && !data.subscriptionClient?.name && onSubscription && (
                   <Button type="link" onClick={onSubscription}>
-                    前往订阅 <RightOutlined />
+                    {label('goToSubscription')} <RightOutlined />
                   </Button>
                 )}
               </section>
@@ -178,7 +194,7 @@ export default function MyDevices({
               )}
             </>
           )}
-          {ipLimit === 0 && (
+          {ipLimit === 0 && hasOnlineConnections && (
             <SubscriptionClientSummary client={data.subscriptionClient} customerView />
           )}
           {(data.onlineIpLimit ?? 0) === 0 && data.limit > 0 && (
@@ -191,18 +207,11 @@ export default function MyDevices({
       <section className="device-panel device-connections">
         <div className="device-section-heading">
           <div>
-            <h3>
-              {label('onlineSources')} ·{' '}
-              {sourceCount === null
-                ? '未知'
-                : `${report?.status === 'partial' ? '至少 ' : ''}${sourceCount} 个`}
-            </h3>
-            <p className="device-muted">当前账号在各节点上的连接记录</p>
+            <h3>{label('onlineConnections')}</h3>
+            <p className="device-muted">{label('onlineConnectionsHint')}</p>
           </div>
-          {report && (
-            <span className="device-collected">
-              {label('collectedAt')}: {IntlUtil.formatDate(report.generatedAt)}
-            </span>
+          {sourceCount !== null && sourceCount > 0 && (
+            <Tag>{t('pages.clients.devices.sourceCount', { count: sourceCount })}</Tag>
           )}
         </div>
         {connections.isPending && <Skeleton active title={false} paragraph={{ rows: 2 }} />}
@@ -210,11 +219,11 @@ export default function MyDevices({
           <Alert
             type="warning"
             showIcon
-            title="在线来源采集不完整"
-            description="部分节点暂未返回数据，可稍后刷新重试。"
+            title={label('incomplete')}
+            description={label('incompleteHint')}
           />
         )}
-        {report && (
+        {report && report.connections.length > 0 && (
           <ul className="device-connection-list">
             {report.connections.map((entry, index) => (
               <li key={`${entry.nodeId}:${index}`}>
@@ -226,7 +235,7 @@ export default function MyDevices({
                     <strong>
                       {label('sourceIP')}: {entry.ip}
                     </strong>
-                    <Tag color="green">在线</Tag>
+                    <Tag color="green">{label('online')}</Tag>
                   </div>
                   <div className="device-source-meta">
                     <span>{label('currentAccount')}</span>
@@ -235,12 +244,6 @@ export default function MyDevices({
                     </span>
                   </div>
                 </div>
-                <div className="device-source-time">
-                  <span>{label('lastActivity')}</span>
-                  <time>
-                    {entry.lastSeen > 0 ? IntlUtil.formatDate(entry.lastSeen) : label('unknown')}
-                  </time>
-                </div>
               </li>
             ))}
           </ul>
@@ -248,9 +251,11 @@ export default function MyDevices({
         {report?.status === 'ready' && report.connections.length === 0 && (
           <div className="device-offline-empty">
             <GlobalOutlined />
-            <h4>暂无在线来源</h4>
-            <p>在客户端连接节点后，在线来源会显示在这里。</p>
-            {onSubscription && <Button onClick={onSubscription}>获取订阅</Button>}
+            <h4>{label('noOnlineConnections')}</h4>
+            <p>{label('noOnlineConnectionsHint')}</p>
+            {onSubscription && (
+              <Button onClick={onSubscription}>{label('goToSubscription')}</Button>
+            )}
           </div>
         )}
       </section>

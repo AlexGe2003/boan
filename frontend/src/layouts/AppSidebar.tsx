@@ -329,15 +329,31 @@ export default function AppSidebar() {
   const groupedNavItems = useMemo<MenuProps['items']>(() => {
     if (access.role !== 'admin') return toMenuItems(navItems);
     const sections = [
-      { name: 'operations', keys: ['/', '/clients', '/plans', '/orders', '/support', '/groups'] },
-      { name: 'infrastructure', keys: ['/node-monitor', '/inbounds', '/hosts', '/nodes'] },
-      { name: 'advancedNetwork', keys: ['/node-groups', '/outbound', '/routing'] },
-      { name: 'system', keys: ['/settings', '/xray', '/api-docs'] },
+      {
+        name: 'operations',
+        label: t('adminOverview.operations'),
+        keys: ['/', '/clients', '/plans', '/orders', '/support', '/groups'],
+      },
+      {
+        name: 'infrastructure',
+        label: t('adminOverview.infrastructure'),
+        keys: ['/node-monitor', '/inbounds', '/hosts', '/nodes'],
+      },
+      {
+        name: 'advancedNetwork',
+        label: t('adminOverview.advancedNetwork'),
+        keys: ['/node-groups', '/outbound', '/routing'],
+      },
+      {
+        name: 'system',
+        label: t('adminOverview.system'),
+        keys: ['/settings', '/xray', '/api-docs'],
+      },
     ];
     return sections.map((section) => ({
       type: 'group',
       key: section.name,
-      label: t(`adminOverview.${section.name}`),
+      label: section.label,
       children: toMenuItems(
         section.keys.flatMap((key) => navItems.filter((item) => item.key === key)),
       ),

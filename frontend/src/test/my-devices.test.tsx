@@ -77,7 +77,7 @@ it('shows full slots, confirms an unbind and refreshes the released slot', async
   expect(within(connection).getByText('Node: 主节点')).toBeTruthy();
   expect(within(connection).queryByText('Phone 1')).toBeNull();
   expect(post.mock.calls.some(([url]) => String(url).includes('/setting/'))).toBe(false);
-  expect(screen.getByRole('heading', { name: 'Online source IPs · 1 个' })).toBeTruthy();
+  expect(screen.getByRole('heading', { name: 'Online connections' })).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Unbind Phone 1' }));
   expect(remove).not.toHaveBeenCalled();
   const first = await screen.findByRole('tooltip');
@@ -187,4 +187,64 @@ it('keeps native platform clients and hides Clash Mi and Karing', () => {
       'https://example.com/sub/private' + (client === 'Shadowrocket' ? '?flag=shadowrocket' : ''),
     );
   }
+});
+
+it('hides historical software when no devices are connected', async () => {
+  const slots = {
+    ...fullSlots(),
+    devices: [],
+    registered: 0,
+    onlineIpLimit: 3,
+    subscriptionClient: {
+      name: 'Shadowrocket',
+      version: '2.2',
+      userAgent: 'Shadowrocket/2.2',
+      lastIp: '127.0.*.1',
+      lastSeen: 1700000000000,
+    },
+  };
+  vi.spyOn(HttpUtil, 'get').mockImplementation(
+    async (url) =>
+      new Msg(
+        true,
+        '',
+        url === '/panel/api/clients/myDevices'
+          ? slots
+          : {
+              ...onlineSources(),
+              connections: [],
+              onlineSourceCount: 0,
+            },
+      ),
+  );
+  show();
+  await screen.findByText('No devices connected');
+  expect(screen.queryByText('Shadowrocket')).toBeNull();
+  expect(await screen.findByText('No active connections')).toBeTruthy();
+  expect(screen.queryByText(/Shadowrocket 2/)).toBeNull();
+  expect(screen.queryByText(/127\.0/)).toBeNull();
+  expect(screen.queryByText(/Collected at/)).toBeNull();
+  expect(screen.queryByText(/Latest subscription client/)).toBeNull();
+});
+
+it.each(['unavailable', 'partial'])('does not label %s node reports as offline', async (status) => {
+  vi.spyOn(HttpUtil, 'get').mockImplementation(
+    async (url) =>
+      new Msg(
+        true,
+        '',
+        url === '/panel/api/clients/myDevices'
+          ? { ...fullSlots(), onlineIpLimit: 3 }
+          : {
+              ...onlineSources(),
+              status,
+              connections: [],
+              onlineSourceCount: 0,
+            },
+      ),
+  );
+  show();
+  await screen.findByText('Connection data is incomplete');
+  expect(screen.queryByText('No active connections')).toBeNull();
+  expect(screen.queryByText('Offline')).toBeNull();
 });

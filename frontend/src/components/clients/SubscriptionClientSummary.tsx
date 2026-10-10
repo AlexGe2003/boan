@@ -17,8 +17,10 @@ export default function SubscriptionClientSummary({
   const clientName = client?.name || label('unknownClient');
   return (
     <section className="subscription-client-summary">
-      <Typography.Title level={5}>{label('subscriptionClient')}</Typography.Title>
-      {client ? (
+      <Typography.Title level={5}>
+        {label(customerView ? 'clientSoftware' : 'subscriptionClient')}
+      </Typography.Title>
+      {client && (!customerView || client.name) ? (
         <>
           {customerView ? (
             <Typography.Text strong>{clientName}</Typography.Text>
@@ -37,13 +39,13 @@ export default function SubscriptionClientSummary({
           )}
         </>
       ) : (
-        <Typography.Text type="secondary">{label('noSubscriptionClient')}</Typography.Text>
+        <Typography.Text type="secondary">
+          {label(customerView ? 'clientNotIdentified' : 'noSubscriptionClient')}
+        </Typography.Text>
       )}
-      <Typography.Text type="secondary">
-        {customerView
-          ? '根据最近的订阅请求识别，不代表当前连接的软件。'
-          : label('subscriptionClientNote')}
-      </Typography.Text>
+      {!customerView && (
+        <Typography.Text type="secondary">{label('subscriptionClientNote')}</Typography.Text>
+      )}
     </section>
   );
 }

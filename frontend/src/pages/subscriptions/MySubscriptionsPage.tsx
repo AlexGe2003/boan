@@ -122,7 +122,7 @@ export default function MySubscriptionsPage() {
     home: '查看你的服务、流量与连接配置',
     subscription: '选择平台与客户端，快速导入订阅',
     usage: '了解流量趋势与节点用量',
-    devices: '查看在线连接与订阅客户端',
+    devices: '查看连接状态与使用的客户端',
     records: '查看已采集的流量明细',
     nodes: '查看已分配节点与配置状态',
   }[section];

@@ -70,7 +70,7 @@ func TestSubscriptionSourceIPTrustedProxyChain(t *testing.T) {
 	for _, tc := range []struct{ real, forwarded, want string }{
 		{"192.0.2.41", "203.0.113.99", "192.0.2.41"},
 		{"", "203.0.113.99, 192.0.2.42, 127.0.0.1", "192.0.2.42"},
-		{"", "invalid", "127.0.0.1"},
+		{"", "invalid", "192.0.2.42"},
 		{"::ffff:192.0.2.43", "", "192.0.2.43"},
 	} {
 		req := httptest.NewRequest(http.MethodGet, "/sub/"+subID, nil)
