@@ -15,25 +15,21 @@ import {
   theme,
 } from 'antd';
 import {
+  ArrowRightOutlined,
+  CheckCircleFilled,
+  FileProtectOutlined,
+  GlobalOutlined,
   KeyOutlined,
   LockOutlined,
-  UserOutlined,
-  SafetyCertificateOutlined,
   QuestionCircleOutlined,
-  CheckCircleFilled,
+  SafetyCertificateOutlined,
+  UserOutlined,
   WarningFilled,
-  CloudServerOutlined,
-  ThunderboltFilled,
-  GlobalOutlined,
-  LaptopOutlined,
-  FileProtectOutlined,
 } from '@ant-design/icons';
-
 import { FormProvider, useForm } from 'react-hook-form';
 import { HttpUtil } from '@/utils';
 import { FormField, rhfZodValidate } from '@/components/form/rhf';
 import { setMessageInstance } from '@/utils/messageBus';
-import earthImage from '@/assets/portal/earth-night.png';
 import { LoginFormSchema, TwoFactorCodeSchema, type LoginFormValues } from '@/schemas/login';
 import './LoginPage.css';
 
@@ -119,7 +115,7 @@ export default function LoginPage() {
   const onSubmit = useCallback(
     async (values: LoginForm) => {
       if (!agreedTerms) {
-        messageApi.warning('请先阅读并同意《用户服务协议》与《隐私保护政策》');
+        messageApi.warning('请先阅读并同意《用户服务协议》与《合规及免责声明》');
         return;
       }
       setSubmitting(true);
@@ -169,56 +165,31 @@ export default function LoginPage() {
       theme={{
         algorithm: theme.darkAlgorithm,
         token: {
-          colorPrimary: '#3b82f6',
-          borderRadius: 10,
-          colorBgContainer: 'rgba(255, 255, 255, 0.04)',
+          colorPrimary: '#2563eb',
+          borderRadius: 8,
+          colorBgContainer: 'rgba(255, 255, 255, 0.03)',
           colorBorder: 'rgba(255, 255, 255, 0.12)',
         },
       }}
     >
       {messageContextHolder}
-      <main className="login-app">
-        <section className="login-panel">
-          <div className="login-brand-bar">
-            <div className="portal-brand">
-              <div className="brand-logo-icon">
-                <SafetyCertificateOutlined />
-              </div>
-              <div className="brand-text-wrap">
-                <strong className="brand-title">Boan</strong>
-                <span className="brand-badge">用户中心</span>
-              </div>
-              <div className="login-service-status-pill">
-                <span className="service-status-dot" />
-                <span>服务正常</span>
-              </div>
+      <main className="login-page-root">
+        <div className="login-container">
+          <header className="login-brand-header">
+            <div className="brand-badge-box">
+              <SafetyCertificateOutlined className="brand-badge-icon" />
             </div>
-            <div className="login-top-actions">
-              <button
-                type="button"
-                className="login-help-trigger"
-                onClick={() => setHelpOpen(true)}
-                aria-label="查看登录帮助"
-              >
-                <QuestionCircleOutlined />
-                <span>登录帮助</span>
-              </button>
-            </div>
-          </div>
+            <h1 className="brand-heading">Boan Console</h1>
+            <p className="brand-subheading">网络基础设施与订阅访问控制台</p>
+          </header>
 
           <div className="login-card">
-            <div className="login-header">
-              <h1>欢迎登录</h1>
-              <p className="login-subtitle">请使用您的专属账户登录控制台或订阅中心</p>
-            </div>
-
             <div className="login-geo-notice" role="note">
               <GlobalOutlined className="geo-icon" aria-hidden="true" />
               <div className="geo-notice-text">
-                <strong>服务地域与免责声明：</strong>
+                <strong>服务地域限制：</strong>
                 <span>
-                  本服务仅面向海外合规用户，<strong>不保证大陆优化</strong>，
-                  <strong>不支持中国大陆及中国境内用户</strong>。
+                  本服务仅面向海外合规业务部署，明确不设中国大陆直连优化线路，不支持中国大陆境内用户。
                 </span>
               </div>
             </div>
@@ -251,7 +222,7 @@ export default function LoginPage() {
 
             {!fetched ? (
               <div className="login-loading-wrap">
-                <Spin tip="正在安全加载登录服务…" />
+                <Spin description="正在安全加载登录服务…" />
               </div>
             ) : (
               <FormProvider {...methods}>
@@ -385,13 +356,13 @@ export default function LoginPage() {
                             openAgreement('compliance');
                           }}
                         >
-                          《合规及免责声明》
+                          《合规声明》
                         </button>
                       </span>
                     </Checkbox>
                   </div>
 
-                  <Form.Item className="submit-row" style={{ marginTop: 20, marginBottom: 8 }}>
+                  <Form.Item className="submit-row">
                     <Button
                       type="primary"
                       htmlType="submit"
@@ -406,13 +377,13 @@ export default function LoginPage() {
                           <CheckCircleFilled style={{ marginRight: 6 }} /> 登录成功，正在进入…
                         </span>
                       ) : submitting ? (
-                        '正在验证身份…'
+                        '正在验证凭据…'
                       ) : (
-                        '立即登录'
+                        '登录控制台'
                       )}
                     </Button>
                     <div className="login-keyboard-hint">
-                      <span>Enter ↵ 快速提交登录</span>
+                      <span>按 Enter ↵ 提交登录</span>
                     </div>
                   </Form.Item>
                 </Form>
@@ -420,15 +391,13 @@ export default function LoginPage() {
             )}
 
             <div className="login-card-footer">
-              <span className="login-footer-security">
-                <SafetyCertificateOutlined /> 传输全程高强度 TLS 加密防护
-              </span>
               <button
                 type="button"
                 className="login-direct-sub-hint"
                 onClick={() => setHelpOpen(true)}
               >
-                持有订阅链接？查看订阅中心导入指引 →
+                <span>持有订阅链接？查看客户端导入说明</span>
+                <ArrowRightOutlined className="sub-hint-arrow" />
               </button>
             </div>
           </div>
@@ -440,7 +409,7 @@ export default function LoginPage() {
                 className="footer-link-btn"
                 onClick={() => openAgreement('terms')}
               >
-                用户服务协议
+                服务协议
               </button>
               <span className="footer-link-dot">·</span>
               <button
@@ -448,7 +417,7 @@ export default function LoginPage() {
                 className="footer-link-btn"
                 onClick={() => openAgreement('privacy')}
               >
-                隐私保护政策
+                隐私政策
               </button>
               <span className="footer-link-dot">·</span>
               <button
@@ -456,67 +425,22 @@ export default function LoginPage() {
                 className="footer-link-btn"
                 onClick={() => openAgreement('compliance')}
               >
-                合规使用准则
+                合规声明
               </button>
               <span className="footer-link-dot">·</span>
               <button type="button" className="footer-link-btn" onClick={() => setHelpOpen(true)}>
-                帮助中心
+                帮助说明
               </button>
+            </div>
+            <div className="login-footer-security">
+              <SafetyCertificateOutlined />
+              <span>TLS 加密通信 · 零活动日志保障</span>
             </div>
             <span className="login-footer-copy">
               © {new Date().getFullYear()} Boan Network. All rights reserved.
             </span>
           </footer>
-        </section>
-
-        <section
-          className="login-visual"
-          style={{ backgroundImage: `url(${earthImage})` }}
-          aria-label="全球网络服务背景"
-        >
-          <div className="login-visual-overlay">
-            <div className="login-showcase-card">
-              <div className="showcase-badge">
-                <GlobalOutlined />
-                <span>海外网络基础设施 · 标准国际路由</span>
-              </div>
-              <h2>全球海外节点，标准互联</h2>
-              <p>
-                面向海外业务与全球云端服务部署。标准海外国际通用路由（明确不设大陆直连与优化线路），透明流量与极简配置，保障国际公网连通性。
-              </p>
-
-              <div className="showcase-feature-grid">
-                <div className="showcase-feature-item">
-                  <div className="showcase-icon-box">
-                    <ThunderboltFilled />
-                  </div>
-                  <div>
-                    <strong>标准国际 Transit</strong>
-                    <small>海外通用 BGP 接入 · 不提供大陆方向路由优化</small>
-                  </div>
-                </div>
-                <div className="showcase-feature-item">
-                  <div className="showcase-icon-box">
-                    <LaptopOutlined />
-                  </div>
-                  <div>
-                    <strong>多平台客户端支持</strong>
-                    <small>iOS / Android / Windows / macOS 一键导入</small>
-                  </div>
-                </div>
-                <div className="showcase-feature-item">
-                  <div className="showcase-icon-box">
-                    <CloudServerOutlined />
-                  </div>
-                  <div>
-                    <strong>透明流量与设备管理</strong>
-                    <small>实时统计、在线状态清晰可查</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        </div>
       </main>
 
       <Modal
@@ -529,7 +453,7 @@ export default function LoginPage() {
         }
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <QuestionCircleOutlined style={{ color: '#3b82f6' }} />
+            <QuestionCircleOutlined style={{ color: '#2563eb' }} />
             <span>账户登录与常见问题帮助</span>
           </div>
         }
@@ -584,7 +508,7 @@ export default function LoginPage() {
                   setAgreedTerms(true);
                   localStorage.setItem(AGREED_TERMS_KEY, 'true');
                   setAgreementOpen(false);
-                  messageApi.success('已同意《用户服务协议》与《隐私保护政策》');
+                  messageApi.success('已同意《用户服务协议》与《合规及免责声明》');
                 }}
               >
                 我已阅读并同意
@@ -594,7 +518,7 @@ export default function LoginPage() {
         }
         title={
           <div className="agreement-dialog-title">
-            <FileProtectOutlined style={{ color: '#3b82f6', fontSize: 18 }} />
+            <FileProtectOutlined style={{ color: '#2563eb', fontSize: 18 }} />
             <span>Boan Network 服务条款与隐私政策说明</span>
           </div>
         }
