@@ -179,21 +179,22 @@ export default function IndexPage() {
 
         <Layout className="content-shell">
           <Layout.Content className="content-area">
-            {panelRole === 'admin' && <AdminOverview />}
             {panelRole === 'admin' && (
-              <Button
-                className="admin-runtime-toggle"
-                onClick={() => setShowRuntime((value) => !value)}
-                aria-expanded={showRuntime}
-              >
-                <span>{t('adminOverview.runtime')}</span>
-                <span>
-                  {fetched
-                    ? `Xray · ${t(status.xray.state === 'running' ? 'pages.index.xrayStatusRunning' : status.xray.state === 'error' ? 'pages.index.xrayStatusError' : 'pages.index.xrayStatusStop')}`
-                    : t('loading')}{' '}
-                  {showRuntime ? '−' : '+'}
-                </span>
-              </Button>
+              <AdminOverview
+                status={status}
+                statusLoading={!fetched}
+                onRefreshAll={refresh}
+                onRestartXray={restartXray}
+                onStopXray={stopXray}
+                onOpenConfig={openConfig}
+                onOpenLogs={() => setLogsOpen(true)}
+                onOpenBackup={() => setBackupOpen(true)}
+                onOpenPanelUpdate={() => setPanelUpdateOpen(true)}
+                onOpenSystemHistory={() => setSysHistoryOpen(true)}
+                onOpenXrayMetrics={() => setXrayMetricsOpen(true)}
+                onToggleRuntime={() => setShowRuntime((v) => !v)}
+                showRuntime={showRuntime}
+              />
             )}
             {(panelRole !== 'admin' || showRuntime) && (
               <Spin

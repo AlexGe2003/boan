@@ -1,3 +1,28 @@
+.xray-page .header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.xray-page .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.xray-page .header-info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.xray-page .header-info .ant-alert {
+  margin: 0;
+  border-radius: 8px;
+}
+
 .xray-page .restart-icon {
   font-size: 16px;
   cursor: pointer;
@@ -13,9 +38,10 @@
 
 .xray-page .advanced-meta h4 {
   margin: 0 0 4px;
+  font-weight: 600;
 }
 
 .xray-page .advanced-meta p {
   margin: 0;
-  opacity: 0.7;
+  color: var(--ant-color-text-secondary);
 }

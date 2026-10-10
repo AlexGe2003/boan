@@ -1,5 +1,31 @@
 .settings-page .conf-alert {
-  margin-bottom: 10px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+.settings-page .header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-page .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-page .header-info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.settings-page .header-info .ant-alert {
+  margin: 0;
+  border-radius: 8px;
 }
 
 .ldap-no-inbounds {
