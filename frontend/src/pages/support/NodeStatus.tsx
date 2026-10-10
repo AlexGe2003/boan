@@ -1,15 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Alert,
-  Button,
-  Input,
-  Space,
-  Spin,
-  Table,
-  Tag,
-  Typography,
-} from 'antd';
+import { Alert, Button, Input, Space, Spin, Table, Tag, Typography } from 'antd';
 import {
   SearchOutlined,
   ReloadOutlined,
@@ -33,10 +24,21 @@ interface RegionInfo {
 
 function parseRegion(nodeName: string): RegionInfo {
   const n = (nodeName || '').toLowerCase();
-  if (n.includes('香港') || /(^|[^a-z])hk(?=[^a-z]|$)/.test(n) || n.includes('hong kong') || n.includes('hongkong')) {
+  if (
+    n.includes('香港') ||
+    /(^|[^a-z])hk(?=[^a-z]|$)/.test(n) ||
+    n.includes('hong kong') ||
+    n.includes('hongkong')
+  ) {
     return { flag: '🇭🇰', name: '香港' };
   }
-  if (n.includes('日本') || /(^|[^a-z])jp(?=[^a-z]|$)/.test(n) || n.includes('japan') || n.includes('tokyo') || n.includes('osaka')) {
+  if (
+    n.includes('日本') ||
+    /(^|[^a-z])jp(?=[^a-z]|$)/.test(n) ||
+    n.includes('japan') ||
+    n.includes('tokyo') ||
+    n.includes('osaka')
+  ) {
     return { flag: '🇯🇵', name: '日本' };
   }
   if (n.includes('新加坡') || /(^|[^a-z])sg(?=[^a-z]|$)/.test(n) || n.includes('singapore')) {
@@ -54,25 +56,55 @@ function parseRegion(nodeName: string): RegionInfo {
   ) {
     return { flag: '🇺🇸', name: '美国' };
   }
-  if (n.includes('台湾') || /(^|[^a-z])tw(?=[^a-z]|$)/.test(n) || n.includes('taiwan') || n.includes('taipei')) {
+  if (
+    n.includes('台湾') ||
+    /(^|[^a-z])tw(?=[^a-z]|$)/.test(n) ||
+    n.includes('taiwan') ||
+    n.includes('taipei')
+  ) {
     return { flag: '🇹🇼', name: '台湾' };
   }
-  if (n.includes('韩国') || /(^|[^a-z])kr(?=[^a-z]|$)/.test(n) || n.includes('korea') || n.includes('seoul')) {
+  if (
+    n.includes('韩国') ||
+    /(^|[^a-z])kr(?=[^a-z]|$)/.test(n) ||
+    n.includes('korea') ||
+    n.includes('seoul')
+  ) {
     return { flag: '🇰🇷', name: '韩国' };
   }
-  if (n.includes('英国') || /(^|[^a-z])uk(?=[^a-z]|$)/.test(n) || /(^|[^a-z])gb(?=[^a-z]|$)/.test(n) || n.includes('london')) {
+  if (
+    n.includes('英国') ||
+    /(^|[^a-z])uk(?=[^a-z]|$)/.test(n) ||
+    /(^|[^a-z])gb(?=[^a-z]|$)/.test(n) ||
+    n.includes('london')
+  ) {
     return { flag: '🇬🇧', name: '英国' };
   }
-  if (n.includes('德国') || /(^|[^a-z])de(?=[^a-z]|$)/.test(n) || n.includes('germany') || n.includes('frankfurt')) {
+  if (
+    n.includes('德国') ||
+    /(^|[^a-z])de(?=[^a-z]|$)/.test(n) ||
+    n.includes('germany') ||
+    n.includes('frankfurt')
+  ) {
     return { flag: '🇩🇪', name: '德国' };
   }
   if (n.includes('加拿大') || /(^|[^a-z])ca(?=[^a-z]|$)/.test(n) || n.includes('canada')) {
     return { flag: '🇨🇦', name: '加拿大' };
   }
-  if (n.includes('澳大利亚') || /(^|[^a-z])au(?=[^a-z]|$)/.test(n) || n.includes('australia') || n.includes('sydney')) {
+  if (
+    n.includes('澳大利亚') ||
+    /(^|[^a-z])au(?=[^a-z]|$)/.test(n) ||
+    n.includes('australia') ||
+    n.includes('sydney')
+  ) {
     return { flag: '🇦🇺', name: '澳大利亚' };
   }
-  if (n.includes('法国') || /(^|[^a-z])fr(?=[^a-z]|$)/.test(n) || n.includes('france') || n.includes('paris')) {
+  if (
+    n.includes('法国') ||
+    /(^|[^a-z])fr(?=[^a-z]|$)/.test(n) ||
+    n.includes('france') ||
+    n.includes('paris')
+  ) {
     return { flag: '🇫🇷', name: '法国' };
   }
   if (n.includes('荷兰') || /(^|[^a-z])nl(?=[^a-z]|$)/.test(n) || n.includes('netherlands')) {
@@ -107,7 +139,11 @@ function getProtocolTag(protocol: string) {
     color = 'gold';
     label = 'WireGuard';
   }
-  return <Tag color={color} style={{ borderRadius: 6, fontWeight: 600 }}>{label}</Tag>;
+  return (
+    <Tag color={color} style={{ borderRadius: 6, fontWeight: 600 }}>
+      {label}
+    </Tag>
+  );
 }
 
 export default function NodeStatus() {
@@ -131,7 +167,7 @@ export default function NodeStatus() {
       (n) =>
         n.name.toLowerCase().includes(term) ||
         n.protocol.toLowerCase().includes(term) ||
-        parseRegion(n.name).name.includes(term)
+        parseRegion(n.name).name.includes(term),
     );
   }, [query.data, search]);
 
@@ -150,7 +186,10 @@ export default function NodeStatus() {
             我的节点
           </Typography.Title>
           <span className="node-status-updated">
-            {query.dataUpdatedAt > 0 ? `更新于 ${new Date(query.dataUpdatedAt).toLocaleTimeString('zh-CN')}` : '正在获取配置'} · 每 30 秒自动更新
+            {query.dataUpdatedAt > 0
+              ? `更新于 ${new Date(query.dataUpdatedAt).toLocaleTimeString('zh-CN')}`
+              : '正在获取配置'}{' '}
+            · 每 30 秒自动更新
           </span>
         </div>
         <Space wrap>
@@ -173,7 +212,8 @@ export default function NodeStatus() {
           <div className="node-stat-card" key={label}>
             <span className="node-stat-label">{label}</span>
             <span className="node-stat-value">
-              {query.data ? count : '—'}<span className="node-stat-unit">个</span>
+              {query.data ? count : '—'}
+              <span className="node-stat-unit">个</span>
             </span>
           </div>
         ))}
@@ -218,25 +258,28 @@ export default function NodeStatus() {
         <Table<Node>
           className="node-status-table"
           size="middle"
-          scroll={{ x: 580 }}
+          scroll={{ x: 320 }}
           pagination={{ hideOnSinglePage: true, pageSize: 20, showSizeChanger: false }}
           rowKey="id"
           dataSource={filteredNodes}
           loading={query.isLoading}
-          locale={{ emptyText: search.trim() ? '没有符合筛选条件的节点' : '尚未分配节点，请联系管理员' }}
+          locale={{
+            emptyText: search.trim() ? '没有符合筛选条件的节点' : '尚未分配节点，请联系管理员',
+          }}
           columns={[
             {
               title: '地区 / 节点',
               dataIndex: 'name',
-              render: (name: string) => {
+              render: (name: string, node: Node) => {
                 const reg = parseRegion(name);
                 return (
                   <div className="node-list-name">
-                    <span className="node-list-flag">{reg.flag}</span>
+                    <GlobalOutlined className="node-list-flag" />
                     <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                       <Typography.Text strong>{name}</Typography.Text>
                       <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                        {reg.name} 节点
+                        <span className="node-region-label">{reg.name} 节点</span>
+                        <span className="node-mobile-protocol">{node.protocol.toUpperCase()}</span>
                       </Typography.Text>
                     </div>
                   </div>
@@ -245,13 +288,15 @@ export default function NodeStatus() {
             },
             {
               title: '传输协议',
-              width: 140,
+              className: 'node-protocol-column',
+              responsive: ['sm'],
+              width: 110,
               dataIndex: 'protocol',
               render: (protocol: string) => getProtocolTag(protocol),
             },
             {
               title: '节点状态',
-              width: 140,
+              width: 110,
               dataIndex: 'status',
               render: (v: string) => {
                 const isEnabled = v === '已启用';
@@ -261,7 +306,7 @@ export default function NodeStatus() {
                     icon={isEnabled ? <CheckCircleOutlined /> : <GlobalOutlined />}
                     style={{ borderRadius: 6 }}
                   >
-                    {isEnabled ? '已启用' : v || '未启用'}
+                    {isEnabled ? '配置已启用' : v || '未启用'}
                   </Tag>
                 );
               },

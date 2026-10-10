@@ -2,9 +2,11 @@ package panel
 
 import (
 	"errors"
+
+	"gorm.io/gorm"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"gorm.io/gorm"
 )
 
 // MigrateLegacyAccount requires an explicit identity mapping and transfers any

@@ -31,12 +31,10 @@ it('accepts legacy exports and keeps credentials and settings intact', () => {
   expect(() => parseClientBackup('{"success":true}')).toThrow();
 });
 it('previews import and lists every skipped reason without overwriting data', async () => {
-  const restore = vi
-    .fn()
-    .mockResolvedValue({
-      created: 0,
-      skipped: [{ email: 'demo-backup', reason: 'email already in use' }],
-    });
+  const restore = vi.fn().mockResolvedValue({
+    created: 0,
+    skipped: [{ email: 'demo-backup', reason: 'email already in use' }],
+  });
   renderWithProviders(<ClientImportModal onClose={vi.fn()} onImport={restore} />);
   fireEvent.change(screen.getByLabelText('用户备份 JSON'), { target: { value: backup } });
   await screen.findByText(/待导入 1 条/);

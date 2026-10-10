@@ -226,3 +226,57 @@ func TestMyDevicesRejectUnlinkedAndSharedSubscriptions(t *testing.T) {
 		}
 	}
 }
+
+func TestMyAuthorizationCreationAndOwnership(t *testing.T) {
+	engine := newRoleTestEngineWithUsers(t, true)
+	db := database.GetDB()
+	admin, err := (&panel.UserService{}).GetFirstAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	clients := []model.ClientRecord{{Email: "grant-own", SubID: "grant-own-sub", Enable: true, LimitHwid: 3}, {Email: "grant-other", SubID: "grant-other-sub", Enable: true, LimitHwid: 3}}
+	users := make([]model.User, 2)
+	for i := range clients {
+		if err := db.Create(&clients[i]).Error; err != nil {
+			t.Fatal(err)
+		}
+		users[i] = model.User{Username: fmt.Sprintf("grant-user-%d", i), Password: admin.Password, Role: model.RoleCustomer, ClientID: &clients[i].Id}
+		if err := db.Create(&users[i]).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+	own := roleClient(t, engine, users[0].Id)
+	resp, err := own.do(http.MethodPost, "/panel/api/clients/myDevices", `{"name":"Windows","email":"grant-other","clientId":999}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var result struct {
+		Success bool
+		Obj     struct {
+			ID    int
+			Token string
+		}
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if !result.Success || len(result.Obj.Token) != 64 {
+		t.Fatal("authorization issue failed", resp.StatusCode)
+	}
+	var row model.ClientHwid
+	if err := db.First(&row, result.Obj.ID).Error; err != nil || row.SubID != clients[0].SubID {
+		t.Fatal("authorization ownership", err)
+	}
+	other := roleClient(t, engine, users[1].Id)
+	resp, err = other.do(http.MethodPost, "/panel/api/clients/myDevices", fmt.Sprintf(`{"name":"stolen","replaceId":%d}`, row.Id))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var denied struct{ Success bool }
+	json.NewDecoder(resp.Body).Decode(&denied)
+	resp.Body.Close()
+	if denied.Success {
+		t.Fatal("cross account rotation")
+	}
+}

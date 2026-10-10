@@ -1,10 +1,12 @@
 package sub
 
 import (
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
@@ -48,7 +50,7 @@ func TestWebsiteRegionBlockDoesNotBlockSubscriptionHTTP(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req := httptest.NewRequest("GET", "http://sub.example.com"+path+"geo-sub", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://sub.example.com"+path+"geo-sub", nil)
 	req.RemoteAddr = "1.2.3.4:54321"
 	result := httptest.NewRecorder()
 	router.ServeHTTP(result, req)

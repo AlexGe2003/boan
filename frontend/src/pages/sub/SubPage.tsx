@@ -133,7 +133,16 @@ export default function SubPage() {
         key: 'apps',
         icon: <AppstoreOutlined />,
         label: t('subscription.tabApps'),
-        children: <SubAppsTab apps={apps} initialPlatform={initialPlatform} onOpen={open} onCopy={copy} subUrl={subUrl} subClashUrl={subClashUrl} />,
+        children: (
+          <SubAppsTab
+            apps={apps}
+            initialPlatform={initialPlatform}
+            onOpen={open}
+            onCopy={copy}
+            subUrl={subUrl}
+            subClashUrl={subClashUrl}
+          />
+        ),
       });
     }
     return items.sort((a, b) => (a.key === 'apps' ? -1 : b.key === 'apps' ? 1 : 0));

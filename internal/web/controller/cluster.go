@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/cluster"
@@ -45,6 +46,7 @@ func registerCluster(g *gin.RouterGroup) {
 	})
 	g.POST("/rpc", clusterRPC)
 }
+
 func initializeCluster(c *gin.Context) {
 	var req struct {
 		URL          string `json:"url"`
@@ -107,6 +109,7 @@ func initializeCluster(c *gin.Context) {
 	}
 	jsonMsg(c, "启用统一登录", err)
 }
+
 func transferCluster(c *gin.Context) {
 	var req struct {
 		Target string `json:"target"`
@@ -137,6 +140,7 @@ func transferCluster(c *gin.Context) {
 	afterClusterChange()
 	jsonMsg(c, "切换主站", err)
 }
+
 func clusterRPC(c *gin.Context) {
 	scope, ok := c.Get("api_token_scope")
 	if !ok || scope != model.ApiScopeAdmin {
@@ -232,6 +236,7 @@ func finalizeClusterSnapshot(ctx context.Context, s *cluster.State) error {
 	}
 	return nil
 }
+
 func afterClusterChange() {
 	s, err := cluster.Load(database.GetDB())
 	if err != nil || s == nil || s.Self == s.Primary {

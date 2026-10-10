@@ -61,7 +61,10 @@
   position: relative;
   overflow: hidden;
   border-radius: 12px;
-  transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.25s ease,
+    border-color 0.2s ease;
 }
 
 .admin-overview-tile::before {
@@ -158,8 +161,16 @@
 }
 
 .admin-shortcut-card:hover {
-  background: color-mix(in srgb, var(--ant-color-primary, #1e5eff) 8%, var(--ant-color-fill-quaternary, transparent));
-  border-color: color-mix(in srgb, var(--ant-color-primary, #1e5eff) 40%, var(--ant-color-border-secondary, transparent));
+  background: color-mix(
+    in srgb,
+    var(--ant-color-primary, #1e5eff) 8%,
+    var(--ant-color-fill-quaternary, transparent)
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--ant-color-primary, #1e5eff) 40%,
+    var(--ant-color-border-secondary, transparent)
+  );
   transform: translateY(-1px);
 }
 
@@ -176,7 +187,9 @@
 .admin-shortcut-card .shortcut-arrow {
   font-size: 12px;
   color: var(--ant-color-text-tertiary);
-  transition: transform 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    color 0.2s;
 }
 
 .admin-shortcut-card:hover .shortcut-arrow {
@@ -296,4 +309,6 @@
   border-color: var(--ant-color-primary, #1e5eff);
 }
 
-.admin-overview-work { grid-template-columns: minmax(0, 1fr); }
+.admin-overview-work {
+  grid-template-columns: minmax(0, 1fr);
+}

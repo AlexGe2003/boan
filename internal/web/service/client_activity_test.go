@@ -16,7 +16,7 @@ func TestClientActivityExactIdentityAndWindow(t *testing.T) {
 	}
 	path := filepath.Join(t.TempDir(), "access.log")
 	text := line(now.Add(-time.Minute), "www.youtube.com", "alice") + line(now.Add(-3*time.Minute), "api.github.com", "alice") + line(now.Add(-4*time.Minute), "www.youtube.com", "alice") + line(now.Add(-time.Minute), "private.example", "alice2") + line(now.Add(-25*time.Hour), "old.example", "alice") + line(now.Add(time.Minute), "future.example", "alice") + "malformed email: alice\n"
-	if err := os.WriteFile(path, []byte(text), 0600); err != nil {
+	if err := os.WriteFile(path, []byte(text), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	r, err := readClientActivity(path, "alice", 24, now)
@@ -56,7 +56,7 @@ func TestActivityBoundedTailAndDisabled(t *testing.T) {
 	}
 	path := filepath.Join(t.TempDir(), "access.log")
 	text := strings.Repeat("x", 9<<20) + "\n" + fmt.Sprintf("%s accepted tcp:github.com:443 email: alice [boan-demo]\n", now.Format("2006/01/02 15:04:05"))
-	if err := os.WriteFile(path, []byte(text), 0600); err != nil {
+	if err := os.WriteFile(path, []byte(text), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	r, err = readClientActivity(path, "alice", 1, now)
@@ -98,7 +98,7 @@ func TestActivityScopeFiltersBeforeLimits(t *testing.T) {
 	}
 	fmt.Fprintf(&log, "%s accepted tcp:chatgpt.com:443 email: alice\n", now.Add(-time.Minute).Format("2006/01/02 15:04:05"))
 	path := filepath.Join(t.TempDir(), "access.log")
-	if err := os.WriteFile(path, []byte(log.String()), 0600); err != nil {
+	if err := os.WriteFile(path, []byte(log.String()), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	for _, tc := range []struct {

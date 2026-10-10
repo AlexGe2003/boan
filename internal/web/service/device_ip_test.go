@@ -7,7 +7,8 @@ func TestMaskDeviceIP(t *testing.T) {
 		{"192.0.2.42", "192.0.*.42"},
 		{"::ffff:192.0.2.42", "192.0.*.42"},
 		{"2001:db8:abcd:1234::42", "2001:db8:abcd:*:*:*:*:*"},
-		{"bad-address", ""}, {"", ""},
+		{"bad-address", ""},
+		{"", ""},
 	} {
 		if got := MaskDeviceIP(tc.raw); got != tc.want {
 			t.Errorf("MaskDeviceIP(%q) = %q, want %q", tc.raw, got, tc.want)

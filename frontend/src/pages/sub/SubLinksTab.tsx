@@ -16,9 +16,30 @@ const appendRawView = (url: string) => `${url}${url.includes('?') ? '&' : '?'}vi
 export default function SubLinksTab({ subUrl, subJsonUrl, subClashUrl, onCopy }: SubLinksTabProps) {
   const { t } = useTranslation();
   const rows = [
-    { kind: 'SUB', color: 'green', url: subUrl, title: t('subscription.standardTitle'), hint: t('subscription.standardHint'), downloadable: false },
-    { kind: 'CLASH', color: 'gold', url: subClashUrl, title: t('subscription.clashTitle'), hint: t('subscription.clashHint'), downloadable: true },
-    { kind: 'JSON', color: 'purple', url: subJsonUrl, title: t('subscription.jsonTitle'), hint: t('subscription.jsonHint'), downloadable: true },
+    {
+      kind: 'SUB',
+      color: 'green',
+      url: subUrl,
+      title: t('subscription.standardTitle'),
+      hint: t('subscription.standardHint'),
+      downloadable: false,
+    },
+    {
+      kind: 'CLASH',
+      color: 'gold',
+      url: subClashUrl,
+      title: t('subscription.clashTitle'),
+      hint: t('subscription.clashHint'),
+      downloadable: true,
+    },
+    {
+      kind: 'JSON',
+      color: 'purple',
+      url: subJsonUrl,
+      title: t('subscription.jsonTitle'),
+      hint: t('subscription.jsonHint'),
+      downloadable: true,
+    },
   ].filter((row) => row.url);
 
   return (

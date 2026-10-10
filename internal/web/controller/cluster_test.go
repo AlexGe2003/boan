@@ -1,11 +1,12 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
@@ -37,6 +38,7 @@ func TestClusterRPCRejectsLimitedTokens(t *testing.T) {
 		}
 	}
 }
+
 func TestFollowerMachineCredentialCannotMutateAccounts(t *testing.T) {
 	engine := newRoleTestEngine(t)
 	api := &APIController{}

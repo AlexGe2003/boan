@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/netsafe"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
@@ -117,7 +118,7 @@ func Gateway(base string) gin.HandlerFunc {
 			r.Header.Del("X-Forwarded-Proto")
 		}
 		proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, e error) {
-			http.Error(w, "当前主站暂时不可用；不会自动提升其他节点", 503)
+			http.Error(w, "当前主站暂时不可用；不会自动提升其他节点", http.StatusServiceUnavailable)
 		}
 		ctx := netsafe.ContextWithAllowPrivate(c.Request.Context(), n.AllowPrivateAddress)
 		if rel != "ws" {

@@ -1,0 +1,85 @@
+---
+title: Primary handoff and unified login
+description: 'Opt-in manual handoff for a fixed set of direct nodes. All nodes
+  must use verified HTTPS, the same panel base path and database schema, full
+  inbound synchronization, and admin API tokens. Browser sessions and
+  subscriptions follow the current primary. Only one primary writes fleet data;
+  interrupted transfers must be resumed. Membership and site connection settings
+  are locked while enrolled; account security and ordinary preferences remain
+  editable. Snapshot limit: 8 MiB. This does not provide offline election or
+  automatic failover.'
+full: true
+_openapi:
+  preload:
+    - ./public/openapi.json
+  toc:
+    - depth: 2
+      title: Administrator-only public cluster status, membership, epoch and pending
+        operation. Never includes credentials or snapshots.
+      url: '#administrator-only-public-cluster-status-membership-epoch-and-pending-operation-never-includes-credentials-or-snapshots'
+    - depth: 2
+      title: Validate and enroll the configured direct nodes, using this panel as the
+        initial primary. Nodes with independent business records, non-admin
+        panel users, child nodes, or Telegram, Discord or LDAP management must
+        be reconciled first.
+      url: '#validate-and-enroll-the-configured-direct-nodes-using-this-panel-as-the-initial-primary-nodes-with-independent-business-records-non-admin-panel-users-child-nodes-or-telegram-discord-or-ldap-management-must-be-reconciled-first'
+    - depth: 2
+      title: Freeze management writes, stage a business-data snapshot, demote the
+        current primary, then activate the selected member. Existing destination
+        sessions are invalidated. Reauthenticate after completion.
+      url: '#freeze-management-writes-stage-a-business-data-snapshot-demote-the-current-primary-then-activate-the-selected-member-existing-destination-sessions-are-invalidated-reauthenticate-after-completion'
+    - depth: 2
+      title: Resume the durable enrollment or transfer journal on the initiating
+        primary. Safe to retry after a lost response; never reactivates the
+        former primary.
+      url: '#resume-the-durable-enrollment-or-transfer-journal-on-the-initiating-primary-safe-to-retry-after-a-lost-response-never-reactivates-the-former-primary'
+    - depth: 2
+      title: Cancel a frozen transfer only before committing the new epoch. Once
+        committing begins, use resume instead.
+      url: '#cancel-a-frozen-transfer-only-before-committing-the-new-epoch-once-committing-begins-use-resume-instead'
+    - depth: 2
+      title: Internal cluster transport. Requires an admin bearer token; browser
+        sessions, monitor tokens and node-sync tokens are rejected. State and
+        snapshot payloads are sensitive and must not be logged.
+      url: '#internal-cluster-transport-requires-an-admin-bearer-token-browser-sessions-monitor-tokens-and-node-sync-tokens-are-rejected-state-and-snapshot-payloads-are-sensitive-and-must-not-be-logged'
+  structuredData:
+    headings:
+      - content: Administrator-only public cluster status, membership, epoch and pending
+          operation. Never includes credentials or snapshots.
+        id: administrator-only-public-cluster-status-membership-epoch-and-pending-operation-never-includes-credentials-or-snapshots
+      - content: Validate and enroll the configured direct nodes, using this panel as
+          the initial primary. Nodes with independent business records,
+          non-admin panel users, child nodes, or Telegram, Discord or LDAP
+          management must be reconciled first.
+        id: validate-and-enroll-the-configured-direct-nodes-using-this-panel-as-the-initial-primary-nodes-with-independent-business-records-non-admin-panel-users-child-nodes-or-telegram-discord-or-ldap-management-must-be-reconciled-first
+      - content: Freeze management writes, stage a business-data snapshot, demote the
+          current primary, then activate the selected member. Existing
+          destination sessions are invalidated. Reauthenticate after completion.
+        id: freeze-management-writes-stage-a-business-data-snapshot-demote-the-current-primary-then-activate-the-selected-member-existing-destination-sessions-are-invalidated-reauthenticate-after-completion
+      - content: Resume the durable enrollment or transfer journal on the initiating
+          primary. Safe to retry after a lost response; never reactivates the
+          former primary.
+        id: resume-the-durable-enrollment-or-transfer-journal-on-the-initiating-primary-safe-to-retry-after-a-lost-response-never-reactivates-the-former-primary
+      - content: Cancel a frozen transfer only before committing the new epoch. Once
+          committing begins, use resume instead.
+        id: cancel-a-frozen-transfer-only-before-committing-the-new-epoch-once-committing-begins-use-resume-instead
+      - content: Internal cluster transport. Requires an admin bearer token; browser
+          sessions, monitor tokens and node-sync tokens are rejected. State and
+          snapshot payloads are sensitive and must not be logged.
+        id: internal-cluster-transport-requires-an-admin-bearer-token-browser-sessions-monitor-tokens-and-node-sync-tokens-are-rejected-state-and-snapshot-payloads-are-sensitive-and-must-not-be-logged
+    contents: []
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+export default function Layout(props) {
+  const { APIPage, OpenAPIPage } = props.components ?? {};
+  // "APIPage" is the old name from v10, this allows both for backward compatibility
+  const Comp = OpenAPIPage ?? APIPage;
+  return (
+    <>
+      {props.children}
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/cluster/status","method":"get"},{"path":"/panel/api/cluster/initialize","method":"post"},{"path":"/panel/api/cluster/transfer","method":"post"},{"path":"/panel/api/cluster/resume","method":"post"},{"path":"/panel/api/cluster/abort","method":"post"},{"path":"/panel/api/cluster/rpc","method":"post"}]} showTitle />
+    </>
+  );
+}

@@ -7,12 +7,14 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
 func initHwidSubRouter(t *testing.T, limit int) (*gin.Engine, string) {
@@ -273,5 +275,40 @@ func TestSubscriptionHwidStatusHidesUnknownVersusDisabled(t *testing.T) {
 	}
 	if disabled.Body.Len() != 0 {
 		t.Fatalf("404 body = %q, want empty", disabled.Body.String())
+	}
+}
+
+func TestAuthorizationDownloadsClashWithoutHwidAndRejectsRevokedToken(t *testing.T) {
+	router, subID := initHwidSubRouter(t, 3)
+	var rec model.ClientRecord
+	if err := database.GetDB().Where("sub_id = ?", subID).First(&rec).Error; err != nil {
+		t.Fatal(err)
+	}
+	svc := &service.ClientService{}
+	id, token, err := svc.IssueSubscriptionAuthorization(rec.Email, "Clash laptop", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, route := range []string{"/clash/", "/json/", "/sub/"} {
+		path := route + subID + "?device_token=" + token + "&view=raw"
+		resp := requestSub(t, router, http.MethodGet, path, "", "text/html")
+		if resp.Code != http.StatusOK || strings.Contains(resp.Header().Get("Content-Type"), "text/html") {
+			t.Fatalf("authorization body %s: %d", route, resp.Code)
+		}
+		if route == "/clash/" && !strings.Contains(resp.Body.String(), "proxies:") {
+			t.Fatal("missing Clash proxies")
+		}
+	}
+	if err := svc.DeleteClientHwid(rec.Email, id); err != nil {
+		t.Fatal(err)
+	}
+	if resp := requestSub(t, router, http.MethodGet, "/clash/"+subID, token, ""); resp.Code != http.StatusNotFound {
+		t.Fatal("revoked grant re-registered as HWID")
+	}
+	for _, value := range []string{token, "", "invalid"} {
+		resp := requestSub(t, router, http.MethodGet, "/clash/"+subID+"?device_token="+value+"&view=raw", "otherwise-valid-hwid", "")
+		if resp.Code != http.StatusNotFound {
+			t.Fatalf("revoked/invalid token fell back to HWID: %d", resp.Code)
+		}
 	}
 }

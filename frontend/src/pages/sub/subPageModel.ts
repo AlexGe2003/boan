@@ -99,19 +99,8 @@ export function buildSubApps({
   };
 
   return {
-    windows: [
-      v2rayn,
-      clash,
-      singBox,
-      flclash,
-    ],
-    macos: [
-      shadowrocket,
-      clash,
-      singBox,
-      v2box,
-      flclash,
-    ],
+    windows: [v2rayn, clash, singBox, flclash],
+    macos: [shadowrocket, clash, singBox, v2box, flclash],
     android: [
       clash,
       { name: 'V2RayNG', url: `v2rayng://install-config?url=${encSub}`, copyUrl: subUrl },

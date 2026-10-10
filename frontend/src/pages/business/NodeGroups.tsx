@@ -49,7 +49,7 @@ export default function NodeGroups() {
     return list.filter(
       (g) =>
         g.name.toLowerCase().includes(term) ||
-        (g.description && g.description.toLowerCase().includes(term))
+        (g.description && g.description.toLowerCase().includes(term)),
     );
   }, [groups.data, search]);
 
@@ -95,7 +95,15 @@ export default function NodeGroups() {
   return (
     <Space orientation="vertical" size="large" style={{ width: '100%' }}>
       {context}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
+      >
         <div>
           <Typography.Title level={2} style={{ margin: 0 }}>
             节点分组
@@ -184,7 +192,8 @@ export default function NodeGroups() {
             {
               title: '说明',
               dataIndex: 'description',
-              render: (desc: string) => desc || <span style={{ color: 'var(--ant-color-text-tertiary)' }}>—</span>,
+              render: (desc: string) =>
+                desc || <span style={{ color: 'var(--ant-color-text-tertiary)' }}>—</span>,
             },
             {
               title: '节点入站',

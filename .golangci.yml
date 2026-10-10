@@ -23,6 +23,15 @@ linters:
       - frontend
       - internal/web/dist
     rules:
+      # The dispatcher patch invokes these helpers after copying them into Xray.
+      - path: deploy/destination-usage/usage\.go
+        linters:
+          - unused
+      # Preserve the established cluster forwarding semantics during portal cleanup.
+      - path: internal/web/cluster/(gateway|subscription)\.go
+        linters:
+          - staticcheck
+        text: 'SA1019: .*ReverseProxy.*Director'
       - path: _test\.go
         linters:
           - errcheck

@@ -3,13 +3,20 @@ import MyDevices from './MyDevices';
 import ResetSubscriptionButton from './ResetSubscriptionButton';
 import NodeStatus from '@/pages/support/NodeStatus';
 import SubscriptionDevicePicker from './SubscriptionDevicePicker';
+import SubscriptionAuthorizations from './SubscriptionAuthorizations';
 import zhCN from 'antd/locale/zh_CN';
 import { ClusterOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useQuery, useQueryClient, useIsFetching } from '@tanstack/react-query';
-import { Alert, Button, ConfigProvider, Empty, Progress, Spin, Tag } from 'antd';
+import { Alert, Button, ConfigProvider, Drawer, Empty, Progress, Spin, Tag } from 'antd';
 import {
+  UserOutlined,
+  MenuOutlined,
+  MoreOutlined,
+  RightOutlined,
+  LockOutlined,
+  InfoCircleOutlined,
   ArrowDownOutlined,
   ArrowUpOutlined,
   DashboardOutlined,
@@ -21,7 +28,6 @@ import {
   ReloadOutlined,
 } from '@ant-design/icons';
 import AppSidebar from '@/layouts/AppSidebar';
-import PanelTopbar from '@/layouts/PanelTopbar';
 import { useTheme } from '@/hooks/useTheme';
 import { usePanelAccess } from '@/api/queries/usePanelRole';
 import { HttpUtil } from '@/utils';
@@ -74,7 +80,7 @@ export default function MySubscriptionsPage() {
   const { antdThemeConfig, isDark, isUltra } = useTheme();
   const access = usePanelAccess();
   const queryClient = useQueryClient();
-  const nodesFetching = useIsFetching({ queryKey: ['customer-node-status', access.userId] });
+  const nodesFetching = useIsFetching({ queryKey: ['customer-node-status'] });
   const usageFetching = useIsFetching({ queryKey: ['my-usage', access.userId] });
   const devicesFetching = useIsFetching({ queryKey: ['my-devices', access.userId] });
   const connectionsFetching = useIsFetching({ queryKey: ['my-connections', access.userId] });
@@ -111,8 +117,67 @@ export default function MySubscriptionsPage() {
     routeNavigate({ pathname: location.pathname, hash: key === 'home' ? '' : key });
     setMobileNav(false);
   };
+  const title = sections.find((item) => item.key === section)?.label || '用户中心';
+  const subtitle = {
+    home: '查看你的服务、流量与连接配置',
+    subscription: '选择平台与客户端，快速导入订阅',
+    usage: '了解流量趋势与节点用量',
+    devices: '管理订阅绑定的设备',
+    records: '查看已采集的流量明细',
+    nodes: '查看已分配节点与配置状态',
+  }[section];
+  const refresh = () => {
+    if (section === 'nodes')
+      void queryClient.invalidateQueries({ queryKey: ['customer-node-status'] });
+    else if (['usage', 'records'].includes(section))
+      void queryClient.invalidateQueries({ queryKey: ['my-usage', access.userId] });
+    else if (section === 'devices') {
+      void queryClient.invalidateQueries({ queryKey: ['my-devices', access.userId] });
+      void queryClient.invalidateQueries({ queryKey: ['my-connections', access.userId] });
+    } else {
+      void query.refetch();
+      if (section === 'subscription')
+        void queryClient.invalidateQueries({ queryKey: ['my-devices', access.userId] });
+    }
+  };
+  const refreshing =
+    section === 'nodes'
+      ? nodesFetching > 0
+      : ['usage', 'records'].includes(section)
+        ? usageFetching > 0
+        : section === 'devices'
+          ? devicesFetching + connectionsFetching > 0
+          : query.isFetching;
+  const navigation = (
+    <nav aria-label="用户导航">
+      {sections.map((item) => (
+        <button
+          key={item.key}
+          type="button"
+          aria-label={item.label}
+          aria-current={section === item.key ? 'page' : undefined}
+          onClick={() => navigate(item.key)}
+        >
+          {item.icon}
+          <span>{item.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
   return (
-    <ConfigProvider locale={zhCN} theme={antdThemeConfig}>
+    <ConfigProvider
+      locale={zhCN}
+      theme={{
+        ...antdThemeConfig,
+        token: {
+          ...antdThemeConfig.token,
+          colorPrimary: '#4169f5',
+          borderRadius: 8,
+          controlHeight: 40,
+          fontSize: 14,
+        },
+      }}
+    >
       <div
         className={`customer-app ${isDark ? 'is-dark' : 'is-light'}${isUltra ? ' is-ultra' : ''}`}
       >
@@ -120,100 +185,72 @@ export default function MySubscriptionsPage() {
           <AppSidebar />
         ) : (
           <>
-            {mobileNav && (
-              <button
-                className="customer-scrim"
-                aria-label="关闭导航"
-                onClick={() => setMobileNav(false)}
-              />
-            )}
-            <aside className={`customer-sidebar ${mobileNav ? 'is-open' : ''}`}>
-              <nav aria-label="用户导航">
-                {sections.map((item, index) => (
-                  <div key={item.key}>
-                    {(index === 0 || sections[index - 1].group !== item.group) && (
-                      <p>{item.group}</p>
-                    )}
-                    <button
-                      aria-current={section === item.key ? 'page' : undefined}
-                      className={section === item.key ? 'active' : ''}
-                      onClick={() => navigate(item.key)}
-                    >
-                      {item.icon}
-                      {item.label}
-                    </button>
-                  </div>
-                ))}
-              </nav>
+            <aside className="customer-sidebar">
+              <div className="customer-brand">
+                <UserOutlined />
+                <strong>用户中心</strong>
+              </div>
+              {navigation}
+              <Button
+                type="text"
+                className="customer-logout"
+                icon={<LogoutOutlined />}
+                onClick={() => void logout()}
+              >
+                退出登录
+              </Button>
             </aside>
+            <Drawer
+              title="用户中心"
+              placement="left"
+              size={264}
+              open={mobileNav}
+              onClose={() => setMobileNav(false)}
+              rootClassName="customer-nav-drawer"
+            >
+              {navigation}
+              <Button type="text" icon={<LogoutOutlined />} onClick={() => void logout()}>
+                退出登录
+              </Button>
+            </Drawer>
           </>
         )}
         <div className="customer-main">
-          <PanelTopbar
-            title={sections.find((item) => item.key === section)?.label || '用户中心'}
-            identity=""
-            onMenu={() => setMobileNav(true)}
-            actions={
-              <>
-                <Button
-                  type="text"
-                  aria-label={section === 'nodes' ? '刷新节点状态' : '刷新账户信息'}
-                  loading={
-                    section === 'nodes'
-                      ? nodesFetching > 0
-                      : ['usage', 'records'].includes(section)
-                        ? usageFetching > 0
-                        : section === 'devices'
-                          ? devicesFetching + connectionsFetching > 0
-                          : query.isFetching
-                  }
-                  icon={<ReloadOutlined />}
-                  onClick={() => {
-                    if (section === 'nodes')
-                      void queryClient.invalidateQueries({
-                        queryKey: ['customer-node-status', access.userId],
-                      });
-                    else if (['usage', 'records'].includes(section))
-                      void queryClient.invalidateQueries({ queryKey: ['my-usage', access.userId] });
-                    else if (section === 'devices') {
-                      void queryClient.invalidateQueries({
-                        queryKey: ['my-devices', access.userId],
-                      });
-                      void queryClient.invalidateQueries({
-                        queryKey: ['my-connections', access.userId],
-                      });
-                    } else void query.refetch();
-                  }}
-                />
-                <Button
-                  type="text"
-                  aria-label="退出登录"
-                  icon={<LogoutOutlined />}
-                  onClick={() => void logout()}
-                />
-              </>
-            }
-          />
-          <main className="customer-content">
-            {access.roleKey === 'customer' && (
-              <nav className="customer-account-tabs" aria-label="账户视图">
-                {['home', 'usage', 'devices', 'records'].map((key) => (
-                  <button
-                    key={key}
-                    aria-current={section === key ? 'page' : undefined}
-                    onClick={() => navigate(key)}
-                  >
-                    {sections.find((item) => item.key === key)?.label}
-                  </button>
-                ))}
-              </nav>
+          <header className="customer-header">
+            <Button
+              className="customer-menu-toggle"
+              type="text"
+              aria-label="打开菜单"
+              icon={<MenuOutlined />}
+              onClick={() => setMobileNav(true)}
+            />
+            <div>
+              <h1>{title}</h1>
+              <p>{subtitle}</p>
+            </div>
+            {(section === 'home' || section === 'subscription') && (
+              <Button
+                className="customer-refresh"
+                aria-label="刷新账户信息"
+                loading={refreshing}
+                icon={<ReloadOutlined />}
+                onClick={refresh}
+              >
+                <span>刷新</span>
+              </Button>
             )}
+          </header>
+          <main className="customer-content">
             {['usage', 'records'].includes(section) && access.roleKey === 'customer' && (
-              <MyUsage userId={access.userId} records={section === 'records'} />
+              <MyUsage
+                userId={access.userId}
+                records={section === 'records'}
+                onRecords={() => navigate('records')}
+              />
             )}
 
             {section === 'devices' && access.roleKey === 'customer' && (
-              <MyDevices userId={access.userId} />
+              <MyDevices userId={access.userId} onSubscription={() => navigate('subscription')} />
             )}
             {section === 'nodes' && <NodeStatus />}
             {['home', 'subscription'].includes(section) && query.isLoading && <Spin />}
@@ -263,30 +300,36 @@ export default function MySubscriptionsPage() {
                           <h2>
                             服务概览 <Tag color={available ? 'green' : 'red'}>{status}</Tag>
                           </h2>
-                          <dl className="dashboard-service-fields">
-                            <div>
-                              <dt>有效期</dt>
-                              <dd>{expiry(item.expiryTime)}</dd>
-                            </div>
-                            <div>
-                              <dt>流量额度</dt>
-                              <dd>{item.total > 0 ? bytes(item.total) : '不限量'}</dd>
-                            </div>
-                          </dl>
+                          <p className="dashboard-quota-label">剩余流量</p>
+                          <strong className="dashboard-quota-value">
+                            {item.total > 0 ? bytes(Math.max(0, item.total - item.used)) : '不限量'}
+                          </strong>
                           {item.total > 0 && (
-                            <div className="dashboard-quota">
-                              <Progress
-                                aria-label="剩余流量比例"
-                                percent={Math.max(
-                                  0,
-                                  Math.min(100, ((item.total - item.used) / item.total) * 100),
-                                )}
-                                showInfo={false}
-                                strokeColor={depleted ? '#ef6565' : '#2bc66c'}
-                              />
-                              <span>剩余 {bytes(Math.max(0, item.total - item.used))}</span>
-                            </div>
+                            <Progress
+                              aria-label="剩余流量比例"
+                              percent={Math.max(
+                                0,
+                                Math.min(100, ((item.total - item.used) / item.total) * 100),
+                              )}
+                              showInfo={false}
+                              strokeColor={depleted ? '#ef6565' : '#5bc675'}
+                            />
                           )}
+                          <div className="dashboard-quota-meta">
+                            <span>
+                              已用 {bytes(item.used)} / 总量{' '}
+                              {item.total > 0 ? bytes(item.total) : '不限量'}
+                            </span>
+                            <span>{expiry(item.expiryTime)}</span>
+                          </div>
+                          <Button
+                            type="primary"
+                            size="large"
+                            className="dashboard-subscribe"
+                            onClick={() => navigate('subscription')}
+                          >
+                            获取订阅
+                          </Button>
                         </section>
                         <section className="customer-card dashboard-traffic">
                           <h2>流量使用情况</h2>
@@ -310,24 +353,24 @@ export default function MySubscriptionsPage() {
                           </dl>
                         </section>
                         <div className="dashboard-links">
-                          <section className="customer-card dashboard-link">
-                            <LinkOutlined className="dashboard-link-icon" />
-                            <div>
-                              <h2>我的订阅</h2>
-                              <p>导入客户端或复制订阅链接</p>
-                            </div>
-                            <Button type="primary" onClick={() => navigate('subscription')}>
-                              获取订阅
-                            </Button>
-                          </section>
-                          <section className="customer-card dashboard-link">
+                          {access.roleKey === 'customer' && (
+                            <button className="dashboard-link" onClick={() => navigate('devices')}>
+                              <LaptopOutlined className="dashboard-link-icon" />
+                              <span>
+                                <strong>我的设备</strong>
+                                <small>查看设备与可用名额</small>
+                              </span>
+                              <RightOutlined />
+                            </button>
+                          )}
+                          <button className="dashboard-link" onClick={() => navigate('nodes')}>
                             <ClusterOutlined className="dashboard-link-icon" />
-                            <div>
-                              <h2>节点状态</h2>
-                              <p>查看已分配节点与配置状态</p>
-                            </div>
-                            <Button onClick={() => navigate('nodes')}>查看节点</Button>
-                          </section>
+                            <span>
+                              <strong>节点状态</strong>
+                              <small>配置启用不代表实际连通</small>
+                            </span>
+                            <RightOutlined />
+                          </button>
                         </div>
                       </div>
                     )}
@@ -343,20 +386,44 @@ export default function MySubscriptionsPage() {
                             </dd>
                           </div>
                           <div>
-                            <dt>到期日期</dt>
+                            <dt>有效期</dt>
                             <dd>{expiry(item.expiryTime)}</dd>
                           </div>
                         </dl>
                         {item.url ? (
-                          <>
-                            <SubscriptionDevicePicker
-                              key={item.url}
-                              url={item.url}
-                              clashUrl={item.clashUrl}
-                              hwidRequired={item.limitHwid > 0}
-                            />
-                            {access.roleKey === 'customer' && <ResetSubscriptionButton />}
-                          </>
+                          <div className="subscription-workspace">
+                            {access.roleKey === 'customer' && item.limitHwid > 0 ? (
+                              <SubscriptionAuthorizations
+                                key={item.url}
+                                userId={access.userId}
+                                url={item.url}
+                                clashUrl={item.clashUrl}
+                              />
+                            ) : (
+                              <SubscriptionDevicePicker
+                                key={item.url}
+                                url={item.url}
+                                clashUrl={item.clashUrl}
+                              />
+                            )}
+                            <aside className="subscription-management">
+                              <h2>订阅管理</h2>
+                              <p>
+                                <LockOutlined /> 订阅链接仅供本人使用，请勿分享。
+                              </p>
+                              {access.roleKey === 'customer' && (
+                                <div className="subscription-reset-section">
+                                  <h3>重置订阅链接</h3>
+                                  <p>重置后旧链接失效，需重新导入客户端。</p>
+                                  <ResetSubscriptionButton />
+                                  <small>点击后需再次确认。</small>
+                                </div>
+                              )}
+                              <p className="subscription-reset-note">
+                                <InfoCircleOutlined /> 流量和有效期保持不变。
+                              </p>
+                            </aside>
+                          </div>
                         ) : (
                           <Alert type="info" title="订阅尚未配置，请联系管理员。" />
                         )}
@@ -367,6 +434,38 @@ export default function MySubscriptionsPage() {
               })}
           </main>
         </div>
+        {access.roleKey === 'customer' && (
+          <nav className="customer-bottom-nav" aria-label="账户视图">
+            {['home', 'subscription', 'usage', 'devices'].map((key) => {
+              const item = sections.find((entry) => entry.key === key)!;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  aria-label={key === 'subscription' ? '订阅' : item.label}
+                  onClick={() => navigate(key)}
+                  aria-current={
+                    section === key || (key === 'usage' && section === 'records')
+                      ? 'page'
+                      : undefined
+                  }
+                >
+                  {item.icon}
+                  <span>{key === 'subscription' ? '订阅' : item.label}</span>
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              aria-expanded={mobileNav}
+              aria-current={section === 'nodes' ? 'page' : undefined}
+              onClick={() => setMobileNav(true)}
+            >
+              <MoreOutlined aria-hidden="true" />
+              <span>更多</span>
+            </button>
+          </nav>
+        )}
       </div>
     </ConfigProvider>
   );

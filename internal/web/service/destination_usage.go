@@ -85,6 +85,7 @@ func readDestinationUsage(path, email string, now time.Time) *DestinationUsage {
 	sortUsageRows(result)
 	return result
 }
+
 func sortUsageRows(u *DestinationUsage) {
 	sort.Slice(u.Rows, func(i, j int) bool {
 		a, b := u.Rows[i], u.Rows[j]
@@ -94,6 +95,7 @@ func sortUsageRows(u *DestinationUsage) {
 		return a.Up+a.Down > b.Up+b.Down
 	})
 }
+
 func mergeDestinationUsage(parts []activityPart) *DestinationUsage {
 	result := &DestinationUsage{Status: "unavailable", Rows: []DestinationUsageRow{}}
 	rows := map[string]DestinationUsageRow{}

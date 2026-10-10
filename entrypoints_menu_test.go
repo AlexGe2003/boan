@@ -39,7 +39,7 @@ if [[ "$2" == -value ]]; then
 fi
 printf '%s\n' "$@" >> "$MENU_RECORD"
 `
-			if err = os.WriteFile(filepath.Join(dir, "x-ui"), []byte(mock), 0700); err != nil {
+			if err = os.WriteFile(filepath.Join(dir, "x-ui"), []byte(mock), 0o700); err != nil {
 				t.Fatal(err)
 			}
 			cmd := exec.Command("bash", "-c", source[start:end]+"\nentry_settings_menu\n")

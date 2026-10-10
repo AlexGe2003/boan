@@ -48,12 +48,7 @@ function AppIcon({ name }: { name: string }) {
   return <img className="sub-app-logo" src={icon.src} alt="" width={32} height={32} />;
 }
 
-export default function SubAppsTab({
-  apps,
-  initialPlatform,
-  onOpen,
-  onCopy,
-}: SubAppsTabProps) {
+export default function SubAppsTab({ apps, initialPlatform, onOpen, onCopy }: SubAppsTabProps) {
   const { t } = useTranslation();
   const [platform, setPlatform] = useState<AppPlatform>(initialPlatform);
 

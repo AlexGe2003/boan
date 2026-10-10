@@ -6,10 +6,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/op/go-logging"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
-	"github.com/op/go-logging"
 )
 
 func setup(t *testing.T) {
@@ -20,6 +21,7 @@ func setup(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = database.CloseDB() })
 }
+
 func TestSnapshotRoundTripPreservesAccountsAndLocalSettings(t *testing.T) {
 	setup(t)
 	db := database.GetDB()
@@ -88,6 +90,7 @@ func TestSnapshotRoundTripPreservesAccountsAndLocalSettings(t *testing.T) {
 		t.Fatal("overwrote machine identity")
 	}
 }
+
 func TestHandoffTransitionsAreFencedAndIdempotent(t *testing.T) {
 	setup(t)
 	db := database.GetDB()
@@ -133,6 +136,7 @@ func TestHandoffTransitionsAreFencedAndIdempotent(t *testing.T) {
 		t.Fatal("accepted old epoch")
 	}
 }
+
 func TestRebasePreservesBusinessIDsAndSwapsPhysicalNodes(t *testing.T) {
 	s := &Snapshot{Tables: map[string][]map[string]any{
 		"inbounds":              {{"id": 10, "node_id": nil, "tag": "a", "settings": "{}", "port": 443, "protocol": "vless", "stream_settings": "{}"}, {"id": 20, "node_id": 1, "tag": "n1-b", "settings": "{}", "port": 8443, "protocol": "vless", "stream_settings": "{}"}},
@@ -158,6 +162,7 @@ func TestRebasePreservesBusinessIDsAndSwapsPhysicalNodes(t *testing.T) {
 		t.Fatal("traffic baseline lost")
 	}
 }
+
 func TestIncompleteImportRollsBack(t *testing.T) {
 	setup(t)
 	db := database.GetDB()
@@ -185,6 +190,7 @@ func TestPublicStateNeverReturnsCredentialsOrSnapshot(t *testing.T) {
 		}
 	}
 }
+
 func TestFrozenJournalSurvivesDatabaseReopen(t *testing.T) {
 	logger.InitLogger(logging.ERROR)
 	path := filepath.Join(t.TempDir(), "state.db")

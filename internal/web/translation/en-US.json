@@ -773,7 +773,6 @@
       "sniffingDestOverride": "Destination override"
     },
     "clients": {
-      "managementIntro": "Set each user's connection credentials, traffic quota, expiry, device limits, and assigned inbounds. Open Details or Edit on a user to manage their configuration.",
       "tabBasics": "Basics",
       "tabCredentials": "Credentials",
       "tabLinks": "Links",
@@ -2737,29 +2736,13 @@
     "operations": "Service management",
     "infrastructure": "Nodes and networking",
     "system": "System configuration",
-    "runtime": "System status",
-    "advancedNetwork": "Advanced network"
+    "runtime": "System status"
   },
   "networkGuide": {
-    "nodes": {
-      "title": "Node management",
-      "hint": "Manage server nodes, connection status, and node settings."
-    },
-    "inbounds": {
-      "title": "Inbound management",
-      "hint": "Configure client protocols and ports, then include nodes in plans for users."
-    },
-    "hosts": {
-      "title": "Subscription node display",
-      "hint": "Configure node names, addresses, and connection settings shown in subscriptions."
-    },
-    "outbound": {
-      "title": "Outbound management",
-      "hint": "Configure how traffic leaves the server and select outbounds through routing rules."
-    },
-    "routing": {
-      "title": "Routing rules",
-      "hint": "Match traffic by domain, IP, or protocol and choose direct, proxy, or blocked connections. Rules are matched in order."
-    }
+    "nodes": {},
+    "inbounds": {},
+    "hosts": {},
+    "outbound": {},
+    "routing": {}
   }
 }

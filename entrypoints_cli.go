@@ -88,7 +88,7 @@ func entryPointsCLI(args []string, out io.Writer) error {
 	if err := database.InitDB(config.GetDBPath()); err != nil {
 		return err
 	}
-	defer database.CloseDB()
+	defer func() { _ = database.CloseDB() }()
 	svc := &service.SettingService{}
 	p, err := svc.GetEntryPoints()
 	if err != nil && !*reset {
@@ -256,7 +256,7 @@ func configureNodeAddress(id int, address string) error {
 				return fmt.Errorf("invalid hostname")
 			}
 			for _, ch := range label {
-				if !(ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' || ch == '-') {
+				if (ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && ch != '-' {
 					return fmt.Errorf("invalid hostname")
 				}
 			}

@@ -14,13 +14,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 var planMutationMu sync.Mutex
@@ -49,6 +50,7 @@ func NewSubscriptionPlanController(g *gin.RouterGroup) {
 	g.POST("/subscribe", a.subscribe)
 	g.POST("/apply", a.apply)
 }
+
 func (a *SubscriptionPlanController) list(c *gin.Context) {
 	var rows []model.SubscriptionPlan
 	if err := database.GetDB().Order("id DESC").Find(&rows).Error; err != nil {
@@ -78,6 +80,7 @@ func (a *SubscriptionPlanController) list(c *gin.Context) {
 	}
 	jsonObj(c, result, nil)
 }
+
 func validatePlan(p *planInput) error {
 	p.Name = strings.TrimSpace(p.Name)
 	if p.Name == "" || len(p.Name) > 120 {
@@ -116,6 +119,7 @@ func validatePlan(p *planInput) error {
 	p.SubscriptionPlan.Prices = string(b)
 	return nil
 }
+
 func (a *SubscriptionPlanController) save(c *gin.Context) {
 	var p planInput
 	if err := c.ShouldBindJSON(&p); err != nil {
@@ -141,6 +145,7 @@ func (a *SubscriptionPlanController) save(c *gin.Context) {
 	}
 	jsonObj(c, p, err)
 }
+
 func (a *SubscriptionPlanController) delete(c *gin.Context) {
 	var req struct {
 		ID int `json:"id"`
@@ -170,6 +175,7 @@ func (a *SubscriptionPlanController) delete(c *gin.Context) {
 	})
 	jsonObj(c, nil, err)
 }
+
 func loadPlan(id int) (planInput, error) {
 	var p planInput
 	if id <= 0 {
@@ -344,6 +350,7 @@ func findSubscriberConflict(db *gorm.DB, name string) (*subscriberConflict, erro
 	}
 	return &subscriberConflict{Kind: "account_exists", Email: rec.Email, Username: user.Username, AccountExists: true}, nil
 }
+
 func (a *SubscriptionPlanController) applyOne(email string, p planInput) error {
 	return a.applyWithExpiry(email, p, nil)
 }
@@ -413,6 +420,7 @@ func (a *SubscriptionPlanController) applyWithExpiry(email string, p planInput, 
 	assignment = model.SubscriptionAssignment{ClientID: rec.Id, PlanID: p.ID, AppliedAt: time.Now().UnixMilli()}
 	return database.GetDB().Clauses(clause.OnConflict{UpdateAll: true}).Create(&assignment).Error
 }
+
 func (a *SubscriptionPlanController) apply(c *gin.Context) {
 	var req struct {
 		PlanID int      `json:"planId"`

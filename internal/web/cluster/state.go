@@ -8,17 +8,22 @@ import (
 	"strings"
 	"sync"
 
+	"gorm.io/gorm"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/crypto/nodetoken"
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"gorm.io/gorm"
 )
 
-const Protocol = 1
-const stateKey = -2147483647
+const (
+	Protocol = 1
+	stateKey = -2147483647
+)
 
-var Gate sync.RWMutex
-var Operation sync.Mutex
+var (
+	Gate      sync.RWMutex
+	Operation sync.Mutex
+)
 
 // Peer carries a portable (decrypted) credential only inside encrypted state
 // or a verified TLS RPC. Public responses must use PublicState.
@@ -76,6 +81,7 @@ func Load(db *gorm.DB) (*State, error) {
 	}
 	return &s, nil
 }
+
 func Save(db *gorm.DB, s *State) error {
 	raw, err := json.Marshal(s)
 	if err != nil {
@@ -87,6 +93,7 @@ func Save(db *gorm.DB, s *State) error {
 	}
 	return db.Save(&model.ClusterState{ID: 1, Data: encrypted}).Error
 }
+
 func Public(s *State) PublicState {
 	p := PublicState{Protocol: Protocol, Phase: "standalone"}
 	if s == nil {
@@ -105,6 +112,7 @@ func Public(s *State) PublicState {
 	}
 	return p
 }
+
 func (s *State) Peer(guid string) (Peer, error) {
 	for _, p := range s.Peers {
 		if p.Node.Guid == guid {

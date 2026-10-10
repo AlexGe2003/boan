@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
@@ -59,4 +60,26 @@ func (a *ClientController) deleteMyDevice(c *gin.Context) {
 		return
 	}
 	jsonObj(c, gin.H{"deleted": id}, nil)
+}
+
+func (a *ClientController) issueMyAuthorization(c *gin.Context) {
+	client := a.myDeviceClient(c)
+	if client == nil {
+		return
+	}
+	c.Header("Cache-Control", "no-store")
+	var input struct {
+		Name      string `json:"name"`
+		ReplaceID int    `json:"replaceId"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	id, token, err := a.clientService.IssueSubscriptionAuthorization(client.Email, input.Name, input.ReplaceID)
+	if err != nil {
+		jsonObj(c, nil, err)
+		return
+	}
+	jsonObj(c, gin.H{"id": id, "token": token, "name": input.Name}, nil)
 }

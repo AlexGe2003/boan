@@ -380,6 +380,9 @@ func (a *SUBController) configuredSubscriptionPathOwner(candidate string) string
 // browser viewing the HTML info page gets clean, name-only remarks (usage is
 // shown in the page summary).
 func (a *SUBController) maybeServeSubPage(c *gin.Context) bool {
+	if c.Request.URL.Query().Has("device_token") {
+		return false
+	}
 	accept := c.GetHeader("Accept")
 	wantsHTML := strings.Contains(strings.ToLower(accept), "text/html") || c.Query("html") == "1" || strings.EqualFold(c.Query("view"), "html")
 	if !wantsHTML {
@@ -694,6 +697,18 @@ func (a *SUBController) subPageContext(page PageData) map[string]any {
 }
 
 func (a *SUBController) enforceHwid(c *gin.Context) bool {
+	if token, present := c.GetQuery("device_token"); present || c.Request.URL.Query().Has("device_token") {
+		allowed, err := a.clientService.ValidateSubscriptionAuthorization(c.Param("subid"), token, service.HwidRequest{UserAgent: c.GetHeader("User-Agent"), SourceIP: a.subscriptionSourceIP(c)})
+		if err != nil {
+			writeSubError(c, err)
+			return false
+		}
+		if !allowed {
+			c.Status(http.StatusNotFound)
+		}
+		return allowed
+	}
+
 	result, err := a.clientService.EnforceHwidForSubID(c.Param("subid"), service.HwidRequest{
 		Hwid:        c.GetHeader("X-HWID"),
 		UserAgent:   c.GetHeader("User-Agent"),

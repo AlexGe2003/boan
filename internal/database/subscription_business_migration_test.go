@@ -4,10 +4,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 func TestSubscriptionBusinessUpgradePreservesLegacyPlan(t *testing.T) {

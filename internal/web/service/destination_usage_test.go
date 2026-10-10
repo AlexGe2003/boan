@@ -12,7 +12,7 @@ func TestDestinationUsageExactUserAndStaleness(t *testing.T) {
 	now := time.Now()
 	path := filepath.Join(t.TempDir(), "usage.json")
 	raw := fmt.Sprintf(`{"version":1,"since":1,"updatedAt":%d,"rows":[{"email":"alice","host":"example.com","up":12,"down":30},{"email":"alice2","host":"private.example","up":999,"down":999},{"email":"alice","host":"1.1.1.1","up":3,"down":4}]}`, now.UnixMilli())
-	if err := os.WriteFile(path, []byte(raw), 0600); err != nil {
+	if err := os.WriteFile(path, []byte(raw), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	u := readDestinationUsage(path, "alice", now)
@@ -26,6 +26,7 @@ func TestDestinationUsageExactUserAndStaleness(t *testing.T) {
 		t.Fatal("cross-user leakage")
 	}
 }
+
 func TestDestinationUsageMergeDoesNotScaleOrHideMissing(t *testing.T) {
 	a := &DestinationUsage{Status: "ready", Up: 10, Down: 20, Rows: []DestinationUsageRow{{Host: "example.com", Up: 10, Down: 20}}}
 	b := &DestinationUsage{Status: "stale", Up: 30, Down: 40, Rows: []DestinationUsageRow{{Host: "example.com", Up: 30, Down: 40}}}

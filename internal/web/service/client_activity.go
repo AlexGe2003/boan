@@ -78,7 +78,7 @@ func activityHost(target string) string {
 		}
 	}
 	for _, r := range target {
-		if !(r >= 'a' && r <= 'z' || r >= '0' && r <= '9' || r == '-' || r == '.') {
+		if (r < 'a' || r > 'z') && (r < '0' || r > '9') && r != '-' && r != '.' {
 			return ""
 		}
 	}

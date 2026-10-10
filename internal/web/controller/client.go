@@ -57,6 +57,7 @@ func (a *ClientController) initRouter(g *gin.RouterGroup) {
 	g.GET("/list", a.list)
 	g.GET("/mySubscriptions", a.mySubscriptions)
 	g.GET("/myDevices", a.myDevices)
+	g.POST("/myDevices", a.issueMyAuthorization)
 	g.GET("/myUsage", a.myUsage)
 	g.GET("/myConnections", a.myConnections)
 	g.DELETE("/myDevices/:id", a.deleteMyDevice)

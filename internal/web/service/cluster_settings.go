@@ -43,6 +43,7 @@ func (s *SettingService) validateClusterSettings(next *entity.AllSetting) error 
 	}
 	return nil
 }
+
 func settingFields(s *entity.AllSetting) (map[string]json.RawMessage, error) {
 	raw, err := json.Marshal(s)
 	if err != nil {

@@ -972,7 +972,69 @@
       "renewsUsed": "已用續期次數",
       "tuicTotalGBDesc": "TUIC does not support per-client traffic limits; set traffic limit on the inbound instead.",
       "bulkAdTagHint": "輸入 32 位十六進位標籤以設定，或輸入 'none' 清除 MTProto 贊助頻道。",
-      "managementIntro": "Set each user's connection credentials, traffic quota, expiry, device limits, and assigned inbounds. Open Details or Edit on a user to manage their configuration."
+      "devices": {
+        "unbound": "Device unbound. You can bind a new device.",
+        "unbindFailed": "Could not unbind the device. Please retry.",
+        "unbindNote": "Unbinding frees one slot. Imported nodes do not stop working immediately; another subscription update can bind this device again.",
+        "unbindConfirm": "Unbind this device?",
+        "unbind": "Unbind",
+        "ipNote": "IPs are masked and show the latest subscription request, not a live connection address or online status.",
+        "bindingNote": "An HWID-capable client binds when it successfully fetches the subscription. Repeated updates with the same identifier use no additional slots.",
+        "slotsFull": "All device slots are occupied. Unbind a device before adding another.",
+        "remaining": "Available slots",
+        "myDevices": "My devices",
+        "title": "Devices and connections",
+        "registered": "Bound devices",
+        "onlineSources": "Online source IPs",
+        "notDeviceCount": "Source IPs are not a device count",
+        "device": "Device",
+        "client": "Client",
+        "unknown": "Unknown",
+        "unnamed": "Unnamed device",
+        "connectionStatus": "Connection status",
+        "firstRegistered": "First registered",
+        "lastFetch": "Last subscription update",
+        "subscriptionIP": "Last subscription IP (masked)",
+        "connectionUser": "User account",
+        "currentAccount": "Current account",
+        "connectionIPNote": "These are the masked source addresses observed by each node for this account, separate from subscription requests. With a relay or front proxy, a node may see the relay address. A source address cannot identify an HWID device.",
+        "subscriptionClient": "Latest subscription client",
+        "unknownClient": "Unidentified client",
+        "noSubscriptionClient": "No client recorded yet. It will appear after the next successful subscription download.",
+        "subscriptionClientNote": "Identified from the subscription request, not the current tunnel. Client headers may be customized. Requests without an HWID do not create device slots.",
+        "sourceIP": "Source IP (masked)",
+        "node": "Node",
+        "lastActivity": "Latest connection time",
+        "onlineUnidentified": "Online · device unidentified",
+        "autoRefresh": "Refresh every 15 seconds",
+        "loading": "Loading devices",
+        "loadFailed": "Could not load devices and connections",
+        "atLeast": "At least {count}",
+        "limit": "Device limit: {count}",
+        "unlimited": "No registration limit",
+        "countNote": "Device identity and online connections are shown separately.",
+        "identityNote": "Devices are counted by client-reported device identifiers. Subscription updates do not prove a device is online. Clients without a device identifier appear only as connection sources; shared IPs, network changes, and multiple clients on one device can affect counts.",
+        "identifiedDevices": "Identified devices",
+        "noDevices": "No device identifiers reported yet. This does not mean that no devices are in use.",
+        "onlineConnections": "Online connections",
+        "partial": "Some nodes could not be queried",
+        "unavailable": "Online connections could not be collected",
+        "unavailableNote": "Online source IPs come from the Xray online API. Offline, unsupported, or unreachable nodes are not treated as having zero connections. Device names cannot be inferred from these addresses.",
+        "collected": "Collected",
+        "notCollected": "Not collected",
+        "noOnlineSources": "No online source IPs on the queried nodes",
+        "collectedAt": "Collected at",
+        "trafficTitle": "User traffic",
+        "outbound": "User outbound (upload)",
+        "inbound": "User inbound (download)",
+        "trafficTotal": "Total traffic",
+        "trafficStarted": "Collection started",
+        "trafficUpdated": "Last traffic update",
+        "localNode": "Local server",
+        "nodeFallback": "Node #{id}",
+        "noTraffic": "No traffic has been recorded yet. Usage is unknown.",
+        "trafficNote": "Upload: user → node. Download: node → user. These are cumulative recorded bytes since collection began, independent of subscription resets, billing multipliers and manual corrections. Statistics are per account and node, not per device. Offline nodes show their last recorded totals; older usage before collection is not included."
+      }
     },
     "groups": {
       "name": "名稱",
@@ -2674,29 +2736,13 @@
     "operations": "服务管理",
     "infrastructure": "节点与网络",
     "system": "系统配置",
-    "runtime": "系统运行",
-    "advancedNetwork": "進階網路"
+    "runtime": "系统运行"
   },
   "networkGuide": {
-    "nodes": {
-      "title": "節點管理",
-      "hint": "新增和管理伺服器節點，查看連線狀態並設定節點參數。"
-    },
-    "inbounds": {
-      "title": "入站管理",
-      "hint": "設定用戶端連線使用的協定與連接埠，並將節點加入套餐供使用者使用。"
-    },
-    "hosts": {
-      "title": "訂閱節點顯示",
-      "hint": "設定訂閱中顯示的節點名稱、位址與連線參數。"
-    },
-    "outbound": {
-      "title": "出站管理",
-      "hint": "設定流量離開伺服器時使用的連線方式，可透過路由規則選擇對應出站。"
-    },
-    "routing": {
-      "title": "路由規則",
-      "hint": "按網域、IP 或協定匹配流量，指定直連、代理或封鎖；規則按順序匹配。"
-    }
+    "nodes": {},
+    "inbounds": {},
+    "hosts": {},
+    "outbound": {},
+    "routing": {}
   }
 }

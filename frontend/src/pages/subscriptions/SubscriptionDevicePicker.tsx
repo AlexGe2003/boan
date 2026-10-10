@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Button, Input, Modal, QRCode, Space, Tag, Tooltip, message } from 'antd';
+import { Button, Input, Modal, QRCode, Space, Tooltip, message } from 'antd';
 import {
   AndroidOutlined,
   AppleOutlined,
@@ -16,7 +16,6 @@ import shadowrocketIcon from '@/assets/clients/shadowrocket.png';
 import clashIcon from '@/assets/clients/clash-verge.png';
 import v2raynIcon from '@/assets/clients/v2rayn.png';
 import v2rayngIcon from '@/assets/clients/v2rayng.png';
-import clashMiIcon from '@/assets/clients/clash-mi.png';
 import {
   subscriptionAddress,
   subscriptionImportLink,
@@ -30,13 +29,15 @@ const devices = [
   { value: 'windows' as const, label: 'Windows', icon: <WindowsOutlined /> },
   { value: 'macos' as const, label: 'macOS', icon: <LaptopOutlined /> },
   { value: 'android' as const, label: 'Android', icon: <AndroidOutlined /> },
-  { value: 'ios' as const, label: 'iOS / 苹果', icon: <AppleOutlined /> },
+  { value: 'ios' as const, label: 'iOS', icon: <AppleOutlined /> },
 ];
 
-const clients: Record<SubscriptionClient, { name: string; detail: string; icon?: string }> = {
+const clients: Record<
+  Exclude<SubscriptionClient, 'clash-mi' | 'karing'>,
+  { name: string; detail: string; icon?: string }
+> = {
   shadowrocket: { name: 'Shadowrocket', detail: '小火箭', icon: shadowrocketIcon },
   'clash-verge': { name: 'Clash Verge Rev', detail: 'Clash / Mihomo', icon: clashIcon },
-  'clash-mi': { name: 'Clash Mi', detail: 'Clash / Mihomo', icon: clashMiIcon },
   v2rayn: { name: 'v2rayN', detail: 'VLESS / Xray', icon: v2raynIcon },
   v2rayng: { name: 'v2rayNG', detail: 'VLESS / Xray', icon: v2rayngIcon },
   universal: { name: '通用订阅', detail: '复制到兼容客户端' },
@@ -51,34 +52,27 @@ function initialDevice(): Device {
   return 'windows';
 }
 
-function deviceClients(device: Device, hasClash: boolean): SubscriptionClient[] {
-  if (device === 'ios') return hasClash ? ['shadowrocket', 'clash-mi'] : ['shadowrocket'];
-  if (device === 'android') return hasClash ? ['v2rayng', 'clash-mi'] : ['v2rayng'];
+function deviceClients(
+  device: Device,
+  hasClash: boolean,
+): Exclude<SubscriptionClient, 'clash-mi' | 'karing'>[] {
+  if (device === 'ios') return ['shadowrocket'];
+  if (device === 'android') return ['v2rayng'];
   if (device === 'windows') return hasClash ? ['clash-verge', 'v2rayn'] : ['v2rayn'];
   if (device === 'macos') return hasClash ? ['clash-verge', 'shadowrocket'] : ['shadowrocket'];
   if (!hasClash) return ['shadowrocket', 'universal'];
   return ['clash-verge'];
 }
 
-function isRecommended(device: Device, client: SubscriptionClient): boolean {
-  if (device === 'windows' && client === 'clash-verge') return true;
-  if (device === 'macos' && client === 'clash-verge') return true;
-  if (device === 'ios' && client === 'shadowrocket') return true;
-  if (device === 'android' && client === 'v2rayng') return true;
-  return false;
-}
-
 export default function SubscriptionDevicePicker({
   url,
   clashUrl,
-  hwidRequired = false,
 }: {
   url: string;
   clashUrl?: string;
-  hwidRequired?: boolean;
 }) {
   const [device, setDevice] = useState<Device>(initialDevice);
-  const [choice, setChoice] = useState<SubscriptionClient>(
+  const [choice, setChoice] = useState<Exclude<SubscriptionClient, 'clash-mi' | 'karing'>>(
     () => deviceClients(initialDevice(), !!clashUrl)[0],
   );
   const [copying, setCopying] = useState(false);
@@ -86,7 +80,7 @@ export default function SubscriptionDevicePicker({
   const [toast, contextHolder] = message.useMessage();
 
   const available = deviceClients(device, !!clashUrl);
-  const client = hwidRequired ? 'universal' : available.includes(choice) ? choice : available[0];
+  const client = available.includes(choice) ? choice : available[0];
   const selected = clients[client];
 
   const getAddress = () => subscriptionAddress(client, url, clashUrl, window.location.origin);
@@ -121,70 +115,53 @@ export default function SubscriptionDevicePicker({
   return (
     <div className="subscription-device-picker">
       {contextHolder}
-      {hwidRequired ? (
-        <Alert
-          type="info"
-          showIcon
-          title="此套餐需要设备绑定"
-          description="请将订阅链接添加到支持 HWID 的客户端，并开启设备标识上报。成功获取订阅后自动绑定设备；未上报设备标识的客户端无法获取订阅。设备满额时，请先在「我的设备」中解绑一台。"
-        />
-      ) : (
-        <>
-          <h2 className="subscription-step-title">1. 选择您的设备系统</h2>
-          <div className="subscription-device-tabs" role="group" aria-label="选择设备">
-            {devices.map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                aria-pressed={device === item.value}
-                onClick={() => {
-                  setDevice(item.value);
-                  setChoice(deviceClients(item.value, !!clashUrl)[0]);
-                }}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </div>
+      <h2 className="subscription-step-title">选择你的平台</h2>
+      <div className="subscription-device-tabs" role="group" aria-label="选择设备">
+        {devices.map((item) => (
+          <button
+            key={item.value}
+            type="button"
+            aria-label={item.label}
+            aria-pressed={device === item.value}
+            onClick={() => {
+              setDevice(item.value);
+              setChoice(deviceClients(item.value, !!clashUrl)[0]);
+            }}
+          >
+            {item.icon}
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </div>
 
-          <h2 className="subscription-step-title">2. 选择配套客户端</h2>
-          <div className="subscription-client-grid" role="group" aria-label="选择应用">
-            {available.map((id) => {
-              const rec = isRecommended(device, id);
-              return (
-                <button
-                  className="subscription-client"
-                  key={id}
-                  type="button"
-                  aria-pressed={client === id}
-                  onClick={() => setChoice(id)}
-                >
-                  {clients[id].icon ? (
-                    <img src={clients[id].icon} alt="" width={42} height={42} />
-                  ) : (
-                    <LinkOutlined className="subscription-generic-icon" />
-                  )}
-                  <span className="subscription-client-label">
-                    <strong>
-                      {clients[id].name}
-                      {rec && (
-                        <Tag color="blue" style={{ marginLeft: 8, fontSize: 11, borderRadius: 4 }}>
-                          推荐
-                        </Tag>
-                      )}
-                    </strong>
-                    <small>{clients[id].detail}</small>
-                  </span>
-                  <span className="subscription-client-check" aria-hidden="true">
-                    {client === id && <CheckOutlined />}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </>
-      )}
+      <h2 className="subscription-step-title">选择客户端</h2>
+      <div className="subscription-client-grid" role="group" aria-label="选择应用">
+        {available.map((id) => {
+          return (
+            <button
+              className="subscription-client"
+              key={id}
+              type="button"
+              aria-label={clients[id].name}
+              aria-pressed={client === id}
+              onClick={() => setChoice(id)}
+            >
+              {clients[id].icon ? (
+                <img src={clients[id].icon} alt="" width={42} height={42} />
+              ) : (
+                <LinkOutlined className="subscription-generic-icon" />
+              )}
+              <span className="subscription-client-label">
+                <strong>{clients[id].name}</strong>
+                <small>{clients[id].detail}</small>
+              </span>
+              <span className="subscription-client-check" aria-hidden="true">
+                {client === id && <CheckOutlined />}
+              </span>
+            </button>
+          );
+        })}
+      </div>
       <div className="subscription-url-row">
         <span className="subscription-url-label">订阅地址</span>
         <Input
@@ -218,37 +195,33 @@ export default function SubscriptionDevicePicker({
       </div>
 
       <div className="subscription-primary-actions">
-        {!hwidRequired && (
-          <Button
-            type="primary"
-            size="large"
-            icon={<ExportOutlined />}
-            disabled={client === 'universal' || client === 'v2rayn'}
-            onClick={importSubscription}
-          >
-            一键导入到客户端
-          </Button>
-        )}
+        <Button
+          type="primary"
+          size="large"
+          icon={<ExportOutlined />}
+          disabled={client === 'universal' || client === 'v2rayn'}
+          onClick={importSubscription}
+        >
+          导入 {selected.name}
+        </Button>
         <Button size="large" icon={<CopyOutlined />} loading={copying} onClick={() => void copy()}>
-          复制订阅链接
+          复制链接
         </Button>
         <Button size="large" icon={<QrcodeOutlined />} onClick={() => setShowQr(true)}>
-          二维码扫码
+          二维码
         </Button>
       </div>
 
       <p className="subscription-privacy-note">
-        {hwidRequired
-          ? '提示：在支持 HWID 的客户端内导入或扫码；网页读取订阅不会占用设备名额。'
-          : client === 'v2rayn'
-            ? '提示：v2rayN 用户请点击「复制订阅链接」，在软件内「订阅分组」->「订阅分组设置」中添加并更新。'
-            : client === 'universal'
-              ? '提示：通用订阅支持大部分兼容客户端，请复制链接后导入到对应工具。'
-              : `提示：点击「一键导入到客户端」将唤起 ${selected.name} 导入订阅；或点击复制链接手动导入。`}
-        <br />🔒 订阅链接包含个人密钥，请勿泄漏或分享给他人。
+        {client === 'v2rayn'
+          ? '请复制链接，在 v2rayN 的「订阅分组设置」中添加并更新。'
+          : '请先安装对应客户端，再点击导入。'}
       </p>
-
-      {!hwidRequired && <SubscriptionRouting client={client} />}
+      <details className="subscription-help">
+        <summary>导入与连接帮助</summary>
+        <p>若导入失败，请确认客户端版本兼容当前套餐，或联系管理员检查订阅配置。</p>
+        <SubscriptionRouting client={client} />
+      </details>
 
       <Modal
         open={showQr}

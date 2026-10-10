@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { subscriptionAddress, subscriptionImportLink } from '@/pages/subscriptions/subscription-links';
+import {
+  subscriptionAddress,
+  subscriptionImportLink,
+} from '@/pages/subscriptions/subscription-links';
 const raw = 'https://example.com/sub/test-token?x=1&y=2';
 const clash = 'https://example.com/clash/test-token?x=1&y=2';
 describe('subscription client links', () => {
@@ -39,6 +42,28 @@ describe('subscription client links', () => {
     expect(subscriptionImportLink('v2rayn', raw)).toBeNull();
   });
   it('rejects executable URLs', () => {
-    expect(() => subscriptionAddress('universal', 'javascript:alert(1)', undefined, 'https://example.com')).toThrow();
+    expect(() =>
+      subscriptionAddress('universal', 'javascript:alert(1)', undefined, 'https://example.com'),
+    ).toThrow();
   });
+});
+
+it('enables client device identification only for restricted Clash Mi imports', () => {
+  const address = 'https://example.com/clash/private?view=raw';
+  const restricted = new URL(subscriptionImportLink('clash-mi', address, true)!);
+  expect(restricted.searchParams.get('xhwid')).toBe('true');
+  expect(restricted.searchParams.get('url')).toBe(address);
+  expect(new URL(subscriptionImportLink('clash-mi', address)!).searchParams.has('xhwid')).toBe(
+    false,
+  );
+});
+
+it('imports Karing using the raw subscription and enables device identification when required', () => {
+  const address = subscriptionAddress('karing', raw, clash, 'https://example.com');
+  expect(address).toBe(raw);
+  const link = new URL(subscriptionImportLink('karing', address, true)!);
+  expect(link.protocol).toBe('karing:');
+  expect(link.searchParams.get('url')).toBe(raw);
+  expect(link.searchParams.get('xhwid')).toBe('true');
+  expect(new URL(subscriptionImportLink('karing', address)!).searchParams.has('xhwid')).toBe(false);
 });

@@ -18,8 +18,10 @@ import (
 	"github.com/xtls/xray-core/transport"
 )
 
-const usageMaxEntries = 20000
-const usageMaxUsers = 1024
+const (
+	usageMaxEntries = 20000
+	usageMaxUsers   = 1024
+)
 
 type usageRow struct {
 	Email    string `json:"email"`
@@ -82,6 +84,7 @@ func newUsageLedger(path string) (*usageLedger, error) {
 	}
 	return l, nil
 }
+
 func (l *usageLedger) counter(email, host string) *usageCounter {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -106,6 +109,7 @@ func (l *usageLedger) counter(email, host string) *usageCounter {
 	l.users[email] = true
 	return c
 }
+
 func (l *usageLedger) flush() error {
 	l.flushMu.Lock()
 	defer l.flushMu.Unlock()
@@ -119,7 +123,7 @@ func (l *usageLedger) flush() error {
 	if err != nil {
 		return err
 	}
-	if err = os.MkdirAll(filepath.Dir(l.path), 0700); err != nil {
+	if err = os.MkdirAll(filepath.Dir(l.path), 0o700); err != nil {
 		return err
 	}
 	temp, err := os.CreateTemp(filepath.Dir(l.path), ".usage-*")
@@ -141,8 +145,10 @@ func (l *usageLedger) flush() error {
 	return os.Rename(name, l.path)
 }
 
-var usageOnce sync.Once
-var destinationUsage *usageLedger
+var (
+	usageOnce        sync.Once
+	destinationUsage *usageLedger
+)
 
 func startDestinationUsage() {
 	usageOnce.Do(func() {
@@ -168,6 +174,7 @@ func startDestinationUsage() {
 		}()
 	})
 }
+
 func flushDestinationUsage() {
 	if destinationUsage != nil {
 		_ = destinationUsage.flush()
@@ -205,7 +212,7 @@ func (r *usageReader) ReadMultiBuffer() (buf.MultiBuffer, error) {
 	recordUsage(r.c, mb, true)
 	return mb, err
 }
-func (r *usageReader) Interrupt() { common.Interrupt(r.reader) }
+func (r *usageReader) Interrupt() { _ = common.Interrupt(r.reader) }
 
 type usageWriter struct {
 	writer buf.Writer
@@ -217,7 +224,7 @@ func (w *usageWriter) WriteMultiBuffer(mb buf.MultiBuffer) error {
 	return w.writer.WriteMultiBuffer(mb)
 }
 func (w *usageWriter) Close() error { return common.Close(w.writer) }
-func (w *usageWriter) Interrupt()   { common.Interrupt(w.writer) }
+func (w *usageWriter) Interrupt()   { _ = common.Interrupt(w.writer) }
 
 func recordUsage(c *usageCounter, mb buf.MultiBuffer, up bool) {
 	now := time.Now().UnixMilli()

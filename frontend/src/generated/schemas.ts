@@ -1882,6 +1882,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "limit": {
         "type": "integer"
       },
+      "onlineIpLimit": {
+        "type": "integer"
+      },
       "registered": {
         "type": "integer"
       },
@@ -1908,6 +1911,9 @@ export const SCHEMAS: Record<string, unknown> = {
   },
   "ClientHwidInfo": {
     "properties": {
+      "authorization": {
+        "type": "boolean"
+      },
       "clientName": {
         "type": "string"
       },

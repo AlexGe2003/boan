@@ -9,6 +9,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
@@ -40,7 +41,7 @@ func TestEntryGateLiveSwitchAndRoles(t *testing.T) {
 	engine.Any("/*path", func(c *gin.Context) { c.Status(http.StatusNoContent) })
 	run := func(host, role, path, forwarded string, want int) {
 		t.Helper()
-		req := httptest.NewRequest("GET", "https://"+host+path, nil)
+		req := httptest.NewRequest(http.MethodGet, "https://"+host+path, nil)
 		req.Header.Set("Test-Role", role)
 		req.Header.Set("X-Forwarded-Host", forwarded)
 		w := httptest.NewRecorder()

@@ -24,7 +24,7 @@ func TestEntryGeoCLIEnableShowDisable(t *testing.T) {
 		t.Fatal(err)
 	}
 	geoPath := filepath.Join(dir, "geoip.dat")
-	if err = os.WriteFile(geoPath, data, 0600); err != nil {
+	if err = os.WriteFile(geoPath, data, 0o600); err != nil {
 		t.Fatal(err)
 	}
 	run := func(args ...string) string {

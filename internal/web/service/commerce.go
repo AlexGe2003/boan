@@ -6,18 +6,21 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
-const OrderPending = "pending"
-const OrderPaid = "paid"
-const OrderFailed = "failed"
-const OrderCompleted = "completed"
-const OrderCancelled = "cancelled"
-const OrderExpired = "expired"
+const (
+	OrderPending   = "pending"
+	OrderPaid      = "paid"
+	OrderFailed    = "failed"
+	OrderCompleted = "completed"
+	OrderCancelled = "cancelled"
+	OrderExpired   = "expired"
+)
 
 type CommerceService struct{}
 

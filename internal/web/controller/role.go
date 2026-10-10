@@ -45,7 +45,7 @@ func (a *APIController) enforceRole(c *gin.Context) {
 			c.Next()
 			return
 		}
-		if c.Request.Method == http.MethodPost && rel == "/clients/resetMySubscription" {
+		if c.Request.Method == http.MethodPost && (rel == "/clients/resetMySubscription" || rel == "/clients/myDevices") {
 			c.Next()
 			return
 		}

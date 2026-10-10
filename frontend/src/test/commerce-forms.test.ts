@@ -46,13 +46,12 @@ describe('commercial plan form boundaries', () => {
   });
 });
 
-it('accepts the requested subscriber defaults while preserving other password limits', async () => {
-  const { SubscriberFormSchema, subscriberDefaults, SubscriberPasswordSchema } =
-    await import('@/schemas/commerce');
-  expect(SubscriberFormSchema.safeParse(subscriberDefaults).success).toBe(true);
+it('requires a login for new subscribers and a plan when assigning', async () => {
+  const { SubscriberFormSchema, SubscriberPasswordSchema } = await import('@/schemas/commerce');
+  const subscriber = { username: 'alice', password: 'valid-password', assigning: false };
+  expect(SubscriberFormSchema.safeParse(subscriber).success).toBe(true);
+  expect(SubscriberFormSchema.safeParse({ ...subscriber, username: '' }).success).toBe(false);
   expect(SubscriberPasswordSchema.safeParse('abcd').success).toBe(false);
   expect(SubscriberPasswordSchema.safeParse('a'.repeat(73)).success).toBe(false);
-  expect(SubscriberFormSchema.safeParse({ ...subscriberDefaults, assigning: true }).success).toBe(
-    false,
-  );
+  expect(SubscriberFormSchema.safeParse({ ...subscriber, assigning: true }).success).toBe(false);
 });

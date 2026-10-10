@@ -7,7 +7,6 @@ export default function LandingPage() {
   return (
     <main className="portal-landing">
       <header className="landing-nav">
-
         <a className="portal-button small" href={login}>
           登录账户 <ArrowRightOutlined />
         </a>

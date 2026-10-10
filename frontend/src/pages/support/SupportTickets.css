@@ -84,7 +84,11 @@
 
 .ticket-stat-card.is-active {
   border-color: var(--ant-color-primary);
-  background: color-mix(in srgb, var(--ant-color-primary, #1e5eff) 4%, var(--ant-color-bg-container));
+  background: color-mix(
+    in srgb,
+    var(--ant-color-primary, #1e5eff) 4%,
+    var(--ant-color-bg-container)
+  );
 }
 
 .ticket-stat-info {
@@ -269,7 +273,11 @@
 }
 
 .chat-bubble-row.admin .chat-bubble-body {
-  background: color-mix(in srgb, var(--ant-color-primary, #1e5eff) 10%, var(--ant-color-bg-container));
+  background: color-mix(
+    in srgb,
+    var(--ant-color-primary, #1e5eff) 10%,
+    var(--ant-color-bg-container)
+  );
   border: 1px solid color-mix(in srgb, var(--ant-color-primary, #1e5eff) 25%, transparent);
   color: var(--ant-color-text);
   border-top-right-radius: 2px;

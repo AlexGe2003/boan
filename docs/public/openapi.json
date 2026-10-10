@@ -65,12 +65,42 @@
         ],
         "type": "object"
       },
+      "ActivitySource": {
+        "properties": {
+          "connections": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nodeId": {
+            "type": "integer"
+          },
+          "sampled": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "connections",
+          "name",
+          "nodeId",
+          "sampled",
+          "status"
+        ],
+        "type": "object"
+      },
       "ActivityVisit": {
         "properties": {
           "category": {
             "type": "string"
           },
           "host": {
+            "type": "string"
+          },
+          "nodeName": {
             "type": "string"
           },
           "time": {
@@ -566,6 +596,9 @@
           },
           "websiteGeoBlockEnable": {
             "type": "boolean"
+          },
+          "websiteGeoBlockRegions": {
+            "type": "string"
           }
         },
         "required": [
@@ -716,7 +749,8 @@
           "webKeyFile",
           "webListen",
           "webPort",
-          "websiteGeoBlockEnable"
+          "websiteGeoBlockEnable",
+          "websiteGeoBlockRegions"
         ],
         "type": "object"
       },
@@ -1225,6 +1259,9 @@
           },
           "websiteGeoBlockEnable": {
             "type": "boolean"
+          },
+          "websiteGeoBlockRegions": {
+            "type": "string"
           }
         },
         "required": [
@@ -1383,7 +1420,8 @@
           "webKeyFile",
           "webListen",
           "webPort",
-          "websiteGeoBlockEnable"
+          "websiteGeoBlockEnable",
+          "websiteGeoBlockRegions"
         ],
         "type": "object"
       },
@@ -1703,8 +1741,22 @@
             "format": "int64",
             "type": "integer"
           },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ActivitySource"
+            },
+            "type": "array"
+          },
           "status": {
             "type": "string"
+          },
+          "usage": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DestinationUsage"
+              }
+            ],
+            "nullable": true
           },
           "visits": {
             "items": {
@@ -1724,6 +1776,216 @@
           "since",
           "status",
           "visits"
+        ],
+        "type": "object"
+      },
+      "ClientConnection": {
+        "properties": {
+          "ip": {
+            "type": "string"
+          },
+          "lastSeen": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "nodeId": {
+            "type": "integer"
+          },
+          "nodeName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ip",
+          "lastSeen",
+          "nodeId",
+          "nodeName"
+        ],
+        "type": "object"
+      },
+      "ClientConnectionReport": {
+        "properties": {
+          "connections": {
+            "items": {
+              "$ref": "#/components/schemas/ClientConnection"
+            },
+            "type": "array"
+          },
+          "generatedAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "onlineSourceCount": {
+            "type": "integer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ClientConnectionSource"
+            },
+            "type": "array"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "connections",
+          "generatedAt",
+          "onlineSourceCount",
+          "sources",
+          "status"
+        ],
+        "type": "object"
+      },
+      "ClientConnectionSource": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "nodeId": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "nodeId",
+          "status"
+        ],
+        "type": "object"
+      },
+      "ClientDeviceReport": {
+        "properties": {
+          "connections": {
+            "$ref": "#/components/schemas/ClientConnectionReport"
+          },
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/ClientHwidInfo"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "registered": {
+            "type": "integer"
+          },
+          "subscriptionClient": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubscriptionClientInfo"
+              }
+            ],
+            "nullable": true
+          },
+          "traffic": {
+            "$ref": "#/components/schemas/ClientTrafficReport"
+          }
+        },
+        "required": [
+          "connections",
+          "devices",
+          "limit",
+          "registered",
+          "traffic"
+        ],
+        "type": "object"
+      },
+      "ClientDeviceSlots": {
+        "properties": {
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/ClientHwidInfo"
+            },
+            "type": "array"
+          },
+          "full": {
+            "type": "boolean"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "onlineIpLimit": {
+            "type": "integer"
+          },
+          "registered": {
+            "type": "integer"
+          },
+          "remaining": {
+            "type": "integer"
+          },
+          "subscriptionClient": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubscriptionClientInfo"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "devices",
+          "full",
+          "limit",
+          "registered",
+          "remaining"
+        ],
+        "type": "object"
+      },
+      "ClientHwidInfo": {
+        "properties": {
+          "authorization": {
+            "type": "boolean"
+          },
+          "clientName": {
+            "type": "string"
+          },
+          "clientVersion": {
+            "type": "string"
+          },
+          "deviceModel": {
+            "type": "string"
+          },
+          "deviceOs": {
+            "type": "string"
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "firstSeen": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "lastIp": {
+            "type": "string"
+          },
+          "lastSeen": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "osVersion": {
+            "type": "string"
+          },
+          "userAgent": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deviceModel",
+          "deviceOs",
+          "fingerprint",
+          "firstSeen",
+          "id",
+          "lastIp",
+          "lastSeen",
+          "osVersion",
+          "userAgent"
         ],
         "type": "object"
       },
@@ -1748,6 +2010,47 @@
           "createdAt",
           "flowOverride",
           "inboundId"
+        ],
+        "type": "object"
+      },
+      "ClientNodeTraffic": {
+        "description": "Direction is from the user's perspective: Up is user -> node,\nDown is node -> user. These are observed bytes, independent of quota resets.",
+        "properties": {
+          "down": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "nodeId": {
+            "type": "integer"
+          },
+          "nodeName": {
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "up": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "down",
+          "nodeId",
+          "nodeName",
+          "startedAt",
+          "total",
+          "up",
+          "updatedAt"
         ],
         "type": "object"
       },
@@ -1997,6 +2300,9 @@
             "example": 0,
             "type": "integer"
           },
+          "loginUsername": {
+            "type": "string"
+          },
           "reset": {
             "example": 0,
             "type": "integer"
@@ -2088,6 +2394,18 @@
             "format": "int64",
             "type": "integer"
           },
+          "rawDown": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rawKnown": {
+            "type": "boolean"
+          },
+          "rawUp": {
+            "description": "Raw counters are lifetime wire bytes, independent of quota resets.",
+            "format": "int64",
+            "type": "integer"
+          },
           "reset": {
             "example": 0,
             "type": "integer"
@@ -2135,6 +2453,9 @@
           "inboundId",
           "lastOnline",
           "lastSubFetch",
+          "rawDown",
+          "rawKnown",
+          "rawUp",
           "reset",
           "resetCount",
           "resetDay",
@@ -2143,6 +2464,102 @@
           "total",
           "up",
           "uuid"
+        ],
+        "type": "object"
+      },
+      "ClientTrafficReport": {
+        "properties": {
+          "down": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/ClientNodeTraffic"
+            },
+            "type": "array"
+          },
+          "recorded": {
+            "type": "boolean"
+          },
+          "startedAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "up": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "down",
+          "nodes",
+          "recorded",
+          "startedAt",
+          "total",
+          "up",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "ClientUsagePoint": {
+        "properties": {
+          "bucket": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "down": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "nodeId": {
+            "type": "integer"
+          },
+          "up": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bucket",
+          "down",
+          "nodeId",
+          "up"
+        ],
+        "type": "object"
+      },
+      "ClientUsageView": {
+        "properties": {
+          "generatedAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/ClientUsagePoint"
+            },
+            "type": "array"
+          },
+          "resolution": {
+            "type": "string"
+          },
+          "traffic": {
+            "$ref": "#/components/schemas/ClientTrafficReport"
+          }
+        },
+        "required": [
+          "generatedAt",
+          "points",
+          "resolution",
+          "traffic"
         ],
         "type": "object"
       },
@@ -2217,6 +2634,82 @@
           "online",
           "onlineCount",
           "total"
+        ],
+        "type": "object"
+      },
+      "DestinationUsage": {
+        "properties": {
+          "down": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "overflow": {
+            "type": "boolean"
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/DestinationUsageRow"
+            },
+            "type": "array"
+          },
+          "since": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "up": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedAt": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "down",
+          "overflow",
+          "partial",
+          "rows",
+          "since",
+          "status",
+          "up",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "DestinationUsageRow": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "down": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "host": {
+            "type": "string"
+          },
+          "lastSeen": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "up": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "category",
+          "down",
+          "host",
+          "lastSeen",
+          "up"
         ],
         "type": "object"
       },
@@ -5058,6 +5551,34 @@
         ],
         "type": "object"
       },
+      "SubscriptionClientInfo": {
+        "properties": {
+          "lastIp": {
+            "type": "string"
+          },
+          "lastSeen": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "userAgent": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "lastIp",
+          "lastSeen",
+          "name",
+          "userAgent",
+          "version"
+        ],
+        "type": "object"
+      },
       "SubscriptionPlan": {
         "description": "SubscriptionPlan is a reusable service template. Applying it preserves each\nsubscriber's credentials and measured traffic.",
         "properties": {
@@ -5537,19 +6058,203 @@
                       {
                         "category": "",
                         "host": "",
+                        "nodeName": "",
                         "time": 0
                       }
                     ],
                     "sampled": false,
                     "since": 0,
+                    "sources": [
+                      {
+                        "connections": 0,
+                        "name": "",
+                        "nodeId": 0,
+                        "sampled": false,
+                        "status": ""
+                      }
+                    ],
                     "status": "",
+                    "usage": null,
                     "visits": [
                       {
                         "category": "",
                         "host": "",
+                        "nodeName": "",
                         "time": 0
                       }
                     ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/devices/{email}": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Admin only. Registered HWID devices, live Xray source IPs from assigned nodes, and observed user upload/download bytes with node breakdown and collection timestamps. Traffic is cumulative since collection began, independent of quota resets, billing multipliers and manual corrections; it cannot be attributed to individual devices. Offline nodes retain their last recorded totals. No traffic records means unknown, not zero. Subscription-fetch timestamps and IPs do not establish device online state. IPs are masked before exposure to the panel. Source addresses are deduplicated across nodes; partial/unavailable collection must not be treated as zero online devices.",
+        "operationId": "get_panel_api_clients_devices_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ClientDeviceReport"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "connections": {
+                      "connections": [
+                        {
+                          "ip": "",
+                          "lastSeen": 0,
+                          "nodeId": 0,
+                          "nodeName": ""
+                        }
+                      ],
+                      "generatedAt": 0,
+                      "onlineSourceCount": 0,
+                      "sources": [
+                        {
+                          "name": "",
+                          "nodeId": 0,
+                          "status": ""
+                        }
+                      ],
+                      "status": ""
+                    },
+                    "devices": [
+                      {
+                        "authorization": false,
+                        "clientName": "",
+                        "clientVersion": "",
+                        "deviceModel": "",
+                        "deviceOs": "",
+                        "fingerprint": "",
+                        "firstSeen": 0,
+                        "id": 0,
+                        "lastIp": "",
+                        "lastSeen": 0,
+                        "osVersion": "",
+                        "userAgent": ""
+                      }
+                    ],
+                    "limit": 0,
+                    "registered": 0,
+                    "subscriptionClient": null,
+                    "traffic": {
+                      "down": 0,
+                      "nodes": [
+                        {
+                          "down": 0,
+                          "nodeId": 0,
+                          "nodeName": "",
+                          "startedAt": 0,
+                          "total": 0,
+                          "up": 0,
+                          "updatedAt": 0
+                        }
+                      ],
+                      "recorded": false,
+                      "startedAt": 0,
+                      "total": 0,
+                      "up": 0,
+                      "updatedAt": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/connections/{email}": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Admin or node-sync token only. Local Xray online source addresses for one exact client email. Never fans out to other nodes; unsupported or unreachable cores report unavailable. Admin responses mask IPs; node-sync responses retain raw addresses for internal deduplication.",
+        "operationId": "get_panel_api_clients_connections_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ClientConnectionReport"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "connections": [
+                      {
+                        "ip": "",
+                        "lastSeen": 0,
+                        "nodeId": 0,
+                        "nodeName": ""
+                      }
+                    ],
+                    "generatedAt": 0,
+                    "onlineSourceCount": 0,
+                    "sources": [
+                      {
+                        "name": "",
+                        "nodeId": 0,
+                        "status": ""
+                      }
+                    ],
+                    "status": ""
                   }
                 }
               }
@@ -5565,6 +6270,347 @@
         ],
         "summary": "Read own subscription quota, expiry and links.",
         "operationId": "get_panel_api_clients_mySubscriptions",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/myUsage": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Read the signed-in customer’s own observed upload/download history",
+        "operationId": "get_panel_api_clients_myUsage",
+        "description": "Customer sessions only; client ownership comes from the session. UTC hourly data is retained for 30 calendar days, with daily rollups or the latest 24 hourly buckets. Recording starts after installation; missing buckets are not estimates. No visited domains are returned. Cumulative observed bytes differ from billable quota usage.",
+        "parameters": [
+          {
+            "name": "resolution",
+            "in": "query",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "string",
+              "default": "day",
+              "enum": [
+                "day",
+                "hour"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ClientUsageView"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "generatedAt": 0,
+                    "points": [
+                      {
+                        "bucket": 0,
+                        "down": 0,
+                        "nodeId": 0,
+                        "up": 0
+                      }
+                    ],
+                    "resolution": "",
+                    "traffic": {
+                      "down": 0,
+                      "nodes": [
+                        {
+                          "down": 0,
+                          "nodeId": 0,
+                          "nodeName": "",
+                          "startedAt": 0,
+                          "total": 0,
+                          "up": 0,
+                          "updatedAt": 0
+                        }
+                      ],
+                      "recorded": false,
+                      "startedAt": 0,
+                      "total": 0,
+                      "up": 0,
+                      "updatedAt": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/myConnections": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Read the signed-in customer’s online source IPs",
+        "operationId": "get_panel_api_clients_myConnections",
+        "description": "Customer sessions only. Federated online sources for the session’s linked client, with masked IPs. Source IP count is not a physical device count. Unavailable nodes are explicitly reported; no visited domains are returned.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ClientConnectionReport"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "connections": [
+                      {
+                        "ip": "",
+                        "lastSeen": 0,
+                        "nodeId": 0,
+                        "nodeName": ""
+                      }
+                    ],
+                    "generatedAt": 0,
+                    "onlineSourceCount": 0,
+                    "sources": [
+                      {
+                        "name": "",
+                        "nodeId": 0,
+                        "status": ""
+                      }
+                    ],
+                    "status": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/myDevices": {
+      "get": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "List the signed-in customer’s bound devices and available slots",
+        "operationId": "get_panel_api_clients_myDevices",
+        "description": "Customer sessions only. Ownership comes from the session’s linked client; IPs are masked. Shared subscriptions require administrator management. Reading this endpoint never binds a device.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {
+                      "$ref": "#/components/schemas/ClientDeviceSlots"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "obj": {
+                    "devices": [
+                      {
+                        "authorization": false,
+                        "clientName": "",
+                        "clientVersion": "",
+                        "deviceModel": "",
+                        "deviceOs": "",
+                        "fingerprint": "",
+                        "firstSeen": 0,
+                        "id": 0,
+                        "lastIp": "",
+                        "lastSeen": 0,
+                        "osVersion": "",
+                        "userAgent": ""
+                      }
+                    ],
+                    "full": false,
+                    "limit": 0,
+                    "onlineIpLimit": 0,
+                    "registered": 0,
+                    "remaining": 0,
+                    "subscriptionClient": null
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Issue or rotate a customer subscription authorization",
+        "operationId": "post_panel_api_clients_myDevices",
+        "description": "Customer session only. Body: name (1–60 characters), optional replaceId. Returns id and a one-time token. Rotation invalidates the old token. Existing device bindings share the slot limit. Tokens grant subscription downloads, not access to the panel. Revocation does not disconnect already imported nodes.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/myDevices/{id}": {
+      "delete": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Unbind one of the signed-in customer’s devices",
+        "operationId": "delete_panel_api_clients_myDevices_id",
+        "description": "Releases one binding slot. Imported node credentials remain valid; another subscription update may bind the removed device again.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID of a device belonging to the signed-in customer.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/resetMySubscription": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Rotate the signed-in account’s linked subscription token. Ignores caller-supplied client identifiers. Preserves usage, expiry, proxy credentials and device bindings; returns {subId}. Shared legacy tokens must be separated first.",
+        "operationId": "post_panel_api_clients_resetMySubscription",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/panel/api/clients/resetSubscription/{email}": {
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Admin only. Rotate a client subscription token; returns {subId}. Old subscription URLs stop serving this client. Already imported proxy credentials remain valid. Preserves usage, expiry and device bindings; shared legacy tokens are rejected.",
+        "operationId": "post_panel_api_clients_resetSubscription_email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response",
@@ -7090,6 +8136,9 @@
                           "inboundId": 1,
                           "lastOnline": 1735680000000,
                           "lastSubFetch": 1735680000000,
+                          "rawDown": 0,
+                          "rawKnown": false,
+                          "rawUp": 0,
                           "reset": 0,
                           "resetCount": 0,
                           "resetDay": 0,
@@ -10325,6 +11374,7 @@
                         ],
                         "limitHwid": 0,
                         "limitIp": 0,
+                        "loginUsername": "",
                         "reset": 0,
                         "resetDay": 0,
                         "resetMax": 0,
@@ -12575,6 +13625,9 @@
                     "inboundId": 1,
                     "lastOnline": 1735680000000,
                     "lastSubFetch": 1735680000000,
+                    "rawDown": 0,
+                    "rawKnown": false,
+                    "rawUp": 0,
                     "reset": 0,
                     "resetCount": 0,
                     "resetDay": 0,
@@ -13001,6 +14054,36 @@
             "bearerAuth": []
           }
         ]
+      }
+    },
+    "/panel/api/nodes/status-feed": {
+      "get": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Read the administrator-only node metrics projection without node credentials",
+        "operationId": "get_panel_api_nodes_status_feed",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/panel/api/nodes/list": {
@@ -18601,6 +19684,9 @@
                     "inboundId": 1,
                     "lastOnline": 1735680000000,
                     "lastSubFetch": 1735680000000,
+                    "rawDown": 0,
+                    "rawKnown": false,
+                    "rawUp": 0,
                     "reset": 0,
                     "resetCount": 0,
                     "resetDay": 0,
@@ -18683,6 +19769,9 @@
                     "inboundId": 1,
                     "lastOnline": 1735680000000,
                     "lastSubFetch": 1735680000000,
+                    "rawDown": 0,
+                    "rawKnown": false,
+                    "rawUp": 0,
                     "reset": 0,
                     "resetCount": 0,
                     "resetDay": 0,
@@ -18729,6 +19818,9 @@
                       "inboundId": 1,
                       "lastOnline": 1735680000000,
                       "lastSubFetch": 1735680000000,
+                      "rawDown": 0,
+                      "rawKnown": false,
+                      "rawUp": 0,
                       "reset": 0,
                       "resetCount": 0,
                       "resetDay": 0,

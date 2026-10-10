@@ -92,7 +92,7 @@ export default function Orders({ admin = false }: { admin?: boolean }) {
         item.id.toLowerCase().includes(term) ||
         (item.planName || '').toLowerCase().includes(term) ||
         (item.userId && String(item.userId).includes(term)) ||
-        (item.paymentNote && item.paymentNote.toLowerCase().includes(term))
+        (item.paymentNote && item.paymentNote.toLowerCase().includes(term)),
     );
   }, [orders.data?.items, search]);
 
@@ -102,7 +102,7 @@ export default function Orders({ admin = false }: { admin?: boolean }) {
     const pending = list.filter((o) => o.status === 'pending').length;
     const completed = list.filter((o) => o.status === 'completed').length;
     const failedOrCancelled = list.filter(
-      (o) => o.status === 'failed' || o.status === 'cancelled'
+      (o) => o.status === 'failed' || o.status === 'cancelled',
     ).length;
     return { total, pending, completed, failedOrCancelled };
   }, [orders.data?.items, orders.data?.total]);
@@ -132,7 +132,15 @@ export default function Orders({ admin = false }: { admin?: boolean }) {
 
   return (
     <div className="orders-container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
+      >
         <Typography.Title level={admin ? 2 : 3} style={{ margin: 0 }}>
           {admin ? '订单管理' : '我的订单'}
         </Typography.Title>
@@ -328,13 +336,31 @@ export default function Orders({ admin = false }: { admin?: boolean }) {
             renderItem={(row) => (
               <List.Item>
                 <div className="order-mobile-card" style={{ width: '100%' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography.Text strong style={{ fontSize: 16 }}>{row.planName}</Typography.Text>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Typography.Text strong style={{ fontSize: 16 }}>
+                      {row.planName}
+                    </Typography.Text>
                     {getStatusTag(row.status)}
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--ant-color-text-secondary)' }}>
-                    <span>{periodName(row.period)} · {row.kind === 'renewal' ? '续期' : '购买'}</span>
-                    <strong style={{ color: 'var(--ant-color-primary)', fontSize: 16 }}>{money(row.amount)}</strong>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      color: 'var(--ant-color-text-secondary)',
+                    }}
+                  >
+                    <span>
+                      {periodName(row.period)} · {row.kind === 'renewal' ? '续期' : '购买'}
+                    </span>
+                    <strong style={{ color: 'var(--ant-color-primary)', fontSize: 16 }}>
+                      {money(row.amount)}
+                    </strong>
                   </div>
                   <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                     订单号：{row.id.slice(0, 12)}...
@@ -448,7 +474,10 @@ export default function Orders({ admin = false }: { admin?: boolean }) {
               }
             />
             <div>
-              <label htmlFor="payment-note" style={{ fontWeight: 500, display: 'block', marginBottom: 6 }}>
+              <label
+                htmlFor="payment-note"
+                style={{ fontWeight: 500, display: 'block', marginBottom: 6 }}
+              >
                 收款凭证 / 确认备注
               </label>
               <Input.TextArea

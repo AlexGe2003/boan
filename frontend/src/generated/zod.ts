@@ -484,6 +484,7 @@ export const ClientDeviceSlotsSchema = z.object({
   devices: z.array(z.lazy(() => ClientHwidInfoSchema)),
   full: z.boolean(),
   limit: z.number().int(),
+  onlineIpLimit: z.number().int().optional(),
   registered: z.number().int(),
   remaining: z.number().int(),
   subscriptionClient: z.lazy(() => SubscriptionClientInfoSchema).nullable().optional(),
@@ -491,6 +492,7 @@ export const ClientDeviceSlotsSchema = z.object({
 export type ClientDeviceSlots = z.infer<typeof ClientDeviceSlotsSchema>;
 
 export const ClientHwidInfoSchema = z.object({
+  authorization: z.boolean().optional(),
   clientName: z.string().optional(),
   clientVersion: z.string().optional(),
   deviceModel: z.string(),

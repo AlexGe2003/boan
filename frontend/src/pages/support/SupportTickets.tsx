@@ -488,7 +488,9 @@ export default function SupportTickets({ admin = false }: { admin?: boolean }) {
           disabled={busy}
         >
           <div style={{ marginBottom: 8 }}>
-            <span style={{ fontSize: 12, color: 'var(--ant-color-text-secondary)', marginRight: 8 }}>
+            <span
+              style={{ fontSize: 12, color: 'var(--ant-color-text-secondary)', marginRight: 8 }}
+            >
               快捷分类标签：
             </span>
             <div className="category-chips" style={{ marginTop: 6 }}>
@@ -565,9 +567,14 @@ export default function SupportTickets({ admin = false }: { admin?: boolean }) {
             <div className="ticket-chat-header">
               <Space split="·" size="middle">
                 <span>
-                  用户：<strong>{detail.data.ticket.userId ? `UID #${detail.data.ticket.userId}` : '当前用户'}</strong>
+                  用户：
+                  <strong>
+                    {detail.data.ticket.userId ? `UID #${detail.data.ticket.userId}` : '当前用户'}
+                  </strong>
                 </span>
-                <span>最后更新：{new Date(detail.data.ticket.updatedAt).toLocaleString('zh-CN')}</span>
+                <span>
+                  最后更新：{new Date(detail.data.ticket.updatedAt).toLocaleString('zh-CN')}
+                </span>
               </Space>
               {detail.data.ticket.status !== '已关闭' && (
                 <Popconfirm
@@ -587,16 +594,21 @@ export default function SupportTickets({ admin = false }: { admin?: boolean }) {
             {/* Chat Timeline Container */}
             <div className="ticket-chat-box">
               {detail.data.messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`chat-bubble-row ${m.fromAdmin ? 'admin' : 'user'}`}
-                >
+                <div key={m.id} className={`chat-bubble-row ${m.fromAdmin ? 'admin' : 'user'}`}>
                   <div className={`chat-avatar ${m.fromAdmin ? 'admin' : 'user'}`}>
                     {m.fromAdmin ? <CustomerServiceOutlined /> : <UserOutlined />}
                   </div>
                   <div className="chat-bubble-content">
                     <div className="chat-meta">
-                      <strong>{m.fromAdmin ? (admin ? '管理员 (我)' : '官方客服') : (admin ? `用户 (#${detail.data?.ticket.userId})` : '我')}</strong>
+                      <strong>
+                        {m.fromAdmin
+                          ? admin
+                            ? '管理员 (我)'
+                            : '官方客服'
+                          : admin
+                            ? `用户 (#${detail.data?.ticket.userId})`
+                            : '我'}
+                      </strong>
                       <span>{new Date(m.createdAt).toLocaleString('zh-CN')}</span>
                     </div>
                     <div className="chat-bubble-body">{m.body}</div>

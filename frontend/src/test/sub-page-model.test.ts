@@ -98,7 +98,12 @@ describe('buildSubApps', () => {
 
   it('gives Windows apps tailored import links', () => {
     const apps = buildSubApps(sub);
-    expect(apps.windows.map((a) => a.name)).toEqual(['v2rayN', 'Clash / Mihomo', 'Sing-box', 'FlClash']);
+    expect(apps.windows.map((a) => a.name)).toEqual([
+      'v2rayN',
+      'Clash / Mihomo',
+      'Sing-box',
+      'FlClash',
+    ]);
     expect(apps.windows[0].isCopyOnly).toBe(true);
     expect(apps.windows[1].url).toBe(`clash://install-config?url=${encSub}&name=Nova%20Net`);
   });
@@ -122,9 +127,9 @@ describe('buildSubApps', () => {
   });
 
   it('names the sing-box profile after the subscription id when there is no title', () => {
-    expect(buildSubApps({ ...sub, subTitle: '' }).windows.find((app) => app.name === 'Sing-box')!.url).toBe(
-      `sing-box://import-remote-profile?url=${encSub}#abc`,
-    );
+    expect(
+      buildSubApps({ ...sub, subTitle: '' }).windows.find((app) => app.name === 'Sing-box')!.url,
+    ).toBe(`sing-box://import-remote-profile?url=${encSub}#abc`);
   });
 
   it('appends flag=shadowrocket with & when the subscription URL already has a query', () => {
@@ -136,7 +141,6 @@ describe('buildSubApps', () => {
   });
 });
 
-
 describe('Apple subscription import', () => {
   const source = {
     subUrl: 'https://sub.example.com/raw/abc?token=1',
@@ -147,9 +151,9 @@ describe('Apple subscription import', () => {
 
   it('offers only Shadowrocket on iOS and imports the same subscription on macOS', () => {
     const apps = buildSubApps(source);
-    expect(apps.ios.map(app => app.name)).toEqual(['Shadowrocket']);
+    expect(apps.ios.map((app) => app.name)).toEqual(['Shadowrocket']);
     const rocket = apps.ios[0];
-    expect(apps.macos.find(app => app.name === 'Shadowrocket')).toEqual(rocket);
+    expect(apps.macos.find((app) => app.name === 'Shadowrocket')).toEqual(rocket);
     expect(rocket.url.startsWith('shadowrocket://add/sub://')).toBe(true);
     const [encoded, query] = rocket.url.split('sub://')[1].split('?');
     expect(atob(encoded)).toBe(`${source.subUrl}&flag=shadowrocket`);
@@ -158,7 +162,7 @@ describe('Apple subscription import', () => {
   });
 
   it('imports the YAML endpoint into Clash on macOS', () => {
-    const app = buildSubApps(source).macos.find(app => app.name === 'Clash / Mihomo')!;
+    const app = buildSubApps(source).macos.find((app) => app.name === 'Clash / Mihomo')!;
     const link = new URL(app.url);
     expect(link.protocol).toBe('clash:');
     expect(link.searchParams.get('url')).toBe(source.subClashUrl);

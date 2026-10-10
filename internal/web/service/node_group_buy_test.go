@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"gorm.io/gorm"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 func TestNodeGroupBuyCostPersistenceAndExpiry(t *testing.T) {

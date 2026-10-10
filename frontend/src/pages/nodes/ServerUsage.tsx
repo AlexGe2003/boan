@@ -203,8 +203,16 @@ export default function ServerUsage({ email, nodeId }: { email?: string; nodeId?
             />
           )}
 
-          <label htmlFor="billing-details-switch" style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-            <Switch id="billing-details-switch" size="small" checked={showBilling} onChange={setShowBilling} />
+          <label
+            htmlFor="billing-details-switch"
+            style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
+          >
+            <Switch
+              id="billing-details-switch"
+              size="small"
+              checked={showBilling}
+              onChange={setShowBilling}
+            />
             <span>计费明细</span>
           </label>
           <Button

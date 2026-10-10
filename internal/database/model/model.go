@@ -934,38 +934,39 @@ type Client struct {
 }
 
 type ClientRecord struct {
-	Id              int    `json:"id" gorm:"primaryKey;autoIncrement"`
-	Email           string `json:"email" gorm:"uniqueIndex;not null"`
-	SubID           string `json:"subId" gorm:"index;column:sub_id"`
-	UUID            string `json:"uuid" gorm:"column:uuid"`
-	Password        string `json:"password"`
-	Auth            string `json:"auth"`
-	Flow            string `json:"flow"`
-	Security        string `json:"security"`
-	Reverse         string `json:"reverse" gorm:"column:reverse"`
-	PrivateKey      string `json:"privateKey" gorm:"column:wg_private_key"`
-	PublicKey       string `json:"publicKey" gorm:"column:wg_public_key"`
-	AllowedIPs      string `json:"allowedIPs" gorm:"column:wg_allowed_ips"`
-	PreSharedKey    string `json:"preSharedKey" gorm:"column:wg_pre_shared_key"`
-	KeepAlive       int    `json:"keepAlive" gorm:"column:wg_keep_alive;default:0"`
-	ForwardedPorts  string `json:"forwardedPorts" gorm:"column:wg_forwarded_ports"`
-	Secret          string `json:"secret" gorm:"column:secret"`
-	AdTag           string `json:"adTag" gorm:"column:ad_tag;default:''"`
-	LimitIP         int    `json:"limitIp" gorm:"column:limit_ip"`
-	LimitHwid       int    `json:"limitHwid" gorm:"column:limit_hwid;default:0"`
-	TotalGB         int64  `json:"totalGB" gorm:"column:total_gb"`
-	ExpiryTime      int64  `json:"expiryTime" gorm:"column:expiry_time"`
-	Enable          bool   `json:"enable" gorm:"default:true"`
-	TgID            int64  `json:"tgId" gorm:"column:tg_id;index:idx_clients_tg_id"`
-	Group           string `json:"group" gorm:"column:group_name;default:'';index:idx_client_record_group"`
-	Comment         string `json:"comment"`
-	Reset           int    `json:"reset" gorm:"default:0"`
-	ResetDay        int    `json:"resetDay" gorm:"column:reset_day;default:0"`
-	ResetMax        int    `json:"resetMax" gorm:"column:reset_max;default:0"`
-	TrafficReset    string `json:"trafficReset" gorm:"column:traffic_reset;default:never;index:idx_clients_traffic_reset"`
-	TrafficResetDay int    `json:"trafficResetDay" gorm:"column:traffic_reset_day;default:1"`
-	CreatedAt       int64  `json:"createdAt" gorm:"autoCreateTime:milli"`
-	UpdatedAt       int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
+	SubscriptionAuthorizationRequired bool   `json:"-" gorm:"not null;default:false"`
+	Id                                int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	Email                             string `json:"email" gorm:"uniqueIndex;not null"`
+	SubID                             string `json:"subId" gorm:"index;column:sub_id"`
+	UUID                              string `json:"uuid" gorm:"column:uuid"`
+	Password                          string `json:"password"`
+	Auth                              string `json:"auth"`
+	Flow                              string `json:"flow"`
+	Security                          string `json:"security"`
+	Reverse                           string `json:"reverse" gorm:"column:reverse"`
+	PrivateKey                        string `json:"privateKey" gorm:"column:wg_private_key"`
+	PublicKey                         string `json:"publicKey" gorm:"column:wg_public_key"`
+	AllowedIPs                        string `json:"allowedIPs" gorm:"column:wg_allowed_ips"`
+	PreSharedKey                      string `json:"preSharedKey" gorm:"column:wg_pre_shared_key"`
+	KeepAlive                         int    `json:"keepAlive" gorm:"column:wg_keep_alive;default:0"`
+	ForwardedPorts                    string `json:"forwardedPorts" gorm:"column:wg_forwarded_ports"`
+	Secret                            string `json:"secret" gorm:"column:secret"`
+	AdTag                             string `json:"adTag" gorm:"column:ad_tag;default:''"`
+	LimitIP                           int    `json:"limitIp" gorm:"column:limit_ip"`
+	LimitHwid                         int    `json:"limitHwid" gorm:"column:limit_hwid;default:0"`
+	TotalGB                           int64  `json:"totalGB" gorm:"column:total_gb"`
+	ExpiryTime                        int64  `json:"expiryTime" gorm:"column:expiry_time"`
+	Enable                            bool   `json:"enable" gorm:"default:true"`
+	TgID                              int64  `json:"tgId" gorm:"column:tg_id;index:idx_clients_tg_id"`
+	Group                             string `json:"group" gorm:"column:group_name;default:'';index:idx_client_record_group"`
+	Comment                           string `json:"comment"`
+	Reset                             int    `json:"reset" gorm:"default:0"`
+	ResetDay                          int    `json:"resetDay" gorm:"column:reset_day;default:0"`
+	ResetMax                          int    `json:"resetMax" gorm:"column:reset_max;default:0"`
+	TrafficReset                      string `json:"trafficReset" gorm:"column:traffic_reset;default:never;index:idx_clients_traffic_reset"`
+	TrafficResetDay                   int    `json:"trafficResetDay" gorm:"column:traffic_reset_day;default:1"`
+	CreatedAt                         int64  `json:"createdAt" gorm:"autoCreateTime:milli"`
+	UpdatedAt                         int64  `json:"updatedAt" gorm:"autoUpdateTime:milli"`
 	// Owned solely by the node-snapshot sweep, which soft-orphans instead of
 	// deleting; orphans from any other cause stay at zero and are never reaped.
 	SyncOrphanedAt int64 `json:"-" gorm:"column:sync_orphaned_at;default:0"`
@@ -1025,16 +1026,17 @@ type ClientInbound struct {
 func (ClientInbound) TableName() string { return "client_inbounds" }
 
 type ClientHwid struct {
-	Id          int    `json:"id" gorm:"primaryKey;autoIncrement"`
-	SubID       string `json:"subId" gorm:"column:sub_id;not null;index;uniqueIndex:idx_client_hwids_sub_hash,priority:1"`
-	HwidHash    string `json:"-" gorm:"column:hwid_hash;size:64;not null;uniqueIndex:idx_client_hwids_sub_hash,priority:2"`
-	FirstSeen   int64  `json:"firstSeen" gorm:"column:first_seen;not null"`
-	LastSeen    int64  `json:"lastSeen" gorm:"column:last_seen;not null;index"`
-	UserAgent   string `json:"userAgent" gorm:"column:user_agent"`
-	DeviceOS    string `json:"deviceOs" gorm:"column:device_os"`
-	OsVersion   string `json:"osVersion" gorm:"column:os_version"`
-	DeviceModel string `json:"deviceModel" gorm:"column:device_model"`
-	LastIP      string `json:"lastIp" gorm:"column:last_ip"`
+	Authorization bool   `json:"-" gorm:"not null;default:false"`
+	Id            int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	SubID         string `json:"subId" gorm:"column:sub_id;not null;index;uniqueIndex:idx_client_hwids_sub_hash,priority:1"`
+	HwidHash      string `json:"-" gorm:"column:hwid_hash;size:64;not null;uniqueIndex:idx_client_hwids_sub_hash,priority:2"`
+	FirstSeen     int64  `json:"firstSeen" gorm:"column:first_seen;not null"`
+	LastSeen      int64  `json:"lastSeen" gorm:"column:last_seen;not null;index"`
+	UserAgent     string `json:"userAgent" gorm:"column:user_agent"`
+	DeviceOS      string `json:"deviceOs" gorm:"column:device_os"`
+	OsVersion     string `json:"osVersion" gorm:"column:os_version"`
+	DeviceModel   string `json:"deviceModel" gorm:"column:device_model"`
+	LastIP        string `json:"lastIp" gorm:"column:last_ip"`
 }
 
 func (ClientHwid) TableName() string { return "client_hwids" }

@@ -38,9 +38,10 @@ export function useClientVisitOptions(enabled = true) {
     queryFn: fetchClients,
     enabled,
     staleTime: 30_000,
-    select: (clients) => clients
-      .filter((client) => client.email.trim())
-      .map((client) => ({ value: client.email, label: client.loginUsername || client.email }))
-      .sort((a, b) => a.label.localeCompare(b.label)),
+    select: (clients) =>
+      clients
+        .filter((client) => client.email.trim())
+        .map((client) => ({ value: client.email, label: client.loginUsername || client.email }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
   });
 }

@@ -14,7 +14,12 @@ export default function AdminOverview() {
   const { t } = useTranslation();
   const users = useQuery({
     queryKey: ['admin-overview', 'users'],
-    queryFn: () => businessGet('clients/list/paged', summarySchema, { page: 1, pageSize: 1, accountScope: 'accounts' }),
+    queryFn: () =>
+      businessGet('clients/list/paged', summarySchema, {
+        page: 1,
+        pageSize: 1,
+        accountScope: 'accounts',
+      }),
     staleTime: 30_000,
   });
   const queries = [users];
@@ -95,7 +100,9 @@ export default function AdminOverview() {
             </div>
 
             <div className="admin-overview-section-group">
-              <div className="admin-overview-section-title">{t('adminOverview.infrastructure')}</div>
+              <div className="admin-overview-section-title">
+                {t('adminOverview.infrastructure')}
+              </div>
               <div className="admin-overview-shortcuts">
                 {[
                   {
@@ -147,7 +154,6 @@ export default function AdminOverview() {
             </div>
           </div>
         </Card>
-
       </div>
     </section>
   );

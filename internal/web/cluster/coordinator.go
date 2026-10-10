@@ -10,11 +10,12 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/crypto/nodetoken"
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
-	"gorm.io/gorm"
 )
 
 // FinalizeSnapshot is installed by the controller at process initialization.
@@ -43,6 +44,7 @@ func Call(ctx context.Context, p Peer, packet Packet, out any) error {
 	n.ApiToken = p.Token
 	return runtime.NewRemote(&n, nil).ClusterRPC(ctx, packet, out)
 }
+
 func validPeer(p Peer, base string) error {
 	n := p.Node
 	if n.Scheme != "https" || (n.TlsVerifyMode != "verify" && n.TlsVerifyMode != "pin") {
@@ -56,6 +58,7 @@ func validPeer(p Peer, base string) error {
 	}
 	return nil
 }
+
 func Inspect(guid string) (*Inspection, error) {
 	db := database.GetDB()
 	s, err := Load(db)
@@ -98,6 +101,7 @@ func Inspect(guid string) (*Inspection, error) {
 	}
 	return out, nil
 }
+
 func Initialize(ctx context.Context, self Peer) error {
 	Operation.Lock()
 	defer Operation.Unlock()
@@ -166,6 +170,7 @@ func Initialize(ctx context.Context, self Peer) error {
 	}
 	return resumeLocked(ctx, s)
 }
+
 func Transfer(ctx context.Context, target string) error {
 	Operation.Lock()
 	defer Operation.Unlock()
@@ -240,6 +245,7 @@ func Transfer(ctx context.Context, target string) error {
 	}
 	return resumeLocked(ctx, s)
 }
+
 func Resume(ctx context.Context) error {
 	Operation.Lock()
 	defer Operation.Unlock()
@@ -254,6 +260,7 @@ func Resume(ctx context.Context) error {
 	}
 	return resumeLocked(ctx, s)
 }
+
 func resumeLocked(ctx context.Context, s *State) error {
 	db := database.GetDB()
 	if s.Phase == "joining" {
@@ -353,6 +360,7 @@ func resumeLocked(ctx context.Context, s *State) error {
 	s.Snapshot = nil
 	return Save(db, s)
 }
+
 func Receive(guid string, p Packet) error {
 	Gate.Lock()
 	defer Gate.Unlock()
@@ -483,6 +491,7 @@ func Receive(guid string, p Packet) error {
 	}
 	return errors.New("unknown cluster action")
 }
+
 func SelfPeer(rawURL, guid, token string, allowPrivate bool) (Peer, error) {
 	u, err := url.Parse(rawURL)
 	if err != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" {

@@ -2,9 +2,10 @@ package service
 
 import (
 	"errors"
-	probing "github.com/prometheus-community/pro-bing"
 	"testing"
 	"time"
+
+	probing "github.com/prometheus-community/pro-bing"
 )
 
 func TestCarrierProbeWindowAndNoInventedLoss(t *testing.T) {

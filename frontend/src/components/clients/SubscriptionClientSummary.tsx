@@ -6,9 +6,11 @@ import { IntlUtil, type CalendarKind } from '@/utils';
 export default function SubscriptionClientSummary({
   client,
   datepicker = 'gregorian',
+  customerView = false,
 }: {
   client?: SubscriptionClientInfo | null;
   datepicker?: CalendarKind;
+  customerView?: boolean;
 }) {
   const { t } = useTranslation();
   const label = (key: string) => t(`pages.clients.devices.${key}`);
@@ -30,7 +32,11 @@ export default function SubscriptionClientSummary({
       ) : (
         <Typography.Text type="secondary">{label('noSubscriptionClient')}</Typography.Text>
       )}
-      <Typography.Text type="secondary">{label('subscriptionClientNote')}</Typography.Text>
+      <Typography.Text type="secondary">
+        {customerView
+          ? '根据最近的订阅请求识别，不代表当前连接的软件。'
+          : label('subscriptionClientNote')}
+      </Typography.Text>
     </section>
   );
 }

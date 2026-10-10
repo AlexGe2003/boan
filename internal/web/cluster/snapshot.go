@@ -10,9 +10,10 @@ import (
 	"sort"
 	"strings"
 
+	"gorm.io/gorm"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/crypto/nodetoken"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"gorm.io/gorm"
 )
 
 type Snapshot struct {
@@ -186,6 +187,7 @@ func (s *Snapshot) Rebase(oldSelf, target Peer, local []model.Inbound) error {
 	s.Tables["client_global_traffics"] = nil
 	return nil
 }
+
 func (s *Snapshot) Apply(db *gorm.DB) error {
 	schema, err := schemaSignature(db)
 	if err != nil {
@@ -264,7 +266,7 @@ func (s *Snapshot) Apply(db *gorm.DB) error {
 			return err
 		}
 	}
-	if db.Dialector.Name() == "postgres" {
+	if db.Name() == "postgres" {
 		for _, table := range tables {
 			if !db.Migrator().HasColumn(table, "id") {
 				continue
@@ -286,7 +288,7 @@ func (s *Snapshot) Apply(db *gorm.DB) error {
 
 func schemaSignature(db *gorm.DB) (string, error) {
 	var parts []string
-	parts = append(parts, db.Dialector.Name())
+	parts = append(parts, db.Name())
 	for _, table := range tables {
 		cols, err := db.Migrator().ColumnTypes(table)
 		if err != nil {

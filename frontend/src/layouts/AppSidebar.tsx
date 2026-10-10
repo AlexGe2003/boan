@@ -227,10 +227,7 @@ export default function AppSidebar() {
 
   const shownTabs = useMemo(
     () =>
-      tabs.filter(
-        (tab) =>
-          visibleNavKeys(access.role, [tab.key], access.pages).includes(tab.key),
-      ),
+      tabs.filter((tab) => visibleNavKeys(access.role, [tab.key], access.pages).includes(tab.key)),
     [tabs, access.role, access.pages],
   );
   const navItems = useMemo(() => shownTabs.filter((tab) => tab.icon !== 'logout'), [shownTabs]);

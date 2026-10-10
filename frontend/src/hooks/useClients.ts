@@ -60,7 +60,7 @@ interface SubSettings {
 }
 
 export interface ClientQueryParams {
-  accountScope?: "accounts" | "unlinked" | "all";
+  accountScope?: 'accounts' | 'unlinked' | 'all';
   page: number;
   pageSize: number;
   search?: string;

@@ -1,16 +1,17 @@
 :is(
-  .index-page,
-  .clients-page,
-  .inbounds-page,
-  .xray-page,
-  .settings-page,
-  .nodes-page,
-  .groups-page,
-  .hosts-page,
-  .plans-page,
-  .business-page,
-  .api-docs-page
-) .ant-card {
+    .index-page,
+    .clients-page,
+    .inbounds-page,
+    .xray-page,
+    .settings-page,
+    .nodes-page,
+    .groups-page,
+    .hosts-page,
+    .plans-page,
+    .business-page,
+    .api-docs-page
+  )
+  .ant-card {
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition:
@@ -20,106 +21,113 @@
 }
 
 :is(
-  .index-page,
-  .clients-page,
-  .inbounds-page,
-  .xray-page,
-  .settings-page,
-  .nodes-page,
-  .groups-page,
-  .hosts-page,
-  .plans-page,
-  .business-page,
-  .api-docs-page
-).is-dark .ant-card {
+    .index-page,
+    .clients-page,
+    .inbounds-page,
+    .xray-page,
+    .settings-page,
+    .nodes-page,
+    .groups-page,
+    .hosts-page,
+    .plans-page,
+    .business-page,
+    .api-docs-page
+  ).is-dark
+  .ant-card {
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 :is(
-  .index-page,
-  .clients-page,
-  .inbounds-page,
-  .xray-page,
-  .settings-page,
-  .nodes-page,
-  .groups-page,
-  .hosts-page,
-  .plans-page,
-  .business-page,
-  .api-docs-page
-).is-dark.is-ultra .ant-card {
+    .index-page,
+    .clients-page,
+    .inbounds-page,
+    .xray-page,
+    .settings-page,
+    .nodes-page,
+    .groups-page,
+    .hosts-page,
+    .plans-page,
+    .business-page,
+    .api-docs-page
+  ).is-dark.is-ultra
+  .ant-card {
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.7),
     inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
 :is(
-  .index-page,
-  .clients-page,
-  .inbounds-page,
-  .xray-page,
-  .settings-page,
-  .nodes-page,
-  .groups-page,
-  .hosts-page,
-  .plans-page,
-  .business-page,
-  .api-docs-page
-) .ant-card.ant-card-hoverable:hover {
+    .index-page,
+    .clients-page,
+    .inbounds-page,
+    .xray-page,
+    .settings-page,
+    .nodes-page,
+    .groups-page,
+    .hosts-page,
+    .plans-page,
+    .business-page,
+    .api-docs-page
+  )
+  .ant-card.ant-card-hoverable:hover {
   cursor: default;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 :is(
-  .index-page,
-  .clients-page,
-  .inbounds-page,
-  .xray-page,
-  .settings-page,
-  .nodes-page,
-  .groups-page,
-  .hosts-page,
-  .plans-page,
-  .business-page,
-  .api-docs-page
-).is-dark .ant-card.ant-card-hoverable:hover {
+    .index-page,
+    .clients-page,
+    .inbounds-page,
+    .xray-page,
+    .settings-page,
+    .nodes-page,
+    .groups-page,
+    .hosts-page,
+    .plans-page,
+    .business-page,
+    .api-docs-page
+  ).is-dark
+  .ant-card.ant-card-hoverable:hover {
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 :is(
-  .index-page,
-  .clients-page,
-  .inbounds-page,
-  .xray-page,
-  .settings-page,
-  .nodes-page,
-  .groups-page,
-  .hosts-page,
-  .plans-page,
-  .business-page,
-  .api-docs-page
-).is-dark.is-ultra .ant-card.ant-card-hoverable:hover {
+    .index-page,
+    .clients-page,
+    .inbounds-page,
+    .xray-page,
+    .settings-page,
+    .nodes-page,
+    .groups-page,
+    .hosts-page,
+    .plans-page,
+    .business-page,
+    .api-docs-page
+  ).is-dark.is-ultra
+  .ant-card.ant-card-hoverable:hover {
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.8),
     inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 :is(
-  .index-page,
-  .clients-page,
-  .inbounds-page,
-  .xray-page,
-  .settings-page,
-  .nodes-page,
-  .groups-page,
-  .hosts-page,
-  .plans-page,
-  .business-page,
-  .api-docs-page
-) .ant-card .ant-card-actions {
+    .index-page,
+    .clients-page,
+    .inbounds-page,
+    .xray-page,
+    .settings-page,
+    .nodes-page,
+    .groups-page,
+    .hosts-page,
+    .plans-page,
+    .business-page,
+    .api-docs-page
+  )
+  .ant-card
+  .ant-card-actions {
   background: transparent;
 }

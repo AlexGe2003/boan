@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/crypto"
@@ -37,7 +38,7 @@ func TestEntryLoginAndBearerCannotCrossDomains(t *testing.T) {
 	engine.POST("/entry-login", ctl.login)
 	// Valid credentials must not create a session on the wrong entry host.
 	for _, tc := range []struct{ host, role string }{{"admin.example.com", model.RoleCustomer}, {"user.example.com", model.RoleAdmin}} {
-		req := httptest.NewRequest("POST", "https://"+tc.host+"/entry-login", strings.NewReader(`{"username":"entry-`+tc.role+`","password":"entry-test-password"}`))
+		req := httptest.NewRequest(http.MethodPost, "https://"+tc.host+"/entry-login", strings.NewReader(`{"username":"entry-`+tc.role+`","password":"entry-test-password"}`))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		engine.ServeHTTP(w, req)
@@ -57,7 +58,7 @@ func TestEntryLoginAndBearerCannotCrossDomains(t *testing.T) {
 		host string
 		want int
 	}{{"admin.example.com", 204}, {"user.example.com", 403}} {
-		req := httptest.NewRequest("GET", "https://"+tc.host+"/entry-api", nil)
+		req := httptest.NewRequest(http.MethodGet, "https://"+tc.host+"/entry-api", nil)
 		req.Header.Set("Authorization", "Bearer "+token.Token)
 		w := httptest.NewRecorder()
 		engine.ServeHTTP(w, req)

@@ -18,12 +18,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/op/go-logging"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 	"github.com/mhsanaei/3x-ui/v3/internal/util/netsafe"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/runtime"
-	"github.com/op/go-logging"
 )
 
 // Each helper owns a separate database and process-wide gate, as real panels do.
@@ -135,12 +136,13 @@ func TestClusterProcessHelper(t *testing.T) {
 	digest := sha256.Sum256(server.Certificate().Raw)
 	self = Peer{Node: model.Node{Name: guid, Guid: guid, Scheme: "https", Address: endpoint.Hostname(), Port: port, BasePath: "/", Enable: true, InboundSyncMode: "all", AllowPrivateAddress: true, TlsVerifyMode: "pin", PinnedCertSha256: hex.EncodeToString(digest[:])}, Token: guid + "-token"}
 	raw, _ := json.Marshal(self)
-	if err := os.WriteFile(filepath.Join(dir, "ready.json"), raw, 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "ready.json"), raw, 0o600); err != nil {
 		t.Fatal(err)
 	}
 	// The parent terminates helpers through Process.Kill in cleanup.
 	select {}
 }
+
 func startPanel(t *testing.T, guid string) Peer {
 	t.Helper()
 	dir := t.TempDir()
@@ -172,6 +174,7 @@ func startPanel(t *testing.T, guid string) Peer {
 	t.Fatalf("helper failed: %s", output)
 	return Peer{}
 }
+
 func TestThreePanelsSwitchAndSwitchBack(t *testing.T) {
 	if os.Getenv("BOAN_CLUSTER_TEST_DIR") != "" {
 		t.Skip("parent only")

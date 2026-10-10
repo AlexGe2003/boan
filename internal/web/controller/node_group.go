@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
@@ -60,7 +61,7 @@ func listNodeGroups(c *gin.Context) {
 			jsonObj(c, nil, err)
 			return
 		}
-		out = append(out, nodeGroupInput{group, ids, counts[group.ID]})
+		out = append(out, nodeGroupInput{NodeGroup: group, InboundIDs: ids, PlanCount: counts[group.ID]})
 	}
 	jsonObj(c, out, nil)
 }

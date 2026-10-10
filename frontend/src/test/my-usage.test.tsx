@@ -109,7 +109,7 @@ it('keeps sites hidden and treats the sites hash as overview', async () => {
     within(tabs)
       .getAllByRole('button')
       .map((button) => button.textContent),
-  ).toEqual(['概览', '用量', '设备', '记录']);
+  ).toEqual(['概览', '订阅', '用量', '设备', '更多']);
   expect(screen.queryByRole('button', { name: '站点' })).toBeNull();
   fireEvent.click(within(tabs).getByRole('button', { name: '用量' }));
   await screen.findByRole('list', { name: '近 30 天流量' });

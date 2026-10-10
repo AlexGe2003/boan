@@ -2,11 +2,12 @@ package dispatcher
 
 import (
 	"encoding/json"
-	"github.com/xtls/xray-core/common/buf"
 	"os"
 	"path/filepath"
 	"sync"
 	"testing"
+
+	"github.com/xtls/xray-core/common/buf"
 )
 
 func TestUsageLedgerPersistenceAndIsolation(t *testing.T) {
@@ -49,6 +50,7 @@ func TestUsageLedgerPersistenceAndIsolation(t *testing.T) {
 		t.Fatal("bad ledger")
 	}
 }
+
 func TestUsageOverflowKeepsBytes(t *testing.T) {
 	l, _ := newUsageLedger(filepath.Join(t.TempDir(), "usage.json"))
 	for i := 0; i < usageMaxEntries; i++ {
@@ -72,6 +74,7 @@ func (w *usageTestWriter) WriteMultiBuffer(mb buf.MultiBuffer) error {
 	buf.ReleaseMulti(mb)
 	return nil
 }
+
 func TestUsageWrappersCountPayload(t *testing.T) {
 	c := &usageCounter{}
 	b := buf.New()

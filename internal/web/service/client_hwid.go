@@ -51,6 +51,7 @@ const (
 )
 
 type ClientHwidInfo struct {
+	Authorization bool   `json:"authorization,omitempty"`
 	ClientName    string `json:"clientName,omitempty"`
 	ClientVersion string `json:"clientVersion,omitempty"`
 	Id            int    `json:"id"`
@@ -65,6 +66,7 @@ type ClientHwidInfo struct {
 }
 
 type ClientDeviceSlots struct {
+	OnlineIPLimit      int                     `json:"onlineIpLimit,omitempty"`
 	SubscriptionClient *SubscriptionClientInfo `json:"subscriptionClient,omitempty"`
 	Devices            []ClientHwidInfo        `json:"devices"`
 	Registered         int                     `json:"registered"`
@@ -96,7 +98,7 @@ func (s *ClientService) DeviceSlots(email string) (ClientDeviceSlots, error) {
 			return ClientDeviceSlots{}, err
 		}
 	}
-	return ClientDeviceSlots{SubscriptionClient: subscriptionClient, Devices: devices, Registered: len(devices), Limit: limit, Remaining: max(limit-len(devices), 0), Full: limit > 0 && len(devices) >= limit}, nil
+	return ClientDeviceSlots{OnlineIPLimit: rec.LimitIP, SubscriptionClient: subscriptionClient, Devices: devices, Registered: len(devices), Limit: limit, Remaining: max(limit-len(devices), 0), Full: limit > 0 && len(devices) >= limit}, nil
 }
 
 func hashHwid(raw string) string {
@@ -153,6 +155,13 @@ func (s *ClientService) EnforceHwidForSubID(subID string, req HwidRequest) (Hwid
 	}
 
 	db := database.GetDB()
+	var authorizationRequired int64
+	if err := db.Model(&model.ClientRecord{}).Where("sub_id = ? AND enable = ? AND subscription_authorization_required = ?", subID, true, true).Count(&authorizationRequired).Error; err != nil {
+		return res, err
+	}
+	if authorizationRequired > 0 {
+		return HwidGateResult{Active: true, NotSupported: true}, nil
+	}
 	limit, err := effectiveHwidLimitForSubID(db, subID)
 	if err != nil {
 		return res, err
@@ -175,7 +184,7 @@ func (s *ClientService) EnforceHwidForSubID(subID string, req HwidRequest) (Hwid
 	hwidHash := hashHwid(req.Hwid)
 
 	err = db.Transaction(func(tx *gorm.DB) error {
-		if tx.Dialector.Name() == "postgres" {
+		if tx.Name() == "postgres" {
 			var records []model.ClientRecord
 			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Select("id").Where("sub_id = ?", subID).Order("id").Find(&records).Error; err != nil {
 				return err
@@ -306,7 +315,7 @@ func (s *ClientService) ListClientHwids(email string) ([]ClientHwidInfo, error) 
 	for _, r := range rows {
 		name, version := IdentifySubscriptionClient(r.UserAgent)
 		out = append(out, ClientHwidInfo{
-			ClientName: name, ClientVersion: version,
+			ClientName: name, ClientVersion: version, Authorization: r.Authorization,
 			Id:          r.Id,
 			FirstSeen:   r.FirstSeen,
 			LastSeen:    r.LastSeen,

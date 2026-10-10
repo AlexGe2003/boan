@@ -1,13 +1,15 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/xray"
 )
 
 func scaleQuotaBytes(bytes, rate, remainder int64) (int64, int64, error) {
@@ -31,7 +33,7 @@ func remoteWireDelta(tx *gorm.DB, nodeID int, email string, raw xray.ClientTraff
 	}
 	var base model.NodeClientTraffic
 	err := tx.Where("node_id = ? AND email = ?", nodeID, email).Take(&base).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, 0, err
 	}
 	up, down := max(raw.RawUp, 0), max(raw.RawDown, 0)

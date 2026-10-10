@@ -1,16 +1,18 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"net/netip"
 	"strconv"
 	"strings"
 
+	"gorm.io/gorm"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/geoblock"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
-	"gorm.io/gorm"
 )
 
 func (s *SettingService) GetWebsiteGeoBlockRegions() (string, error) {
@@ -71,7 +73,7 @@ func (s *SettingService) ConfigureWebsiteGeoBlock(enabled *bool, regions string,
 		for key, value := range values {
 			var row model.Setting
 			err := tx.Where("key = ?", key).First(&row).Error
-			if err == gorm.ErrRecordNotFound {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				row = model.Setting{Key: key, Value: value}
 				err = tx.Create(&row).Error
 			} else if err == nil {

@@ -23,8 +23,53 @@ _openapi:
         counts or live-session guarantees.
       url: '#admin-only-local-xray-accepted-connection-activity-by-exact-client-email-optional-hours1-or-24-reads-at-most-the-last-8-mib-domain-categories-and-connection-counts-are-approximate-no-per-domain-byte-counts-or-live-session-guarantees'
     - depth: 2
+      title: Admin only. Registered HWID devices, live Xray source IPs from assigned
+        nodes, and observed user upload/download bytes with node breakdown and
+        collection timestamps. Traffic is cumulative since collection began,
+        independent of quota resets, billing multipliers and manual corrections;
+        it cannot be attributed to individual devices. Offline nodes retain
+        their last recorded totals. No traffic records means unknown, not zero.
+        Subscription-fetch timestamps and IPs do not establish device online
+        state. IPs are masked before exposure to the panel. Source addresses are
+        deduplicated across nodes; partial/unavailable collection must not be
+        treated as zero online devices.
+      url: '#admin-only-registered-hwid-devices-live-xray-source-ips-from-assigned-nodes-and-observed-user-uploaddownload-bytes-with-node-breakdown-and-collection-timestamps-traffic-is-cumulative-since-collection-began-independent-of-quota-resets-billing-multipliers-and-manual-corrections-it-cannot-be-attributed-to-individual-devices-offline-nodes-retain-their-last-recorded-totals-no-traffic-records-means-unknown-not-zero-subscription-fetch-timestamps-and-ips-do-not-establish-device-online-state-ips-are-masked-before-exposure-to-the-panel-source-addresses-are-deduplicated-across-nodes-partialunavailable-collection-must-not-be-treated-as-zero-online-devices'
+    - depth: 2
+      title: Admin or node-sync token only. Local Xray online source addresses for one
+        exact client email. Never fans out to other nodes; unsupported or
+        unreachable cores report unavailable. Admin responses mask IPs;
+        node-sync responses retain raw addresses for internal deduplication.
+      url: '#admin-or-node-sync-token-only-local-xray-online-source-addresses-for-one-exact-client-email-never-fans-out-to-other-nodes-unsupported-or-unreachable-cores-report-unavailable-admin-responses-mask-ips-node-sync-responses-retain-raw-addresses-for-internal-deduplication'
+    - depth: 2
       title: Read own subscription quota, expiry and links.
       url: '#read-own-subscription-quota-expiry-and-links'
+    - depth: 2
+      title: Read the signed-in customer’s own observed upload/download history
+      url: '#read-the-signed-in-customers-own-observed-uploaddownload-history'
+    - depth: 2
+      title: Read the signed-in customer’s online source IPs
+      url: '#read-the-signed-in-customers-online-source-ips'
+    - depth: 2
+      title: List the signed-in customer’s bound devices and available slots
+      url: '#list-the-signed-in-customers-bound-devices-and-available-slots'
+    - depth: 2
+      title: Issue or rotate a customer subscription authorization
+      url: '#issue-or-rotate-a-customer-subscription-authorization'
+    - depth: 2
+      title: Unbind one of the signed-in customer’s devices
+      url: '#unbind-one-of-the-signed-in-customers-devices'
+    - depth: 2
+      title: Rotate the signed-in account’s linked subscription token. Ignores
+        caller-supplied client identifiers. Preserves usage, expiry, proxy
+        credentials and device bindings; returns {subId}. Shared legacy tokens
+        must be separated first.
+      url: '#rotate-the-signed-in-accounts-linked-subscription-token-ignores-caller-supplied-client-identifiers-preserves-usage-expiry-proxy-credentials-and-device-bindings-returns-subid-shared-legacy-tokens-must-be-separated-first'
+    - depth: 2
+      title: Admin only. Rotate a client subscription token; returns {subId}. Old
+        subscription URLs stop serving this client. Already imported proxy
+        credentials remain valid. Preserves usage, expiry and device bindings;
+        shared legacy tokens are rejected.
+      url: '#admin-only-rotate-a-client-subscription-token-returns-subid-old-subscription-urls-stop-serving-this-client-already-imported-proxy-credentials-remain-valid-preserves-usage-expiry-and-device-bindings-shared-legacy-tokens-are-rejected'
     - depth: 2
       title: Admin only. Observed lifetime client byte counters, manual corrections
         and budget status by directly connected node. Adjusted usage drives
@@ -154,8 +199,45 @@ _openapi:
           categories and connection counts are approximate; no per-domain byte
           counts or live-session guarantees.
         id: admin-only-local-xray-accepted-connection-activity-by-exact-client-email-optional-hours1-or-24-reads-at-most-the-last-8-mib-domain-categories-and-connection-counts-are-approximate-no-per-domain-byte-counts-or-live-session-guarantees
+      - content: Admin only. Registered HWID devices, live Xray source IPs from assigned
+          nodes, and observed user upload/download bytes with node breakdown and
+          collection timestamps. Traffic is cumulative since collection began,
+          independent of quota resets, billing multipliers and manual
+          corrections; it cannot be attributed to individual devices. Offline
+          nodes retain their last recorded totals. No traffic records means
+          unknown, not zero. Subscription-fetch timestamps and IPs do not
+          establish device online state. IPs are masked before exposure to the
+          panel. Source addresses are deduplicated across nodes;
+          partial/unavailable collection must not be treated as zero online
+          devices.
+        id: admin-only-registered-hwid-devices-live-xray-source-ips-from-assigned-nodes-and-observed-user-uploaddownload-bytes-with-node-breakdown-and-collection-timestamps-traffic-is-cumulative-since-collection-began-independent-of-quota-resets-billing-multipliers-and-manual-corrections-it-cannot-be-attributed-to-individual-devices-offline-nodes-retain-their-last-recorded-totals-no-traffic-records-means-unknown-not-zero-subscription-fetch-timestamps-and-ips-do-not-establish-device-online-state-ips-are-masked-before-exposure-to-the-panel-source-addresses-are-deduplicated-across-nodes-partialunavailable-collection-must-not-be-treated-as-zero-online-devices
+      - content: Admin or node-sync token only. Local Xray online source addresses for
+          one exact client email. Never fans out to other nodes; unsupported or
+          unreachable cores report unavailable. Admin responses mask IPs;
+          node-sync responses retain raw addresses for internal deduplication.
+        id: admin-or-node-sync-token-only-local-xray-online-source-addresses-for-one-exact-client-email-never-fans-out-to-other-nodes-unsupported-or-unreachable-cores-report-unavailable-admin-responses-mask-ips-node-sync-responses-retain-raw-addresses-for-internal-deduplication
       - content: Read own subscription quota, expiry and links.
         id: read-own-subscription-quota-expiry-and-links
+      - content: Read the signed-in customer’s own observed upload/download history
+        id: read-the-signed-in-customers-own-observed-uploaddownload-history
+      - content: Read the signed-in customer’s online source IPs
+        id: read-the-signed-in-customers-online-source-ips
+      - content: List the signed-in customer’s bound devices and available slots
+        id: list-the-signed-in-customers-bound-devices-and-available-slots
+      - content: Issue or rotate a customer subscription authorization
+        id: issue-or-rotate-a-customer-subscription-authorization
+      - content: Unbind one of the signed-in customer’s devices
+        id: unbind-one-of-the-signed-in-customers-devices
+      - content: Rotate the signed-in account’s linked subscription token. Ignores
+          caller-supplied client identifiers. Preserves usage, expiry, proxy
+          credentials and device bindings; returns {subId}. Shared legacy tokens
+          must be separated first.
+        id: rotate-the-signed-in-accounts-linked-subscription-token-ignores-caller-supplied-client-identifiers-preserves-usage-expiry-proxy-credentials-and-device-bindings-returns-subid-shared-legacy-tokens-must-be-separated-first
+      - content: Admin only. Rotate a client subscription token; returns {subId}. Old
+          subscription URLs stop serving this client. Already imported proxy
+          credentials remain valid. Preserves usage, expiry and device bindings;
+          shared legacy tokens are rejected.
+        id: admin-only-rotate-a-client-subscription-token-returns-subid-old-subscription-urls-stop-serving-this-client-already-imported-proxy-credentials-remain-valid-preserves-usage-expiry-and-device-bindings-shared-legacy-tokens-are-rejected
       - content: Admin only. Observed lifetime client byte counters, manual corrections
           and budget status by directly connected node. Adjusted usage drives
           estimates and shares; raw uploaded/downloaded bytes remain intact.
@@ -245,7 +327,31 @@ _openapi:
         id: reply-to-an-owned-open-ticket-using-body
       - content: Close an owned ticket.
         id: close-an-owned-ticket
-    contents: []
+    contents:
+      - content: Customer sessions only; client ownership comes from the session. UTC
+          hourly data is retained for 30 calendar days, with daily rollups or
+          the latest 24 hourly buckets. Recording starts after installation;
+          missing buckets are not estimates. No visited domains are returned.
+          Cumulative observed bytes differ from billable quota usage.
+        heading: read-the-signed-in-customers-own-observed-uploaddownload-history
+      - content: Customer sessions only. Federated online sources for the session’s
+          linked client, with masked IPs. Source IP count is not a physical
+          device count. Unavailable nodes are explicitly reported; no visited
+          domains are returned.
+        heading: read-the-signed-in-customers-online-source-ips
+      - content: Customer sessions only. Ownership comes from the session’s linked
+          client; IPs are masked. Shared subscriptions require administrator
+          management. Reading this endpoint never binds a device.
+        heading: list-the-signed-in-customers-bound-devices-and-available-slots
+      - content: 'Customer session only. Body: name (1–60 characters), optional
+          replaceId. Returns id and a one-time token. Rotation invalidates the
+          old token. Existing device bindings share the slot limit. Tokens grant
+          subscription downloads, not access to the panel. Revocation does not
+          disconnect already imported nodes.'
+        heading: issue-or-rotate-a-customer-subscription-authorization
+      - content: Releases one binding slot. Imported node credentials remain valid;
+          another subscription update may bind the removed device again.
+        heading: unbind-one-of-the-signed-in-customers-devices
 ---
 
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
@@ -257,7 +363,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/clients/account/{email}","method":"get"},{"path":"/panel/api/clients/account/{email}","method":"post"},{"path":"/panel/api/clients/activity/{email}","method":"get"},{"path":"/panel/api/clients/mySubscriptions","method":"get"},{"path":"/panel/api/nodes/usage","method":"get"},{"path":"/panel/api/nodes/usage/billing","method":"post"},{"path":"/panel/api/nodes/usage/control","method":"post"},{"path":"/panel/api/nodes/group-buy","method":"get"},{"path":"/panel/api/nodes/group-buy","method":"post"},{"path":"/panel/api/nodes/monitor","method":"get"},{"path":"/panel/api/setting/users/migrationTargets","method":"get"},{"path":"/panel/api/setting/users/delete/{id}","method":"post"},{"path":"/panel/api/setting/users/migrate/{id}","method":"post"},{"path":"/panel/api/node-groups","method":"get"},{"path":"/panel/api/node-groups/save","method":"post"},{"path":"/panel/api/node-groups/delete","method":"post"},{"path":"/panel/api/subscription-plans","method":"get"},{"path":"/panel/api/subscription-plans/assignments","method":"get"},{"path":"/panel/api/subscription-plans/save","method":"post"},{"path":"/panel/api/subscription-plans/delete","method":"post"},{"path":"/panel/api/subscription-plans/subscribe","method":"post"},{"path":"/panel/api/subscription-plans/apply","method":"post"},{"path":"/panel/api/commerce/plans","method":"get"},{"path":"/panel/api/commerce/orders","method":"get"},{"path":"/panel/api/commerce/orders","method":"post"},{"path":"/panel/api/commerce/orders/{id}/cancel","method":"post"},{"path":"/panel/api/commerce/orders/{id}/confirm","method":"post"},{"path":"/panel/api/support/nodes","method":"get"},{"path":"/panel/api/support/tickets","method":"get"},{"path":"/panel/api/support/tickets","method":"post"},{"path":"/panel/api/support/tickets/{id}","method":"get"},{"path":"/panel/api/support/tickets/{id}/reply","method":"post"},{"path":"/panel/api/support/tickets/{id}/close","method":"post"}]} showTitle />
+      <Comp document="./public/openapi.json" webhooks={[]} operations={[{"path":"/panel/api/clients/account/{email}","method":"get"},{"path":"/panel/api/clients/account/{email}","method":"post"},{"path":"/panel/api/clients/activity/{email}","method":"get"},{"path":"/panel/api/clients/devices/{email}","method":"get"},{"path":"/panel/api/clients/connections/{email}","method":"get"},{"path":"/panel/api/clients/mySubscriptions","method":"get"},{"path":"/panel/api/clients/myUsage","method":"get"},{"path":"/panel/api/clients/myConnections","method":"get"},{"path":"/panel/api/clients/myDevices","method":"get"},{"path":"/panel/api/clients/myDevices","method":"post"},{"path":"/panel/api/clients/myDevices/{id}","method":"delete"},{"path":"/panel/api/clients/resetMySubscription","method":"post"},{"path":"/panel/api/clients/resetSubscription/{email}","method":"post"},{"path":"/panel/api/nodes/usage","method":"get"},{"path":"/panel/api/nodes/usage/billing","method":"post"},{"path":"/panel/api/nodes/usage/control","method":"post"},{"path":"/panel/api/nodes/group-buy","method":"get"},{"path":"/panel/api/nodes/group-buy","method":"post"},{"path":"/panel/api/nodes/monitor","method":"get"},{"path":"/panel/api/setting/users/migrationTargets","method":"get"},{"path":"/panel/api/setting/users/delete/{id}","method":"post"},{"path":"/panel/api/setting/users/migrate/{id}","method":"post"},{"path":"/panel/api/node-groups","method":"get"},{"path":"/panel/api/node-groups/save","method":"post"},{"path":"/panel/api/node-groups/delete","method":"post"},{"path":"/panel/api/subscription-plans","method":"get"},{"path":"/panel/api/subscription-plans/assignments","method":"get"},{"path":"/panel/api/subscription-plans/save","method":"post"},{"path":"/panel/api/subscription-plans/delete","method":"post"},{"path":"/panel/api/subscription-plans/subscribe","method":"post"},{"path":"/panel/api/subscription-plans/apply","method":"post"},{"path":"/panel/api/commerce/plans","method":"get"},{"path":"/panel/api/commerce/orders","method":"get"},{"path":"/panel/api/commerce/orders","method":"post"},{"path":"/panel/api/commerce/orders/{id}/cancel","method":"post"},{"path":"/panel/api/commerce/orders/{id}/confirm","method":"post"},{"path":"/panel/api/support/nodes","method":"get"},{"path":"/panel/api/support/tickets","method":"get"},{"path":"/panel/api/support/tickets","method":"post"},{"path":"/panel/api/support/tickets/{id}","method":"get"},{"path":"/panel/api/support/tickets/{id}/reply","method":"post"},{"path":"/panel/api/support/tickets/{id}/close","method":"post"}]} showTitle />
     </>
   );
 }

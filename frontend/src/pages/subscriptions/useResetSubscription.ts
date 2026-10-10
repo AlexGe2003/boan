@@ -17,7 +17,9 @@ export function useResetSubscription({
   const confirmReset = () => {
     if (pending) return;
     modal.confirm({
-      title: '重置订阅链接',
+      title: '重置订阅链接？',
+      centered: true,
+      width: 420,
       content: `${email ? `用户：${email}。` : ''}重置后旧订阅链接将失效，请复制新链接并重新导入客户端。流量和有效期保持不变，已导入的节点仍可能继续连接。`,
       okText: '确认重置',
       cancelText: '取消',

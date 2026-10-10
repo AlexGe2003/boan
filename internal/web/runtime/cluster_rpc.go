@@ -3,8 +3,9 @@ package runtime
 import (
 	"context"
 	"encoding/json"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"net/http"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
 // ClusterRPC requires an admin token on the receiving panel.

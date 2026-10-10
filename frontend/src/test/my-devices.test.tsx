@@ -117,21 +117,27 @@ it('keeps occupied slots visible when unbinding fails', async () => {
   expect(screen.getByText('Available slots').parentElement?.textContent).toContain('0');
 });
 
-it('directs a limited subscription to HWID import rather than ordinary Clash import', () => {
+it('offers platform-specific subscription formats without exposing hardware details', () => {
   renderWithProviders(
     <SubscriptionDevicePicker
       url="https://example.com/sub/private"
       clashUrl="https://example.com/clash/private"
-      hwidRequired
     />,
   );
-  expect(screen.getByText('此套餐需要设备绑定')).toBeTruthy();
-  expect(screen.queryByText('Clash Verge Rev')).toBeNull();
-  expect(screen.queryByRole('button', { name: '一键导入到客户端' })).toBeNull();
-  expect((screen.getByRole('textbox', { name: '订阅地址' }) as HTMLInputElement).value).toBe(
-    'https://example.com/sub/private',
-  );
-  expect(screen.getByRole('button', { name: /复制订阅链接/ })).toBeTruthy();
+  expect(screen.queryByText(/HWID/)).toBeNull();
+  expect(screen.getByText('Clash Verge Rev')).toBeTruthy();
+  const address = () =>
+    (screen.getByRole('textbox', { name: '订阅地址' }) as HTMLInputElement).value;
+  expect(address()).toBe('https://example.com/clash/private');
+  fireEvent.click(screen.getByRole('button', { name: 'iOS' }));
+  expect(screen.getByText('Shadowrocket')).toBeTruthy();
+  expect(address()).toBe('https://example.com/sub/private?flag=shadowrocket');
+  fireEvent.click(screen.getByRole('button', { name: 'Android' }));
+  expect(screen.getByText('v2rayNG')).toBeTruthy();
+  expect(address()).toBe('https://example.com/sub/private');
+  fireEvent.click(screen.getByRole('button', { name: 'macOS' }));
+  expect(screen.getByText('Clash Verge Rev')).toBeTruthy();
+  expect(address()).toBe('https://example.com/clash/private');
 });
 
 it('shows account subscription software without creating a device slot', async () => {
@@ -158,4 +164,27 @@ it('shows account subscription software without creating a device slot', async (
   expect(screen.getByText('Bound devices').parentElement?.textContent).toContain('0');
   expect(screen.getByText('Available slots').parentElement?.textContent).toContain('3');
   expect(screen.queryByText('Phone 1')).toBeNull();
+});
+
+it('keeps native platform clients and hides Clash Mi and Karing', () => {
+  renderWithProviders(
+    <SubscriptionDevicePicker
+      url="https://example.com/sub/private"
+      clashUrl="https://example.com/clash/private"
+    />,
+  );
+  for (const [platform, client] of [
+    ['Windows', 'v2rayN'],
+    ['macOS', 'Shadowrocket'],
+    ['Android', 'v2rayNG'],
+    ['iOS', 'Shadowrocket'],
+  ]) {
+    fireEvent.click(screen.getByRole('button', { name: platform }));
+    expect(screen.queryByText('Clash Mi')).toBeNull();
+    expect(screen.queryByText('Karing')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: client }));
+    expect((screen.getByRole('textbox', { name: '订阅地址' }) as HTMLInputElement).value).toBe(
+      'https://example.com/sub/private' + (client === 'Shadowrocket' ? '?flag=shadowrocket' : ''),
+    );
+  }
 });

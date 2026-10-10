@@ -773,7 +773,6 @@
       "advancedTitle": "高级设置"
     },
     "clients": {
-      "managementIntro": "新增用户时只需设置登录账号和密码；创建后勾选用户即可分配套餐。每个用户拥有独立的订阅链接与流量记录。",
       "tabBasics": "基本",
       "tabCredentials": "凭据",
       "tabLinks": "链接",
@@ -2737,29 +2736,13 @@
     "operations": "服务管理",
     "infrastructure": "节点与网络",
     "system": "系统配置",
-    "runtime": "系统运行",
-    "advancedNetwork": "高级网络"
+    "runtime": "系统运行"
   },
   "networkGuide": {
-    "nodes": {
-      "title": "节点管理",
-      "hint": "添加和管理服务器节点，查看连接状态并配置节点参数。"
-    },
-    "inbounds": {
-      "title": "入站管理",
-      "hint": "配置客户端连接使用的协议与端口，并将节点加入套餐供用户使用。"
-    },
-    "hosts": {
-      "title": "订阅节点展示",
-      "hint": "配置订阅中显示的节点名称、地址与连接参数。"
-    },
-    "outbound": {
-      "title": "出站管理",
-      "hint": "配置流量离开服务器时使用的连接方式，可通过路由规则选择对应出站。"
-    },
-    "routing": {
-      "title": "路由规则",
-      "hint": "按域名、IP 或协议匹配流量，指定直连、代理或阻断；规则按顺序匹配。"
-    }
+    "nodes": {},
+    "inbounds": {},
+    "hosts": {},
+    "outbound": {},
+    "routing": {}
   }
 }

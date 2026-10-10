@@ -441,13 +441,12 @@ func mergeClientIps(old, new []IPWithTimestamp, staleCutoff int64, newAlwaysLive
 }
 
 // selectIpsToBan splits the live IPs (sorted oldest-first by partitionLiveIps)
-// into the newest `limit` entries to keep and the older remainder to ban.
+// into the first `limit` entries to keep and the later remainder to ban.
 func selectIpsToBan(live []IPWithTimestamp, limit int) (kept, banned []IPWithTimestamp) {
 	if limit <= 0 || len(live) <= limit {
 		return live, nil
 	}
-	cutoff := len(live) - limit
-	return live[cutoff:], live[:cutoff]
+	return live[:limit], live[limit:]
 }
 
 func partitionLiveIps(ipMap map[string]int64, observedThisScan map[string]bool) (live, historical []IPWithTimestamp) {
@@ -465,7 +464,12 @@ func partitionLiveIps(ipMap map[string]int64, observedThisScan map[string]bool) 
 			historical = append(historical, entry)
 		}
 	}
-	sort.Slice(live, func(i, j int) bool { return live[i].Timestamp < live[j].Timestamp })
+	sort.Slice(live, func(i, j int) bool {
+		if live[i].Timestamp == live[j].Timestamp {
+			return live[i].IP < live[j].IP
+		}
+		return live[i].Timestamp < live[j].Timestamp
+	})
 	sort.Slice(historical, func(i, j int) bool { return historical[i].Timestamp < historical[j].Timestamp })
 	return live, historical
 }
@@ -542,7 +546,23 @@ func (j *CheckClientIpJob) updateInboundClientIps(tx *gorm.DB, inboundClientIps 
 
 	// historical db-only ips are excluded from this count on purpose.
 	limitedIps, allowedIps := j.allowlist.split(liveIps)
+	admitted := make(map[string]bool, len(oldIpsWithTime))
+	for _, entry := range oldIpsWithTime {
+		admitted[entry.IP] = true
+	}
+	sort.SliceStable(limitedIps, func(i, k int) bool {
+		return admitted[limitedIps[i].IP] && !admitted[limitedIps[k].IP]
+	})
 	keptLive, bannedLive := selectIpsToBan(limitedIps, limitIp)
+	// Ban deduplication uses the core's dispatch timestamp, not a sync heartbeat.
+	for i := range bannedLive {
+		for _, observed := range newIpsWithTime {
+			if bannedLive[i].IP == observed.IP {
+				bannedLive[i].Timestamp = observed.Timestamp
+				break
+			}
+		}
+	}
 	// Allowlisted addresses stay connected and out of the count: charging them
 	// against the limit would still cut the shared network the entry protects.
 	keptLive = append(keptLive, allowedIps...)
@@ -573,6 +593,14 @@ func (j *CheckClientIpJob) updateInboundClientIps(tx *gorm.DB, inboundClientIps 
 	// recently seen ips. banned live ips are already in the fail2ban log
 	// and will reappear in the next scan if they reconnect.
 	dbIps := make([]IPWithTimestamp, 0, len(keptLive)+len(historicalIps))
+	// Only locally observed admitted IPs get a heartbeat; peers must not echo it.
+	if observedAreLive {
+		for i := range keptLive {
+			if observedThisScan[keptLive[i].IP] {
+				keptLive[i].Timestamp = time.Now().Unix()
+			}
+		}
+	}
 	dbIps = append(dbIps, keptLive...)
 	dbIps = append(dbIps, historicalIps...)
 	jsonIps, _ := json.Marshal(dbIps)

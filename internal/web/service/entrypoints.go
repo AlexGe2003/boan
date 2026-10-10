@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"net/url"
@@ -11,9 +12,10 @@ import (
 	"strings"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"gorm.io/gorm"
 )
 
 // EntryPoints is CLI-managed so a routine settings form cannot erase access policy.
@@ -76,7 +78,7 @@ func ValidateEntryURL(raw string) (*url.URL, error) {
 				return nil, fmt.Errorf("invalid hostname")
 			}
 			for _, ch := range label {
-				if !(ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' || ch == '-') {
+				if (ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && ch != '-' {
 					return nil, fmt.Errorf("invalid hostname")
 				}
 			}
@@ -264,7 +266,7 @@ func (s *SettingService) ConfigureSubscriptionOrigin(raw, certPath, keyPath stri
 		for key, value := range values {
 			var row model.Setting
 			err := tx.Where("key = ?", key).First(&row).Error
-			if err == gorm.ErrRecordNotFound {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				row = model.Setting{Key: key, Value: value}
 				err = tx.Create(&row).Error
 			} else if err == nil {

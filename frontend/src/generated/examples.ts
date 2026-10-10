@@ -508,6 +508,7 @@ export const EXAMPLES: Record<string, unknown> = {
     },
     "devices": [
       {
+        "authorization": false,
         "clientName": "",
         "clientVersion": "",
         "deviceModel": "",
@@ -547,6 +548,7 @@ export const EXAMPLES: Record<string, unknown> = {
   "ClientDeviceSlots": {
     "devices": [
       {
+        "authorization": false,
         "clientName": "",
         "clientVersion": "",
         "deviceModel": "",
@@ -562,11 +564,13 @@ export const EXAMPLES: Record<string, unknown> = {
     ],
     "full": false,
     "limit": 0,
+    "onlineIpLimit": 0,
     "registered": 0,
     "remaining": 0,
     "subscriptionClient": null
   },
   "ClientHwidInfo": {
+    "authorization": false,
     "clientName": "",
     "clientVersion": "",
     "deviceModel": "",

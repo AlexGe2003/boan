@@ -119,7 +119,24 @@ func migrateOutboundSubscriptionUserAgentColumn() error {
 	return migrator.AddColumn(&model.OutboundSubscription{}, "UserAgent")
 }
 
+func migrateClientAuthorizationColumn() error {
+	migrator := db.Migrator()
+	if migrator.HasTable(&model.ClientRecord{}) && !migrator.HasColumn(&model.ClientRecord{}, "subscription_authorization_required") {
+		if err := migrator.AddColumn(&model.ClientRecord{}, "SubscriptionAuthorizationRequired"); err != nil {
+			return err
+		}
+	}
+	if !migrator.HasTable(&model.ClientHwid{}) || migrator.HasColumn(&model.ClientHwid{}, "authorization") {
+		return nil
+	}
+	return migrator.AddColumn(&model.ClientHwid{}, "Authorization")
+}
+
 func initModels() error {
+	if err := migrateClientAuthorizationColumn(); err != nil {
+		return err
+	}
+
 	if err := migrateClientTrafficLastSubFetchColumn(); err != nil {
 		return err
 	}

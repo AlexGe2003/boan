@@ -116,13 +116,13 @@ func TestSelectIpsToBan(t *testing.T) {
 		{IP: "C", Timestamp: 300},
 	}
 
-	// over the limit: oldest connections are banned, newest keep the slots
+	// Over the limit, previously admitted connections keep their slots.
 	kept, banned := selectIpsToBan(live, 1)
-	if got := collectIps(kept); !reflect.DeepEqual(got, []string{"C"}) {
-		t.Fatalf("newest ip must keep the slot, got %v", got)
+	if got := collectIps(kept); !reflect.DeepEqual(got, []string{"A"}) {
+		t.Fatalf("oldest ip must keep the slot, got %v", got)
 	}
-	if got := collectIps(banned); !reflect.DeepEqual(got, []string{"A", "B"}) {
-		t.Fatalf("older ips must be banned oldest-first, got %v", got)
+	if got := collectIps(banned); !reflect.DeepEqual(got, []string{"B", "C"}) {
+		t.Fatalf("later ips must be banned, got %v", got)
 	}
 
 	// at the limit: nothing banned
@@ -175,9 +175,7 @@ func TestPartitionLiveIps_SingleLiveNotStarvedByStillFreshHistoricals(t *testing
 }
 
 func TestPartitionLiveIps_ConcurrentLiveIpsSortedAscending(t *testing.T) {
-	// when several ips are really live, partition returns them all in the
-	// live set sorted ascending by timestamp. updateInboundClientIps then
-	// keeps the newest and bans the oldest (last-IP-wins, #4699).
+	// Concurrent live IPs are ordered by timestamp before admission.
 	ipMap := map[string]int64{
 		"A": 5000,
 		"B": 5500,

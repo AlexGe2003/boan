@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, Empty, Segmented, Skeleton, Table, Tooltip } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { BarChartOutlined, RightOutlined, ReloadOutlined } from '@ant-design/icons';
 import { ClientUsageViewSchema, type ClientUsagePoint } from '@/generated/zod';
 import { HttpUtil, SizeFormatter } from '@/utils';
 import './CustomerUsage.css';
@@ -82,9 +82,11 @@ export function UsageBars({
 export default function MyUsage({
   userId,
   records = false,
+  onRecords,
 }: {
   userId: number;
   records?: boolean;
+  onRecords?: () => void;
 }) {
   const [resolution, setResolution] = useState<'day' | 'hour'>('day');
   const query = useQuery({
@@ -156,14 +158,10 @@ export default function MyUsage({
             ).map(([label, value]) => (
               <div className="customer-card" key={label}>
                 <span>{label}</span>
-                <strong>{data.traffic.recorded ? bytes(value) : '暂无记录'}</strong>
+                <strong>{data.traffic.recorded ? bytes(value) : '—'}</strong>
               </div>
             ))}
           </div>
-          <p className="customer-usage-note">
-            上传：用户 → 节点；下载：节点 →
-            用户。分时数据从启用采集后开始记录，空档表示无采集记录；已采集累计量与套餐计费用量可能不同。
-          </p>
           {records ? (
             <section className="customer-card">
               <Table<ClientUsagePoint>
@@ -185,13 +183,16 @@ export default function MyUsage({
                   { title: '下载', dataIndex: 'down', render: bytes },
                 ]}
                 pagination={{ pageSize: 15, hideOnSinglePage: true }}
-                scroll={{ x: 520 }}
+                scroll={{ x: 340 }}
                 locale={{ emptyText: '尚无用量记录' }}
               />
             </section>
           ) : data.traffic.nodes.length === 0 ? (
-            <section className="customer-card">
-              <Empty description="尚未采集到节点用量" />
+            <section className="customer-usage-empty">
+              <BarChartOutlined />
+              <h3>尚未采集到用量</h3>
+              <p>开始采集后，这里将显示流量趋势。</p>
+              <small>暂无数据不代表没有使用流量。</small>
             </section>
           ) : (
             data.traffic.nodes.map((node) => {
@@ -218,6 +219,16 @@ export default function MyUsage({
                 </section>
               );
             })
+          )}
+          <p className="customer-usage-note">
+            上传：用户 → 节点；下载：节点 →
+            用户。分时数据从启用采集后开始记录，空档表示无采集记录；已采集累计量与套餐计费用量可能不同。
+          </p>
+          {!records && onRecords && (
+            <button className="customer-records-link" onClick={onRecords}>
+              查看用量记录
+              <RightOutlined />
+            </button>
           )}
         </>
       )}

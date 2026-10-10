@@ -46,7 +46,7 @@ func TestBoanInstallAndUpdateOrigins(t *testing.T) {
 func TestSourceUpgradeRestoresProgramAndDatabase(t *testing.T) {
 	root := t.TempDir()
 	for _, dir := range []string{"backup/data", "app", "data", "bin"} {
-		if err := os.MkdirAll(filepath.Join(root, dir), 0700); err != nil {
+		if err := os.MkdirAll(filepath.Join(root, dir), 0o700); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -55,7 +55,7 @@ func TestSourceUpgradeRestoresProgramAndDatabase(t *testing.T) {
 		"backup/data/x-ui.db": "old-database", "app/x-ui": "new-binary", "app/source-commit": "new-commit",
 		"app/node-settings": "keep-node-settings", "data/x-ui.db": "migrated-database", "data/new-file": "new-state", "bin/x-ui": "new-menu",
 	} {
-		if err := os.WriteFile(filepath.Join(root, path), []byte(content), 0600); err != nil {
+		if err := os.WriteFile(filepath.Join(root, path), []byte(content), 0o600); err != nil {
 			t.Fatal(err)
 		}
 	}

@@ -1,10 +1,12 @@
 package middleware
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
-	"net/http"
 )
 
 // EntryPointGate runs after session decoding and before any page or API route.

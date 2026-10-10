@@ -1,18 +1,20 @@
 package middleware
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	xraygeodata "github.com/xtls/xray-core/common/geodata"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
-	xraygeodata "github.com/xtls/xray-core/common/geodata"
-	"google.golang.org/protobuf/proto"
 )
 
 func TestWebsiteGeoBlockLiveSwitchAndForwarding(t *testing.T) {
@@ -31,7 +33,7 @@ func TestWebsiteGeoBlockLiveSwitchAndForwarding(t *testing.T) {
 		t.Fatal(err)
 	}
 	geoPath := filepath.Join(dir, "geoip.dat")
-	if err = os.WriteFile(geoPath, data, 0600); err != nil {
+	if err = os.WriteFile(geoPath, data, 0o600); err != nil {
 		t.Fatal(err)
 	}
 	svc := &service.SettingService{}
@@ -53,7 +55,7 @@ func TestWebsiteGeoBlockLiveSwitchAndForwarding(t *testing.T) {
 		{"/panel/api/nodes/status-feed", "invalid", 403},
 		{"/panel/", token.Token, 403},
 	} {
-		r := httptest.NewRequest("GET", "http://panel.example.com"+tc.path, nil)
+		r := httptest.NewRequest(http.MethodGet, "http://panel.example.com"+tc.path, nil)
 		r.RemoteAddr = "1.2.3.4:1234"
 		r.Header.Set("Authorization", "Bearer "+tc.token)
 		if got := WebsiteGeoStatus(r); got != tc.want {
@@ -65,7 +67,7 @@ func TestWebsiteGeoBlockLiveSwitchAndForwarding(t *testing.T) {
 	router.Any("/*path", func(c *gin.Context) { c.Status(204) })
 	run := func(peer, xff, path string, want int) {
 		t.Helper()
-		r := httptest.NewRequest("GET", "http://user.example.com"+path, nil)
+		r := httptest.NewRequest(http.MethodGet, "http://user.example.com"+path, nil)
 		r.RemoteAddr = peer
 		r.Header.Set("X-Forwarded-For", xff)
 		w := httptest.NewRecorder()

@@ -3,12 +3,13 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service/panel"
 	"github.com/mhsanaei/3x-ui/v3/internal/xray"
-	"net/http"
-	"testing"
 )
 
 func TestSubscriptionPlanAccountAndReapply(t *testing.T) {
@@ -205,7 +206,7 @@ func TestSubscriptionPlanAccountAndReapply(t *testing.T) {
 			t.Fatal(e)
 		}
 		r.Body.Close()
-		if r.StatusCode != 403 {
+		if r.StatusCode != http.StatusForbidden {
 			t.Fatalf("customer accessed %s: %d", path, r.StatusCode)
 		}
 	}

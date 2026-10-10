@@ -1908,6 +1908,9 @@
           "limit": {
             "type": "integer"
           },
+          "onlineIpLimit": {
+            "type": "integer"
+          },
           "registered": {
             "type": "integer"
           },
@@ -1934,6 +1937,9 @@
       },
       "ClientHwidInfo": {
         "properties": {
+          "authorization": {
+            "type": "boolean"
+          },
           "clientName": {
             "type": "string"
           },
@@ -6147,6 +6153,7 @@
                     },
                     "devices": [
                       {
+                        "authorization": false,
                         "clientName": "",
                         "clientVersion": "",
                         "deviceModel": "",
@@ -6457,6 +6464,7 @@
                   "obj": {
                     "devices": [
                       {
+                        "authorization": false,
                         "clientName": "",
                         "clientVersion": "",
                         "deviceModel": "",
@@ -6472,9 +6480,39 @@
                     ],
                     "full": false,
                     "limit": 0,
+                    "onlineIpLimit": 0,
                     "registered": 0,
                     "remaining": 0,
                     "subscriptionClient": null
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Subscription Business"
+        ],
+        "summary": "Issue or rotate a customer subscription authorization",
+        "operationId": "post_panel_api_clients_myDevices",
+        "description": "Customer session only. Body: name (1–60 characters), optional replaceId. Returns id and a one-time token. Rotation invalidates the old token. Existing device bindings share the slot limit. Tokens grant subscription downloads, not access to the panel. Revocation does not disconnect already imported nodes.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
                   }
                 }
               }
@@ -14016,6 +14054,36 @@
             "bearerAuth": []
           }
         ]
+      }
+    },
+    "/panel/api/nodes/status-feed": {
+      "get": {
+        "tags": [
+          "Nodes"
+        ],
+        "summary": "Read the administrator-only node metrics projection without node credentials",
+        "operationId": "get_panel_api_nodes_status_feed",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "obj": {}
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/panel/api/nodes/list": {

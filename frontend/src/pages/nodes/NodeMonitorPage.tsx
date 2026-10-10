@@ -152,6 +152,7 @@ function Metric({
       </div>
       {percent !== undefined ? (
         <Progress
+          aria-label={label}
           percent={Math.min(100, Math.max(0, percent))}
           showInfo={false}
           size="small"
@@ -162,7 +163,7 @@ function Metric({
                 ? 'var(--ant-color-warning)'
                 : 'var(--ant-color-primary)'
           }
-          trailColor="var(--ant-color-fill-secondary)"
+          railColor="var(--ant-color-fill-secondary)"
         />
       ) : (
         <div className="node-monitor-metric-no-progress" />
@@ -218,7 +219,12 @@ function NodeCard({ node }: { node: MonitoredNode }) {
           />
           <strong>{node.local ? t('nodeMonitor.local') : node.name}</strong>
         </div>
-        <Tag color={coreIssue ? 'warning' : online ? 'success' : 'default'}>{statusText}</Tag>
+        <Tag
+          color={coreIssue ? 'warning' : online ? 'success' : 'default'}
+          style={{ color: 'var(--ant-color-text)' }}
+        >
+          {statusText}
+        </Tag>
       </div>
       <div className="node-monitor-meta">
         <span className="node-monitor-address" title={node.address} dir="ltr">

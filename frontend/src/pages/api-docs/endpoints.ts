@@ -274,6 +274,13 @@ export const sections: readonly Section[] = [
         responseSchema: 'ClientDeviceSlots',
       },
       {
+        method: 'POST',
+        path: '/panel/api/clients/myDevices',
+        summary: 'Issue or rotate a customer subscription authorization',
+        description:
+          'Customer session only. Body: name (1–60 characters), optional replaceId. Returns id and a one-time token. Rotation invalidates the old token. Existing device bindings share the slot limit. Tokens grant subscription downloads, not access to the panel. Revocation does not disconnect already imported nodes.',
+      },
+      {
         method: 'DELETE',
         path: '/panel/api/clients/myDevices/:id',
         summary: 'Unbind one of the signed-in customer’s devices',
@@ -1957,6 +1964,11 @@ export const sections: readonly Section[] = [
     description:
       'Manage remote 3x-ui panels acting as nodes for a central panel. All endpoints under /panel/api/nodes.',
     endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/nodes/status-feed',
+        summary: 'Read the administrator-only node metrics projection without node credentials',
+      },
       {
         method: 'GET',
         path: '/panel/api/nodes/list',

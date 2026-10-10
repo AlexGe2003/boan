@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 	"io"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
 
 func entryMenuValue(s *service.SettingService, p service.EntryPoints, key string, out io.Writer) error {

@@ -30,7 +30,7 @@ it('explains missing collection instead of reporting zero website usage', async 
   await screen.findByText('尚未开启访问日志');
   expect(screen.queryByText('当前范围连接次数')).toBeNull();
   expect(HttpUtil.get).toHaveBeenCalledWith(
-    '/panel/api/clients/activity/alice%40example.com?hours=24&scope=web',
+    '/panel/api/clients/activity/alice%40example.com?hours=24&scope=web&nodeId=-1',
   );
 });
 
@@ -73,5 +73,7 @@ it('starts with websites and requests network statistics when switching scope', 
   fireEvent.click(screen.getByText('DNS / IP 连接'));
   await screen.findByText('1.1.1.1');
   expect(screen.queryByText('chatgpt.com')).toBeNull();
-  expect(get).toHaveBeenLastCalledWith('/panel/api/clients/activity/alice?hours=24&scope=network');
+  expect(get).toHaveBeenLastCalledWith(
+    '/panel/api/clients/activity/alice?hours=24&scope=network&nodeId=-1',
+  );
 });

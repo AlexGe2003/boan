@@ -10,10 +10,12 @@ export default function DeviceBindingTable({
   devices,
   onUnbind,
   datepicker = 'gregorian',
+  customerView = false,
 }: {
   devices: ClientHwidInfo[];
   onUnbind: (id: number) => Promise<void>;
   datepicker?: 'gregorian' | 'jalalian';
+  customerView?: boolean;
 }) {
   const { t } = useTranslation();
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -36,9 +38,11 @@ export default function DeviceBindingTable({
           <div style={{ color: 'var(--ant-color-text-secondary)' }}>
             {[entry.deviceOs, entry.osVersion].filter(Boolean).join(' ') || label('unknown')}
           </div>
-          <Typography.Text type="secondary" code>
-            {entry.fingerprint}
-          </Typography.Text>
+          {!customerView && (
+            <Typography.Text type="secondary" code>
+              {entry.fingerprint}
+            </Typography.Text>
+          )}
         </div>
       ),
     },
@@ -72,11 +76,15 @@ export default function DeviceBindingTable({
       fixed: 'right' as const,
       render: (_: unknown, entry: ClientHwidInfo) => (
         <Popconfirm
-          title={label('unbindConfirm')}
-          description={label('unbindNote')}
+          title={entry.authorization ? '撤销订阅授权？' : label('unbindConfirm')}
+          description={
+            entry.authorization
+              ? '该授权链接将无法再次获取订阅；已导入节点仍可能继续连接。'
+              : label('unbindNote')
+          }
           onConfirm={() => mutation.mutate(entry.id)}
           okButtonProps={{ danger: true }}
-          okText={label('unbind')}
+          okText={entry.authorization ? '撤销' : label('unbind')}
           cancelText={t('cancel')}
         >
           <Button
@@ -87,9 +95,9 @@ export default function DeviceBindingTable({
             icon={<DeleteOutlined />}
             disabled={mutation.isPending}
             loading={deletingId === entry.id}
-            aria-label={`${label('unbind')} ${entry.deviceModel || entry.fingerprint}`}
+            aria-label={`${entry.authorization ? '撤销' : label('unbind')} ${entry.deviceModel || entry.fingerprint}`}
           >
-            {label('unbind')}
+            {entry.authorization ? '撤销' : label('unbind')}
           </Button>
         </Popconfirm>
       ),

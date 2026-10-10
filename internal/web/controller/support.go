@@ -3,16 +3,18 @@ package controller
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
-	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
-	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+
+	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/web/session"
 )
 
 var supportMu sync.Mutex
@@ -33,6 +35,7 @@ func NewSupportController(g *gin.RouterGroup) {
 	g.POST("/tickets/:id/reply", replySupportTicket)
 	g.POST("/tickets/:id/close", closeSupportTicket)
 }
+
 func customerNodes(c *gin.Context) {
 	u := session.GetLoginUser(c)
 	type row struct {
@@ -74,6 +77,7 @@ func customerNodes(c *gin.Context) {
 	}
 	jsonObj(c, out, err)
 }
+
 func ticketScope(c *gin.Context) *gorm.DB {
 	q := database.GetDB().Model(&model.SupportTicket{})
 	u := session.GetLoginUser(c)
@@ -82,11 +86,13 @@ func ticketScope(c *gin.Context) *gorm.DB {
 	}
 	return q
 }
+
 func listSupportTickets(c *gin.Context) {
 	rows := []model.SupportTicket{}
 	err := ticketScope(c).Order("updated_at DESC").Limit(200).Find(&rows).Error
 	jsonObj(c, rows, err)
 }
+
 func ownedTicket(c *gin.Context) (model.SupportTicket, error) {
 	var t model.SupportTicket
 	id, err := strconv.Atoi(c.Param("id"))
@@ -99,6 +105,7 @@ func ownedTicket(c *gin.Context) (model.SupportTicket, error) {
 	}
 	return t, nil
 }
+
 func createSupportTicket(c *gin.Context) {
 	var req struct {
 		Subject string `json:"subject"`
@@ -133,6 +140,7 @@ func createSupportTicket(c *gin.Context) {
 	})
 	jsonObj(c, t, err)
 }
+
 func readSupportTicket(c *gin.Context) {
 	t, err := ownedTicket(c)
 	if err != nil {
@@ -143,6 +151,7 @@ func readSupportTicket(c *gin.Context) {
 	err = database.GetDB().Where("ticket_id=?", t.ID).Order("id").Find(&rows).Error
 	jsonObj(c, gin.H{"ticket": t, "messages": rows}, err)
 }
+
 func replySupportTicket(c *gin.Context) {
 	var req struct {
 		Body string `json:"body"`
@@ -181,6 +190,7 @@ func replySupportTicket(c *gin.Context) {
 	})
 	jsonObj(c, nil, err)
 }
+
 func closeSupportTicket(c *gin.Context) {
 	supportMu.Lock()
 	defer supportMu.Unlock()

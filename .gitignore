@@ -44,3 +44,44 @@ docker-compose.override.yml
 
 # Ignore .env (Environment Variables) file
 .env
+
+# Local credentials and deployment secrets
+.env.*
+!.env.example
+*.key
+*.p12
+*.pfx
+*.ppk
+id_rsa*
+id_ed25519*
+*.pem
+!internal/pia/trust/serverlist_public_key.pem
+服务器登录信息*.txt
+credentials*.json
+credentials*.txt
+secrets/
+
+# Test output, local previews, and design verification captures
+coverage/
+test-results/
+playwright-report/
+blob-report/
+*.test
+*.prof
+coverage.out
+__pycache__/
+*.py[cod]
+/design-qa/
+/design-qa.md
+/subscription-plans-qa.md
+/frontend/tools/customer-preview/
+/screenshots/
+
+# Local release packages and operating-system files
+x-ui.next*
+*.zip
+*.tgz
+*.gz
+*.bak
+*.orig
+.AppleDouble/

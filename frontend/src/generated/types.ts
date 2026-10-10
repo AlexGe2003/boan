@@ -455,12 +455,14 @@ export interface ClientDeviceSlots {
   devices: ClientHwidInfo[];
   full: boolean;
   limit: number;
+  onlineIpLimit?: number;
   registered: number;
   remaining: number;
   subscriptionClient?: SubscriptionClientInfo | null;
 }
 
 export interface ClientHwidInfo {
+  authorization?: boolean;
   clientName?: string;
   clientVersion?: string;
   deviceModel: string;

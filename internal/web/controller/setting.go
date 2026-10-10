@@ -550,6 +550,7 @@ func (a *SettingController) migrationTargets(c *gin.Context) {
 	err := database.GetDB().Model(&model.ClientRecord{}).Select("id,email").Where("id NOT IN (?)", database.GetDB().Model(&model.User{}).Select("client_id").Where("client_id IS NOT NULL AND role IN ?", []string{model.RoleAdmin, model.RoleCustomer})).Order("email").Scan(&rows).Error
 	jsonObj(c, rows, err)
 }
+
 func (a *SettingController) migrateLegacyAccount(c *gin.Context) {
 	current := session.GetLoginUser(c)
 	if current == nil || !current.IsAdmin() {

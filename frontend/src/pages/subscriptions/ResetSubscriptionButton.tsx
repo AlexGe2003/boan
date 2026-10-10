@@ -1,4 +1,5 @@
 import { Button } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 import { useResetSubscription } from './useResetSubscription';
 
 export default function ResetSubscriptionButton({
@@ -16,7 +17,14 @@ export default function ResetSubscriptionButton({
     <>
       {modalContext}
       {messageContext}
-      <Button size="small" danger loading={pending} onClick={confirmReset}>
+      <Button
+        aria-label="重置订阅链接"
+        className="subscription-reset-button"
+        icon={<ReloadOutlined />}
+        danger
+        loading={pending}
+        onClick={confirmReset}
+      >
         重置订阅链接
       </Button>
     </>

@@ -3,7 +3,12 @@ import { useRouteError } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 export function isResourceLoadError(error: unknown): boolean {
-  return error instanceof Error && /Unable to preload CSS|Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk .* failed/i.test(error.message);
+  return (
+    error instanceof Error &&
+    /Unable to preload CSS|Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk .* failed/i.test(
+      error.message,
+    )
+  );
 }
 
 export default function RouteError() {
@@ -16,10 +21,16 @@ export default function RouteError() {
         status="warning"
         title={t(resourceError ? 'pageLoadError.resourceTitle' : 'pageLoadError.title')}
         subTitle={t(resourceError ? 'pageLoadError.resourceHint' : 'pageLoadError.hint')}
-        extra={<Space wrap>
-          <Button type="primary" onClick={() => window.location.reload()}>{t('pageLoadError.retry')}</Button>
-          <Button href={`${window.X_UI_BASE_PATH || '/'}panel/`}>{t('pageLoadError.home')}</Button>
-        </Space>}
+        extra={
+          <Space wrap>
+            <Button type="primary" onClick={() => window.location.reload()}>
+              {t('pageLoadError.retry')}
+            </Button>
+            <Button href={`${window.X_UI_BASE_PATH || '/'}panel/`}>
+              {t('pageLoadError.home')}
+            </Button>
+          </Space>
+        }
       />
     </main>
   );

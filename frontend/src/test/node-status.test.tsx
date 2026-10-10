@@ -52,6 +52,8 @@ it('shows the node list without view switching', async () => {
   expect(screen.queryByRole('button', { name: '复制节点名称' })).toBeNull();
 
   expect(screen.getAllByText('地区 / 节点').length).toBeGreaterThan(0);
-  expect(screen.getAllByText('传输协议').length).toBeGreaterThan(0);
+  expect(screen.getByText('VLESS')).toBeTruthy();
+  expect(screen.getByText('VMESS')).toBeTruthy();
+  expect(screen.getByText('TROJAN')).toBeTruthy();
   expect(screen.getAllByText('节点状态').length).toBeGreaterThan(0);
 });
