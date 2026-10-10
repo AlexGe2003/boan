@@ -160,7 +160,7 @@ it('shows account subscription software without creating a device slot', async (
       new Msg(true, '', url === '/panel/api/clients/myDevices' ? report : onlineSources()),
   );
   show();
-  await screen.findByText('Shadowrocket 2.2.92');
+  await screen.findByText('Shadowrocket');
   expect(screen.getByText('Bound devices').parentElement?.textContent).toContain('0');
   expect(screen.getByText('Available slots').parentElement?.textContent).toContain('3');
   expect(screen.queryByText('Phone 1')).toBeNull();

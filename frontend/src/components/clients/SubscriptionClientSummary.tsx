@@ -14,20 +14,27 @@ export default function SubscriptionClientSummary({
 }) {
   const { t } = useTranslation();
   const label = (key: string) => t(`pages.clients.devices.${key}`);
+  const clientName = client?.name || label('unknownClient');
   return (
     <section className="subscription-client-summary">
       <Typography.Title level={5}>{label('subscriptionClient')}</Typography.Title>
       {client ? (
         <>
-          <Tooltip title={client.userAgent || undefined}>
-            <Typography.Text strong>
-              {[client.name || label('unknownClient'), client.version].filter(Boolean).join(' ')}
-            </Typography.Text>
-          </Tooltip>
-          <Typography.Text type="secondary">
-            {label('lastFetch')}: {IntlUtil.formatDate(client.lastSeen, datepicker)}
-            {client.lastIp ? ` · ${label('subscriptionIP')}: ${client.lastIp}` : ''}
-          </Typography.Text>
+          {customerView ? (
+            <Typography.Text strong>{clientName}</Typography.Text>
+          ) : (
+            <>
+              <Tooltip title={client.userAgent || undefined}>
+                <Typography.Text strong>
+                  {[clientName, client.version].filter(Boolean).join(' ')}
+                </Typography.Text>
+              </Tooltip>
+              <Typography.Text type="secondary">
+                {label('lastFetch')}: {IntlUtil.formatDate(client.lastSeen, datepicker)}
+                {client.lastIp ? ` · ${label('subscriptionIP')}: ${client.lastIp}` : ''}
+              </Typography.Text>
+            </>
+          )}
         </>
       ) : (
         <Typography.Text type="secondary">{label('noSubscriptionClient')}</Typography.Text>
