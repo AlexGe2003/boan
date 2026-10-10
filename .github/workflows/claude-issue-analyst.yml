@@ -92,7 +92,7 @@ jobs:
             `git log -S`, `git show` and `git blame` all work - that is how you answer
             "when did this break" and "is it already fixed".
             
-            User-facing docs live in docs/content/docs/{en,ru,fa,zh}/
+            User-facing docs live in docs/content/docs/{en,zh}/
             (guide/installation, guide/first-login, help/faq, help/troubleshooting,
             help/migration, operations/multi-node, operations/backup-restore, config/,
             reference/). If a question is already answered there, link that page.

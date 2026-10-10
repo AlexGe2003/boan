@@ -104,12 +104,20 @@ func I18n(i18nType I18nType, key string, params ...string) string {
 	return msg
 }
 
-// LocalizerFor returns a new Localizer for the given language tag using the global bundle.
+// NormalizeLanguage maps legacy preferences to the two supported catalogs.
+func NormalizeLanguage(lang string) string {
+	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(lang)), "zh") {
+		return "zh-CN"
+	}
+	return "en-US"
+}
+
+// LocalizerFor returns a localizer for the supported language using the global bundle.
 func LocalizerFor(lang string) *i18n.Localizer {
 	if i18nBundle == nil {
 		return nil
 	}
-	return i18n.NewLocalizer(i18nBundle, lang)
+	return i18n.NewLocalizer(i18nBundle, NormalizeLanguage(lang))
 }
 
 // I18nForLang retrieves a localized message for a specific language tag with optional params.
@@ -136,7 +144,7 @@ func initTGBotLocalizer(settingService SettingService) error {
 		return err
 	}
 
-	LocalizerBot = i18n.NewLocalizer(i18nBundle, botLang)
+	LocalizerBot = i18n.NewLocalizer(i18nBundle, NormalizeLanguage(botLang))
 	return nil
 }
 

@@ -14,7 +14,7 @@ import {
 import { getSiteMessages } from './site-i18n';
 
 // Build locale-aware shared layout options. With `hideLocale: 'default-locale'`,
-// English URLs have no prefix while other locales are prefixed (`/fa`, `/ru`, `/zh`).
+// English URLs have no prefix while other locales are prefixed (`/zh`).
 export function baseOptions(lang: string): BaseLayoutProps {
   const prefix = lang === 'en' ? '' : `/${lang}`;
   const m = getSiteMessages(lang);

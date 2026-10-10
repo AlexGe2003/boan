@@ -55,7 +55,6 @@ const heroData = {
 
 const apps = buildSubApps({ subUrl, sId, subTitle, subClashUrl });
 const initialPlatform = detectPlatform(navigator.userAgent);
-const RTL_LANGUAGES = new Set(['fa-IR', 'ar-EG']);
 
 // The sub page runs its own violet accent, so every antd control on it picks the
 // hue up instead of the panel blue useTheme pins. Mirrored in SubPage.css.
@@ -148,7 +147,7 @@ export default function SubPage() {
     return items.sort((a, b) => (a.key === 'apps' ? -1 : b.key === 'apps' ? 1 : 0));
   }, [t, copy, open]);
 
-  const direction = RTL_LANGUAGES.has(lang) ? 'rtl' : 'ltr';
+  const direction = 'ltr';
   const pageClass = ['subscription-page', isDark && 'is-dark', isUltra && 'is-ultra']
     .filter(Boolean)
     .join(' ');

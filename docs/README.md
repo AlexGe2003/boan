@@ -101,7 +101,7 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full list and project convent
 ```
 app/             # Next.js App Router — layouts, home, docs, OG images, search, llms.txt
 components/      # React components — interactive tools, home sections, MDX bindings
-content/docs/    # MDX documentation, one folder per locale (en · fa · ru · zh)
+content/docs/    # MDX documentation, one folder per locale (en · zh)
 lib/             # source config, i18n, GitHub stats, and the unit-tested lib/xray logic
 public/          # static assets — logos, favicon, openapi.json, CNAME
 scripts/         # build-time scripts (API reference generation)
@@ -112,9 +112,7 @@ proxy.ts         # i18n middleware
 
 ## Internationalization
 
-Documentation is authored in **English**. Persian (`fa`, RTL), Russian (`ru`), and
-Chinese (`zh`) locales are wired up; untranslated pages fall back to English so they
-never 404. English URLs are unprefixed; other locales live under `/fa`, `/ru`, `/zh`.
+Documentation supports **English** and **Chinese** (`zh`). Untranslated Chinese pages fall back to English. English URLs are unprefixed; Chinese URLs live under `/zh`.
 
 ## Deployment
 

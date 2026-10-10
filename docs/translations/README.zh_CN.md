@@ -1,4 +1,4 @@
-[English](/README.md) | [فارسی](/docs/translations/README.fa_IR.md) | [العربية](/docs/translations/README.ar_EG.md) | [中文](/docs/translations/README.zh_CN.md) | [Español](/docs/translations/README.es_ES.md) | [Русский](/docs/translations/README.ru_RU.md) | [Türkçe](/docs/translations/README.tr_TR.md)
+[English](/README.md) | [中文](/docs/translations/README.zh_CN.md)
 
 <p align="center">
   <picture>

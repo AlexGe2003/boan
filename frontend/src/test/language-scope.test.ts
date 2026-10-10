@@ -26,9 +26,9 @@ describe('subscription language scope', () => {
     await readyI18n('subscription');
     expect(cookies.get('subLang')).toBe('en-US');
 
-    utils.LanguageManager.setLanguage('fa-IR', 'subscription');
+    utils.LanguageManager.setLanguage('zh-CN', 'subscription');
     expect(cookies.get('lang')).toBe('en-US');
-    expect(cookies.get('subLang')).toBe('fa-IR');
+    expect(cookies.get('subLang')).toBe('zh-CN');
     expect(reload).toHaveBeenCalledOnce();
 
     const dateTimeFormat = vi.spyOn(Intl, 'DateTimeFormat').mockImplementation(function (
@@ -36,8 +36,32 @@ describe('subscription language scope', () => {
     ) {
       return { format: () => String(locale) } as Intl.DateTimeFormat;
     } as typeof Intl.DateTimeFormat);
-    expect(utils.IntlUtil.formatDate(0, 'gregorian', 'fa-IR')).toBe('fa-IR');
-    expect(dateTimeFormat).toHaveBeenLastCalledWith('fa-IR', expect.any(Object));
+    expect(utils.IntlUtil.formatDate(0, 'gregorian', 'zh-CN')).toBe('zh-CN');
+    expect(dateTimeFormat).toHaveBeenLastCalledWith('zh-CN', expect.any(Object));
+  });
+
+  it.each([
+    ['fa-IR', 'en-US'],
+    ['ru-RU', 'en-US'],
+    ['zh-TW', 'zh-CN'],
+  ])('replaces legacy %s cookies with %s without reloading', async (previous, expected) => {
+    const utils = await import('@/utils');
+    const cookies = new Map([
+      ['subLang', previous],
+      ['lang', 'zh-CN'],
+    ]);
+    vi.spyOn(utils.CookieManager, 'getCookie').mockImplementation(
+      (name) => cookies.get(name) ?? '',
+    );
+    vi.spyOn(utils.CookieManager, 'setCookie').mockImplementation((name, value) => {
+      cookies.set(name, value);
+    });
+    const reload = vi.fn();
+    vi.stubGlobal('window', { navigator: { language: 'en-US' }, location: { reload } });
+    expect(utils.LanguageManager.getLanguage('subscription')).toBe(expected);
+    expect(cookies.get('subLang')).toBe(expected);
+    expect(cookies.get('lang')).toBe('zh-CN');
+    expect(reload).not.toHaveBeenCalled();
   });
 
   it('does not resolve the language for empty or invalid dates', async () => {

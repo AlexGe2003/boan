@@ -3,7 +3,7 @@ import type { Locale } from './i18n';
 // UI strings for the marketing chrome (landing page hero/features/footer + the
 // shared navbar labels). The docs *pages* are translated as MDX under
 // content/docs/{locale}; this covers the React-rendered home page and nav that
-// can't live in MDX. English is the source; fa/ru/zh fall back to en.
+// can't live in MDX. English is the source; zh fall back to en.
 //
 // Convention matches the docs: translate prose only — product/protocol names
 // (3x-ui, Xray, VLESS, REALITY, x25519, Docker, REST API, …) stay in Latin.
@@ -79,108 +79,6 @@ const en: SiteMessages = {
   licenseAfter: ' license.',
 };
 
-const fa: SiteMessages = {
-  tagline: 'پنل وب پیشرفته برای مدیریت سرورهای Xray-core',
-  getStarted: 'شروع کنید',
-  viewOnGitHub: 'مشاهده در GitHub',
-  documentation: 'مستندات',
-  donate: 'حمایت مالی',
-  docs: 'مستندات',
-  stars: 'ستاره',
-  forks: 'فورک',
-  latest: 'آخرین',
-  copyCommand: 'کپی دستور نصب',
-  copied: 'کپی شد',
-  featuresHeading: 'هر آنچه برای اجرای Xray لازم دارید',
-  featuresSubtitle:
-    'یک پنل کنترلِ مدرن و سریع برای Xray-core — ساخته‌شده برای ادمین‌هایی که قدرت می‌خواهند، بدون درگیری با خط فرمان.',
-  features: [
-    {
-      title: 'همه‌ی پروتکل‌های اصلی',
-      description:
-        'VLESS، VMess، Trojan، Shadowsocks، WireGuard، Hysteria2، SOCKS، HTTP و Dokodemo-door — همه از یک پنل مدیریت می‌شوند.',
-    },
-    {
-      title: 'REALITY و XTLS-Vision',
-      description:
-        'پشتیبانی درجه‌یک از VLESS + REALITY با کلیدهای x25519، short ID‌ها و فلوی xtls-rprx-vision برای مخفی‌کاری و سرعت.',
-    },
-    {
-      title: 'کلاینت‌ها و کنترل ترافیک',
-      description:
-        'سهمیه‌ی ترافیک برای هر کلاینت، تاریخ انقضا، محدودیت IP و وضعیت آنلاینِ زنده، همراه با لینک‌های اشتراک‌گذاری و کدهای QR تنها با یک کلیک.',
-    },
-    {
-      title: 'چندنودی و سابسکریپشن‌ها',
-      description:
-        'هماهنگ‌سازی چند سرور، هاست‌های مدیریت‌شده و پروکسی‌های خارجی، و ارائه‌ی سابسکریپشن‌های VLESS / Clash / JSON.',
-    },
-    {
-      title: 'ربات‌های Telegram و Discord',
-      description:
-        'اعلان‌های داخلیِ Telegram و Discord برای سقف ترافیک، هشدار انقضا و بار سیستم، به‌علاوه‌ی کنش‌های مدیریتی.',
-    },
-    {
-      title: 'خودمیزبان و قابل‌اسکریپت',
-      description:
-        'یک باینری Go یا ایمیج Docker، بک‌اندِ SQLite/PostgreSQL، و یک REST API کامل برای خودکارسازی.',
-    },
-  ],
-  licenseBefore: 'تحت مجوز ',
-  licenseAfter: ' منتشر شده است.',
-};
-
-const ru: SiteMessages = {
-  tagline: 'Продвинутая веб-панель для управления серверами Xray-core',
-  getStarted: 'Начать',
-  viewOnGitHub: 'Открыть на GitHub',
-  documentation: 'Документация',
-  donate: 'Поддержать',
-  docs: 'Документация',
-  stars: 'звёзд',
-  forks: 'форков',
-  latest: 'последняя',
-  copyCommand: 'Скопировать команду установки',
-  copied: 'Скопировано',
-  featuresHeading: 'Всё необходимое для запуска Xray',
-  featuresSubtitle:
-    'Современная и быстрая панель управления для Xray-core — создана для администраторов, которым нужна мощь без возни с командной строкой.',
-  features: [
-    {
-      title: 'Все основные протоколы',
-      description:
-        'VLESS, VMess, Trojan, Shadowsocks, WireGuard, Hysteria2, SOCKS, HTTP и Dokodemo-door — под управлением из одной панели.',
-    },
-    {
-      title: 'REALITY и XTLS-Vision',
-      description:
-        'Первоклассная поддержка VLESS + REALITY с ключами x25519, short ID и потоком xtls-rprx-vision для скрытности и скорости.',
-    },
-    {
-      title: 'Клиенты и контроль трафика',
-      description:
-        'Квоты трафика по клиентам, даты окончания, лимиты IP и статус «онлайн» в реальном времени, плюс ссылки-подписки и QR-коды в один клик.',
-    },
-    {
-      title: 'Мультинода и подписки',
-      description:
-        'Координация нескольких серверов, управляемых хостов и внешних прокси, а также выдача подписок VLESS / Clash / JSON.',
-    },
-    {
-      title: 'Telegram- и Discord-боты',
-      description:
-        'Встроенные уведомления Telegram и Discord о лимитах трафика, истечении срока и нагрузке системы, а также действия администратора.',
-    },
-    {
-      title: 'Свой хостинг и скрипты',
-      description:
-        'Один бинарный файл Go или Docker-образ, бэкенд SQLite/PostgreSQL и полноценный REST API для автоматизации.',
-    },
-  ],
-  licenseBefore: 'распространяется под лицензией ',
-  licenseAfter: '.',
-};
-
 const zh: SiteMessages = {
   tagline: '用于管理 Xray-core 服务器的高级 Web 面板',
   getStarted: '开始使用',
@@ -231,7 +129,7 @@ const zh: SiteMessages = {
   licenseAfter: ' 许可证发布。',
 };
 
-const messages: Record<Locale, SiteMessages> = { en, fa, ru, zh };
+const messages: Record<Locale, SiteMessages> = { en, zh };
 
 export function getSiteMessages(lang: string): SiteMessages {
   return messages[lang as Locale] ?? en;

@@ -1,16 +1,14 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { Inter, Vazirmatn } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './global.css';
 import { appName, appTagline, siteUrl } from '@/lib/shared';
 import { i18n, localeDirection } from '@/lib/i18n';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
-// Persian UI font; covers Arabic + Latin glyphs so mixed content renders well.
-const vazirmatn = Vazirmatn({ subsets: ['arabic'], display: 'swap' });
 
-// Global SEO defaults and document shell. Locale-aware html attributes are
-// computed from route params so RTL locales get a correct base direction.
+// Global SEO defaults and document shell.
+// Route params select the English or Chinese document language.
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -44,7 +42,7 @@ export default async function RootLayout({
     ? (rawLang as (typeof i18n.languages)[number])
     : i18n.defaultLanguage;
   const dir = localeDirection(lang);
-  const fontClassName = lang === 'fa' ? vazirmatn.className : inter.className;
+  const fontClassName = inter.className;
 
   return (
     <html lang={lang} dir={dir} className={fontClassName} suppressHydrationWarning>

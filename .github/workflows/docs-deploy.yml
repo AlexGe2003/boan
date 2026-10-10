@@ -53,7 +53,7 @@ jobs:
         # under /en/, and there is no i18n middleware on a static host — so copy
         # the English build to the root (data files included) while KEEPING /en/
         # in place. That way both /docs/... and /en/docs/... resolve. Other
-        # locales stay under /fa, /ru, /zh.
+        # locales stay under /zh.
         run: cp -a out/en/. out/
       - name: Build the component Storybook (frontend/)
         working-directory: frontend

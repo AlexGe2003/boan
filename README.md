@@ -1,8 +1,8 @@
-[English](/README.md) | [فارسی](/docs/translations/README.fa_IR.md) | [العربية](/docs/translations/README.ar_EG.md) | [中文](/docs/translations/README.zh_CN.md) | [Español](/docs/translations/README.es_ES.md) | [Русский](/docs/translations/README.ru_RU.md) | [Türkçe](/docs/translations/README.tr_TR.md)
+[English](/README.md) | [中文](/docs/translations/README.zh_CN.md)
 
 ## Repository navigation
 
-- [中文说明](docs/translations/README.zh_CN.md) · [其他语言](docs/translations/)
+- [中文说明](docs/translations/README.zh_CN.md)
 - [客户界面代码](frontend/src/pages/subscriptions/) · [后端代码](internal/)
 - [部署脚本](deploy/) · [Docker 辅助脚本](deploy/docker/)
 - [开发指南](.github/CONTRIBUTING.md) · [开发记录](docs/development/)

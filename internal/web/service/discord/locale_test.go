@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestDiscordMessagesFollowDiscordLang(t *testing.T) {
-	const lang = "ru-RU"
+	const lang = "zh-CN"
 	settingService := setupTestDB(t)
 	_ = settingService.SetDiscordLang(lang)
 	_ = settingService.SetDiscordBotToken("token")
