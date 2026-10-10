@@ -1,10 +1,10 @@
 .panel-topbar {
-  height: 64px;
+  height: 100px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 24px;
+  padding: 0 44px;
   border-bottom: 1px solid;
   position: sticky;
   top: 0;
@@ -12,8 +12,8 @@
 }
 .panel-topbar h1 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 650;
   min-width: 0;
 }
 .panel-topbar-actions {
@@ -36,12 +36,13 @@
   right: 0;
 }
 .ant-sidebar + .ant-layout {
-  padding-top: 64px;
+  padding-top: 100px;
   min-width: 0;
 }
 @media (max-width: 1024px) {
   .panel-topbar {
-    padding: 0 14px;
+    height: 64px;
+    padding: 0 16px;
   }
   .panel-topbar-fixed {
     left: 0;
@@ -54,8 +55,18 @@
   }
 }
 .ant-sidebar + .customer-main {
-  padding-top: 64px;
+  padding-top: 100px;
 }
 .ant-sidebar + .customer-main > .panel-topbar {
   display: none;
+}
+
+@media (max-width: 1024px) {
+  .panel-topbar h1 {
+    font-size: 20px;
+  }
+  .ant-sidebar + .ant-layout,
+  .ant-sidebar + .customer-main {
+    padding-top: 64px;
+  }
 }

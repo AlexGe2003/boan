@@ -11,45 +11,11 @@
   .business-page,
   .api-docs-page
 ) {
-  --bg-page: #e6e8ec;
-  --bg-card: #ffffff;
+  --bg-page: var(--panel-bg);
+  --bg-card: var(--panel-card);
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--bg-page);
-}
-
-:is(
-  .index-page,
-  .clients-page,
-  .inbounds-page,
-  .xray-page,
-  .settings-page,
-  .nodes-page,
-  .groups-page,
-  .hosts-page,
-  .plans-page,
-  .business-page,
-  .api-docs-page
-).is-dark {
-  --bg-page: #1a1b1f;
-  --bg-card: #23252b;
-}
-
-:is(
-    .index-page,
-    .clients-page,
-    .inbounds-page,
-    .xray-page,
-    .settings-page,
-    .nodes-page,
-    .groups-page,
-    .hosts-page,
-    .plans-page,
-    .business-page,
-    .api-docs-page
-  ).is-dark.is-ultra {
-  --bg-page: #000;
-  --bg-card: #101013;
 }
 
 :is(
@@ -83,7 +49,10 @@
     .api-docs-page
   )
   .content-area {
-  padding: 24px;
+  width: 100%;
+  max-width: 1360px;
+  margin-inline: auto;
+  padding: 32px 44px 48px;
 }
 
 @media (max-width: 768px) {
@@ -101,7 +70,7 @@
       .api-docs-page
     )
     .content-area {
-    padding: 10px;
+    padding: 20px 16px 32px;
   }
 }
 

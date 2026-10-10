@@ -2720,6 +2720,7 @@
     "settings": "Settings"
   },
   "adminOverview": {
+    "advancedNetwork": "Network configuration",
     "title": "Admin overview",
     "admin": "Administration",
     "subtitle": "Manage services and daily operations in one place.",

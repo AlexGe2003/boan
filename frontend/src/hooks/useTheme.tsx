@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useSt
 import type { ReactNode } from 'react';
 import { theme as antdTheme } from 'antd';
 import type { ThemeConfig } from 'antd';
+import { panelPalette } from '@/styles/palette';
 
 const STORAGE_DARK = 'dark-mode';
 const STORAGE_ULTRA = 'isUltraDarkThemeEnabled';
@@ -13,6 +14,10 @@ function readBool(key: string, fallback: boolean): boolean {
 }
 
 function applyDom(isDark: boolean, isUltra: boolean) {
+  const palette = panelPalette(isDark, isUltra);
+  for (const [key, value] of Object.entries(palette)) {
+    document.documentElement.style.setProperty(`--panel-${key}`, value);
+  }
   document.body.classList.remove('dark', 'light');
   document.body.classList.add(isDark ? 'dark' : 'light');
   // Native scrollbars read color-scheme, not the body class.
@@ -34,69 +39,7 @@ const initialDark = readBool(STORAGE_DARK, true);
 const initialUltra = readBool(STORAGE_ULTRA, false);
 applyDom(initialDark, initialUltra);
 
-const DARK_TOKENS = {
-  colorBgBase: '#1a1b1f',
-  colorBgLayout: '#1a1b1f',
-  colorBgContainer: '#23252b',
-  colorBgElevated: '#2d2f37',
-};
-const ULTRA_DARK_TOKENS = {
-  colorBgBase: '#000',
-  colorBgLayout: '#000',
-  colorBgContainer: '#101013',
-  colorBgElevated: '#1a1a1e',
-};
-const DARK_LAYOUT_TOKENS = {
-  bodyBg: '#1a1b1f',
-  headerBg: '#15161a',
-  headerColor: '#ffffff',
-  footerBg: '#1a1b1f',
-  siderBg: '#15161a',
-  triggerBg: '#23252b',
-  triggerColor: '#ffffff',
-};
-const ULTRA_DARK_LAYOUT_TOKENS = {
-  bodyBg: '#000',
-  headerBg: '#050507',
-  headerColor: '#ffffff',
-  footerBg: '#000',
-  siderBg: '#050507',
-  triggerBg: '#1a1a1e',
-  triggerColor: '#ffffff',
-};
-const DARK_MENU_TOKENS = {
-  darkItemBg: '#15161a',
-  darkSubMenuItemBg: '#1a1b1f',
-  darkPopupBg: '#23252b',
-};
-const ULTRA_DARK_MENU_TOKENS = {
-  darkItemBg: '#050507',
-  darkSubMenuItemBg: '#000',
-  darkPopupBg: '#101013',
-};
-const DARK_CARD_TOKENS = {
-  colorBorderSecondary: 'rgba(255, 255, 255, 0.06)',
-};
-const ULTRA_DARK_CARD_TOKENS = {
-  colorBorderSecondary: 'rgba(255, 255, 255, 0.04)',
-};
-const STATISTIC_TOKENS = {
-  contentFontSize: 17,
-  titleFontSize: 11,
-};
-const LIGHT_CONTRAST_TOKENS = {
-  colorTextDescription: 'rgba(0, 0, 0, 0.58)',
-  colorTextTertiary: 'rgba(0, 0, 0, 0.58)',
-  colorTextPlaceholder: '#767676',
-  colorError: '#cf1322',
-  colorErrorText: '#cf1322',
-  colorSuccessText: '#237804',
-};
-const LIGHT_BUTTON_TOKENS = {
-  colorPrimary: '#0958d9',
-  colorPrimaryHover: '#2468e5',
-  colorPrimaryActive: '#073ea8',
-};
+const STATISTIC_TOKENS = { contentFontSize: 17, titleFontSize: 11 };
 
 // hashed:false drops the `:where(.css-<hash>)` wrapper antd puts around every
 // rule. It costs nothing in specificity — `:where()` contributes zero, so the
@@ -113,25 +56,55 @@ const SHARED_STYLE_CONFIG = {
 } as const;
 
 export function buildAntdThemeConfig(isDark: boolean, isUltra: boolean): ThemeConfig {
-  if (!isDark) {
-    return {
-      ...SHARED_STYLE_CONFIG,
-      algorithm: antdTheme.defaultAlgorithm,
-      token: LIGHT_CONTRAST_TOKENS,
-      components: {
-        Statistic: STATISTIC_TOKENS,
-        Button: LIGHT_BUTTON_TOKENS,
-      },
-    };
-  }
+  const palette = panelPalette(isDark, isUltra);
   return {
     ...SHARED_STYLE_CONFIG,
-    algorithm: antdTheme.darkAlgorithm,
-    token: isUltra ? ULTRA_DARK_TOKENS : DARK_TOKENS,
+    algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+    token: {
+      colorPrimary: palette.primary,
+      colorBgBase: palette.bg,
+      colorBgLayout: palette.bg,
+      colorBgContainer: palette.card,
+      colorBgElevated: palette.card,
+      colorBorder: palette.border,
+      colorBorderSecondary: palette.border,
+      colorText: palette.text,
+      colorTextSecondary: palette.muted,
+      colorTextDescription: palette.muted,
+      colorTextTertiary: palette.tertiary,
+      colorTextPlaceholder: palette.tertiary,
+      borderRadius: 8,
+      borderRadiusLG: 16,
+      controlHeight: 40,
+      fontSize: 14,
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif",
+      ...(!isDark
+        ? { colorError: '#cf1322', colorErrorText: '#cf1322', colorSuccessText: '#237804' }
+        : {}),
+    },
     components: {
-      Layout: isUltra ? ULTRA_DARK_LAYOUT_TOKENS : DARK_LAYOUT_TOKENS,
-      Menu: isUltra ? ULTRA_DARK_MENU_TOKENS : DARK_MENU_TOKENS,
-      Card: isUltra ? ULTRA_DARK_CARD_TOKENS : DARK_CARD_TOKENS,
+      Layout: {
+        bodyBg: palette.bg,
+        headerBg: palette.bg,
+        headerColor: palette.text,
+        footerBg: palette.bg,
+        siderBg: palette.sidebar,
+        triggerBg: palette.card,
+        triggerColor: palette.text,
+      },
+      Menu: {
+        itemBg: palette.sidebar,
+        darkItemBg: palette.sidebar,
+        darkSubMenuItemBg: palette.sidebar,
+        darkPopupBg: palette.card,
+        itemSelectedBg: palette.activeBg,
+        darkItemSelectedBg: palette.activeBg,
+        itemSelectedColor: palette.activeText,
+        darkItemSelectedColor: palette.activeText,
+        itemColor: palette.muted,
+        darkItemColor: palette.muted,
+      },
+      Card: { colorBorderSecondary: palette.border },
       Statistic: STATISTIC_TOKENS,
     },
   };

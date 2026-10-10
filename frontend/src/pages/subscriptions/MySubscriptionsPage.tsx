@@ -165,19 +165,7 @@ export default function MySubscriptionsPage() {
     </nav>
   );
   return (
-    <ConfigProvider
-      locale={zhCN}
-      theme={{
-        ...antdThemeConfig,
-        token: {
-          ...antdThemeConfig.token,
-          colorPrimary: '#4169f5',
-          borderRadius: 8,
-          controlHeight: 40,
-          fontSize: 14,
-        },
-      }}
-    >
+    <ConfigProvider locale={zhCN} theme={antdThemeConfig}>
       <div
         className={`customer-app ${isDark ? 'is-dark' : 'is-light'}${isUltra ? ' is-ultra' : ''}`}
       >

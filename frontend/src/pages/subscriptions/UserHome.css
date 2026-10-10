@@ -1,15 +1,15 @@
 .customer-app {
-  --customer-bg: #141619;
-  --customer-sidebar-bg: #181b20;
-  --customer-card-bg: #1c1f24;
-  --customer-border: #303640;
-  --customer-text: #f0f2f7;
-  --customer-text-muted: #a4adbd;
-  --customer-text-tertiary: #8b95a6;
-  --customer-primary: #4169f5;
-  --customer-nav-active-bg: #1d2d4b;
-  --customer-nav-active-text: #7696ff;
-  --customer-nav-hover-bg: #232830;
+  --customer-bg: var(--panel-bg);
+  --customer-sidebar-bg: var(--panel-sidebar);
+  --customer-card-bg: var(--panel-card);
+  --customer-border: var(--panel-border);
+  --customer-text: var(--panel-text);
+  --customer-text-muted: var(--panel-muted);
+  --customer-text-tertiary: var(--panel-tertiary);
+  --customer-primary: var(--panel-primary);
+  --customer-nav-active-bg: var(--panel-activeBg);
+  --customer-nav-active-text: var(--panel-activeText);
+  --customer-nav-hover-bg: var(--panel-hoverBg);
   min-height: 100dvh;
   display: flex;
   color: var(--customer-text);
@@ -17,22 +17,6 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
   font-size: 14px;
   line-height: 1.6;
-}
-.customer-app.is-light {
-  --customer-bg: #f8f9fc;
-  --customer-sidebar-bg: #fff;
-  --customer-card-bg: #fff;
-  --customer-border: #dce1e9;
-  --customer-text: #202631;
-  --customer-text-muted: #596577;
-  --customer-text-tertiary: #647083;
-  --customer-nav-active-bg: #eaf0ff;
-  --customer-nav-active-text: #3158dc;
-  --customer-nav-hover-bg: #f0f3f8;
-}
-.customer-app.is-ultra {
-  --customer-bg: #08090b;
-  --customer-sidebar-bg: #101215;
 }
 .customer-app *,
 .customer-nav-drawer * {

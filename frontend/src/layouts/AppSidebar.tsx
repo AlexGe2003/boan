@@ -397,6 +397,10 @@ export default function AppSidebar() {
         collapsed={railCollapsed}
       >
         <div className="sider-brand">
+          <CloudServerOutlined className="sidebar-brand-icon" aria-hidden="true" />
+          {!railCollapsed && (
+            <strong className="sidebar-brand-name">{t('adminOverview.admin')}</strong>
+          )}
           {!railCollapsed && (
             <div className="brand-actions">
               <button
@@ -486,6 +490,7 @@ export default function AppSidebar() {
         onClose={() => setDrawerOpen(false)}
       >
         <div className="drawer-header">
+          <strong className="sidebar-brand-name">{t('adminOverview.admin')}</strong>
           <div className="drawer-header-actions">
             <ThemeCycleButton
               id="theme-cycle-drawer"

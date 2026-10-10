@@ -2720,6 +2720,7 @@
     "settings": "设置"
   },
   "adminOverview": {
+    "advancedNetwork": "网络配置",
     "title": "管理概览",
     "admin": "管理后台",
     "subtitle": "服务经营与日常处理，一处掌握。",
