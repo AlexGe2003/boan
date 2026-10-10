@@ -197,6 +197,7 @@ func (a *APIController) initRouter(g *gin.RouterGroup) {
 	NewSupportController(api.Group("/support"))
 	NewNodeGroupController(api.Group("/node-groups"))
 	NewCommerceController(api.Group("/commerce"))
+	NewAnnouncementController(api.Group("/announcements"))
 
 	// Server API
 	server := api.Group("/server")

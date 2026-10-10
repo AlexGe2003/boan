@@ -79,6 +79,8 @@ export default function SubPage() {
   const [messageApi, messageContextHolder] = message.useMessage();
   useEffect(() => {
     setMessageInstance(messageApi);
+    document.title = subTitle ? `${subTitle} - 订阅中心` : '我的订阅 - Boan';
+    document.documentElement.lang = 'zh-CN';
   }, [messageApi]);
   const [lang, setLang] = useState<string>(() => LanguageManager.getLanguage('subscription'));
 

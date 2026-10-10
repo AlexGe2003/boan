@@ -11,10 +11,18 @@
   height: 100vh;
   height: 100dvh;
   align-self: flex-start;
+  border-right: 1px solid var(--panel-border);
+  transition: width 0.2s cubic-bezier(0.2, 0, 0, 1), min-width 0.2s cubic-bezier(0.2, 0, 0, 1), max-width 0.2s cubic-bezier(0.2, 0, 0, 1), flex-basis 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
+  will-change: width;
+  contain: layout paint;
 }
 
 .ant-sidebar:not(.sidebar-pinned) > .ant-layout-sider:not(.ant-layout-sider-collapsed) {
-  box-shadow: 0 0 32px rgba(0, 0, 0, 0.22);
+  box-shadow: 4px 0 20px -2px rgba(0, 0, 0, 0.08), 1px 0 3px rgba(0, 0, 0, 0.04);
+}
+
+body.dark .ant-sidebar:not(.sidebar-pinned) > .ant-layout-sider:not(.ant-layout-sider-collapsed) {
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45), 1px 0 4px rgba(0, 0, 0, 0.25);
 }
 
 .sider-nav .ant-menu-item .anticon,
@@ -389,9 +397,6 @@ body.dark .ant-drawer-body .drawer-menu .ant-menu-item-group-list {
   margin-inline-end: 0;
 }
 
-.ant-sidebar > .ant-layout-sider {
-  border-right: 1px solid var(--panel-border);
-}
 .sidebar-brand-icon {
   font-size: 24px;
   color: var(--panel-text);
@@ -412,7 +417,39 @@ body.dark .ant-drawer-body .drawer-menu .ant-menu-item-group-list {
   border-radius: 8px;
   margin: 4px 12px;
   width: calc(100% - 24px);
+  transition: width 0.2s cubic-bezier(0.2, 0, 0, 1), margin 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s ease, color 0.15s ease !important;
 }
+
+.ant-layout-sider-collapsed .sider-nav .ant-menu-item-group-title {
+  display: none !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.ant-layout-sider-collapsed .sider-nav .ant-menu-item-group-list {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.ant-layout-sider-collapsed .sider-nav .ant-menu-item,
+.ant-layout-sider-collapsed .sider-nav .ant-menu-submenu-title,
+.ant-layout-sider-collapsed .sider-utility .ant-menu-item {
+  width: 44px !important;
+  margin: 4px auto !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.ant-layout-sider-collapsed .sider-nav .ant-menu-item .anticon,
+.ant-layout-sider-collapsed .sider-nav .ant-menu-submenu-title .anticon,
+.ant-layout-sider-collapsed .sider-utility .ant-menu-item .anticon {
+  margin: 0 !important;
+  font-size: 18px !important;
+}
+
 .sidebar-pin:focus-visible,
 .sidebar-theme-cycle:focus-visible,
 .sider-version:focus-visible {

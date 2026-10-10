@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Progress, Tag, theme } from 'antd';
+import { Progress, theme } from 'antd';
 
 import { IntlUtil } from '@/utils';
 import type { CalendarKind } from '@/utils';
@@ -64,7 +64,7 @@ export default function SubHero({
   const formatDate = (ms: number) => IntlUtil.formatDate(ms, datepicker, lang);
   const statusTag = STATUS_TAGS[status];
 
-  const stats: { key: string; label: string; value: ReactNode }[] = [
+  const stats: { key: string; label: string; value: ReactNode; icon?: ReactNode }[] = [
     { key: 'days', label: t('subscription.daysLeft'), value: daysLeft ?? '∞' },
     {
       key: 'expiry',
@@ -74,11 +74,28 @@ export default function SubHero({
     {
       key: 'status',
       label: t('subscription.status'),
-      value: <Tag color={statusTag.color}>{t(statusTag.label)}</Tag>,
+      value: (
+        <span className={`sub-status-pill status-${statusTag.color}`}>
+          <span className="sub-status-pulse" />
+          <span>{t(statusTag.label)}</span>
+        </span>
+      ),
     },
-    { key: 'down', label: t('subscription.downloaded'), value: <bdi>{download}</bdi> },
-    { key: 'up', label: t('subscription.uploaded'), value: <bdi>{upload}</bdi> },
-    { key: 'total', label: t('subscription.totalQuota'), value: <bdi>{total}</bdi> },
+    {
+      key: 'down',
+      label: t('subscription.downloaded'),
+      value: <bdi>{download}</bdi>,
+    },
+    {
+      key: 'up',
+      label: t('subscription.uploaded'),
+      value: <bdi>{upload}</bdi>,
+    },
+    {
+      key: 'total',
+      label: t('subscription.totalQuota'),
+      value: <bdi>{total}</bdi>,
+    },
     {
       key: 'lastOnline',
       label: t('lastOnline'),
@@ -105,7 +122,13 @@ export default function SubHero({
         )}
       />
       <div className="sub-hero-summary">
-        <div className="sub-label">{hasQuota ? t('remained') : t('usage')}</div>
+        <div className="sub-hero-header-row">
+          <div className="sub-label">{hasQuota ? t('remained') : t('usage')}</div>
+          <span className={`sub-status-pill status-${statusTag.color}`}>
+            <span className="sub-status-pulse" />
+            <span>{t(statusTag.label)}</span>
+          </span>
+        </div>
         <bdi className="sub-big">
           <span className="sub-big-num">{amount}</span>
           {unit && <span className="sub-big-unit">{unit}</span>}

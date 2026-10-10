@@ -22,6 +22,7 @@ import {
   MailOutlined,
   ReloadOutlined,
   MessageOutlined,
+  NotificationOutlined,
   MoonFilled,
   MoonOutlined,
   PushpinFilled,
@@ -63,6 +64,7 @@ type IconName =
   | 'inbound'
   | 'team'
   | 'groups'
+  | 'announcement'
   | 'setting'
   | 'tool'
   | 'cluster'
@@ -77,6 +79,7 @@ const iconByName: Record<IconName, ComponentType> = {
   inbound: ImportOutlined,
   team: TeamOutlined,
   groups: TagsOutlined,
+  announcement: NotificationOutlined,
   setting: SettingOutlined,
   tool: ToolOutlined,
   cluster: ClusterOutlined,
@@ -186,7 +189,10 @@ export default function AppSidebar() {
     const next = !pinned;
     saveSidebarPinned(next);
     setPinned(next);
-  }, [pinned]);
+    if (!next) {
+      updateHovered(false);
+    }
+  }, [pinned, updateHovered]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -209,6 +215,7 @@ export default function AppSidebar() {
       { key: '/inbounds', icon: 'inbound', title: t('menu.inbounds') },
       { key: '/clients', icon: 'team', title: t('menu.clients') },
       { key: '/plans', icon: 'groups', title: t('menu.nodePlans') },
+      { key: '/announcements', icon: 'announcement', title: t('menu.announcements') },
       { key: '/my-subscriptions', icon: 'team', title: t('menu.mySubscriptions') },
       { key: '/node-monitor', icon: 'cluster', title: t('nodeMonitor.title') },
       { key: '/node-groups', icon: 'cluster', title: '节点分组' },
@@ -404,7 +411,16 @@ export default function AppSidebar() {
         if (!(event.target instanceof Element && event.target.closest('.panel-topbar')))
           updateHovered(true);
       }}
-      onMouseLeave={() => updateHovered(false)}
+      onMouseLeave={(event) => {
+        const related = event.relatedTarget;
+        if (
+          related instanceof Element &&
+          (related.closest('.ant-menu-submenu-popup') || related.closest('.ant-tooltip'))
+        ) {
+          return;
+        }
+        updateHovered(false);
+      }}
     >
       <Layout.Sider
         theme={currentTheme}
@@ -466,11 +482,12 @@ export default function AppSidebar() {
         <Menu
           theme={currentTheme}
           mode="inline"
+          inlineCollapsed={railCollapsed}
           selectedKeys={[selectedKey]}
           openKeys={railCollapsed ? undefined : openKeys}
           onOpenChange={(keys) => setOpenKeys(keys as string[])}
           className="sider-nav"
-          items={railCollapsed ? toMenuItems(navItems) : groupedNavItems}
+          items={groupedNavItems}
           onClick={onMenuClick}
         />
         <Menu

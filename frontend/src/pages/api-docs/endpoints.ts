@@ -480,6 +480,33 @@ export const sections: readonly Section[] = [
     ],
   },
   {
+    id: 'announcements',
+    title: 'Announcements',
+    description: 'System announcements, user notice popups, and maintenance broadcasts.',
+    endpoints: [
+      {
+        method: 'GET',
+        path: '/panel/api/announcements',
+        summary: 'List system announcements for users and administrators.',
+      },
+      {
+        method: 'POST',
+        path: '/panel/api/announcements',
+        summary: 'Create a new announcement (admin only).',
+      },
+      {
+        method: 'PUT',
+        path: '/panel/api/announcements/:id',
+        summary: 'Update an existing announcement (admin only).',
+      },
+      {
+        method: 'DELETE',
+        path: '/panel/api/announcements/:id',
+        summary: 'Delete an announcement by id (admin only).',
+      },
+    ],
+  },
+  {
     id: 'authentication',
     title: 'Authentication',
     description:

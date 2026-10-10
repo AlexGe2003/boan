@@ -1,5 +1,13 @@
+import { useState } from 'react';
 import { Button, Space, Tag, message } from 'antd';
-import { CopyOutlined, ExportOutlined } from '@ant-design/icons';
+import {
+  CopyOutlined,
+  ExportOutlined,
+  CompassOutlined,
+  GlobalOutlined,
+  ApiOutlined,
+  CheckOutlined,
+} from '@ant-design/icons';
 import { ClipboardManager } from '@/utils';
 import type { SubscriptionClient } from './subscription-links';
 
@@ -7,38 +15,49 @@ const shadowrocketRules = 'https://status.huckge.com/client-rules/shadowrocket.c
 
 export default function SubscriptionRouting({ client }: { client: SubscriptionClient }) {
   const [toast, contextHolder] = message.useMessage();
+  const [ruleCopied, setRuleCopied] = useState(false);
   const shadowrocket = client === 'shadowrocket';
   const clash = client === 'clash-verge' || client === 'clash-mi';
   const modes = [
     {
       key: 'config',
+      icon: <CompassOutlined />,
       title: '规则分流',
-      detail: '国内网站和局域网直连，其他流量通过所选节点。适合日常使用。',
+      detail: '国内网站与局域网直连，海外流量走代理节点。推荐日常使用。',
     },
     {
       key: 'proxy',
+      icon: <GlobalOutlined />,
       title: '全局代理',
-      detail: '交给客户端处理的流量统一走代理。适合临时排查无法访问的网站。',
+      detail: '所有流量统一经代理节点转发。适合临时排查无法访问的网站。',
     },
     {
       key: 'direct',
+      icon: <ApiOutlined />,
       title: '全部直连',
-      detail: '不经过代理节点，使用当前网络直接访问。部分海外网站可能无法打开。',
+      detail: '不经过任何代理，使用本地网络直接访问。部分海外网站可能无法打开。',
     },
   ];
   return (
     <section className="subscription-routing" aria-label="连接模式">
       {contextHolder}
-      <h2 className="subscription-step-title">3. 设置连接模式</h2>
+      <h2 className="subscription-step-title">设置分流连接模式</h2>
       <div className="subscription-routing-modes">
         {modes.map((mode) => (
-          <div key={mode.key}>
-            <h3>
-              {mode.title} {mode.key === 'config' && <Tag color="blue">推荐</Tag>}
-            </h3>
-            <p>{mode.detail}</p>
+          <div key={mode.key} className="subscription-routing-card">
+            <div>
+              <h3>
+                <span>
+                  {mode.icon} {mode.title}
+                </span>
+                {mode.key === 'config' && <Tag color="blue">推荐</Tag>}
+              </h3>
+              <p>{mode.detail}</p>
+            </div>
             {shadowrocket && (
-              <Button href={`shadowrocket://route/${mode.key}`}>在小火箭中切换</Button>
+              <Button size="small" href={`shadowrocket://route/${mode.key}`} className="subscription-mode-switch-btn">
+                切换至此模式
+              </Button>
             )}
           </div>
         ))}
@@ -57,18 +76,22 @@ export default function SubscriptionRouting({ client }: { client: SubscriptionCl
               安装分流配置
             </Button>
             <Button
-              icon={<CopyOutlined />}
+              icon={ruleCopied ? <CheckOutlined style={{ color: '#10b981' }} /> : <CopyOutlined />}
               onClick={async () => {
                 try {
-                  if (await ClipboardManager.copyText(shadowrocketRules))
+                  if (await ClipboardManager.copyText(shadowrocketRules)) {
+                    setRuleCopied(true);
                     toast.success('已复制分流配置地址');
-                  else toast.error('复制失败，请重试');
+                    setTimeout(() => setRuleCopied(false), 2000);
+                  } else {
+                    toast.error('复制失败，请重试');
+                  }
                 } catch {
                   toast.error('复制失败，请重试');
                 }
               }}
             >
-              复制配置地址
+              {ruleCopied ? '已复制！' : '复制配置地址'}
             </Button>
           </Space>
           <p className="subscription-routing-hint">

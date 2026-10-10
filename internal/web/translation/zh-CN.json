@@ -153,6 +153,7 @@
   },
   "menu": {
     "mySubscriptions": "我的首页",
+    "announcements": "系统公告",
     "theme": "主题",
     "dashboard": "系统状态",
     "inbounds": "节点连接（入站）",

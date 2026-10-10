@@ -5,11 +5,10 @@ import NodeStatus from '@/pages/support/NodeStatus';
 import SubscriptionDevicePicker from './SubscriptionDevicePicker';
 import SubscriptionAuthorizations from './SubscriptionAuthorizations';
 import zhCN from 'antd/locale/zh_CN';
-import { ClusterOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useQuery, useQueryClient, useIsFetching } from '@tanstack/react-query';
-import { Alert, Button, ConfigProvider, Drawer, Empty, Progress, Spin, Tag } from 'antd';
+import { Alert, Badge, Button, ConfigProvider, Drawer, Empty, Progress, Skeleton, Tag } from 'antd';
 import {
   UserOutlined,
   MenuOutlined,
@@ -26,11 +25,16 @@ import {
   LaptopOutlined,
   LogoutOutlined,
   ReloadOutlined,
+  NotificationOutlined,
+  ClusterOutlined,
 } from '@ant-design/icons';
 import AppSidebar from '@/layouts/AppSidebar';
 import { useTheme } from '@/hooks/useTheme';
 import { usePanelAccess } from '@/api/queries/usePanelRole';
 import { HttpUtil } from '@/utils';
+import AnnouncementModal from './AnnouncementModal';
+import AnnouncementsView from './AnnouncementsView';
+import type { Announcement } from '@/models/announcement';
 import './UserHome.css';
 interface SubscriptionLink {
   email: string;
@@ -71,6 +75,7 @@ const sections = [
     icon: <LinkOutlined />,
     group: '订阅',
   },
+  { key: 'announcements', label: '系统公告', icon: <NotificationOutlined />, group: '订阅' },
   { key: 'usage', label: '用量', icon: <BarChartOutlined />, group: '订阅' },
   { key: 'devices', label: '设备', icon: <LaptopOutlined />, group: '订阅' },
   { key: 'records', label: '记录', icon: <HistoryOutlined />, group: '订阅' },
@@ -95,6 +100,54 @@ export default function MySubscriptionsPage() {
     ? hash
     : 'home';
   const [mobileNav, setMobileNav] = useState(false);
+
+  const READ_KEY = 'boan_read_announcements';
+  const [readIds, setReadIds] = useState<number[]>(() => {
+    try {
+      const raw = localStorage.getItem(READ_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const announcementsQuery = useQuery({
+    queryKey: ['announcements'],
+    queryFn: async () => {
+      const res = await HttpUtil.get<Announcement[]>('/panel/api/announcements');
+      return res.success ? (res.obj || []) : [];
+    },
+    refetchInterval: 60000,
+  });
+
+  const markRead = (id: number) => {
+    setReadIds((prev) => {
+      if (prev.includes(id)) return prev;
+      const next = [...prev, id];
+      try {
+        localStorage.setItem(READ_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const markAllRead = () => {
+    const allIds = (announcementsQuery.data || []).map((a) => a.id);
+    setReadIds(allIds);
+    try {
+      localStorage.setItem(READ_KEY, JSON.stringify(allIds));
+    } catch {}
+  };
+
+  const unreadCount = useMemo(() => {
+    return (announcementsQuery.data || []).filter((a) => !readIds.includes(a.id)).length;
+  }, [announcementsQuery.data, readIds]);
+
+  const unreadPopup = useMemo(() => {
+    if (!announcementsQuery.data) return null;
+    return announcementsQuery.data.find((a) => a.popup && !readIds.includes(a.id)) || null;
+  }, [announcementsQuery.data, readIds]);
+
   const query = useQuery({
     queryKey: ['clients', 'mySubscriptions', access.userId],
     enabled: access.userId > 0,
@@ -121,6 +174,7 @@ export default function MySubscriptionsPage() {
   const subtitle = {
     home: '查看你的服务、流量与连接配置',
     subscription: '选择平台与客户端，快速导入订阅',
+    announcements: '浏览所有系统通知、网络维护与更新说明',
     usage: '了解流量趋势与节点用量',
     devices: '查看连接状态与使用的客户端',
     records: '查看已采集的流量明细',
@@ -129,6 +183,8 @@ export default function MySubscriptionsPage() {
   const refresh = () => {
     if (section === 'nodes')
       void queryClient.invalidateQueries({ queryKey: ['customer-node-status'] });
+    else if (section === 'announcements')
+      void announcementsQuery.refetch();
     else if (['usage', 'records'].includes(section))
       void queryClient.invalidateQueries({ queryKey: ['my-usage', access.userId] });
     else if (section === 'devices') {
@@ -143,25 +199,36 @@ export default function MySubscriptionsPage() {
   const refreshing =
     section === 'nodes'
       ? nodesFetching > 0
-      : ['usage', 'records'].includes(section)
-        ? usageFetching > 0
-        : section === 'devices'
-          ? devicesFetching + connectionsFetching > 0
-          : query.isFetching;
+      : section === 'announcements'
+        ? announcementsQuery.isFetching
+        : ['usage', 'records'].includes(section)
+          ? usageFetching > 0
+          : section === 'devices'
+            ? devicesFetching + connectionsFetching > 0
+            : query.isFetching;
   const navigation = (
     <nav aria-label="用户导航">
-      {sections.map((item) => (
-        <button
-          key={item.key}
-          type="button"
-          aria-label={item.label}
-          aria-current={section === item.key ? 'page' : undefined}
-          onClick={() => navigate(item.key)}
-        >
-          {item.icon}
-          <span>{item.label}</span>
-        </button>
-      ))}
+      {sections.map((item) => {
+        const isAnnounce = item.key === 'announcements';
+        const hasUnread = isAnnounce && unreadCount > 0;
+        return (
+          <button
+            key={item.key}
+            type="button"
+            aria-label={item.label}
+            aria-current={section === item.key ? 'page' : undefined}
+            onClick={() => navigate(item.key)}
+          >
+            {item.icon}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              {item.label}
+              {hasUnread && (
+                <Badge count={unreadCount} size="small" style={{ backgroundColor: '#ff4d4f' }} />
+              )}
+            </span>
+          </button>
+        );
+      })}
     </nav>
   );
   return (
@@ -216,10 +283,10 @@ export default function MySubscriptionsPage() {
               <h1>{title}</h1>
               <p>{subtitle}</p>
             </div>
-            {(section === 'home' || section === 'subscription') && (
+            {(section === 'home' || section === 'subscription' || section === 'announcements') && (
               <Button
                 className="customer-refresh"
-                aria-label="刷新账户信息"
+                aria-label="刷新信息"
                 loading={refreshing}
                 icon={<ReloadOutlined />}
                 onClick={refresh}
@@ -229,6 +296,16 @@ export default function MySubscriptionsPage() {
             )}
           </header>
           <main className="customer-content">
+            {section === 'announcements' && (
+              <AnnouncementsView
+                announcements={announcementsQuery.data || []}
+                loading={announcementsQuery.isLoading}
+                onRefresh={() => void announcementsQuery.refetch()}
+                readIds={readIds}
+                onMarkRead={markRead}
+                onMarkAllRead={markAllRead}
+              />
+            )}
             {['usage', 'records'].includes(section) && access.roleKey === 'customer' && (
               <MyUsage
                 userId={access.userId}
@@ -241,7 +318,16 @@ export default function MySubscriptionsPage() {
               <MyDevices userId={access.userId} onSubscription={() => navigate('subscription')} />
             )}
             {section === 'nodes' && <NodeStatus />}
-            {['home', 'subscription'].includes(section) && query.isLoading && <Spin />}
+            {['home', 'subscription'].includes(section) && query.isLoading && (
+              <div className="customer-skeleton-grid">
+                <div className="customer-card customer-skeleton-card">
+                  <Skeleton active paragraph={{ rows: 4 }} title={{ width: 160 }} />
+                </div>
+                <div className="customer-card customer-skeleton-card">
+                  <Skeleton active paragraph={{ rows: 3 }} title={{ width: 140 }} />
+                </div>
+              </div>
+            )}
             {['home', 'subscription'].includes(section) && query.isError && (
               <Alert
                 type="error"
@@ -285,80 +371,143 @@ export default function MySubscriptionsPage() {
                     {section === 'home' && (
                       <div className="dashboard-overview">
                         <section className="customer-card dashboard-service">
-                          <h2>
-                            服务概览 <Tag color={available ? 'green' : 'red'}>{status}</Tag>
-                          </h2>
-                          <p className="dashboard-plan-name">{item.planName || item.email}</p>
-                          <p className="dashboard-quota-label">剩余流量</p>
-                          <strong className="dashboard-quota-value">
-                            {item.total > 0 ? bytes(Math.max(0, item.total - item.used)) : '不限量'}
-                          </strong>
-                          {item.total > 0 && (
-                            <Progress
-                              aria-label="剩余流量比例"
-                              percent={Math.max(
-                                0,
-                                Math.min(100, ((item.total - item.used) / item.total) * 100),
+                          <div className="dashboard-service-header">
+                            <div>
+                              <h2 className="dashboard-service-title">
+                                服务概览
+                                <Tag
+                                  color={available ? 'success' : expired || depleted ? 'error' : 'default'}
+                                  className="dashboard-status-tag"
+                                >
+                                  <span className={`status-dot ${available ? 'is-online' : 'is-offline'}`} />
+                                  {status}
+                                </Tag>
+                              </h2>
+                              {item.planName && (
+                                <span className="dashboard-plan-pill">{item.planName}</span>
                               )}
-                              showInfo={false}
-                              strokeColor={depleted ? '#ef6565' : '#5bc675'}
-                            />
-                          )}
-                          <div className="dashboard-quota-meta">
-                            <span>
-                              已用 {bytes(item.used)} / 总量{' '}
-                              {item.total > 0 ? bytes(item.total) : '不限量'}
-                            </span>
-                            <span>{expiry(item.expiryTime)}</span>
+                            </div>
                           </div>
+
+                          <div className="dashboard-quota-wrap">
+                            <span className="dashboard-quota-label">剩余流量</span>
+                            <div className="dashboard-quota-row">
+                              <strong className="dashboard-quota-value">
+                                {item.total > 0 ? bytes(Math.max(0, item.total - item.used)) : '不限量'}
+                              </strong>
+                              {item.total > 0 && (
+                                <span className="dashboard-quota-percent-tag">
+                                  {Math.max(0, Math.min(100, Math.round(((item.total - item.used) / item.total) * 100)))}% 可用
+                                </span>
+                              )}
+                            </div>
+                            {item.total > 0 && (
+                              <Progress
+                                aria-label="剩余流量比例"
+                                percent={Math.max(
+                                  0,
+                                  Math.min(100, ((item.total - item.used) / item.total) * 100),
+                                )}
+                                showInfo={false}
+                                strokeColor={
+                                  depleted
+                                    ? '#ef4444'
+                                    : (item.total - item.used) / item.total < 0.15
+                                      ? '#f59e0b'
+                                      : '#10b981'
+                                }
+                                className="dashboard-service-progress"
+                              />
+                            )}
+                          </div>
+
+                          <div className="dashboard-quota-stats">
+                            <div className="dashboard-quota-stat-item">
+                              <span className="stat-label">已用流量</span>
+                              <strong className="stat-value">{bytes(item.used)}</strong>
+                            </div>
+                            <div className="dashboard-quota-stat-item">
+                              <span className="stat-label">配额总量</span>
+                              <strong className="stat-value">
+                                {item.total > 0 ? bytes(item.total) : '不限量'}
+                              </strong>
+                            </div>
+                            <div className="dashboard-quota-stat-item">
+                              <span className="stat-label">到期时间</span>
+                              <strong className="stat-value">{expiry(item.expiryTime)}</strong>
+                            </div>
+                          </div>
+
                           <Button
                             type="primary"
                             size="large"
+                            icon={<RightOutlined />}
+                            iconPosition="end"
                             className="dashboard-subscribe"
                             onClick={() => navigate('subscription')}
                           >
-                            获取订阅
+                            获取 / 导入订阅
                           </Button>
                         </section>
+
                         <section className="customer-card dashboard-traffic">
-                          <h2>流量使用情况</h2>
+                          <div className="dashboard-traffic-header">
+                            <h2>流量使用情况</h2>
+                            <span className="dashboard-traffic-sub">当前账户已用流量统计</span>
+                          </div>
                           <dl className="dashboard-traffic-fields">
-                            <div className="dashboard-total">
-                              <dt>累计使用</dt>
-                              <dd>{bytes(item.used)}</dd>
+                            <div className="dashboard-total dashboard-traffic-tile">
+                              <div className="traffic-tile-icon total-icon">
+                                <BarChartOutlined />
+                              </div>
+                              <div className="traffic-tile-content">
+                                <dt>累计使用</dt>
+                                <dd>{bytes(item.used)}</dd>
+                              </div>
                             </div>
-                            <div>
-                              <dt>
-                                <ArrowUpOutlined /> 上传
-                              </dt>
-                              <dd>{bytes(item.up || 0)}</dd>
+                            <div className="dashboard-traffic-tile">
+                              <div className="traffic-tile-icon up-icon">
+                                <ArrowUpOutlined />
+                              </div>
+                              <div className="traffic-tile-content">
+                                <dt>上传</dt>
+                                <dd>{bytes(item.up || 0)}</dd>
+                              </div>
                             </div>
-                            <div>
-                              <dt>
-                                <ArrowDownOutlined /> 下载
-                              </dt>
-                              <dd>{bytes(item.down || 0)}</dd>
+                            <div className="dashboard-traffic-tile">
+                              <div className="traffic-tile-icon down-icon">
+                                <ArrowDownOutlined />
+                              </div>
+                              <div className="traffic-tile-content">
+                                <dt>下载</dt>
+                                <dd>{bytes(item.down || 0)}</dd>
+                              </div>
                             </div>
                           </dl>
                         </section>
+
                         <div className="dashboard-links">
                           {access.roleKey === 'customer' && (
                             <button className="dashboard-link" onClick={() => navigate('devices')}>
-                              <LaptopOutlined className="dashboard-link-icon" />
-                              <span>
+                              <div className="dashboard-link-icon-wrap device-icon">
+                                <LaptopOutlined />
+                              </div>
+                              <span className="dashboard-link-text">
                                 <strong>我的设备</strong>
                                 <small>查看在线来源与客户端</small>
                               </span>
-                              <RightOutlined />
+                              <RightOutlined className="dashboard-link-arrow" />
                             </button>
                           )}
                           <button className="dashboard-link" onClick={() => navigate('nodes')}>
-                            <ClusterOutlined className="dashboard-link-icon" />
-                            <span>
+                            <div className="dashboard-link-icon-wrap node-icon">
+                              <ClusterOutlined />
+                            </div>
+                            <span className="dashboard-link-text">
                               <strong>节点状态</strong>
                               <small>配置启用不代表实际连通</small>
                             </span>
-                            <RightOutlined />
+                            <RightOutlined className="dashboard-link-arrow" />
                           </button>
                         </div>
                       </div>
@@ -366,17 +515,29 @@ export default function MySubscriptionsPage() {
                     {section === 'subscription' && (
                       <section className="customer-card detail-card subscription-design-card customer-subscription">
                         <dl className="dashboard-service-fields subscription-quota-summary">
-                          <div>
+                          <div className="subscription-quota-item">
                             <dt>剩余流量</dt>
                             <dd>
                               {item.total > 0
                                 ? bytes(Math.max(0, item.total - item.used))
                                 : '不限量'}
                             </dd>
+                            {item.total > 0 && (
+                              <span className="subscription-quota-sub">
+                                已用 {bytes(item.used)} / 总量 {bytes(item.total)}
+                              </span>
+                            )}
                           </div>
-                          <div>
+                          <div className="subscription-quota-item">
                             <dt>有效期</dt>
                             <dd>{expiry(item.expiryTime)}</dd>
+                            <span className="subscription-quota-sub">
+                              {item.expiryTime > 0
+                                ? item.expiryTime <= query.dataUpdatedAt
+                                  ? '服务已过期'
+                                  : `距到期约 ${Math.max(1, Math.ceil((item.expiryTime - query.dataUpdatedAt) / 86400000))} 天`
+                                : '长期有效套餐'}
+                            </span>
                           </div>
                         </dl>
                         {item.url ? (
@@ -396,21 +557,28 @@ export default function MySubscriptionsPage() {
                               />
                             )}
                             <aside className="subscription-management">
-                              <h2>订阅管理</h2>
-                              <p>
-                                <LockOutlined /> 订阅链接仅供本人使用，请勿分享。
-                              </p>
+                              <div className="subscription-management-header">
+                                <h2>订阅管理</h2>
+                              </div>
+                              <div className="subscription-security-card">
+                                <div className="security-icon-wrap">
+                                  <LockOutlined />
+                                </div>
+                                <div className="security-text">
+                                  <strong>个人专属安全链接</strong>
+                                  <p>订阅链接包含您的节点配置与密钥，仅限本人使用，请勿分享或公开。</p>
+                                </div>
+                              </div>
                               {access.roleKey === 'customer' && (
                                 <div className="subscription-reset-section">
                                   <h3>重置订阅链接</h3>
-                                  <p>重置后旧链接失效，需重新导入客户端。</p>
+                                  <p>若怀疑链接泄露，重置后旧链接即刻失效，需重新导入客户端。</p>
                                   <ResetSubscriptionButton />
-                                  <small>点击后需再次确认。</small>
+                                  <small>
+                                    <InfoCircleOutlined /> 重置后剩余流量和有效期完全保持不变。
+                                  </small>
                                 </div>
                               )}
-                              <p className="subscription-reset-note">
-                                <InfoCircleOutlined /> 流量和有效期保持不变。
-                              </p>
                             </aside>
                           </div>
                         ) : (
@@ -455,6 +623,12 @@ export default function MySubscriptionsPage() {
             </button>
           </nav>
         )}
+        <AnnouncementModal
+          open={!!unreadPopup}
+          announcement={unreadPopup}
+          onAcknowledge={(id) => markRead(id)}
+          onViewAll={() => navigate('announcements')}
+        />
       </div>
     </ConfigProvider>
   );

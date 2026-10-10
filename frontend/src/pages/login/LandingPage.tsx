@@ -1,4 +1,4 @@
-import { ArrowRightOutlined } from '@ant-design/icons';
+import { ArrowRightOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import serverImage from '@/assets/portal/server-rack.png';
 import './LoginPage.css';
 
@@ -7,6 +7,15 @@ export default function LandingPage() {
   return (
     <main className="portal-landing">
       <header className="landing-nav">
+        <div className="portal-brand">
+          <div className="brand-logo-icon">
+            <SafetyCertificateOutlined />
+          </div>
+          <div className="brand-text-wrap">
+            <strong className="brand-title">Boan</strong>
+            <span className="brand-badge">服务门户</span>
+          </div>
+        </div>
         <a className="portal-button small" href={login}>
           登录账户 <ArrowRightOutlined />
         </a>
@@ -25,12 +34,13 @@ export default function LandingPage() {
           <a className="portal-button" href={login}>
             进入我的首页 <ArrowRightOutlined />
           </a>
-          <span className="landing-hint">已有账户？登录即可查看您的服务</span>
+          <span className="landing-hint">面向海外合规业务部署 · 不提供大陆优化线路 · 不支持大陆用户</span>
         </div>
       </section>
       <footer className="landing-footer">
-        <a href={login}>
-          登录账户 <ArrowRightOutlined />
+        <span>© {new Date().getFullYear()} Boan Network. All rights reserved.</span>
+        <a href={login} className="landing-footer-login">
+          登录用户中心 <ArrowRightOutlined />
         </a>
       </footer>
     </main>

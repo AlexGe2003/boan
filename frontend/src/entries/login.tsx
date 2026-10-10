@@ -9,7 +9,7 @@ import { ThemeProvider } from '@/hooks/useTheme';
 import { QueryProvider } from '@/api/QueryProvider';
 import LoginPage from '@/pages/login/LoginPage';
 
-document.title = '登录';
+document.title = '登录 - Boan 用户中心';
 setupHttp();
 CookieManager.setCookie('lang', 'zh-CN', 365);
 

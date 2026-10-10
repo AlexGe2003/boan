@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Segmented, Space, Tooltip } from 'antd';
 import {
   AndroidOutlined,
   AppleOutlined,
+  CheckOutlined,
   CopyOutlined,
   DesktopOutlined,
   ImportOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 
 import { APP_ICONS } from './appIcons';
@@ -21,11 +23,11 @@ interface SubAppsTabProps {
   subClashUrl: string;
 }
 
-const PLATFORM_OPTIONS = [
-  { value: 'windows' as const, label: 'Windows', icon: <DesktopOutlined /> },
-  { value: 'macos' as const, label: 'macOS', icon: <AppleOutlined /> },
-  { value: 'android' as const, label: 'Android', icon: <AndroidOutlined /> },
-  { value: 'ios' as const, label: 'iOS', icon: <AppleOutlined /> },
+const PLATFORMS: { value: AppPlatform; label: string; icon: React.ReactNode }[] = [
+  { value: 'windows', label: 'Windows', icon: <DesktopOutlined /> },
+  { value: 'macos', label: 'macOS', icon: <AppleOutlined /> },
+  { value: 'android', label: 'Android', icon: <AndroidOutlined /> },
+  { value: 'ios', label: 'iOS', icon: <AppleOutlined /> },
 ];
 
 function AppIcon({ name }: { name: string }) {
@@ -45,19 +47,43 @@ function AppIcon({ name }: { name: string }) {
       </span>
     );
   }
-  return <img className="sub-app-logo" src={icon.src} alt="" width={32} height={32} />;
+  return <img className="sub-app-logo" src={icon.src} alt="" width={36} height={36} />;
 }
 
 export default function SubAppsTab({ apps, initialPlatform, onOpen, onCopy }: SubAppsTabProps) {
   const { t } = useTranslation();
   const [platform, setPlatform] = useState<AppPlatform>(initialPlatform);
+  const [copiedApp, setCopiedApp] = useState<string | null>(null);
+
+  const platformOptions = useMemo(() => {
+    return PLATFORMS.map((p) => ({
+      value: p.value,
+      label: (
+        <span className="sub-platform-segment-item">
+          {p.icon}
+          <span>{p.label}</span>
+          {p.value === initialPlatform && (
+            <span className="sub-current-platform-badge">当前系统</span>
+          )}
+        </span>
+      ),
+    }));
+  }, [initialPlatform]);
 
   const handleAppAction = (app: SubApp) => {
     if (app.isCopyOnly) {
-      onCopy(app.copyUrl || app.url, app.toast);
+      handleCopy(app);
       return;
     }
     onOpen(app.url);
+  };
+
+  const handleCopy = (app: SubApp) => {
+    onCopy(app.copyUrl || app.url, app.toast);
+    setCopiedApp(app.name);
+    setTimeout(() => {
+      setCopiedApp((curr) => (curr === app.name ? null : curr));
+    }, 2000);
   };
 
   return (
@@ -66,38 +92,56 @@ export default function SubAppsTab({ apps, initialPlatform, onOpen, onCopy }: Su
       <Segmented<AppPlatform>
         value={platform}
         onChange={setPlatform}
-        options={PLATFORM_OPTIONS}
+        options={platformOptions}
+        className="sub-platform-segmented"
         style={{ marginBottom: 16 }}
       />
       <div className="sub-app-grid">
-        {(apps[platform] || []).map((app) => (
-          <div key={app.name} className="sub-row">
-            <AppIcon name={app.name} />
-            <span className="sub-app-name" style={{ fontWeight: 600 }}>
-              {app.name === 'Shadowrocket' ? t('subscription.rocketName') : app.name}
-            </span>
-            <Space size="small">
-              <Button
-                type="primary"
-                icon={<ImportOutlined />}
-                size="middle"
-                onClick={() => handleAppAction(app)}
-              >
-                {t(app.isCopyOnly ? 'subscription.copySubscription' : 'subscription.openImport')}
-              </Button>
-              <Tooltip title={t('subscription.copySubscription')}>
+        {(apps[platform] || []).map((app) => {
+          const isCopied = copiedApp === app.name;
+          return (
+            <div key={app.name} className="sub-row sub-app-card">
+              <AppIcon name={app.name} />
+              <div className="sub-app-info">
+                <span className="sub-app-name" style={{ fontWeight: 600 }}>
+                  {app.name === 'Shadowrocket' ? t('subscription.rocketName') : app.name}
+                </span>
+                <span className="sub-app-desc">
+                  {app.isCopyOnly ? '复制链接后打开应用添加' : '支持一键自动导入配置'}
+                </span>
+              </div>
+              <Space size="small" className="sub-app-actions">
                 <Button
-                  icon={<CopyOutlined />}
-                  aria-label={t('subscription.copySubscription')}
+                  type="primary"
+                  icon={<ImportOutlined />}
                   size="middle"
-                  onClick={() => onCopy(app.copyUrl || app.url, app.toast)}
-                />
-              </Tooltip>
-            </Space>
-          </div>
-        ))}
+                  className="sub-app-import-btn"
+                  onClick={() => handleAppAction(app)}
+                >
+                  {t(app.isCopyOnly ? 'subscription.copySubscription' : 'subscription.openImport')}
+                </Button>
+                <Tooltip title={isCopied ? '已复制！' : t('subscription.copySubscription')}>
+                  <Button
+                    icon={isCopied ? <CheckOutlined style={{ color: '#10b981' }} /> : <CopyOutlined />}
+                    className={isCopied ? 'sub-btn-copied' : ''}
+                    aria-label={t('subscription.copySubscription')}
+                    size="middle"
+                    onClick={() => handleCopy(app)}
+                  >
+                    {isCopied ? <span style={{ color: '#10b981', marginLeft: 4 }}>已复制</span> : null}
+                  </Button>
+                </Tooltip>
+              </Space>
+            </div>
+          );
+        })}
       </div>
-      <p className="sub-muted">{t('subscription.importFallback')}</p>
+      <div className="sub-apps-help-box">
+        <InfoCircleOutlined className="sub-help-icon" />
+        <span>
+          💡 提示：如果点击「一键导入」未自动唤起应用，请先确认手机或电脑已安装对应客户端，或点击右侧复制链接后在客户端内手动添加。
+        </span>
+      </div>
     </div>
   );
 }

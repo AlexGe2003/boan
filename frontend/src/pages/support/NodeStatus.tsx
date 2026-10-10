@@ -243,6 +243,22 @@ export default function NodeStatus() {
           onChange={(e) => setSearch(e.target.value)}
           style={{ maxWidth: 360 }}
         />
+        <div className="node-quick-filters">
+          {['全部', '香港', '日本', '新加坡', '美国'].map((r) => {
+            const isAll = r === '全部';
+            const isActive = isAll ? !search : search.includes(r);
+            return (
+              <button
+                key={r}
+                type="button"
+                className={`node-filter-chip ${isActive ? 'is-active' : ''}`}
+                onClick={() => setSearch(isAll ? '' : r)}
+              >
+                {r}
+              </button>
+            );
+          })}
+        </div>
         <div className="node-status-actions">
           <span className="node-status-count">
             {query.data ? `${filteredNodes.length} / ${stats.total} 个节点` : ''}
@@ -274,7 +290,9 @@ export default function NodeStatus() {
                 const reg = parseRegion(name);
                 return (
                   <div className="node-list-name">
-                    <GlobalOutlined className="node-list-flag" />
+                    <span className="node-list-flag" role="img" aria-label={reg.name}>
+                      {reg.flag || <GlobalOutlined />}
+                    </span>
                     <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                       <Typography.Text strong>{name}</Typography.Text>
                       <Typography.Text type="secondary" style={{ fontSize: 12 }}>

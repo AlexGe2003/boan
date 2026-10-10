@@ -73,6 +73,7 @@ func allModels() []any {
 		&model.ServiceOrder{},
 		&model.SupportTicket{},
 		&model.SupportMessage{},
+		&model.Announcement{},
 		&model.SubscriptionAssignment{},
 		&model.Inbound{},
 		&model.OutboundTraffics{},

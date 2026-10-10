@@ -726,7 +726,7 @@ a.sub-row-title:hover {
 @media (max-width: 600px) {
   .sub-app-grid .sub-row {
     display: grid;
-    grid-template-columns: 32px minmax(0, 1fr);
+    grid-template-columns: 36px minmax(0, 1fr);
   }
 
   .sub-app-grid .sub-app-name {
@@ -739,3 +739,148 @@ a.sub-row-title:hover {
     justify-content: flex-end;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Modern Customer Portal Additions & Micro-interactions
+   -------------------------------------------------------------------------- */
+.sub-hero-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sub-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.sub-status-pill.status-green {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  color: #10b981;
+}
+
+.sub-status-pill.status-purple {
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  color: #a855f7;
+}
+
+.sub-status-pill.status-red {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  color: #ef4444;
+}
+
+.sub-status-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  animation: sub-pulse-breath 2s infinite ease-in-out;
+}
+
+@keyframes sub-pulse-breath {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+}
+
+.sub-platform-segment-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sub-current-platform-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #60a5fa;
+  letter-spacing: -0.2px;
+}
+
+.sub-app-card {
+  padding: 12px 16px !important;
+  border-radius: 14px !important;
+  gap: 14px !important;
+}
+
+.sub-app-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.sub-app-desc {
+  font-size: 12px;
+  color: var(--ant-color-text-tertiary);
+  margin-top: 2px;
+}
+
+.sub-app-import-btn {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+}
+
+.sub-btn-copied {
+  border-color: #10b981 !important;
+  color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+}
+
+.sub-apps-help-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--sub-tile-bg);
+  border: 1px solid var(--sub-tile-border);
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--ant-color-text-secondary);
+  line-height: 1.6;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.sub-help-icon {
+  color: var(--sub-accent);
+  font-size: 16px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.sub-link-card {
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+}
+
+.sub-qr-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sub-qr-extra-tip {
+  font-size: 12px;
+  color: var(--ant-color-text-tertiary);
+  margin-top: 4px;
+}
+

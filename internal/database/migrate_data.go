@@ -46,6 +46,7 @@ func migrationModels() []any {
 		&model.ServiceOrder{},
 		&model.SupportTicket{},
 		&model.SupportMessage{},
+		&model.Announcement{},
 		&model.SubscriptionAssignment{},
 		&model.Setting{},
 		&model.HistoryOfSeeders{},

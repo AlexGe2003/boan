@@ -20,6 +20,7 @@ const ApiDocsPage = lazy(() => import('@/pages/api-docs/ApiDocsPage'));
 const MySubscriptionsPage = lazy(() => import('@/pages/subscriptions/MySubscriptionsPage'));
 const NodeMonitorPage = lazy(() => import('@/pages/nodes/NodeMonitorPage'));
 const PanelUsersPage = lazy(() => import('@/pages/settings/PanelUsersPage'));
+const AnnouncementsAdminPage = lazy(() => import('@/pages/announcements/AnnouncementsAdminPage'));
 
 function withSuspense(node: React.ReactNode) {
   return (
@@ -55,6 +56,7 @@ const routes: RouteObject[] = [
       { path: 'node-monitor', element: withSuspense(<NodeMonitorPage />) },
       { path: 'support', element: withSuspense(<SupportPage />) },
       { path: 'plans', element: withSuspense(<PlansPage />) },
+      { path: 'announcements', element: withSuspense(<AnnouncementsAdminPage />) },
       { path: 'node-groups', element: withSuspense(<BusinessPage section="groups" />) },
       { path: 'orders', element: withSuspense(<BusinessPage section="orders" />) },
       { path: 'groups', element: withSuspense(<GroupsPage />) },

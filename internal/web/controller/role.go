@@ -49,7 +49,7 @@ func (a *APIController) enforceRole(c *gin.Context) {
 			c.Next()
 			return
 		}
-		if c.Request.Method == http.MethodGet && (rel == "/clients/mySubscriptions" || rel == "/setting/session") {
+		if c.Request.Method == http.MethodGet && (rel == "/clients/mySubscriptions" || rel == "/setting/session" || rel == "/announcements") {
 			c.Next()
 			return
 		}
@@ -137,6 +137,7 @@ func roleAllows(method, rel string) bool {
 }
 
 var userRoleRoutes = map[string]struct{}{
+	"GET /announcements":                              {},
 	"GET /clients/mySubscriptions":                    {},
 	"GET /nodes/monitor":                              {},
 	"GET /server/status":                              {},
