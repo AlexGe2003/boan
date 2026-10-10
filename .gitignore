@@ -60,6 +60,12 @@ id_ed25519*
 credentials*.json
 credentials*.txt
 secrets/
+test-accounts*.json
+test-accounts*.txt
+test-accounts*.csv
+测试账户*.txt
+测试账号*.txt
+/account-reset-test*/
 
 # Test output, local previews, and design verification captures
 coverage/
