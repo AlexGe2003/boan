@@ -1,0 +1,96 @@
+name: Boan HK
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Deploy to HK after tests and build succeed
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build frontend
+        working-directory: frontend
+        run: npm ci && npm run build
+      - name: Build HK artifact
+        env:
+          CGO_ENABLED: '1'
+          GOOS: linux
+          GOARCH: amd64
+        run: |
+          mkdir -p hk-artifact
+          go build -trimpath -ldflags "-w -s -X github.com/mhsanaei/3x-ui/v3/internal/config.buildCommit=${GITHUB_SHA:0:8}" -o hk-artifact/x-ui .
+          cp x-ui.sh hk-artifact/x-ui.sh
+          cp deploy/update-source.sh hk-artifact/update-source.sh
+          printf '%s\n' "$GITHUB_SHA" > hk-artifact/source-commit
+          cd hk-artifact
+          sha256sum x-ui x-ui.sh source-commit > SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        with:
+          name: boan-hk-${{ github.sha }}
+          path: hk-artifact/
+          if-no-files-found: error
+          retention-days: 14
+
+  deploy:
+    if: inputs.deploy && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: hk-production
+    concurrency:
+      group: boan-hk-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: boan-hk-${{ github.sha }}
+          path: hk-artifact
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.HK_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.HK_KNOWN_HOSTS }}
+        run: |
+          test -n "$SSH_KEY" && test -n "$KNOWN_HOSTS"
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+      - name: Update HK with backup and rollback
+        env:
+          HK_HOST: ${{ vars.HK_HOST }}
+          HK_PORT: ${{ vars.HK_PORT || '22' }}
+        run: |
+          [[ "$HK_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$HK_PORT" =~ ^[0-9]+$ ]]
+          ssh_options=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15)
+          remote=$(ssh "${ssh_options[@]}" -p "$HK_PORT" "root@$HK_HOST" 'umask 077; mktemp -d /var/tmp/boan-ci.XXXXXXXX')
+          [[ "$remote" =~ ^/var/tmp/boan-ci\.[a-zA-Z0-9]+$ ]]
+          scp "${ssh_options[@]}" -P "$HK_PORT" hk-artifact/* "root@$HK_HOST:$remote/"
+          ssh "${ssh_options[@]}" -p "$HK_PORT" "root@$HK_HOST" \
+            "BOAN_ARTIFACT_DIR='$remote' BOAN_EXPECTED_COMMIT='$GITHUB_SHA' bash '$remote/update-source.sh'"
+          ssh "${ssh_options[@]}" -p "$HK_PORT" "root@$HK_HOST" "rm -rf -- '$remote'"
+      - name: Remove runner credentials
+        if: always()
+        run: rm -f ~/.ssh/id_ed25519 ~/.ssh/known_hosts
