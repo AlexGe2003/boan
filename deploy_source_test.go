@@ -43,6 +43,70 @@ func TestBoanInstallAndUpdateOrigins(t *testing.T) {
 	}
 }
 
+func TestSourceUpgradeArtifactValidation(t *testing.T) {
+	if _, err := exec.LookPath("sha256sum"); err != nil {
+		t.Skip("sha256sum is required")
+	}
+	commit := strings.Repeat("a", 40)
+	for _, scenario := range []string{"valid", "corrupt", "missing-checksum", "wrong-commit", "wrong-arch", "symlink"} {
+		t.Run(scenario, func(t *testing.T) {
+			root := t.TempDir()
+			source := filepath.Join(root, "artifact")
+			work := filepath.Join(root, "work")
+			if err := os.MkdirAll(source, 0o700); err != nil {
+				t.Fatal(err)
+			}
+			for file, body := range map[string]string{"x-ui": "new-program", "x-ui.sh": "#!/bin/bash\ntrue\n", "source-commit": commit + "\n"} {
+				if err := os.WriteFile(filepath.Join(source, file), []byte(body), 0o600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			cmd := exec.Command("bash", "-c", "sha256sum x-ui x-ui.sh source-commit > SHA256SUMS")
+			cmd.Dir = source
+			if out, err := cmd.CombinedOutput(); err != nil {
+				t.Fatalf("manifest: %v %s", err, out)
+			}
+			expected, arch := commit, "amd64"
+			switch scenario {
+			case "corrupt":
+				if err := os.WriteFile(filepath.Join(source, "x-ui"), []byte("tampered"), 0o600); err != nil {
+					t.Fatal(err)
+				}
+			case "missing-checksum":
+				if err := os.WriteFile(filepath.Join(source, "SHA256SUMS"), nil, 0o600); err != nil {
+					t.Fatal(err)
+				}
+			case "wrong-commit":
+				expected = strings.Repeat("b", 40)
+			case "wrong-arch":
+				arch = "arm64"
+			case "symlink":
+				if err := os.Remove(filepath.Join(source, "x-ui")); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Symlink("x-ui.sh", filepath.Join(source, "x-ui")); err != nil {
+					t.Fatal(err)
+				}
+			}
+			cmd = exec.Command("bash", "-c", `set -e; source deploy/update-source.sh; upgrade_prepare_artifact "$1" "$2" "$3" "$4"`, "test", source, work, expected, arch)
+			out, err := cmd.CombinedOutput()
+			if scenario != "valid" {
+				if err == nil {
+					t.Fatalf("invalid artifact accepted: %s", out)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("valid artifact: %v %s", err, out)
+			}
+			data, err := os.ReadFile(filepath.Join(work, "build", "x-ui"))
+			if err != nil || string(data) != "new-program" {
+				t.Fatalf("prepared binary: %s %v", data, err)
+			}
+		})
+	}
+}
+
 func TestSourceUpgradeRestoresProgramAndDatabase(t *testing.T) {
 	root := t.TempDir()
 	for _, dir := range []string{"backup/data", "app", "data", "bin"} {

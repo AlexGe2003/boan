@@ -8,6 +8,26 @@ usage() {
     echo '先构建，再短暂停机备份、替换程序及菜单；失败时恢复旧程序与数据库。'
 }
 
+upgrade_prepare_artifact() {
+    local source="$1" work="$2" expected="$3" arch="$4"
+    [[ "$source" == /* && "$expected" =~ ^[0-9a-f]{40}$ && "$arch" == amd64 ]] || return 1
+    local file
+    mkdir -p "$work/build"
+    for file in x-ui x-ui.sh source-commit SHA256SUMS; do
+        [[ -f "$source/$file" && ! -L "$source/$file" ]] || return 1
+        cp "$source/$file" "$work/$file"
+    done
+    (
+        cd "$work"
+        [[ $(cat source-commit) == "$expected" ]] || exit 1
+        # Require all three payload files, not merely whatever the manifest lists.
+        sha256sum x-ui x-ui.sh source-commit > expected-sums
+        cmp expected-sums SHA256SUMS || exit 1
+        bash -n x-ui.sh || exit 1
+        mv x-ui build/x-ui
+    )
+}
+
 upgrade_healthy() {
     local first_pid second_pid
     systemctl is-active --quiet x-ui || return 1
@@ -80,16 +100,23 @@ upgrade_source() {
     trap 'upgrade_failure $?' ERR
     trap 'upgrade_failure 130' INT
     trap 'upgrade_failure 143' TERM
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update
-    apt-get install -y ca-certificates curl git build-essential xz-utils tar python3 iproute2
-    # Fetch helper from the selected ref; the helper does not execute on source.
-    curl -fL --retry 5 "https://raw.githubusercontent.com/AlexGe2003/boan/${ref}/deploy/install-source.sh" -o "$work/build-helper.sh"
-    # shellcheck source=/dev/null
-    . "$work/build-helper.sh"
-    declare -F build_source >/dev/null
-    echo '正在构建新版；现有面板继续运行。'
-    build_source "$work" "$arch" "$node_arch" "$ref" panel
+    local built_commit
+    if [[ -n "${BOAN_ARTIFACT_DIR:-}" ]]; then
+        upgrade_prepare_artifact "$BOAN_ARTIFACT_DIR" "$work" "${BOAN_EXPECTED_COMMIT:-}" "$arch"
+        built_commit="$BOAN_EXPECTED_COMMIT"
+        cd "$work"
+    else
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update
+        apt-get install -y ca-certificates curl git build-essential xz-utils tar python3 iproute2
+        # Fetch helper from the selected ref; the helper does not execute on source.
+        curl -fL --retry 5 "https://raw.githubusercontent.com/AlexGe2003/boan/${ref}/deploy/install-source.sh" -o "$work/build-helper.sh"
+        # shellcheck source=/dev/null
+        . "$work/build-helper.sh"
+        declare -F build_source >/dev/null
+        echo '正在构建新版；现有面板继续运行。'
+        build_source "$work" "$arch" "$node_arch" "$ref" panel
+    fi
     # No Xray/GeoIP/runtime downloads in panel mode: preserve node runtime files.
     bash -n x-ui.sh
     systemctl is-active --quiet x-ui && was_active=true
